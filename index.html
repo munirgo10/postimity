@@ -393,44 +393,91 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
       <div class="sp-dot" id="sp3"></div>
     </div>
 
-    <!-- Card 1: Identidad simplificada (Campo 1 + 2) -->
+    <!-- Card 1: Identidad del negocio -->
     <div class="scard">
       <div class="scard-title">🏪 Tu negocio en 30 segundos</div>
+      <div class="logo-upload-row">
+        <div class="logo-circle" id="logoCircle">
+          <input type="file" id="logoFile" accept="image/png,image/svg+xml,image/webp,image/jpeg">
+          <img id="logoImg" src="" alt="" style="display:none">
+          <span class="plus" id="logoPlus">+</span>
+        </div>
+        <div class="logo-info">
+          <div class="li-title">Logo del negocio <span style="font-size:11px;font-weight:400;color:var(--t3)">(opcional)</span></div>
+          <div class="li-sub">Se añadirá en todas las imágenes generadas</div>
+          <div class="li-hint">💡 Puedes agregar o cambiar el logo después de guardar</div>
+        </div>
+      </div>
+      <div class="fg">
+        <div class="fg-item">
+          <div class="fg-label">Nombre del negocio <span style="color:var(--pk)">*</span></div>
+          <input type="text" id="bName" placeholder="Ej: Wonderik Preschool">
+        </div>
+        <div class="fg-item">
+          <div class="fg-label">WhatsApp de contacto <span style="color:var(--pk)">*</span>
+            <div class="tooltip" data-tip="Número con lada internacional. Ej: +52 449 123 4567. Se usará en los CTAs de todos los posts.">?</div>
+          </div>
+          <input type="tel" id="bWhatsApp" placeholder="+52 449 123 4567">
+        </div>
+        <div class="fg-item span2">
+          <div class="fg-label">Tipo de negocio <span style="color:var(--pk)">*</span></div>
+          <input type="text" id="bType" placeholder="Ej: Kinder privado, Restaurante de comida italiana, Salón de belleza, Gym...">
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 2: Ubicación -->
+    <div class="scard">
+      <div class="scard-title">📍 Ubicación</div>
+      <div class="fg">
+        <div class="fg-item">
+          <div class="fg-label">País <span style="color:var(--pk)">*</span></div>
+          <select id="bCountry" onchange="updateStates()">
+            <option value="">— Selecciona —</option>
+            <option value="México">🇲🇽 México</option>
+            <option value="Estados Unidos">🇺🇸 Estados Unidos</option>
+            <option value="Colombia">🇨🇴 Colombia</option>
+            <option value="Argentina">🇦🇷 Argentina</option>
+            <option value="Chile">🇨🇱 Chile</option>
+            <option value="Perú">🇵🇪 Perú</option>
+            <option value="España">🇪🇸 España</option>
+            <option value="Guatemala">🇬🇹 Guatemala</option>
+            <option value="Costa Rica">🇨🇷 Costa Rica</option>
+            <option value="Otro">🌎 Otro</option>
+          </select>
+        </div>
+        <div class="fg-item">
+          <div class="fg-label">Estado / Provincia <span style="color:var(--pk)">*</span></div>
+          <select id="bState" disabled>
+            <option value="">— Selecciona país primero —</option>
+          </select>
+          <input type="text" id="bStateText" placeholder="Estado / Provincia" class="states-hidden" style="margin-top:6px">
+        </div>
+        <div class="fg-item span2">
+          <div class="fg-label">Ciudad</div>
+          <input type="text" id="bCity" placeholder="Ej: Aguascalientes, Houston, Bogotá...">
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 3: Estrategia de contenido (HÍBRIDO) -->
+    <div class="scard">
+      <div class="scard-title">🎯 ¿Qué hace especial a tu negocio?</div>
       <div class="fg full">
         <div class="fg-item span2">
-          <div class="fg-label">¿Cómo se llama y qué hace tu negocio? <span style="color:var(--pk)">*</span></div>
-          <input type="text" id="bName" placeholder='Ej: Wonderik, kinder privado en Aguascalientes'>
-          <div style="font-size:11px;color:var(--t3);margin-top:4px">Formato: <strong>Nombre del negocio, tipo de negocio en Ciudad</strong> — Ej: "La Trattoria, restaurante italiano en CDMX"</div>
+          <div class="fg-label">Cuéntanos en tus palabras <span style="color:var(--pk)">*</span></div>
+          <textarea id="bStory" rows="4" placeholder="Describe qué te hace diferente y a quién le hablas. Ej: Somos el único kinder en Aguascalientes con enfoque en neurociencia aplicada. Atendemos a familias de 25-40 años que buscan lo mejor para sus hijos de 1-6 años. Nos diferenciamos porque nuestros métodos están basados en evidencia científica real."></textarea>
+          <div style="font-size:11px;color:var(--t3);margin-top:5px;line-height:1.5">💡 Incluye tu diferenciador y tu audiencia — la AI construirá toda la estrategia de contenido de aquí. <strong style="color:var(--t2)">Cuanto más específico, mejor resultado.</strong></div>
         </div>
         <div class="fg-item span2">
-          <div class="fg-label">¿Qué hace especial a tu negocio? <span style="color:var(--pk)">*</span> <span style="font-size:10px;font-weight:400;color:var(--t3)">2-4 oraciones</span></div>
-          <textarea id="bStory" rows="4" placeholder="Ej: Somos el único kinder en Aguascalientes con enfoque en neurociencia aplicada. Desarrollamos el cerebro de niños de 1-6 años a través de metodologías basadas en evidencia científica. Nuestras familias nos eligen porque ven resultados reales en el desarrollo de sus hijos."></textarea>
-          <div style="font-size:11px;color:var(--t3);margin-top:4px;line-height:1.5">💡 La AI extrae: diferenciador, audiencia objetivo, tono, propuesta de valor y hashtags. <strong style="color:var(--t2)">Cuanto más específico, mejor el resultado.</strong></div>
-        </div>
-        <!-- WhatsApp field -->
-        <div class="fg-item">
-          <div class="fg-label">WhatsApp de contacto <span style="color:var(--pk)">*</span></div>
-          <div style="display:flex;align-items:center;gap:8px">
-            <span style="font-size:18px">📱</span>
-            <input type="tel" id="bWhatsApp" placeholder="+52 449 123 4567" style="flex:1">
-          </div>
-          <div style="font-size:11px;color:var(--t3);margin-top:4px">Se incluye automáticamente en todos los CTAs generados</div>
-        </div>
-        <!-- Logo field -->
-        <div class="fg-item">
-          <div class="fg-label">Logo <span style="font-size:10px;font-weight:400;color:var(--t3)">(opcional — puedes agregar esto después)</span></div>
-          <div style="display:flex;align-items:center;gap:12px;margin-top:6px;padding:10px 12px;background:var(--bg);border:1.5px dashed var(--bor);border-radius:10px;cursor:pointer" onclick="document.getElementById('logoFile').click()">
-            <div class="logo-circle" id="logoCircle" style="width:48px;height:48px;flex-shrink:0;margin:0;cursor:pointer">
-              <input type="file" id="logoFile" accept="image/png,image/svg+xml,image/webp,image/jpeg" style="display:none">
-              <img id="logoImg" src="" alt="" style="display:none;width:100%;height:100%;object-fit:contain;border-radius:50%">
-              <span class="plus" id="logoPlus" style="font-size:20px">+</span>
-            </div>
-            <div>
-              <div style="font-size:12px;font-weight:600;color:var(--t2)">Subir logo</div>
-              <div style="font-size:11px;color:var(--t3);margin-top:2px">PNG con fondo transparente para mejores resultados</div>
-              <div style="font-size:11px;color:var(--t3)">Se agrega como overlay en todas las imágenes</div>
-            </div>
-          </div>
+          <div class="fg-label">Tono de comunicación</div>
+          <select id="bTone">
+            <option value="Cálido, moderno y cercano">Cálido y moderno</option>
+            <option value="Profesional y confiable">Profesional y confiable</option>
+            <option value="Divertido y energético">Divertido y energético</option>
+            <option value="Inspiracional y motivador">Inspiracional y motivador</option>
+            <option value="Informativo y educativo">Informativo y educativo</option>
+          </select>
         </div>
       </div>
     </div>
@@ -877,11 +924,7 @@ const T = {
     modes: { post: 'Post', enhance: 'Estudio Pro', flyer: 'Flyer', testimonial: 'Testimonio' },
     generate: 'Generar contenido',
     generating2: 'Generando...',
-    flyerPlaceholder: 'Pega o describe la información de tu flyer...
-
-Ej: "Curso de verano Wonderik, del 14 al 25 de julio, para niños de 1-6 años, $2,500 MXN todo incluido, actividades de neurociencia y arte, cupos limitados"
-
-La AI extrae el título, fechas, precio y genera el diseño automáticamente.',
+    flyerPlaceholder: 'Pega o describe la información de tu flyer... La AI extrae título, fechas, precio y genera el diseño. Ej: Curso de verano del 14-25 julio, niños 1-6 años, $2,500 MXN todo incluido, cupos limitados.',
     flyerTypes: ['📅 Evento', '🛍️ Promoción', '📢 Anuncio', '📋 Nuevo servicio', '🎓 Admisiones', '🍽️ Menú especial'],
     styleSel: 'Estilo de imagen',
     stylePhoto: 'Fotorrealista', stylePhotoDesc: 'Persona genérica en actividad',
@@ -908,11 +951,7 @@ La AI extrae el título, fechas, precio y genera el diseño automáticamente.',
     modes: { post: 'Post', enhance: 'Pro Studio', flyer: 'Flyer', testimonial: 'Testimonial' },
     generate: 'Generate content',
     generating2: 'Generating...',
-    flyerPlaceholder: 'Paste or describe your flyer information...
-
-Ex: "Summer camp July 14-25, kids 1-6 years old, $2,500 MXN all inclusive, neuroscience activities, limited spots"
-
-The AI extracts title, dates, price and generates the design automatically.',
+    flyerPlaceholder: 'Paste or describe your flyer info. AI extracts title, dates, price and generates the design. Ex: Summer camp July 14-25, kids 1-6 years, $2,500 MXN all inclusive, limited spots.',
     flyerTypes: ['📅 Event', '🛍️ Promotion', '📢 Announcement', '📋 New service', '🎓 Enrollments', '🍽️ Special menu'],
     styleSel: 'Image style',
     stylePhoto: 'Photorealistic', stylePhotoDesc: 'Generic person in activity',
@@ -1019,11 +1058,7 @@ async function sendRecoveryLink() {
   const email = document.getElementById('recoveryEmail').value.trim();
   if(!email) { alert('Ingresa tu email'); return; }
   // In Phase 2.5: send email. For now, just show the link
-  alert('✅ Guarda este link:
-
-' + getBrandUrl() + '
-
-En una próxima versión lo enviaremos a ' + email);
+  alert('Guarda este link: ' + getBrandUrl() + ' — En una próxima versión lo enviaremos a ' + email);
   closeRecoveryModal();
 }
 
@@ -1199,13 +1234,39 @@ function showSeasonalAlert() {
 // STATES CASCADE
 // ═══════════════════════════════════════════════════════
 function updateStates() {
-  // Location fields removed in new Brand Setup (inferred from bName)
+  const country = document.getElementById('bCountry')?.value;
+  const sel = document.getElementById('bState');
+  const txt = document.getElementById('bStateText');
+  if (!sel || !txt) return;
+  const states = {
+    'México': ['Aguascalientes','Baja California','Baja California Sur','Campeche','Chiapas','Chihuahua','Ciudad de México','Coahuila','Colima','Durango','Estado de México','Guanajuato','Guerrero','Hidalgo','Jalisco','Michoacán','Morelos','Nayarit','Nuevo León','Oaxaca','Puebla','Querétaro','Quintana Roo','San Luis Potosí','Sinaloa','Sonora','Tabasco','Tamaulipas','Tlaxcala','Veracruz','Yucatán','Zacatecas'],
+    'Colombia': ['Antioquia','Bogotá D.C.','Valle del Cauca','Atlántico','Cundinamarca','Bolívar','Santander','Nariño','Córdoba','Tolima','Otro'],
+    'Argentina': ['Buenos Aires','Córdoba','Santa Fe','Mendoza','Tucumán','Salta','Entre Ríos','Misiones','Chaco','Corrientes','Otro'],
+    'Chile': ['Región Metropolitana','Valparaíso','Biobío','Maule','Araucanía','Los Lagos',"O'Higgins",'Coquimbo','Antofagasta','Otro'],
+    'Perú': ['Lima','Arequipa','La Libertad','Piura','Cusco','Lambayeque','Junín','Loreto','Callao','Otro'],
+    'España': ['Madrid','Cataluña','Andalucía','Comunitat Valenciana','País Vasco','Galicia','Castilla y León','Castilla-La Mancha','Canarias','Aragón','Otro'],
+    'Guatemala': ['Guatemala','Quetzaltenango','Huehuetenango','Alta Verapaz','San Marcos','Escuintla','Otro'],
+    'Costa Rica': ['San José','Alajuela','Cartago','Heredia','Guanacaste','Puntarenas','Limón'],
+    'Estados Unidos': ['California','Texas','Florida','New York','Illinois','Pennsylvania','Ohio','Georgia','North Carolina','Michigan','Otro'],
+  };
+  const list = states[country];
+  if (list) {
+    sel.innerHTML = '<option value="">— Selecciona estado —</option>' + list.map(s => '<option value="' + s + '">' + s + '</option>').join('');
+    sel.disabled = false; sel.style.display = '';
+    txt.style.display = 'none';
+  } else {
+    sel.innerHTML = '<option value="">— Selecciona estado —</option>';
+    sel.disabled = true; sel.style.display = 'none';
+    txt.style.display = ''; txt.value = '';
+  }
 }
 function getLocation() {
-  // Location is now inferred from the bName field (e.g. "Wonderik, kinder en Aguascalientes")
-  const bName = document.getElementById('bName')?.value || '';
-  const parts = bName.split(',');
-  return parts.slice(1).join(',').trim() || '';
+  const c = document.getElementById('bCountry')?.value || '';
+  const s = (document.getElementById('bState')?.style.display !== 'none'
+    ? document.getElementById('bState')?.value
+    : document.getElementById('bStateText')?.value) || '';
+  const ci = document.getElementById('bCity')?.value.trim() || '';
+  return [ci, s, c].filter(Boolean).join(', ');
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1262,32 +1323,35 @@ function handleDrop(file, zone, prevId, titleId, nameId, cb) {
 // BRAND SETUP
 // ═══════════════════════════════════════════════════════
 async function generateBrandGuide() {
-  const name=document.getElementById('bName').value.trim();
-  const story=document.getElementById('bStory')?.value.trim() || '';
-  const wa=document.getElementById('bWhatsApp')?.value.trim() || '';
-  if(!name||!story){ alert(lang==='es'?'Completa el nombre y la descripción de tu negocio.':'Fill in your business name and description.'); return; }
+  const name = document.getElementById('bName')?.value.trim() || '';
+  const bType = document.getElementById('bType')?.value.trim() || '';
+  const story = document.getElementById('bStory')?.value.trim() || '';
+  const wa = document.getElementById('bWhatsApp')?.value.trim() || '';
+  const tone = document.getElementById('bTone')?.value || 'Cálido, moderno y cercano';
+  if(!name || !bType || !story) {
+    alert(lang==='es'
+      ? 'Completa: Nombre del negocio, Tipo de negocio y la descripción de lo que te hace especial.'
+      : 'Please fill in: Business name, Type, and your unique description.');
+    return;
+  }
   const btn=document.getElementById('btnGenBG');
   btn.innerHTML='<div class="spin-sm"></div> Generando tu Brand Guide...'; btn.disabled=true;
-  // Show time estimate to user
   const timeNote = document.createElement('p');
   timeNote.id='bgTimeNote';
   timeNote.style.cssText='font-size:12px;color:var(--t3);margin-top:8px;text-align:center';
   timeNote.textContent='☕ Esto puede tomar hasta 1 minuto — la AI está analizando tu negocio a fondo';
   btn.parentNode.insertBefore(timeNote, btn.nextSibling);
   try {
-    const nameParts = name.split(',');
-    const parsedName = nameParts[0].trim();
-    const parsedTypeLocation = nameParts.slice(1).join(',').trim();
     const res=await fetch(WORKER,{ method:'POST', headers:{'Content-Type':'application/json'},
       body:JSON.stringify({ mode:'brand-guide', brandData:{
-        name: parsedName,
-        type: parsedTypeLocation,
-        location: parsedTypeLocation,
+        name: name,
+        type: bType,
+        location: getLocation(),
         whatsapp: wa,
         differentiator: story,
         story: story,
         audience: '',
-        tone: 'Cálido y moderno',
+        tone: tone,
         colors:{ primary:document.getElementById('bC1').value, secondary:document.getElementById('bC2').value, accent:document.getElementById('bC3').value }
       }})
     });
@@ -1316,25 +1380,38 @@ async function generateBrandGuide() {
 }
 
 function saveBrand() {
-  const rawName = document.getElementById('bName').value.trim();
-  const story = document.getElementById('bStory')?.value.trim() || '';
-  const wa = document.getElementById('bWhatsApp')?.value.trim() || '';
-  if(!rawName||!story){ alert(lang==='es'?'Completa el nombre y la descripción.':'Fill in name and description.'); return; }
-  const nameParts = rawName.split(',');
-  const parsedName = nameParts[0].trim();
-  const parsedTypeLocation = nameParts.slice(1).join(',').trim();
+  const bNameVal = document.getElementById('bName')?.value.trim() || '';
+  const bTypeVal = document.getElementById('bType')?.value.trim() || '';
+  const bStoryVal = document.getElementById('bStory')?.value.trim() || '';
+  const bWaVal = document.getElementById('bWhatsApp')?.value.trim() || '';
+  const bCountryVal = document.getElementById('bCountry')?.value || '';
+  const bStateVal = (document.getElementById('bState')?.style.display !== 'none'
+    ? document.getElementById('bState')?.value
+    : document.getElementById('bStateText')?.value) || '';
+  const bCityVal = document.getElementById('bCity')?.value.trim() || '';
+  const bToneVal = document.getElementById('bTone')?.value || 'Cálido, moderno y cercano';
+  if(!bNameVal || !bTypeVal || !bStoryVal) {
+    alert(lang==='es'
+      ? 'Completa: Nombre del negocio, Tipo de negocio y la descripción de lo que te hace especial.'
+      : 'Please fill in: Business name, Type, and your unique description.');
+    return;
+  }
+  if(!bCountryVal || !bStateVal) {
+    alert(lang==='es' ? 'Selecciona tu país y estado/provincia.' : 'Please select your country and state/province.');
+    return;
+  }
   const brand={
-    name: parsedName,
-    type: parsedTypeLocation,
-    whatsapp: wa,
-    country: '',
-    state: '',
-    city: parsedTypeLocation,
-    location: parsedTypeLocation,
-    differentiator: story,
-    story: story,
+    name: bNameVal,
+    type: bTypeVal,
+    whatsapp: bWaVal,
+    country: bCountryVal,
+    state: bStateVal,
+    city: bCityVal,
+    location: getLocation(),
+    differentiator: bStoryVal,
+    story: bStoryVal,
     audience: '',
-    tone: 'Cálido y moderno',
+    tone: bToneVal,
     colors:{ primary:document.getElementById('bC1').value, secondary:document.getElementById('bC2').value, accent:document.getElementById('bC3').value },
     brandGuide:document.getElementById('bgText').value,
     pillars:(()=>{
@@ -1411,12 +1488,13 @@ function buildPillarBtns(pillars) {
 function goToEdit() {
   const b=loadBrand();
   if(b){
-    document.getElementById('bName').value=b.name||(b.type?b.name+', '+b.type:b.name)||'';
+    document.getElementById('bName').value = b.name||'';
+    const bTypeEl=document.getElementById('bType'); if(bTypeEl) bTypeEl.value=b.type||'';
     const bStoryEl=document.getElementById('bStory'); if(bStoryEl) bStoryEl.value=b.story||b.differentiator||'';
+    const bToneEl=document.getElementById('bTone'); if(bToneEl) bToneEl.value=b.tone||'Cálido, moderno y cercano';
     document.getElementById('bWhatsApp').value=b.whatsapp||'';
-    // bDiff and bAudience removed — story field replaces them
-    // bTone, bCountry, bState, bCity removed in new simplified Brand Setup
-    // Story is populated by the goToEdit fix above
+    if(b.country){ const cEl=document.getElementById('bCountry'); if(cEl){ cEl.value=b.country; updateStates(); } setTimeout(()=>{ const sEl=document.getElementById('bState'); if(sEl&&b.state) sEl.value=b.state; },100); }
+    const bCityEl=document.getElementById('bCity'); if(bCityEl) bCityEl.value=b.city||'';
     if(b.colors){ document.getElementById('bC1').value=b.colors.primary; document.getElementById('bC2').value=b.colors.secondary; document.getElementById('bC3').value=b.colors.accent; }
     if(b.logo){ logoB64=b.logo; const img=document.getElementById('logoImg'); img.src=b.logo; img.style.display='block'; document.getElementById('logoPlus').style.display='none'; }
     if(b.brandGuide){
