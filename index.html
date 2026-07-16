@@ -314,8 +314,6 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
 .toast{position:fixed;bottom:24px;right:24px;background:var(--t1);color:#fff;padding:10px 16px;border-radius:10px;font-size:13px;font-weight:600;z-index:999;transform:translateY(80px);transition:transform .3s;display:flex;align-items:center;gap:8px;box-shadow:var(--s2)}
 .toast.show{transform:translateY(0)}
 
-/* Lang toggle hover */
-#langBtn:hover{background:var(--b);color:#fff!important;border-color:var(--b)}
 
 /* Responsive */
 @media(max-width:640px){
@@ -334,13 +332,10 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
     <div class="logo-sq">P</div>
     Postimity
   </a>
-  <div style="display:flex;align-items:center;gap:8px">
-    <div class="brand-chip" id="brandChip" onclick="goToEdit()">
-      <div class="chip-logo" id="chipLogo">?</div>
-      <span id="chipName">Mi marca</span>
-      <span style="color:var(--t3);font-size:12px">✏️</span>
-    </div>
-    <button id="langBtn" onclick="event.stopPropagation();toggleLang()" title="Switch language" style="padding:5px 10px;border-radius:7px;border:1px solid var(--bor);background:var(--bg);color:var(--t2);font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;flex-shrink:0;line-height:1">🌐 EN</button>
+  <div class="brand-chip" id="brandChip" onclick="goToEdit()">
+    <div class="chip-logo" id="chipLogo">?</div>
+    <span id="chipName">Mi marca</span>
+    <span style="color:var(--t3)">✏️</span>
   </div>
 </nav>
 
@@ -382,7 +377,7 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
   <div class="setup-wrap">
     <div class="setup-hero">
       <div class="setup-icon">✨</div>
-      <h1>Configura tu marca</h1>
+      <h1>Configura tu marca en 30 segundos</h1>
       <p>Esta información es el cerebro de la AI. Define el estilo, voz y estrategia de TODO tu contenido.</p>
     </div>
     <div class="setup-progress" id="setupProgress">
@@ -395,7 +390,7 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
 
     <!-- Card 1: Identidad del negocio -->
     <div class="scard">
-      <div class="scard-title">🏪 Tu negocio en 30 segundos</div>
+      <div class="scard-title">🏪 Identidad del negocio</div>
       <div class="logo-upload-row">
         <div class="logo-circle" id="logoCircle">
           <input type="file" id="logoFile" accept="image/png,image/svg+xml,image/webp,image/jpeg">
@@ -867,8 +862,8 @@ Ej: 'Wonderik es increíble. Mi hija de 3 años ya lee palabras cortas y su desa
 // ═══════════════════════════════════════════════════════
 // CONFIG
 // ═══════════════════════════════════════════════════════
-const WORKER = CONFIG.workerUrl; // set in CONFIG above
-const STORE_KEY = CONFIG.storeKey; // set in CONFIG above
+// WORKER already defined above
+// STORE_KEY already defined above
 const STATES = {
   'México':['Aguascalientes','Baja California','Baja California Sur','Campeche','Chiapas','Chihuahua','Ciudad de México','Coahuila','Colima','Durango','Estado de México','Guanajuato','Guerrero','Hidalgo','Jalisco','Michoacán','Morelos','Nayarit','Nuevo León','Oaxaca','Puebla','Querétaro','Quintana Roo','San Luis Potosí','Sinaloa','Sonora','Tabasco','Tamaulipas','Tlaxcala','Veracruz','Yucatán','Zacatecas'],
   'Estados Unidos':['California','Texas','Florida','New York','Illinois','Arizona','Colorado','Georgia','Nevada','New Jersey','New Mexico','North Carolina','Washington','Virginia','Pennsylvania','Ohio','Michigan'],
@@ -890,114 +885,12 @@ const PLT_INFO = {
 // ═══════════════════════════════════════════════════════
 // STATE
 // ═══════════════════════════════════════════════════════
-// ═══════════════════════════════════════════════════════════
-// CONFIG — editar aquí para cambiar modelos, límites, precios
-// ═══════════════════════════════════════════════════════════
-const CONFIG = {
-  workerUrl: 'https://postimity-content.munir-go10.workers.dev/',
-  plans: {
-    trial:   { gens: 25, days: 14, name: 'Trial' },
-    starter: { gens: 25, price: 149, name: 'Starter' },
-    growth:  { gens: 60, price: 349, name: 'Growth' },
-    agency:  { gens: 200, price: 799, name: 'Agency' }
-  },
-  defaultPlan: 'trial',
-  storeKey: 'postimity_brand_v1',
-};
+// ── WORKER CONFIG ──────────────────────────────────────────
+const WORKER = 'https://postimity-content.munir-go10.workers.dev/';
+const STORE_KEY = 'postimity_brand_v1';
+const GEN_LIMITS = { trial: 25, starter: 25, growth: 60, agency: 200 };
 
-// ── LANGUAGE ────────────────────────────────────────────────
-const T = {
-  es: {
-    setup: 'Configura tu marca',
-    setupSub: 'Solo necesitamos 4 cosas para empezar',
-    field1Label: '¿Cómo se llama tu negocio y qué hace?',
-    field1Hint: 'Ej: "Wonderik, kinder privado en Aguascalientes" o "La Trattoria, restaurante italiano en CDMX"',
-    field2Label: '¿Qué hace especial a tu negocio? (2-4 oraciones)',
-    field2Hint: 'Cuéntanos en tus palabras — la AI construirá tu estrategia completa de aquí',
-    field3Label: 'WhatsApp de contacto',
-    field3Hint: 'Se incluye automáticamente en todos los CTAs generados',
-    field4Label: 'Logo y colores (opcional — puedes agregar esto después)',
-    generateBG: '✨ Generar mi Brand Guide con AI',
-    generating: 'Generando tu Brand Guide...',
-    generatingNote: '☕ Esto puede tomar hasta 1 minuto — la AI analiza tu negocio a fondo',
-    editBrand: 'Editar mi marca',
-    modes: { post: 'Post', enhance: 'Estudio Pro', flyer: 'Flyer', testimonial: 'Testimonio' },
-    generate: 'Generar contenido',
-    generating2: 'Generando...',
-    flyerPlaceholder: 'Pega o describe la información de tu flyer... La AI extrae título, fechas, precio y genera el diseño. Ej: Curso de verano del 14-25 julio, niños 1-6 años, $2,500 MXN todo incluido, cupos limitados.',
-    flyerTypes: ['📅 Evento', '🛍️ Promoción', '📢 Anuncio', '📋 Nuevo servicio', '🎓 Admisiones', '🍽️ Menú especial'],
-    styleSel: 'Estilo de imagen',
-    stylePhoto: 'Fotorrealista', stylePhotoDesc: 'Persona genérica en actividad',
-    styleIllus: 'Ilustrado', styleIllusDesc: 'Gráfico colorido, sin personas',
-    styleAbstr: 'Abstracto', styleAbstrDesc: 'Fondo de marca para texto',
-    trial: 'días de prueba restantes',
-    trialExpired: 'Tu prueba ha vencido',
-    upgrade: 'Mejorar plan',
-  },
-  en: {
-    setup: 'Set up your brand',
-    setupSub: 'We only need 4 things to get started',
-    field1Label: 'What is your business called and what does it do?',
-    field1Hint: 'e.g. "Wonderik, private kindergarten in Aguascalientes" or "La Trattoria, Italian restaurant in Mexico City"',
-    field2Label: 'What makes your business special? (2-4 sentences)',
-    field2Hint: 'Tell us in your own words — the AI will build your complete strategy from this',
-    field3Label: 'WhatsApp contact number',
-    field3Hint: 'Automatically included in all generated CTAs',
-    field4Label: 'Logo and colors (optional — you can add this later)',
-    generateBG: '✨ Generate my Brand Guide with AI',
-    generating: 'Generating your Brand Guide...',
-    generatingNote: '☕ This may take up to 1 minute — the AI is deeply analyzing your business',
-    editBrand: 'Edit my brand',
-    modes: { post: 'Post', enhance: 'Pro Studio', flyer: 'Flyer', testimonial: 'Testimonial' },
-    generate: 'Generate content',
-    generating2: 'Generating...',
-    flyerPlaceholder: 'Paste or describe your flyer info. AI extracts title, dates, price and generates the design. Ex: Summer camp July 14-25, kids 1-6 years, $2,500 MXN all inclusive, limited spots.',
-    flyerTypes: ['📅 Event', '🛍️ Promotion', '📢 Announcement', '📋 New service', '🎓 Enrollments', '🍽️ Special menu'],
-    styleSel: 'Image style',
-    stylePhoto: 'Photorealistic', stylePhotoDesc: 'Generic person in activity',
-    styleIllus: 'Illustrated', styleIllusDesc: 'Colorful graphic, no people',
-    styleAbstr: 'Abstract', styleAbstrDesc: 'Brand background for text',
-    trial: 'trial days remaining',
-    trialExpired: 'Your trial has expired',
-    upgrade: 'Upgrade plan',
-  }
-};
-let lang = localStorage.getItem('postimity_lang') || 'es';
-function t(key) { return T[lang][key] || T.es[key] || key; }
-function toggleLang() {
-  lang = lang === 'es' ? 'en' : 'es';
-  localStorage.setItem('postimity_lang', lang);
-  applyTranslations();
-}
-function applyTranslations() {
-  // Update lang toggle button
-  const btn = document.getElementById('langBtn');
-  if (btn) btn.textContent = lang === 'es' ? '🌐 EN' : '🌐 ES';
-  // Update mode card labels
-  ['post','enhance','flyer','testimonial'].forEach(m => {
-    const el = document.getElementById('mc_' + m + '_label');
-    if (el) el.textContent = t('modes')[m];
-  });
-  // Update flyer placeholder
-  const fp = document.getElementById('flyerFreeText');
-  if (fp) fp.placeholder = t('flyerPlaceholder');
-  // Update flyer type buttons
-  const ftbs = document.querySelectorAll('.flyer-type-btn');
-  const types = t('flyerTypes');
-  ftbs.forEach((btn, i) => { if (types[i]) btn.textContent = types[i]; });
-  // Style selector labels
-  const sLabels = [
-    ['sPhotoName', 'stylePhoto'], ['sPhotoDesc', 'stylePhotoDesc'],
-    ['sIllusName', 'styleIllus'], ['sIllusDesc', 'styleIllusDesc'],
-    ['sAbstrName', 'styleAbstr'], ['sAbstrDesc', 'styleAbstrDesc'],
-  ];
-  sLabels.forEach(([id, key]) => { const el = document.getElementById(id); if (el) el.textContent = t(key); });
-  // Style selector section label
-  const ssLabel = document.getElementById('styleSelLabel');
-  if (ssLabel) ssLabel.textContent = t('styleSel');
-}
-
-// ── STATE ───────────────────────────────────────────────────
+// ── STATE ───────────────────────────────────────────────────// ── STATE ───────────────────────────────────────────────────
 let mode = 'post', platform = 'instagram', pillar = 'General', flyerMode = 'ai', imageStyle = 'illustrated';
 let brandId = null; // Phase 2: unique brand identifier for KV sync
 let genCount = 0;   // Phase 2: generation counter for plan limits
@@ -1064,8 +957,8 @@ async function sendRecoveryLink() {
 
 function updateGenCounter() {
   const brand = loadBrand();
-  const plan = brand?.plan || CONFIG.defaultPlan;
-  const limit = CONFIG.plans[plan]?.gens || CONFIG.plans.trial.gens;
+  const plan = brand?.plan || 'trial';
+  const limit = GEN_LIMITS[plan] || GEN_LIMITS.trial;
   const monthKey = 'postimity_gens_' + new Date().toISOString().slice(0,7);
   const used = parseInt(localStorage.getItem(monthKey) || '0');
   const remaining = Math.max(0, limit - used);
@@ -1329,9 +1222,7 @@ async function generateBrandGuide() {
   const wa = document.getElementById('bWhatsApp')?.value.trim() || '';
   const tone = document.getElementById('bTone')?.value || 'Cálido, moderno y cercano';
   if(!name || !bType || !story) {
-    alert(lang==='es'
-      ? 'Completa: Nombre del negocio, Tipo de negocio y la descripción de lo que te hace especial.'
-      : 'Please fill in: Business name, Type, and your unique description.');
+    alert('Completa: Nombre, Tipo de negocio y la descripción de lo que te hace especial.');
     return;
   }
   const btn=document.getElementById('btnGenBG');
@@ -1391,13 +1282,11 @@ function saveBrand() {
   const bCityVal = document.getElementById('bCity')?.value.trim() || '';
   const bToneVal = document.getElementById('bTone')?.value || 'Cálido, moderno y cercano';
   if(!bNameVal || !bTypeVal || !bStoryVal) {
-    alert(lang==='es'
-      ? 'Completa: Nombre del negocio, Tipo de negocio y la descripción de lo que te hace especial.'
-      : 'Please fill in: Business name, Type, and your unique description.');
+    alert('Completa: Nombre, Tipo de negocio y la descripción de lo que te hace especial.');
     return;
   }
   if(!bCountryVal || !bStateVal) {
-    alert(lang==='es' ? 'Selecciona tu país y estado/provincia.' : 'Please select your country and state/province.');
+    alert('Selecciona tu país y estado/provincia.');
     return;
   }
   const brand={
@@ -1614,17 +1503,15 @@ function setFlyerMode(m) {
 // ═══════════════════════════════════════════════════════
 async function generate() {
   const brand=loadBrand();
-  if(!brand){ alert(lang==='es'?'Primero configura tu marca.':'Please set up your brand first.'); return; }
+  if(!brand){ alert('Primero configura tu marca.'); return; }
   // ── Generation limit check (Phase 2 model) ────────────────────────────
-  const plan = brand?.plan || CONFIG.defaultPlan;
-  const limit = (CONFIG.plans[plan] || CONFIG.plans.trial).gens;
+  const plan = brand?.plan || 'trial';
+  const limit = GEN_LIMITS[plan] || GEN_LIMITS.trial;
   const monthKey = 'postimity_gens_' + new Date().toISOString().slice(0,7);
   const usedThisMonth = parseInt(localStorage.getItem(monthKey) || '0');
   if (usedThisMonth >= limit) {
-    const msg = lang === 'es'
-      ? `Llegaste al límite de ${limit} generaciones este mes (plan ${plan}). ¿Quieres ver los planes de Postimity?`
-      : `You've reached the ${limit} generation limit this month (${plan} plan). View Postimity plans?`;
-    if (confirm(msg)) alert(lang==='es'?'Escríbenos a postimity@gmail.com para hacer upgrade.':'Contact postimity@gmail.com to upgrade.');
+    const msg = `Llegaste al límite de ${limit} generaciones este mes. Escríbenos a postimity@gmail.com para hacer upgrade.`;
+    alert(msg);
     return;
   }
   // Validate inputs
