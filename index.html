@@ -494,11 +494,13 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
   <!-- ╔═══════════════════════════════════════════╗
        ║  MARKETING AGENT SCREEN                    ║
        ╚═══════════════════════════════════════════╝ -->
-  <div id="agentScreen" class="screen" style="display:none;overflow-y:auto">
+  <div id="agentScreen" class="screen" style="overflow-y:auto">
     <div class="agent-screen">
       <!-- Header -->
       <div class="agent-header">
-        <button class="agent-back" onclick="showCreatorFromAgent()" title="Volver">←</button>
+        <button class="agent-back" onclick="showCreatorFromAgent()" title="Volver al Studio" style="display:flex;align-items:center;gap:5px;padding:7px 12px;font-size:12px;font-weight:700;background:var(--bg);border:1.5px solid var(--bor);border-radius:8px;cursor:pointer;color:var(--t2);font-family:inherit">
+          ← Volver
+        </button>
         <div class="agent-header-title">🤖 Marketing Agent</div>
         <span class="agent-month-badge" id="agentMonthBadge">Este mes</span>
       </div>
@@ -2152,6 +2154,9 @@ function showAgentScreen() {
   const badge = document.getElementById('agentMonthBadge');
   if(badge) badge.textContent = label;
 
+  // Make sure config is shown (reset state)
+  showAgentConfig();
+
   // Try to load saved plan for this month
   const brand = loadBrand();
   if(brand?.brandId) {
@@ -2164,10 +2169,23 @@ function showAgentScreen() {
       }
     }).catch(() => {});
   }
-  showScreen('agentScreen');
+
+  // Show the screen
+  document.querySelectorAll('.screen').forEach(s => {
+    s.classList.remove('active');
+    if(s.id !== 'agentScreen') s.style.display = '';
+  });
+  const agentEl = document.getElementById('agentScreen');
+  if(agentEl) {
+    agentEl.classList.add('active');
+    agentEl.style.display = 'block';
+  }
+  window.scrollTo(0, 0);
 }
 
 function showCreatorFromAgent() {
+  const agentEl = document.getElementById('agentScreen');
+  if(agentEl) { agentEl.classList.remove('active'); agentEl.style.display = ''; }
   showScreen('creatorScreen');
 }
 
