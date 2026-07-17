@@ -130,7 +130,7 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
 .mode-card:hover::before{opacity:.04}
 .mode-card.active{border-color:var(--b);background:var(--b3);box-shadow:0 2px 10px rgba(41,121,255,.15)}
 .mc-icon{font-size:22px;margin-bottom:5px;display:block;position:relative}
-.mc-title{font-size:11px;font-weight:700;color:var(--t1);margin-bottom:3px;position:relative;line-height:1.2}
+.mc-title{font-size:12px;font-weight:700;color:var(--t1);margin-bottom:3px;position:relative;line-height:1.2}
 .mode-card.active .mc-title{color:var(--b2)}
 .mc-desc{font-size:10px;color:var(--t3);line-height:1.3;position:relative;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
 .mode-card.active .mc-desc{color:var(--b)}
@@ -182,7 +182,7 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
 .ls.done{opacity:.6}
 .ls.done::after{content:' ✓';color:var(--g)}
 /* Results */
-.result-wrap{background:var(--w);border-radius:16px;border:1px solid var(--bor);overflow:hidden;margin-top:14px;box-shadow:0 2px 12px rgba(0,0,0,.06)}
+.result-wrap{display:none;background:var(--w);border-radius:16px;border:1px solid var(--bor);overflow:hidden;margin-top:14px;box-shadow:0 2px 12px rgba(0,0,0,.06)}
 .result-wrap.show{display:block}
 .result-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
 /* Image panel */
@@ -1561,8 +1561,11 @@ function setImageStyle(style, btn) {
 }
 function updateStyleSelector() {
   const sel = document.getElementById('styleSel');
-  // Show for post, flyer-ai, carousel, testimonial modes
-  const visible = mode === 'post' || (mode === 'flyer' && flyerMode === 'ai') || mode === 'carousel';
+  // Show for post, flyer-ai, carousel-AI only
+  // Hide when using real photos (enhance, flyer-photo, carousel-photo)
+  const visible = mode === 'post' ||
+    (mode === 'flyer' && flyerMode === 'ai') ||
+    (mode === 'carousel' && carouselCoverMode === 'ai');
   sel.classList.toggle('show', visible);
   // For testimonials: force abstract (hidden from user)
   if (mode === 'testimonial') { imageStyle = 'abstract'; }
@@ -1657,11 +1660,12 @@ function adjustSlides(delta) {
   carouselSlides = Math.min(Math.max(carouselSlides + delta, 3), 10);
   document.getElementById('slideCountVal').textContent = carouselSlides;
 }
-function setCarouselCoverMode(mode, btn) {
-  carouselCoverMode = mode;
+function setCarouselCoverMode(m, btn) {
+  carouselCoverMode = m;
   document.querySelectorAll('#cvrAI,#cvrPhoto').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
-  document.getElementById('carouselPhotoWrap').style.display = mode==='photo' ? 'block' : 'none';
+  document.getElementById('carouselPhotoWrap').style.display = m==='photo' ? 'block' : 'none';
+  updateStyleSelector(); // Hide/show fotorrealista selector based on photo vs AI
 }
 function setCarouselStyle(btn) {
   document.querySelectorAll('.cs-style-btn').forEach(b=>b.classList.remove('active'));
