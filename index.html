@@ -123,14 +123,17 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
 .plt-info{font-size:12px;color:var(--t3);background:var(--bg2);border-radius:8px;padding:8px 12px;margin-bottom:14px;line-height:1.5;display:none}
 .plt-info.show{display:block}
 /* Mode cards */
-.mode-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}
-.mode-card{background:var(--w);border:2px solid var(--bor);border-radius:var(--r2);padding:16px 14px;cursor:pointer;transition:.15s;text-align:center}
-.mode-card:hover{border-color:var(--b);box-shadow:var(--s2)}
+.mode-cards{display:flex;gap:8px;margin-bottom:16px;flex-wrap:nowrap;overflow-x:auto;padding-bottom:2px}
+.mode-cards::-webkit-scrollbar{height:3px}
+.mode-cards::-webkit-scrollbar-track{background:transparent}
+.mode-cards::-webkit-scrollbar-thumb{background:var(--bor);border-radius:2px}
+.mode-card{flex-shrink:0;background:var(--w);border:1.5px solid var(--bor);border-radius:10px;padding:8px 14px;cursor:pointer;transition:.15s;display:flex;align-items:center;gap:7px;white-space:nowrap}
+.mode-card:hover{border-color:var(--b);background:var(--b3);transform:translateY(-1px)}
 .mode-card.active{border-color:var(--b);background:var(--b3)}
-.mc-icon{font-size:22px;margin-bottom:7px}
-.mc-title{font-size:12px;font-weight:700;color:var(--t1);margin-bottom:3px}
+.mc-icon{font-size:18px;flex-shrink:0}
+.mc-title{font-size:12px;font-weight:700;color:var(--t2)}
 .mode-card.active .mc-title{color:var(--b2)}
-.mc-desc{font-size:11px;color:var(--t3);line-height:1.3}
+.mc-desc{display:none}
 /* Input card */
 .input-card{background:var(--w);border:1px solid var(--bor);border-radius:var(--r2);padding:18px;box-shadow:var(--s1);margin-bottom:14px}
 .ic-label{font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px}
@@ -316,16 +319,27 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
 
 
 /* Carousel */
-.carousel-slides-preview{display:flex;gap:10px;overflow-x:auto;padding:8px 0;margin-bottom:16px;scroll-snap-type:x mandatory}
-.carousel-slides-preview::-webkit-scrollbar{height:4px}
-.carousel-slides-preview::-webkit-scrollbar-track{background:var(--bg)}
-.carousel-slides-preview::-webkit-scrollbar-thumb{background:var(--bor);border-radius:2px}
-.cs-preview{flex-shrink:0;width:140px;height:140px;border-radius:10px;overflow:hidden;border:2px solid var(--bor);cursor:pointer;position:relative;scroll-snap-align:start}
+.carousel-slides-wrap{position:relative;margin-bottom:10px}
+.carousel-slides-nav{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.csn-label{font-size:12px;font-weight:700;color:var(--t2)}
+.csn-hint{font-size:11px;color:var(--t3);margin-left:auto}
+.cs-arrows{display:flex;gap:4px}
+.cs-arrow{width:28px;height:28px;border-radius:7px;border:1px solid var(--bor);background:var(--bg);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;color:var(--t2);transition:.15s}
+.cs-arrow:hover{background:var(--b);color:#fff;border-color:var(--b)}
+.carousel-slides-preview{display:flex;gap:10px;overflow-x:auto;padding:4px 2px 8px;scroll-snap-type:x mandatory;scroll-behavior:smooth}
+.carousel-slides-preview::-webkit-scrollbar{height:5px}
+.carousel-slides-preview::-webkit-scrollbar-track{background:var(--bg);border-radius:3px}
+.carousel-slides-preview::-webkit-scrollbar-thumb{background:var(--b);border-radius:3px}
+.cs-preview{flex-shrink:0;width:130px;height:130px;border-radius:10px;overflow:hidden;border:2.5px solid var(--bor);cursor:pointer;position:relative;scroll-snap-align:start;transition:.15s}
+.cs-preview:hover{border-color:var(--b);transform:scale(1.03)}
 .cs-preview img{width:100%;height:100%;object-fit:cover}
-.cs-preview .cs-num{position:absolute;top:5px;left:5px;background:rgba(0,0,0,.6);color:#fff;font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px}
-.cs-preview .cs-dl{position:absolute;bottom:5px;right:5px;background:var(--b);color:#fff;border:none;border-radius:5px;font-size:11px;padding:3px 7px;cursor:pointer;display:none}
-.cs-preview:hover .cs-dl{display:block}
-.cs-preview.active{border-color:var(--b)}
+.cs-preview .cs-num{position:absolute;top:5px;left:5px;background:rgba(0,0,0,.65);color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px}
+.cs-preview .cs-dl{position:absolute;bottom:5px;right:5px;background:var(--b);color:#fff;border:none;border-radius:5px;font-size:11px;padding:4px 8px;cursor:pointer;opacity:0;transition:.15s;font-family:inherit}
+.cs-preview:hover .cs-dl{opacity:1}
+.cs-preview.active{border-color:var(--b);box-shadow:0 0 0 3px rgba(41,121,255,.2)}
+.cs-dots{display:flex;gap:5px;justify-content:center;margin-top:6px}
+.cs-dot{width:6px;height:6px;border-radius:50%;background:var(--bor);cursor:pointer;transition:.15s}
+.cs-dot.active{background:var(--b);width:18px;border-radius:3px}
 .carousel-slide-count{display:flex;align-items:center;gap:8px;margin-bottom:10px}
 .cs-count-label{font-size:12px;font-weight:600;color:var(--t2)}
 .cs-count-btn{width:32px;height:32px;border-radius:6px;border:1px solid var(--bor);background:var(--bg);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--t2)}
@@ -339,7 +353,7 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
 
 /* Responsive */
 @media(max-width:640px){
-  .mode-cards{grid-template-columns:1fr 1fr}
+  .mode-cards{flex-wrap:wrap}
   .result-grid{grid-template-columns:1fr}
   .fg{grid-template-columns:1fr}
   .fg-item.span2{grid-column:span 1}
@@ -792,6 +806,22 @@ Ej: &quot;Hazla blanco y negro estilo editorial de revista&quot;"></textarea>
           <button class="cs-style-btn" data-style="Tutorial paso a paso" onclick="setCarouselStyle(this)">🎯 Tutorial</button>
           <button class="cs-style-btn" data-style="Preguntas y respuestas" onclick="setCarouselStyle(this)">❓ Q&A</button>
         </div>
+        <!-- Cover source option -->
+        <div class="ic-label" style="margin-top:14px">Portada del carrusel</div>
+        <div style="display:flex;gap:8px;margin-bottom:10px">
+          <button class="em-btn active" id="cvrAI" onclick="setCarouselCoverMode('ai',this)">🤖 Generar con AI</button>
+          <button class="em-btn" id="cvrPhoto" onclick="setCarouselCoverMode('photo',this)">📸 Usar mi foto</button>
+        </div>
+        <div id="carouselPhotoWrap" style="display:none">
+          <div class="upload-zone" id="carouselCoverZone" style="padding:16px">
+            <input type="file" id="carouselCoverFile" accept="image/*">
+            <div class="uz-icon" style="font-size:24px">🖼️</div>
+            <div class="uz-title" id="carouselCoverTitle" style="font-size:13px">Arrastra tu foto o haz click</div>
+            <div class="uz-sub">Esta foto será el fondo del slide de portada</div>
+            <div class="uz-name" id="carouselCoverName"></div>
+          </div>
+          <img id="carouselCoverPrev" class="photo-prev" src="" alt="">
+        </div>
       </div>
 
       <!-- TESTIMONIAL MODE -->
@@ -848,10 +878,20 @@ Ej: 'Wonderik es increíble. Mi hija de 3 años ya lee palabras cortas y su desa
           <img id="resultImg" src="" alt="Generada por AI">
           <div class="photo-desc-bar" id="photoDescBar"></div>
           <!-- Carousel slides preview -->
-          <div id="carouselPreviewWrap" style="display:none;padding:12px;background:var(--bg);border-bottom:1px solid var(--bor)">
-            <div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px">🎠 Slides del carrusel — click para previsualizar</div>
-            <div class="carousel-slides-preview" id="carouselSlidesPreview"></div>
-            <button class="carousel-dl-all" onclick="downloadAllSlides()">⬇️ Descargar todos los slides</button>
+          <div id="carouselPreviewWrap" style="display:none;padding:14px;background:var(--bg);border-bottom:1px solid var(--bor)">
+            <div class="carousel-slides-nav">
+              <span class="csn-label">🎠 Slides del carrusel</span>
+              <span class="csn-hint" id="csHint">← → para navegar · click para previsualizar</span>
+              <div class="cs-arrows">
+                <button class="cs-arrow" onclick="scrollCarousel(-1)" title="Anterior">‹</button>
+                <button class="cs-arrow" onclick="scrollCarousel(1)" title="Siguiente">›</button>
+              </div>
+            </div>
+            <div class="carousel-slides-wrap">
+              <div class="carousel-slides-preview" id="carouselSlidesPreview"></div>
+              <div class="cs-dots" id="csDots"></div>
+            </div>
+            <button class="carousel-dl-all" onclick="downloadAllSlides()">⬇️ Descargar todos los slides (ZIP)</button>
           </div>
           <div id="keyQuoteWrap" style="display:none;padding:10px 14px;background:#FDF0DC;border-top:1px solid rgba(200,121,26,.2)">
             <div style="font-size:10px;font-weight:700;color:#854F0B;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px">⭐ Quote destacada del cliente</div>
@@ -1269,6 +1309,10 @@ function setupUploads() {
     reader.readAsDataURL(e.target.files[0]);
   });
   // Enhance
+  setupDropzone('carouselCoverZone','carouselCoverFile','carouselCoverPrev','carouselCoverTitle','carouselCoverName', async (b64,mime)=>{
+    const conv = await convertToPNG(b64, mime, 1024);
+    carouselCoverB64 = conv.b64; carouselCoverMime = 'image/png';
+  });
   setupDropzone('enhanceZone','enhanceFile','enhancePrev','enhanceTitle','enhanceName', async (b64,mime)=>{
     // Convert to PNG for OpenAI Edit API compatibility
     const converted = await convertToPNG(b64, mime, 1024);
@@ -1587,10 +1631,31 @@ function setEnhanceExample(el) {
 let carouselSlides = 5;
 let carouselStyle = 'Educativo';
 let carouselResults = []; // stores rendered slide data URLs
+let carouselCoverMode = 'ai'; // 'ai' or 'photo'
+let carouselCoverB64 = null;
+let carouselCoverMime = 'image/jpeg';
 
+function scrollCarousel(dir) {
+  const el = document.getElementById('carouselSlidesPreview');
+  if(el) el.scrollBy({ left: dir * 150, behavior: 'smooth' });
+}
+function updateCarouselDots(activeIdx) {
+  const dots = document.querySelectorAll('.cs-dot');
+  dots.forEach((d,i) => d.classList.toggle('active', i === activeIdx));
+  // Update active thumbnail
+  const previews = document.querySelectorAll('.cs-preview');
+  previews.forEach((p,i) => p.classList.toggle('active', i === activeIdx));
+  if(carouselResults[activeIdx]) document.getElementById('resultImg').src = carouselResults[activeIdx];
+}
 function adjustSlides(delta) {
   carouselSlides = Math.min(Math.max(carouselSlides + delta, 3), 10);
   document.getElementById('slideCountVal').textContent = carouselSlides;
+}
+function setCarouselCoverMode(mode, btn) {
+  carouselCoverMode = mode;
+  document.querySelectorAll('#cvrAI,#cvrPhoto').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('carouselPhotoWrap').style.display = mode==='photo' ? 'block' : 'none';
 }
 function setCarouselStyle(btn) {
   document.querySelectorAll('.cs-style-btn').forEach(b=>b.classList.remove('active'));
@@ -1601,11 +1666,19 @@ function setCarouselStyle(btn) {
 async function genCarousel(brand, bg) {
   const topic = document.getElementById('carouselTopic')?.value.trim();
   if(!topic) { alert('Escribe el tema del carrusel.'); return; }
+  if(carouselCoverMode==='photo' && !carouselCoverB64) { alert('Sube una foto para la portada.'); return; }
   setStep(1);
+  // If photo mode, convert to PNG first
+  let coverPhoto = null, coverMime = null;
+  if(carouselCoverMode==='photo' && carouselCoverB64) {
+    const conv = await convertToPNG(carouselCoverB64, carouselCoverMime, 1024);
+    coverPhoto = conv.b64; coverMime = 'image/png';
+  }
   const res = await postWithTimeout({
     mode: 'carousel',
     topic, slideCount: carouselSlides, style: carouselStyle,
-    brandGuide: bg, brandData: brand, imageStyle
+    brandGuide: bg, brandData: brand, imageStyle,
+    coverPhotoB64: coverPhoto, coverPhotoType: coverMime
   }, 55000);
   setStep(2);
   // Render all slides using Canvas
@@ -1990,16 +2063,21 @@ function showResult(data) {
     carouselPreviewWrap.style.display = 'block';
     const preview = document.getElementById('carouselSlidesPreview');
     preview.innerHTML = '';
+    const dots = document.getElementById('csDots');
+    if(dots) dots.innerHTML = '';
     data.carouselImages.forEach((url, i) => {
       const div = document.createElement('div');
       div.className = 'cs-preview' + (i===0?' active':'');
-      div.innerHTML = '<img src="'+url+'" alt="Slide '+(i+1)+'"><span class="cs-num">'+(i+1)+'</span><button class="cs-dl" onclick="downloadCarouselSlide('+i+')">⬇</button>';
-      div.onclick = () => {
-        document.querySelectorAll('.cs-preview').forEach(p=>p.classList.remove('active'));
-        div.classList.add('active');
-        document.getElementById('resultImg').src = url;
-      };
+      div.innerHTML = '<img src="'+url+'" alt="Slide '+(i+1)+'"><span class="cs-num">'+(i+1)+'</span><button class="cs-dl" onclick="event.stopPropagation();downloadCarouselSlide('+i+')" title="Descargar slide">⬇</button>';
+      div.onclick = () => updateCarouselDots(i);
       preview.appendChild(div);
+      // Add dot
+      if(dots) {
+        const dot = document.createElement('div');
+        dot.className = 'cs-dot' + (i===0?' active':'');
+        dot.onclick = () => { updateCarouselDots(i); document.querySelectorAll('.cs-preview')[i]?.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'}); };
+        dots.appendChild(dot);
+      }
     });
     // Show first slide in main result img
     document.getElementById('resultImg').src = data.carouselImages[0];
