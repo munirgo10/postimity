@@ -994,7 +994,7 @@ async function sendRecoveryLink() {
 function updateGenCounter() {
   const brand = loadBrand();
   const plan = brand?.plan || 'trial';
-  const limit = GEN_LIMITS[plan] || GEN_LIMITS.trial;
+  const limit = GEN_LIMITS[plan] || GEN_LIMITS['trial'];
   const monthKey = 'postimity_gens_' + new Date().toISOString().slice(0,7);
   const used = parseInt(localStorage.getItem(monthKey) || '0');
   const remaining = Math.max(0, limit - used);
@@ -1122,7 +1122,6 @@ window.addEventListener('DOMContentLoaded', async () => {
   } else {
     showScreen('setupScreen');
   }
-  applyTranslations();
   updateGenCounter();
 });
 
@@ -1258,7 +1257,7 @@ async function generateBrandGuide() {
   const aud = document.getElementById('bAudience')?.value.trim() || '';
   const wa = document.getElementById('bWhatsApp')?.value.trim() || '';
   const tone = document.getElementById('bTone')?.value || 'Cálido, moderno y cercano';
-  if(!name || !bType || !story) {
+  if(!name || !bType || !diff || !aud) {
     alert('Completa: Nombre, Tipo de negocio y la descripción de lo que te hace especial.');
     return;
   }
@@ -1545,7 +1544,7 @@ async function generate() {
   if(!brand){ alert('Primero configura tu marca.'); return; }
   // ── Generation limit check (Phase 2 model) ────────────────────────────
   const plan = brand?.plan || 'trial';
-  const limit = GEN_LIMITS[plan] || GEN_LIMITS.trial;
+  const limit = GEN_LIMITS[plan] || GEN_LIMITS['trial'];
   const monthKey = 'postimity_gens_' + new Date().toISOString().slice(0,7);
   const usedThisMonth = parseInt(localStorage.getItem(monthKey) || '0');
   if (usedThisMonth >= limit) {
