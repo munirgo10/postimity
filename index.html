@@ -425,6 +425,8 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
 .apc-btn.wa:hover{background:#1fa851}
 .apc-btn.copy{background:var(--bg);color:var(--t2);border:.5px solid var(--bor)}
 .apc-btn.copy:hover{background:var(--bor)}
+.apc-btn.reminder{background:var(--bg);color:var(--t3);border:.5px solid var(--bor);padding:7px 10px;border-radius:8px;font-size:14px}
+.apc-btn.reminder:hover{background:#FDF0DC;border-color:#E8961A;color:#E8961A}
 .agent-bar{background:linear-gradient(135deg,var(--b),var(--b2));border-radius:12px;padding:12px 16px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:.15s}
 .agent-bar:hover{opacity:.92}
 .agent-bar-left{display:flex;align-items:center;gap:10px}
@@ -432,6 +434,21 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
 .agent-bar-title{font-size:13px;font-weight:700;color:#fff}
 .agent-bar-sub{font-size:11px;color:rgba(255,255,255,.75)}
 .agent-bar-cta{font-size:12px;font-weight:700;color:#fff;background:rgba(255,255,255,.2);padding:6px 14px;border-radius:8px;white-space:nowrap}
+
+/* ─── REMINDER TOGGLE CARD ────────────────────────── */
+.reminder-card{background:var(--w);border:1.5px solid var(--bor);border-radius:14px;padding:16px;margin-bottom:20px;display:flex;align-items:center;gap:14px;transition:all .2s}
+.reminder-card.active{border-color:#25D366;background:linear-gradient(135deg,rgba(37,211,102,.06),rgba(37,211,102,.02))}
+.reminder-icon{font-size:28px;flex-shrink:0}
+.reminder-info{flex:1}
+.reminder-title{font-size:13px;font-weight:700;color:var(--t1);margin-bottom:3px}
+.reminder-sub{font-size:12px;color:var(--t3);line-height:1.4}
+.reminder-card.active .reminder-sub{color:#1a8a4a}
+.reminder-toggle{flex-shrink:0}
+.reminder-btn{padding:9px 18px;border-radius:10px;border:none;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .18s;white-space:nowrap}
+.reminder-btn.off{background:var(--bg);color:var(--t2);border:1.5px solid var(--bor)}
+.reminder-btn.off:hover{border-color:#25D366;color:#25D366;background:rgba(37,211,102,.06)}
+.reminder-btn.on{background:#25D366;color:#fff}
+.reminder-btn.on:hover{background:#1fa851}
 
 /* ─── RESPONSIVE ──────────────────────────────────── */
 /* Responsive */
@@ -2134,6 +2151,7 @@ async function genEnhance(brand,bg) {
 let agentFreq = 5;
 let agentPlats = ['instagram', 'facebook'];
 let agentPlan = null;
+let agentPostsCache = []; // Stores posts indexed for onclick access
 
 function getCurrentMonth() {
   const now = new Date();
@@ -2274,8 +2292,9 @@ function renderAgentPlan(plan) {
   const container = document.getElementById('agentPlanContent');
   if(!container) return;
 
-  // Group by week
+  // Cache posts by index for clean onclick access
   const posts = plan.posts || [];
+  agentPostsCache = posts;
   const weeks = {};
   posts.forEach(post => {
     const d = new Date(post.date + 'T12:00:00');
@@ -2286,7 +2305,11 @@ function renderAgentPlan(plan) {
     weeks[wKey].push(post);
   });
 
-  container.innerHTML = '';
+  // Reminder toggle card
+  const brandForReminder = loadBrand();
+  const remActive = localStorage.getItem('postimity_reminders_' + getCurrentMonth()) === 'on';
+  container.innerHTML = renderReminderCard(remActive, brandForReminder);
+
   const monthNames = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 
   Object.keys(weeks).sort().forEach((wKey, wi) => {
@@ -2302,6 +2325,7 @@ function renderAgentPlan(plan) {
       card.className = 'agent-post-card' + (post.festivity ? ' festivity' : '');
       const platClass = post.platform || 'instagram';
       const platLabel = post.platform === 'instagram' ? '📸 Instagram' : post.platform === 'facebook' ? '👥 Facebook' : '🎵 TikTok';
+      const postIdx = agentPostsCache.indexOf(post);
       card.innerHTML = '<div class="apc-meta">' +
         '<span class="apc-date">' + (post.dayName||'') + ' ' + (post.dateShort||post.date) + '</span>' +
         '<span class="apc-plat ' + platClass + '">' + platLabel + '</span>' +
@@ -2311,9 +2335,9 @@ function renderAgentPlan(plan) {
         '<div class="apc-topic">' + (post.topic||'') + '</div>' +
         '<div class="apc-prompt">' + (post.prompt||'') + '</div>' +
         '<div class="apc-btns">' +
-        '<button class="apc-btn create" onclick="goCreatePost(' + JSON.stringify(JSON.stringify(post)) + ')">→ Crear este post</button>' +
-        '<button class="apc-btn wa" onclick="copyWAMessage(' + JSON.stringify(JSON.stringify(post)) + ')">📱 Copiar WA</button>' +
-        '<button class="apc-btn copy" onclick="copyPrompt(' + JSON.stringify(JSON.stringify(post)) + ')">📋 Copiar prompt</button>' +
+        '<button class="apc-btn create" onclick="goCreatePost(' + postIdx + ')">→ Crear este post</button>' +
+        '<button class="apc-btn copy" onclick="copyPrompt(' + postIdx + ')">📋 Copiar prompt</button>' +
+
         '</div>';
       weekDiv.appendChild(card);
     });
@@ -2321,17 +2345,21 @@ function renderAgentPlan(plan) {
   });
 }
 
-function goCreatePost(postJson) {
-  const post = JSON.parse(postJson);
+function goCreatePost(idx) {
+  const post = agentPostsCache[idx];
+  if(!post) { showToast('Error: post no encontrado'); return; }
   // Pre-fill the creator screen
   setMode('post');
   const ta = document.getElementById('postText');
   if(ta) ta.value = post.prompt || '';
   if(post.pilar) setPillarByName(post.pilar);
   if(post.platform) setPlatformByName(post.platform);
-  showToast('✨ Post pre-cargado — solo dale Generar');
+  // Go back to creator
+  const agentEl = document.getElementById('agentScreen');
+  if(agentEl) { agentEl.classList.remove('active'); agentEl.style.display = ''; }
   showScreen('creatorScreen');
-  setTimeout(() => { ta?.focus(); ta?.scrollIntoView({behavior:'smooth'}); }, 300);
+  showToast('✨ Post pre-cargado — solo dale Generar');
+  setTimeout(() => { ta?.focus(); ta?.scrollIntoView({behavior:'smooth', block:'center'}); }, 350);
 }
 
 function setPillarByName(pilarName) {
@@ -2354,20 +2382,79 @@ function setPlatformByName(platName) {
   });
 }
 
-function copyWAMessage(postJson) {
-  const post = JSON.parse(postJson);
-  const msg = post.waMessage || post.prompt || '';
-  navigator.clipboard.writeText(msg).then(() => showToast('📱 Mensaje de WhatsApp copiado')).catch(() => {
-    const ta = document.createElement('textarea');
-    ta.value = msg; document.body.appendChild(ta); ta.select();
-    document.execCommand('copy'); document.body.removeChild(ta);
-    showToast('📱 Mensaje de WhatsApp copiado');
-  });
+function renderReminderCard(active, brand) {
+  const businessName = brand?.name || 'tu negocio';
+  const waNum = brand?.whatsapp || '';
+  const month = getCurrentMonth();
+  const monthLabel = getMonthLabel(month);
+  if(active) {
+    return '<div class="reminder-card active" id="reminderCard">' +
+      '<span class="reminder-icon">🔔</span>' +
+      '<div class="reminder-info">' +
+        '<div class="reminder-title">Recordatorios activos para ' + monthLabel + '</div>' +
+        '<div class="reminder-sub">Cuando conectes Twilio, recibirás un mensaje personal cada mañana antes de tu post del día</div>' +
+      '</div>' +
+      '<div class="reminder-toggle">' +
+        '<button class="reminder-btn on" onclick="toggleReminders(false)">✓ Activo</button>' +
+      '</div>' +
+    '</div>';
+  } else {
+    return '<div class="reminder-card" id="reminderCard">' +
+      '<span class="reminder-icon">🔔</span>' +
+      '<div class="reminder-info">' +
+        '<div class="reminder-title">Recordatorios por WhatsApp</div>' +
+        '<div class="reminder-sub">Recibe un mensaje cálido cada mañana con el post del día y un link directo para generarlo</div>' +
+      '</div>' +
+      '<div class="reminder-toggle">' +
+        '<button class="reminder-btn off" onclick="toggleReminders(true)">Activar →</button>' +
+      '</div>' +
+    '</div>';
+  }
 }
 
-function copyPrompt(postJson) {
-  const post = JSON.parse(postJson);
-  navigator.clipboard.writeText(post.prompt || '').then(() => showToast('📋 Prompt copiado')).catch(() => showToast('Error al copiar'));
+function toggleReminders(activate) {
+  const month = getCurrentMonth();
+  const brand = loadBrand();
+  const businessName = brand?.name || 'tu negocio';
+
+  if(activate) {
+    localStorage.setItem('postimity_reminders_' + month, 'on');
+    // Update card in place
+    const card = document.getElementById('reminderCard');
+    if(card) card.outerHTML = renderReminderCard(true, brand);
+    // Show warm confirmation message
+    const monthLabel = getMonthLabel(month);
+    showToast('🔔 Recordatorios activados para ' + monthLabel);
+    setTimeout(() => {
+      // Show info modal about what will happen
+      const msg = '✅ Recordatorios activados para ' + monthLabel + '\n\n' +
+        'Cuando conectemos Twilio recibirás cada mañana un mensaje así:\n\n' +
+        '☀️ Buenos días! Hoy es tu momento de brillar.\n' +
+        'Tu post: [tema del día]\n' +
+        'Un solo toque y está listo → [link]\n\n' +
+        'Por ahora tu plan está guardado aquí.';
+      alert(msg);
+    }, 500);
+  } else {
+    localStorage.removeItem('postimity_reminders_' + month);
+    const card = document.getElementById('reminderCard');
+    if(card) card.outerHTML = renderReminderCard(false, brand);
+    showToast('Recordatorios desactivados');
+  }
+}
+
+function copyPrompt(idx) {
+  const post = agentPostsCache[idx];
+  if(!post) { showToast('Error: post no encontrado'); return; }
+  const text = post.prompt || '';
+  navigator.clipboard.writeText(text)
+    .then(() => showToast('📋 Prompt copiado'))
+    .catch(() => {
+      const ta = document.createElement('textarea');
+      ta.value = text; document.body.appendChild(ta); ta.select();
+      document.execCommand('copy'); document.body.removeChild(ta);
+      showToast('📋 Prompt copiado');
+    });
 }
 
 // ── Deep-link pre-fill from URL params ────────────────────────────────────
