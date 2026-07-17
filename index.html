@@ -400,7 +400,7 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
         <div class="logo-info">
           <div class="li-title">Logo del negocio <span style="font-size:11px;font-weight:400;color:var(--t3)">(opcional)</span></div>
           <div class="li-sub">Se añadirá en todas las imágenes generadas</div>
-          <div class="li-hint">💡 Puedes agregar o cambiar el logo después de guardar</div>
+          <div class="li-hint">💡 Usa PNG con fondo transparente para mejores resultados</div>
         </div>
       </div>
       <div class="fg">
@@ -455,14 +455,21 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
       </div>
     </div>
 
-    <!-- Card 3: Estrategia de contenido (HÍBRIDO) -->
+    <!-- Card 3: Estrategia de contenido -->
     <div class="scard">
-      <div class="scard-title">🎯 ¿Qué hace especial a tu negocio?</div>
+      <div class="scard-title">🎯 Estrategia de contenido</div>
       <div class="fg full">
         <div class="fg-item span2">
-          <div class="fg-label">Cuéntanos en tus palabras <span style="color:var(--pk)">*</span></div>
-          <textarea id="bStory" rows="4" placeholder="Describe qué te hace diferente y a quién le hablas. Ej: Somos el único kinder en Aguascalientes con enfoque en neurociencia aplicada. Atendemos a familias de 25-40 años que buscan lo mejor para sus hijos de 1-6 años. Nos diferenciamos porque nuestros métodos están basados en evidencia científica real."></textarea>
-          <div style="font-size:11px;color:var(--t3);margin-top:5px;line-height:1.5">💡 Incluye tu diferenciador y tu audiencia — la AI construirá toda la estrategia de contenido de aquí. <strong style="color:var(--t2)">Cuanto más específico, mejor resultado.</strong></div>
+          <div class="fg-label">¿Qué te hace diferente? (Diferenciador clave) *
+            <div class="tooltip" data-tip="La razón única por la que un cliente te elige a ti y no a la competencia. Ej: 'Somos el único kinder que integra Neurociencias + Psicología en Aguascalientes'">?</div>
+          </div>
+          <input type="text" id="bDiff" placeholder="Ej: Somos el único kinder con enfoque en neurociencia aplicada en Aguascalientes">
+        </div>
+        <div class="fg-item span2">
+          <div class="fg-label">¿A quién le hablas? (Audiencia objetivo) *
+            <div class="tooltip" data-tip="Describe a tu cliente ideal: edad, profesión, situación de vida, qué les preocupa. Cuanto más específico, mejor contenido generará la AI.">?</div>
+          </div>
+          <textarea id="bAudience" rows="2" placeholder="Ej: Papás y mamás de 28-40 años, nivel medio-alto, que buscan la mejor educación inicial para sus hijos en Aguascalientes"></textarea>
         </div>
         <div class="fg-item span2">
           <div class="fg-label">Tono de comunicación</div>
@@ -683,30 +690,59 @@ Ej: &quot;Hazla blanco y negro estilo editorial de revista&quot;"></textarea>
           </div>
           <img id="flyerPrev" class="photo-prev" src="" alt="">
         </div>
-        <!-- Flyer form: 1 free text field + type selector — AI extracts everything -->
-        <div>
-          <div class="ff-label">¿Qué tipo de flyer?</div>
-          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">
-            <button class="flyer-type-btn active" data-type="Evento" onclick="setFlyerType(this)">📅 Evento</button>
-            <button class="flyer-type-btn" data-type="Promoción" onclick="setFlyerType(this)">🛍️ Promoción</button>
-            <button class="flyer-type-btn" data-type="Anuncio" onclick="setFlyerType(this)">📢 Anuncio</button>
-            <button class="flyer-type-btn" data-type="Nuevo servicio" onclick="setFlyerType(this)">📋 Servicio</button>
-            <button class="flyer-type-btn" data-type="Admisiones" onclick="setFlyerType(this)">🎓 Admisiones</button>
-            <button class="flyer-type-btn" data-type="Menú especial" onclick="setFlyerType(this)">🍽️ Menú</button>
+        <div class="flyer-form">
+          <div>
+            <div class="ff-label">Tipo de contenido *</div>
+            <select id="flyerType">
+              <option value="Evento">📅 Evento</option>
+              <option value="Inscripciones / Admisiones">🎓 Inscripciones</option>
+              <option value="Promoción / Oferta">🛍️ Promoción</option>
+              <option value="Información">📢 Información</option>
+              <option value="Curso o Taller">📋 Curso / Taller</option>
+              <option value="Lanzamiento">🚀 Lanzamiento</option>
+              <option value="Aniversario">🎉 Aniversario</option>
+              <option value="Menú especial">🍽️ Menú especial</option>
+              <option value="Otro">✨ Otro</option>
+            </select>
           </div>
-          <div class="ff-label">Pega o describe la información del flyer *</div>
-          <textarea class="text-ta" id="flyerFreeText" rows="5" placeholder="Pega todo lo que tengas — título, fechas, precio, horario, requisitos, etc. La AI lo estructura automáticamente.
-
-Ej: &quot;Curso de verano Wonderik, del 14 al 25 de julio, para niños de 1-6 años, $2,500 MXN todo incluido, actividades de neurociencia y arte, 8am-2pm, cupos limitados a 20 niños&quot;
-
-Ej: &quot;2x1 en margaritas todos los viernes, consumo mínimo $300, válido julio, no acumulable&quot;"></textarea>
-          <div style="font-size:11px;color:var(--t3);margin-top:4px">💡 Puedes pegar directamente desde WhatsApp, Word o tus notas. Entre más info des, mejor el resultado.</div>
-          <!-- Hidden fields kept for compatibility with Canvas flyer composition -->
-          <input type="hidden" id="flyerTitle2" value=""><input type="hidden" id="flyerSub" value="">
-          <input type="hidden" id="flyerTag" value=""><input type="hidden" id="flyerDates" value="">
-          <input type="hidden" id="flyerPrice" value=""><input type="hidden" id="flyerSched" value="">
-          <input type="hidden" id="flyerExtra" value=""><input type="hidden" id="flyerStyle" value="Colorido y vibrante">
-          <input type="hidden" id="flyerType" value="Evento">
+          <div>
+            <div class="ff-label">Estilo visual</div>
+            <select id="flyerStyle">
+              <option value="Colorido y vibrante, estilo agencia creativa">Colorido / Vibrante</option>
+              <option value="Profesional y elegante">Profesional / Elegante</option>
+              <option value="Minimalista y moderno">Minimalista</option>
+              <option value="Festivo y divertido">Festivo / Divertido</option>
+              <option value="Informativo y organizado">Informativo</option>
+            </select>
+          </div>
+          <div style="grid-column:span 2">
+            <div class="ff-label">Título principal *</div>
+            <input type="text" id="flyerTitle2" placeholder="Ej: Curso de Verano — Un Verano para Explorar">
+          </div>
+          <div>
+            <div class="ff-label">Subtítulo</div>
+            <input type="text" id="flyerSub" placeholder="Ej: Para niños de 1 a 7 años">
+          </div>
+          <div>
+            <div class="ff-label">Tagline</div>
+            <input type="text" id="flyerTag" placeholder="Ej: ¡El verano más divertido!">
+          </div>
+          <div>
+            <div class="ff-label">Fecha / Período</div>
+            <input type="text" id="flyerDates" placeholder="Ej: 14 al 25 de julio">
+          </div>
+          <div>
+            <div class="ff-label">Precio</div>
+            <input type="text" id="flyerPrice" placeholder="Ej: $2,500 MXN">
+          </div>
+          <div>
+            <div class="ff-label">Horario</div>
+            <input type="text" id="flyerSched" placeholder="Ej: 8am – 2pm">
+          </div>
+          <div>
+            <div class="ff-label">Info adicional</div>
+            <input type="text" id="flyerExtra" placeholder="Ej: Cupos limitados a 20 niños">
+          </div>
         </div>
       </div>
       <!-- TESTIMONIAL MODE -->
@@ -1218,7 +1254,8 @@ function handleDrop(file, zone, prevId, titleId, nameId, cb) {
 async function generateBrandGuide() {
   const name = document.getElementById('bName')?.value.trim() || '';
   const bType = document.getElementById('bType')?.value.trim() || '';
-  const story = document.getElementById('bStory')?.value.trim() || '';
+  const diff = document.getElementById('bDiff')?.value.trim() || '';
+  const aud = document.getElementById('bAudience')?.value.trim() || '';
   const wa = document.getElementById('bWhatsApp')?.value.trim() || '';
   const tone = document.getElementById('bTone')?.value || 'Cálido, moderno y cercano';
   if(!name || !bType || !story) {
@@ -1239,9 +1276,9 @@ async function generateBrandGuide() {
         type: bType,
         location: getLocation(),
         whatsapp: wa,
-        differentiator: story,
-        story: story,
-        audience: '',
+        differentiator: diff,
+        story: diff + ' ' + aud,
+        audience: aud,
         tone: tone,
         colors:{ primary:document.getElementById('bC1').value, secondary:document.getElementById('bC2').value, accent:document.getElementById('bC3').value }
       }})
@@ -1273,7 +1310,8 @@ async function generateBrandGuide() {
 function saveBrand() {
   const bNameVal = document.getElementById('bName')?.value.trim() || '';
   const bTypeVal = document.getElementById('bType')?.value.trim() || '';
-  const bStoryVal = document.getElementById('bStory')?.value.trim() || '';
+  const bDiffVal = document.getElementById('bDiff')?.value.trim() || '';
+  const bAudienceVal = document.getElementById('bAudience')?.value.trim() || '';
   const bWaVal = document.getElementById('bWhatsApp')?.value.trim() || '';
   const bCountryVal = document.getElementById('bCountry')?.value || '';
   const bStateVal = (document.getElementById('bState')?.style.display !== 'none'
@@ -1281,7 +1319,7 @@ function saveBrand() {
     : document.getElementById('bStateText')?.value) || '';
   const bCityVal = document.getElementById('bCity')?.value.trim() || '';
   const bToneVal = document.getElementById('bTone')?.value || 'Cálido, moderno y cercano';
-  if(!bNameVal || !bTypeVal || !bStoryVal) {
+  if(!bNameVal || !bTypeVal || !bDiffVal || !bAudienceVal) {
     alert('Completa: Nombre, Tipo de negocio y la descripción de lo que te hace especial.');
     return;
   }
@@ -1297,9 +1335,9 @@ function saveBrand() {
     state: bStateVal,
     city: bCityVal,
     location: getLocation(),
-    differentiator: bStoryVal,
-    story: bStoryVal,
-    audience: '',
+    differentiator: bDiffVal,
+    story: bDiffVal + ' ' + bAudienceVal,
+    audience: bAudienceVal,
     tone: bToneVal,
     colors:{ primary:document.getElementById('bC1').value, secondary:document.getElementById('bC2').value, accent:document.getElementById('bC3').value },
     brandGuide:document.getElementById('bgText').value,
@@ -1379,7 +1417,8 @@ function goToEdit() {
   if(b){
     document.getElementById('bName').value = b.name||'';
     const bTypeEl=document.getElementById('bType'); if(bTypeEl) bTypeEl.value=b.type||'';
-    const bStoryEl=document.getElementById('bStory'); if(bStoryEl) bStoryEl.value=b.story||b.differentiator||'';
+    const bDiffEl=document.getElementById('bDiff'); if(bDiffEl) bDiffEl.value=b.differentiator||'';
+    const bAudEl=document.getElementById('bAudience'); if(bAudEl) bAudEl.value=b.audience||'';
     const bToneEl=document.getElementById('bTone'); if(bToneEl) bToneEl.value=b.tone||'Cálido, moderno y cercano';
     document.getElementById('bWhatsApp').value=b.whatsapp||'';
     if(b.country){ const cEl=document.getElementById('bCountry'); if(cEl){ cEl.value=b.country; updateStates(); } setTimeout(()=>{ const sEl=document.getElementById('bState'); if(sEl&&b.state) sEl.value=b.state; },100); }
@@ -1517,7 +1556,7 @@ async function generate() {
   // Validate inputs
   if(mode==='post'&&!document.getElementById('postText').value.trim()){ alert('Escribe qué quieres publicar.'); return; }
   if(mode==='enhance'&&!enhanceB64){ alert('Sube una foto primero.'); return; }
-  if(mode==='flyer'&&flyerMode==='ai'&&!document.getElementById('flyerFreeText')?.value.trim()){ alert(lang==='es'?'Describe el contenido del flyer.':'Describe your flyer content.'); return; }
+  if(mode==='flyer'&&flyerMode==='ai'&&!document.getElementById('flyerTitle2')?.value.trim()){ alert('Escribe el título del flyer.'); return; }
   if(mode==='flyer'&&flyerMode==='photo'&&!flyerPhotoB64){ alert('Sube una foto para el flyer.'); return; }
   if(mode==='testimonial'&&!document.getElementById('testText').value.trim()&&!testPhotoB64){
     alert('Pega una reseña de tu cliente o sube su foto para continuar.'); return;
@@ -1598,25 +1637,17 @@ async function genTestimonial(brand,bg) {
   showResult(res);
 }
 
-function setFlyerType(btn) {
-  document.querySelectorAll('.flyer-type-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  document.getElementById('flyerType').value = btn.dataset.type;
-}
 function getFlyerData() {
-  const freeText = document.getElementById('flyerFreeText')?.value.trim() || '';
-  const type = document.querySelector('.flyer-type-btn.active')?.dataset.type || document.getElementById('flyerType').value || 'Evento';
   return {
-    type, freeText,
-    style: document.getElementById('flyerStyle')?.value || 'Colorido y vibrante',
-    // Legacy fields — used by Canvas composition for photo flyers
-    title: freeText.split(',')[0]?.trim() || freeText.slice(0,60),
+    type:     document.getElementById('flyerType')?.value || 'Evento',
+    style:    document.getElementById('flyerStyle')?.value || 'Colorido y vibrante, estilo agencia creativa',
+    title:    document.getElementById('flyerTitle2')?.value.trim() || '',
     subtitle: document.getElementById('flyerSub')?.value.trim() || '',
-    tagline: document.getElementById('flyerTag')?.value.trim() || '',
-    dates: document.getElementById('flyerDates')?.value.trim() || '',
-    price: document.getElementById('flyerPrice')?.value.trim() || '',
+    tagline:  document.getElementById('flyerTag')?.value.trim() || '',
+    dates:    document.getElementById('flyerDates')?.value.trim() || '',
+    price:    document.getElementById('flyerPrice')?.value.trim() || '',
     schedule: document.getElementById('flyerSched')?.value.trim() || '',
-    extraInfo: document.getElementById('flyerExtra')?.value.trim() || ''
+    extraInfo:document.getElementById('flyerExtra')?.value.trim() || ''
   };
 }
 
