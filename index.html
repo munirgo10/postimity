@@ -384,6 +384,55 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
 .cs-style-btn.active{background:var(--b);border-color:var(--b);color:#fff;font-weight:700}
 
 
+/* ─── MARKETING AGENT ─────────────────────────────── */
+.agent-screen{max-width:700px;margin:0 auto;padding:0 16px 80px}
+.agent-header{display:flex;align-items:center;gap:12px;padding:16px 0;border-bottom:1.5px solid var(--bor);margin-bottom:20px}
+.agent-back{background:none;border:none;cursor:pointer;font-size:20px;color:var(--t2);padding:4px;border-radius:6px;line-height:1}
+.agent-back:hover{background:var(--bg)}
+.agent-header-title{font-size:18px;font-weight:800;color:var(--t1);flex:1}
+.agent-month-badge{font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;background:var(--b3);color:var(--b2)}
+.agent-config{background:var(--w);border-radius:16px;border:1px solid var(--bor);padding:20px;margin-bottom:16px;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+.agent-config-title{font-size:14px;font-weight:700;color:var(--t1);margin-bottom:14px}
+.agent-freq-btns{display:flex;gap:8px;margin-bottom:14px}
+.agent-freq-btn{flex:1;padding:10px 8px;border-radius:10px;border:1.5px solid var(--bor);background:var(--w);font-size:12px;font-weight:700;cursor:pointer;text-align:center;font-family:inherit;color:var(--t3);transition:all .15s}
+.agent-freq-btn:hover{border-color:var(--b);color:var(--b);background:var(--b3)}
+.agent-freq-btn.active{border-color:var(--b);background:var(--b);color:#fff}
+.agent-plat-btns{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.agent-plat-btn{padding:8px 14px;border-radius:10px;border:1.5px solid var(--bor);background:var(--w);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--t2);transition:all .15s;display:flex;align-items:center;gap:5px}
+.agent-plat-btn:hover{border-color:var(--b);background:var(--b3)}
+.agent-plat-btn.active{border-color:var(--b);background:var(--b3);color:var(--b2)}
+.agent-summary{background:var(--b3);border:.5px solid var(--b);border-radius:12px;padding:14px;margin-bottom:20px;font-size:13px;color:var(--b2);line-height:1.6}
+.agent-week{margin-bottom:20px}
+.agent-week-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--t3);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--bor)}
+.agent-post-card{background:var(--w);border:.5px solid var(--bor);border-radius:12px;padding:14px;margin-bottom:8px;transition:box-shadow .15s}
+.agent-post-card:hover{box-shadow:0 3px 12px rgba(0,0,0,.08)}
+.agent-post-card.festivity{border-left:3px solid var(--g)}
+.apc-meta{display:flex;align-items:center;gap:6px;margin-bottom:8px;flex-wrap:wrap}
+.apc-date{font-size:11px;font-weight:700;color:var(--t2)}
+.apc-plat{font-size:11px;font-weight:700;padding:2px 9px;border-radius:20px}
+.apc-plat.instagram{background:#E6F1FB;color:#185FA5}
+.apc-plat.facebook{background:#EBF0FF;color:#1a3bc1}
+.apc-plat.tiktok{background:#FDE8F0;color:#b5006e}
+.apc-pilar{font-size:11px;padding:2px 9px;border-radius:20px;background:#EAF3DE;color:#3B6D11;font-weight:600}
+.apc-fest{font-size:10px;padding:2px 7px;border-radius:20px;background:var(--g2);color:var(--g3);font-weight:700}
+.apc-topic{font-size:13px;font-weight:700;color:var(--t1);margin-bottom:5px;line-height:1.3}
+.apc-prompt{font-size:12px;color:var(--t3);line-height:1.55;margin-bottom:10px}
+.apc-btns{display:flex;gap:7px;flex-wrap:wrap}
+.apc-btn{padding:7px 13px;border-radius:8px;border:none;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;transition:.15s}
+.apc-btn.create{background:var(--b);color:#fff}
+.apc-btn.create:hover{background:var(--b2)}
+.apc-btn.wa{background:#25D366;color:#fff}
+.apc-btn.wa:hover{background:#1fa851}
+.apc-btn.copy{background:var(--bg);color:var(--t2);border:.5px solid var(--bor)}
+.apc-btn.copy:hover{background:var(--bor)}
+.agent-bar{background:linear-gradient(135deg,var(--b),var(--b2));border-radius:12px;padding:12px 16px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:.15s}
+.agent-bar:hover{opacity:.92}
+.agent-bar-left{display:flex;align-items:center;gap:10px}
+.agent-bar-icon{font-size:20px}
+.agent-bar-title{font-size:13px;font-weight:700;color:#fff}
+.agent-bar-sub{font-size:11px;color:rgba(255,255,255,.75)}
+.agent-bar-cta{font-size:12px;font-weight:700;color:#fff;background:rgba(255,255,255,.2);padding:6px 14px;border-radius:8px;white-space:nowrap}
+
 /* ─── RESPONSIVE ──────────────────────────────────── */
 /* Responsive */
 @media(max-width:640px){
@@ -441,6 +490,55 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
   </div>
 </div>
 
+
+  <!-- ╔═══════════════════════════════════════════╗
+       ║  MARKETING AGENT SCREEN                    ║
+       ╚═══════════════════════════════════════════╝ -->
+  <div id="agentScreen" class="screen" style="display:none;overflow-y:auto">
+    <div class="agent-screen">
+      <!-- Header -->
+      <div class="agent-header">
+        <button class="agent-back" onclick="showCreatorFromAgent()" title="Volver">←</button>
+        <div class="agent-header-title">🤖 Marketing Agent</div>
+        <span class="agent-month-badge" id="agentMonthBadge">Este mes</span>
+      </div>
+
+      <!-- Config section (shown before generating) -->
+      <div id="agentConfigWrap">
+        <div class="agent-config">
+          <div class="agent-config-title">⚙️ Configura tu plan mensual</div>
+          <div class="ic-label">Posts por semana</div>
+          <div class="agent-freq-btns">
+            <button class="agent-freq-btn" data-freq="3" onclick="setAgentFreq(this)">3/semana<br><span style="font-size:10px;opacity:.7">~12 posts</span></button>
+            <button class="agent-freq-btn active" data-freq="5" onclick="setAgentFreq(this)">5/semana<br><span style="font-size:10px;opacity:.7">~20 posts</span></button>
+            <button class="agent-freq-btn" data-freq="7" onclick="setAgentFreq(this)">7/semana<br><span style="font-size:10px;opacity:.7">~28 posts</span></button>
+          </div>
+          <div class="ic-label">Plataformas</div>
+          <div class="agent-plat-btns">
+            <button class="agent-plat-btn active" data-plat="instagram" onclick="toggleAgentPlat(this)">📸 Instagram</button>
+            <button class="agent-plat-btn active" data-plat="facebook" onclick="toggleAgentPlat(this)">👥 Facebook</button>
+            <button class="agent-plat-btn" data-plat="tiktok" onclick="toggleAgentPlat(this)">🎵 TikTok</button>
+          </div>
+          <div id="agentConfigNote" style="font-size:12px;color:var(--t3);margin-bottom:14px;line-height:1.5">Las plataformas se distribuyen inteligentemente según tu audiencia del Brand Guide.</div>
+          <button class="btn btn-primary btn-full" id="btnGenAgent" onclick="generateAgentPlan()" style="font-size:14px;font-weight:700;padding:14px;border-radius:12px">
+            ✨ Generar plan de <span id="agentMonthLabel">este mes</span>
+          </button>
+          <div id="agentLoadNote" style="display:none;text-align:center;padding:12px;font-size:12px;color:var(--t3)">
+            ☕ Generando tu plan mensual... puede tomar hasta 30 segundos
+          </div>
+        </div>
+      </div>
+
+      <!-- Plan display (shown after generating) -->
+      <div id="agentPlanWrap" style="display:none">
+        <div class="agent-summary" id="agentSummary"></div>
+        <div id="agentPlanContent"></div>
+        <button class="btn btn-full" onclick="showAgentConfig()" style="margin-top:8px;background:var(--bg);color:var(--t2);border:.5px solid var(--bor);border-radius:10px;padding:10px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">
+          ↺ Regenerar plan
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- ╔═══════════════════════════════════════════╗
        ║  TOAST & MODALS                            ║
@@ -663,6 +761,18 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
     <div class="plt-info show" id="pltInfo">📸 <strong>Instagram 2026:</strong> Keywords en caption, hook en primera línea, 3-5 hashtags. Meta: Guardados + compartidos por DM.</div>
 
     <!-- Mode Cards -->
+    <!-- Agent Bar -->
+    <div class="agent-bar" onclick="showAgentScreen()" id="agentBar">
+      <div class="agent-bar-left">
+        <span class="agent-bar-icon">🤖</span>
+        <div>
+          <div class="agent-bar-title">Marketing Agent</div>
+          <div class="agent-bar-sub" id="agentBarSub">Genera tu plan de contenido mensual</div>
+        </div>
+      </div>
+      <span class="agent-bar-cta">Ver plan →</span>
+    </div>
+
     <div class="mode-cards">
       <div class="mode-card active" id="mc1" onclick="setMode('post')">
         <div class="mc-icon">✍️</div>
@@ -1143,6 +1253,7 @@ async function sendRecoveryLink() {
 }
 
 // ─── GENERATION COUNTER ───────────────────────────────
+function applyTranslations() { /* ES/EN toggle — full version in landing page */ }
 function updateGenCounter() {
   const brand = loadBrand();
   const plan = brand?.plan || 'trial';
@@ -1277,6 +1388,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     showScreen('setupScreen');
   }
   updateGenCounter();
+  checkDeepLink();
 });
 
 function showScreen(id) {
@@ -2014,6 +2126,252 @@ async function genEnhance(brand,bg) {
   setStep(3); setStep(4);
   showResult(res);
 }
+// ╔═══════════════════════════════════════════════════╗
+// ║  MARKETING AGENT                                 ║
+// ╚═══════════════════════════════════════════════════╝
+let agentFreq = 5;
+let agentPlats = ['instagram', 'facebook'];
+let agentPlan = null;
+
+function getCurrentMonth() {
+  const now = new Date();
+  return now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+}
+
+function getMonthLabel(monthStr) {
+  const [y, m] = monthStr.split('-');
+  const names = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  return names[parseInt(m) - 1] + ' ' + y;
+}
+
+function showAgentScreen() {
+  const month = getCurrentMonth();
+  const label = getMonthLabel(month);
+  const el = document.getElementById('agentMonthLabel');
+  if(el) el.textContent = label;
+  const badge = document.getElementById('agentMonthBadge');
+  if(badge) badge.textContent = label;
+
+  // Try to load saved plan for this month
+  const brand = loadBrand();
+  if(brand?.brandId) {
+    fetch(WORKER, { method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ mode:'get-agent-plan', brandId: brand.brandId, month })
+    }).then(r=>r.json()).then(data => {
+      if(data.success && data.plan) {
+        agentPlan = data.plan;
+        renderAgentPlan(data.plan);
+      }
+    }).catch(() => {});
+  }
+  showScreen('agentScreen');
+}
+
+function showCreatorFromAgent() {
+  showScreen('creatorScreen');
+}
+
+function showAgentConfig() {
+  document.getElementById('agentConfigWrap').style.display = 'block';
+  document.getElementById('agentPlanWrap').style.display = 'none';
+}
+
+function setAgentFreq(btn) {
+  document.querySelectorAll('.agent-freq-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  agentFreq = parseInt(btn.dataset.freq);
+}
+
+function toggleAgentPlat(btn) {
+  const plat = btn.dataset.plat;
+  btn.classList.toggle('active');
+  if(btn.classList.contains('active')) {
+    if(!agentPlats.includes(plat)) agentPlats.push(plat);
+  } else {
+    agentPlats = agentPlats.filter(p => p !== plat);
+    if(agentPlats.length === 0) { btn.classList.add('active'); agentPlats = [plat]; } // min 1
+  }
+}
+
+async function generateAgentPlan() {
+  const brand = loadBrand();
+  const bg = brand?.brandGuide;
+  if(!bg) { alert('Primero completa tu Brand Guide para generar el plan.'); return; }
+  if(agentPlats.length === 0) { alert('Selecciona al menos una plataforma.'); return; }
+
+  const btn = document.getElementById('btnGenAgent');
+  const note = document.getElementById('agentLoadNote');
+  btn.disabled = true;
+  btn.textContent = '⏳ Generando plan...';
+  if(note) note.style.display = 'block';
+
+  try {
+    const month = getCurrentMonth();
+    const lang = localStorage.getItem('postimity_lang') || 'es';
+    const res = await fetch(WORKER, { method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        mode: 'marketing-agent',
+        brandGuide: bg,
+        brandData: { ...brand, brandId: brandId || '' },
+        month, postsPerWeek: agentFreq,
+        platforms: agentPlats, language: lang
+      })
+    });
+    const data = await res.json();
+    if(!data.success) throw new Error(data.error || 'Error del servidor');
+
+    agentPlan = data;
+
+    // Save plan to KV
+    if(brandId) {
+      fetch(WORKER, { method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ mode:'save-agent-plan', brandId, month, plan: data })
+      }).catch(() => {});
+    }
+
+    renderAgentPlan(data);
+
+    // Update agent bar
+    const sub = document.getElementById('agentBarSub');
+    if(sub) sub.textContent = data.totalPosts + ' posts planificados para ' + getMonthLabel(month);
+
+  } catch(e) {
+    alert('Error generando el plan: ' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '✨ Generar plan de <span id="agentMonthLabel">' + getMonthLabel(getCurrentMonth()) + '</span>';
+    if(note) note.style.display = 'none';
+  }
+}
+
+function renderAgentPlan(plan) {
+  document.getElementById('agentConfigWrap').style.display = 'none';
+  document.getElementById('agentPlanWrap').style.display = 'block';
+
+  const summary = document.getElementById('agentSummary');
+  if(summary) summary.innerHTML = '📋 <strong>' + (plan.month||'') + '</strong> · ' + (plan.totalPosts||0) + ' posts · ' + (plan.summary||'');
+
+  const container = document.getElementById('agentPlanContent');
+  if(!container) return;
+
+  // Group by week
+  const posts = plan.posts || [];
+  const weeks = {};
+  posts.forEach(post => {
+    const d = new Date(post.date + 'T12:00:00');
+    const weekStart = new Date(d);
+    weekStart.setDate(d.getDate() - d.getDay() + 1); // Monday
+    const wKey = weekStart.toISOString().slice(0,10);
+    if(!weeks[wKey]) weeks[wKey] = [];
+    weeks[wKey].push(post);
+  });
+
+  container.innerHTML = '';
+  const monthNames = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
+  Object.keys(weeks).sort().forEach((wKey, wi) => {
+    const wPosts = weeks[wKey];
+    const firstDate = new Date(wKey + 'T12:00:00');
+    const lastDate = new Date(wPosts[wPosts.length-1].date + 'T12:00:00');
+    const weekDiv = document.createElement('div');
+    weekDiv.className = 'agent-week';
+    weekDiv.innerHTML = '<div class="agent-week-label">Semana ' + (wi+1) + ' · ' + firstDate.getDate() + ' al ' + lastDate.getDate() + ' de ' + monthNames[firstDate.getMonth()] + '</div>';
+
+    wPosts.forEach(post => {
+      const card = document.createElement('div');
+      card.className = 'agent-post-card' + (post.festivity ? ' festivity' : '');
+      const platClass = post.platform || 'instagram';
+      const platLabel = post.platform === 'instagram' ? '📸 Instagram' : post.platform === 'facebook' ? '👥 Facebook' : '🎵 TikTok';
+      card.innerHTML = '<div class="apc-meta">' +
+        '<span class="apc-date">' + (post.dayName||'') + ' ' + (post.dateShort||post.date) + '</span>' +
+        '<span class="apc-plat ' + platClass + '">' + platLabel + '</span>' +
+        '<span class="apc-pilar">' + (post.pilar||'') + '</span>' +
+        (post.festivity ? '<span class="apc-fest">🎉 ' + post.festivity + '</span>' : '') +
+        '</div>' +
+        '<div class="apc-topic">' + (post.topic||'') + '</div>' +
+        '<div class="apc-prompt">' + (post.prompt||'') + '</div>' +
+        '<div class="apc-btns">' +
+        '<button class="apc-btn create" onclick="goCreatePost(' + JSON.stringify(JSON.stringify(post)) + ')">→ Crear este post</button>' +
+        '<button class="apc-btn wa" onclick="copyWAMessage(' + JSON.stringify(JSON.stringify(post)) + ')">📱 Copiar WA</button>' +
+        '<button class="apc-btn copy" onclick="copyPrompt(' + JSON.stringify(JSON.stringify(post)) + ')">📋 Copiar prompt</button>' +
+        '</div>';
+      weekDiv.appendChild(card);
+    });
+    container.appendChild(weekDiv);
+  });
+}
+
+function goCreatePost(postJson) {
+  const post = JSON.parse(postJson);
+  // Pre-fill the creator screen
+  setMode('post');
+  const ta = document.getElementById('postText');
+  if(ta) ta.value = post.prompt || '';
+  if(post.pilar) setPillarByName(post.pilar);
+  if(post.platform) setPlatformByName(post.platform);
+  showToast('✨ Post pre-cargado — solo dale Generar');
+  showScreen('creatorScreen');
+  setTimeout(() => { ta?.focus(); ta?.scrollIntoView({behavior:'smooth'}); }, 300);
+}
+
+function setPillarByName(pilarName) {
+  const btns = document.querySelectorAll('.pillar-btn');
+  let found = false;
+  btns.forEach(btn => {
+    if(btn.textContent.trim().toLowerCase().includes(pilarName.toLowerCase().slice(0,8))) {
+      btn.click(); found = true;
+    }
+  });
+  if(!found) pillar = pilarName; // set directly if button not found
+}
+
+function setPlatformByName(platName) {
+  const tabs = document.querySelectorAll('.plat-tab');
+  tabs.forEach(tab => {
+    if(tab.dataset.plat === platName || tab.textContent.toLowerCase().includes(platName)) {
+      tab.click();
+    }
+  });
+}
+
+function copyWAMessage(postJson) {
+  const post = JSON.parse(postJson);
+  const msg = post.waMessage || post.prompt || '';
+  navigator.clipboard.writeText(msg).then(() => showToast('📱 Mensaje de WhatsApp copiado')).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = msg; document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta);
+    showToast('📱 Mensaje de WhatsApp copiado');
+  });
+}
+
+function copyPrompt(postJson) {
+  const post = JSON.parse(postJson);
+  navigator.clipboard.writeText(post.prompt || '').then(() => showToast('📋 Prompt copiado')).catch(() => showToast('Error al copiar'));
+}
+
+// ── Deep-link pre-fill from URL params ────────────────────────────────────
+function checkDeepLink() {
+  const params = new URLSearchParams(window.location.search);
+  const dlMode = params.get('mode');
+  const dlPillar = params.get('pillar');
+  const dlPrompt = params.get('prompt');
+  const dlPlatform = params.get('platform');
+  if(!dlPrompt && !dlPillar && !dlMode) return; // no deep-link params
+
+  setTimeout(() => { // wait for brand to load
+    if(dlMode && ['post','enhance','flyer','testimonial','carousel'].includes(dlMode)) setMode(dlMode);
+    if(dlPrompt) { const ta = document.getElementById('postText'); if(ta) ta.value = decodeURIComponent(dlPrompt); }
+    if(dlPillar) setPillarByName(decodeURIComponent(dlPillar));
+    if(dlPlatform) setPlatformByName(dlPlatform);
+    showToast('✨ Post pre-cargado desde tu plan mensual — solo dale Generar');
+    // Clean URL keeping only brandId
+    const base = window.location.href.split('?')[0];
+    const bId = new URLSearchParams(window.location.search).get('b');
+    history.replaceState({}, '', base + (bId ? '?b=' + bId : ''));
+  }, 500);
+}
+
 // ─── FLYER GENERATION ─────────────────────────────────
 async function genFlyerAI(brand,bg) {
   const fd=getFlyerData();
