@@ -2254,7 +2254,9 @@ async function generateAgentPlan() {
     if(sub) sub.textContent = data.totalPosts + ' posts planificados para ' + getMonthLabel(month);
 
   } catch(e) {
-    alert('Error generando el plan: ' + e.message);
+    console.error('Marketing Agent error:', e);
+    const msg = e.message || 'Error desconocido';
+    alert('No se pudo generar el plan. ' + (msg.includes('Could not parse') ? 'La AI devolvió una respuesta inválida — intenta de nuevo en unos segundos.' : msg));
   } finally {
     btn.disabled = false;
     btn.innerHTML = '✨ Generar plan de <span id="agentMonthLabel">' + getMonthLabel(getCurrentMonth()) + '</span>';
