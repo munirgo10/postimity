@@ -29,6 +29,8 @@ nav{background:var(--w);border-bottom:1px solid var(--bor);height:58px;padding:0
 /* ── SCREENS ── */
 .screen{display:none}.screen.active{display:block}
 /* ── SETUP ── */
+
+/* ─── SETUP SCREEN ────────────────────────────────── */
 .setup-wrap{max-width:660px;margin:0 auto;padding:28px 20px 80px}
 .setup-hero{text-align:center;margin-bottom:28px}
 .setup-icon{font-size:36px;margin-bottom:10px}
@@ -38,9 +40,10 @@ nav{background:var(--w);border-bottom:1px solid var(--bor);height:58px;padding:0
 .sp-dot{width:8px;height:8px;border-radius:50%;background:var(--bor)}
 .sp-dot.active{background:var(--b);transform:scale(1.3)}
 .sp-dot.done{background:var(--g)}
+
+/* ─── SETUP CARDS ─────────────────────────────────── */
 .scard{background:var(--w);border:1px solid var(--bor);border-radius:var(--r2);padding:20px;margin-bottom:14px;box-shadow:var(--s1)}
-.scard-title{font-size:12px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px;display:flex;align-items:center;gap:6px}
-/* Logo upload */
+.scard-title{font-size:14px;font-weight:700;color:var(--t1);margin-bottom:16px;padding-bottom:10px;border-bottom:1.5px solid var(--bor);display:flex;align-items:center;gap:7px}
 .logo-upload-row{display:flex;align-items:center;gap:14px;margin-bottom:16px}
 .logo-circle{width:68px;height:68px;border-radius:50%;border:2px dashed var(--bor);display:flex;align-items:center;justify-content:center;cursor:pointer;background:var(--bg);flex-shrink:0;overflow:hidden;transition:.2s;position:relative}
 .logo-circle:hover{border-color:var(--b)}
@@ -107,10 +110,13 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
 /* Pillar selector */
 .pillar-wrap{margin-bottom:16px}
 .pillar-label{font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:7px}
-.pillar-btns{display:flex;gap:6px;flex-wrap:wrap}
-.pillar-btn{padding:6px 13px;border-radius:8px;border:1.5px solid var(--bor);background:var(--w);font-size:12px;font-weight:600;cursor:pointer;color:var(--t3);transition:.15s}
-.pillar-btn:hover{border-color:var(--b);color:var(--b)}
-.pillar-btn.active{background:var(--b);border-color:var(--b);color:#fff}
+
+/* ─── PILLAR BUTTONS ──────────────────────────────── */
+.pillar-btns{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:4px}
+.pillar-btn{padding:7px 14px;border-radius:20px;border:1.5px solid var(--bor);background:var(--w);font-size:12px;font-weight:600;cursor:pointer;color:var(--t2);transition:all .15s;font-family:inherit}
+.pillar-btn:hover{border-color:var(--b);color:var(--b);background:var(--b3)}
+.pillar-btn.active{border-color:var(--b);background:var(--b);color:#fff;font-weight:700}
+.pillar-btn.fixed{border-color:var(--g);background:var(--g2);color:var(--g3);font-weight:700}
 .pillar-btn.pillar-fixed{border-color:var(--pk);color:var(--pk)}
 .pillar-btn.pillar-fixed.active{background:var(--pk);border-color:var(--pk);color:#fff}
 /* Platform */
@@ -123,24 +129,37 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
 .plt-info{font-size:12px;color:var(--t3);background:var(--bg2);border-radius:8px;padding:8px 12px;margin-bottom:14px;line-height:1.5;display:none}
 .plt-info.show{display:block}
 /* Mode cards */
-.mode-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}
-.mode-card{background:var(--w);border:2px solid var(--bor);border-radius:var(--r2);padding:16px 14px;cursor:pointer;transition:.15s;text-align:center}
-.mode-card:hover{border-color:var(--b);box-shadow:var(--s2)}
-.mode-card.active{border-color:var(--b);background:var(--b3)}
-.mc-icon{font-size:22px;margin-bottom:7px}
-.mc-title{font-size:12px;font-weight:700;color:var(--t1);margin-bottom:3px}
+
+/* ─── MODE CARDS ──────────────────────────────────── */
+.mode-cards{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:18px}
+.mode-card{background:var(--w);border:1.5px solid var(--bor);border-radius:12px;padding:12px 8px 10px;cursor:pointer;transition:all .18s;text-align:center;position:relative;overflow:hidden}
+.mode-card::before{content:'';position:absolute;inset:0;background:var(--b);opacity:0;transition:opacity .18s}
+.mode-card:hover{border-color:var(--b);transform:translateY(-2px);box-shadow:0 4px 14px rgba(41,121,255,.13)}
+.mode-card:hover::before{opacity:.04}
+.mode-card.active{border-color:var(--b);background:var(--b3);box-shadow:0 2px 10px rgba(41,121,255,.15)}
+.mc-icon{font-size:22px;margin-bottom:5px;display:block;position:relative}
+.mc-title{font-size:12px;font-weight:700;color:var(--t1);margin-bottom:3px;position:relative;line-height:1.2}
 .mode-card.active .mc-title{color:var(--b2)}
-.mc-desc{font-size:11px;color:var(--t3);line-height:1.3}
+.mc-desc{font-size:10px;color:var(--t3);line-height:1.3;position:relative;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.mode-card.active .mc-desc{color:var(--b)}
 /* Input card */
-.input-card{background:var(--w);border:1px solid var(--bor);border-radius:var(--r2);padding:18px;box-shadow:var(--s1);margin-bottom:14px}
-.ic-label{font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px}
-.text-ta{width:100%;padding:11px 13px;border:1.5px solid var(--bor);border-radius:10px;font-size:13px;font-family:inherit;color:var(--t1);resize:vertical;min-height:90px;outline:none;transition:border .15s;line-height:1.5}
+
+/* ─── INPUT CARD ──────────────────────────────────── */
+.input-card{background:var(--w);border-radius:16px;border:1px solid var(--bor);padding:20px;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+
+/* ─── INPUT LABELS & FIELDS ───────────────────────── */
+.ic-label{font-size:12px;font-weight:700;color:var(--t2);margin-bottom:6px;margin-top:14px;display:flex;align-items:center;gap:6px;letter-spacing:.1px}
+.ic-label:first-child{margin-top:0}
+.text-ta{width:100%;padding:11px 13px;border-radius:10px;border:1.5px solid var(--bor);background:var(--w);font-size:13px;color:var(--t1);font-family:inherit;resize:vertical;transition:border .15s;line-height:1.5}
+.text-ta:focus{border-color:var(--b);outline:none;box-shadow:0 0 0 3px rgba(41,121,255,.1)}
 .text-ta:focus{border-color:var(--b)}
 .text-ta::placeholder{color:var(--t3)}
 /* Upload zone */
-.upload-zone{border:2px dashed var(--bor);border-radius:10px;padding:24px 16px;text-align:center;cursor:pointer;transition:.2s;background:var(--bg);position:relative}
+
+/* ─── UPLOAD ZONES ────────────────────────────────── */
+.upload-zone{border:2px dashed var(--bor);border-radius:14px;padding:28px 20px;text-align:center;cursor:pointer;transition:all .2s;background:var(--bg);position:relative}
 .upload-zone:hover,.upload-zone.drag{border-color:var(--b);background:var(--b3)}
-.upload-zone.has-file{border-style:solid;border-color:var(--g);background:var(--g3)}
+.upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
 .uz-icon{font-size:28px;margin-bottom:7px}
 .uz-title{font-size:13px;font-weight:600;color:var(--t2);margin-bottom:2px}
 .uz-sub{font-size:11px;color:var(--t3)}
@@ -153,8 +172,10 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
 .ft-btn{flex:1;padding:9px;border-radius:9px;border:1.5px solid var(--bor);background:var(--w);font-size:12px;font-weight:700;cursor:pointer;color:var(--t3);transition:.15s;text-align:center}
 .ft-btn:hover{border-color:var(--b);color:var(--b)}
 .ft-btn.active{background:var(--b);border-color:var(--b);color:#fff}
+
+/* ─── FLYER FORM ──────────────────────────────────── */
 .flyer-form{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.ff-label{font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px}
+.ff-label{font-size:11px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
 /* Testimonial */
 .test-ta{width:100%;padding:11px 13px;border:1.5px solid var(--bor);border-radius:10px;font-size:13px;font-family:inherit;color:var(--t1);resize:vertical;min-height:100px;outline:none;transition:border .15s;line-height:1.5}
 .test-ta:focus{border-color:var(--b)}
@@ -177,7 +198,9 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
 .ls.done{opacity:.6}
 .ls.done::after{content:' ✓';color:var(--g)}
 /* Results */
-.result-wrap{display:none}
+
+/* ─── RESULT SECTION ──────────────────────────────── */
+.result-wrap{display:none;background:var(--w);border-radius:16px;border:1px solid var(--bor);overflow:hidden;margin-top:14px;box-shadow:0 2px 12px rgba(0,0,0,.06)}
 .result-wrap.show{display:block}
 .result-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
 /* Image panel */
@@ -197,7 +220,7 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
 .lt-switch input:checked+.lt-slider::before{transform:translateX(16px)}
 /* Download */
 .dl-label{font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:7px}
-.dl-btns{display:flex;gap:6px}
+.dl-btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
 .btn-dl{flex:1;padding:7px 4px;border:1px solid var(--bor);border-radius:7px;background:var(--bg);font-size:11px;font-weight:700;cursor:pointer;transition:.15s;color:var(--t2);text-align:center;line-height:1.3}
 .btn-dl:hover{border-color:var(--b);color:var(--b);background:var(--b3)}
 /* Caption panel */
@@ -255,10 +278,12 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
 .err-wrap.show{display:block}
 /* Enhance mode toggle */
 .enhance-mode-wrap{margin-bottom:12px}
-.enhance-mode-btns{display:flex;gap:8px;margin-bottom:10px}
-.em-btn{flex:1;padding:9px 12px;border-radius:9px;border:1.5px solid var(--bor);background:var(--w);font-size:12px;font-weight:700;cursor:pointer;color:var(--t3);transition:.15s;text-align:center;font-family:inherit}
-.em-btn:hover{border-color:var(--b);color:var(--b)}
-.em-btn.active{background:var(--b);border-color:var(--b);color:#fff}
+.enhance-mode-btns{display:flex;gap:8px;margin-bottom:12px}
+
+/* ─── MODE TOGGLE BUTTONS (AI/Photo) ──────────────── */
+.em-btn{flex:1;padding:10px 14px;border-radius:10px;border:1.5px solid var(--bor);background:var(--w);font-size:12px;font-weight:700;cursor:pointer;color:var(--t3);transition:all .18s;text-align:center;font-family:inherit}
+.em-btn:hover{border-color:var(--b);color:var(--b);background:var(--b3)}
+.em-btn.active{border-color:var(--b);background:var(--b3);color:var(--b2)}
 .enhance-prompt-wrap{display:none}
 .enhance-prompt-wrap.show{display:block}
 .ep-hint{font-size:11px;color:var(--t3);margin-top:5px;line-height:1.5}
@@ -267,11 +292,14 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
 .ep-ex:hover{border-color:var(--b);color:var(--b);background:var(--b3)}
 
 /* Image style selector */
+
+/* ─── IMAGE STYLE SELECTOR ────────────────────────── */
 .style-sel-wrap{margin-bottom:16px;display:none}
 .style-sel-wrap.show{display:block}
 .style-sel-label{font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px}
 .style-btns{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
-.style-btn{background:var(--w);border:1.5px solid var(--bor);border-radius:10px;padding:10px 8px;cursor:pointer;transition:.15s;text-align:center;display:flex;flex-direction:column;align-items:center;gap:3px;font-family:inherit}
+.style-btn{background:var(--w);border:1.5px solid var(--bor);border-radius:12px;padding:12px 8px;cursor:pointer;transition:all .18s;text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px;font-family:inherit}
+.style-btn:hover{border-color:var(--b);transform:translateY(-1px);box-shadow:0 3px 12px rgba(41,121,255,.1)}
 .style-btn:hover{border-color:var(--b);background:var(--b3)}
 .style-btn.active{border-color:var(--b);background:var(--b3)}
 .sb-icon{font-size:20px;line-height:1}
@@ -296,6 +324,8 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
 .bau-btn:disabled{opacity:.5;cursor:not-allowed}
 
 /* Cloud sync + BrandID */
+
+/* ─── CLOUD SYNC BAR ──────────────────────────────── */
 .cloud-bar{display:none;background:#EAF3DE;border-bottom:1px solid rgba(118,196,66,.25);padding:7px 20px;font-size:12px;color:#3B6D11;align-items:center;justify-content:space-between;gap:10px}
 .cloud-bar.show{display:flex}
 .cb-left{display:flex;align-items:center;gap:7px;font-weight:600}
@@ -314,12 +344,118 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
 .toast{position:fixed;bottom:24px;right:24px;background:var(--t1);color:#fff;padding:10px 16px;border-radius:10px;font-size:13px;font-weight:600;z-index:999;transform:translateY(80px);transition:transform .3s;display:flex;align-items:center;gap:8px;box-shadow:var(--s2)}
 .toast.show{transform:translateY(0)}
 
-/* Lang toggle hover */
-#langBtn:hover{background:var(--b);color:#fff!important;border-color:var(--b)}
 
+/* Carousel */
+
+/* ─── CAROUSEL ────────────────────────────────────── */
+.carousel-slides-wrap{position:relative;margin-bottom:10px}
+.carousel-slides-nav{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.csn-label{font-size:12px;font-weight:700;color:var(--t2)}
+.csn-hint{font-size:11px;color:var(--t3);margin-left:auto}
+.cs-arrows{display:flex;gap:4px}
+.cs-arrow{width:28px;height:28px;border-radius:7px;border:1px solid var(--bor);background:var(--bg);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;color:var(--t2);transition:.15s}
+.cs-arrow:hover{background:var(--b);color:#fff;border-color:var(--b)}
+.carousel-slides-preview{display:flex;gap:10px;overflow-x:auto;padding:4px 2px 8px;scroll-snap-type:x mandatory;scroll-behavior:smooth}
+.carousel-slides-preview::-webkit-scrollbar{height:5px}
+.carousel-slides-preview::-webkit-scrollbar-track{background:var(--bg);border-radius:3px}
+.carousel-slides-preview::-webkit-scrollbar-thumb{background:var(--b);border-radius:3px}
+.cs-preview{flex-shrink:0;width:130px;height:130px;border-radius:10px;overflow:hidden;border:2.5px solid var(--bor);cursor:pointer;position:relative;scroll-snap-align:start;transition:.15s}
+.cs-preview:hover{border-color:var(--b);transform:scale(1.03)}
+.cs-preview img{width:100%;height:100%;object-fit:cover}
+.cs-preview .cs-num{position:absolute;top:5px;left:5px;background:rgba(0,0,0,.65);color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px}
+.cs-preview .cs-dl{position:absolute;bottom:5px;right:5px;background:var(--b);color:#fff;border:none;border-radius:5px;font-size:11px;padding:4px 8px;cursor:pointer;opacity:0;transition:.15s;font-family:inherit}
+.cs-preview:hover .cs-dl{opacity:1}
+.cs-preview.active{border-color:var(--b);box-shadow:0 0 0 3px rgba(41,121,255,.2)}
+.cs-dots{display:flex;gap:5px;justify-content:center;margin-top:6px}
+.cs-dot{width:6px;height:6px;border-radius:50%;background:var(--bor);cursor:pointer;transition:.15s}
+.cs-dot.active{background:var(--b);width:18px;border-radius:3px}
+.carousel-slide-count{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.cs-count-label{font-size:12px;font-weight:600;color:var(--t2)}
+.cs-count-btn{width:32px;height:32px;border-radius:6px;border:1px solid var(--bor);background:var(--bg);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--t2)}
+.cs-count-btn:hover{background:var(--b);color:#fff;border-color:var(--b)}
+.cs-count-val{font-size:18px;font-weight:800;color:var(--b);min-width:28px;text-align:center}
+.carousel-dl-all{width:100%;padding:10px;background:var(--b);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;margin-top:8px;font-family:inherit}
+.carousel-dl-all:hover{background:var(--b2)}
+
+/* ─── CAROUSEL STYLE BUTTONS ──────────────────────── */
+.carousel-style-btns{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.cs-style-btn{padding:7px 13px;border-radius:20px;border:1.5px solid var(--bor);background:var(--w);font-size:12px;font-weight:600;cursor:pointer;color:var(--t2);transition:all .15s;font-family:inherit}
+.cs-style-btn:hover{border-color:var(--b);color:var(--b);background:var(--b3)}
+.cs-style-btn.active{background:var(--b);border-color:var(--b);color:#fff;font-weight:700}
+
+
+/* ─── MARKETING AGENT ─────────────────────────────── */
+.agent-screen{max-width:700px;margin:0 auto;padding:0 16px 80px}
+.agent-header{display:flex;align-items:center;gap:12px;padding:16px 0;border-bottom:1.5px solid var(--bor);margin-bottom:20px}
+.agent-back{background:none;border:none;cursor:pointer;font-size:20px;color:var(--t2);padding:4px;border-radius:6px;line-height:1}
+.agent-back:hover{background:var(--bg)}
+.agent-header-title{font-size:18px;font-weight:800;color:var(--t1);flex:1}
+.agent-month-badge{font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;background:var(--b3);color:var(--b2)}
+.agent-config{background:var(--w);border-radius:16px;border:1px solid var(--bor);padding:20px;margin-bottom:16px;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+.agent-config-title{font-size:14px;font-weight:700;color:var(--t1);margin-bottom:14px}
+.agent-freq-btns{display:flex;gap:8px;margin-bottom:14px}
+.agent-freq-btn{flex:1;padding:10px 8px;border-radius:10px;border:1.5px solid var(--bor);background:var(--w);font-size:12px;font-weight:700;cursor:pointer;text-align:center;font-family:inherit;color:var(--t3);transition:all .15s}
+.agent-freq-btn:hover{border-color:var(--b);color:var(--b);background:var(--b3)}
+.agent-freq-btn.active{border-color:var(--b);background:var(--b);color:#fff}
+.agent-plat-btns{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.agent-plat-btn{padding:8px 14px;border-radius:10px;border:1.5px solid var(--bor);background:var(--w);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--t2);transition:all .15s;display:flex;align-items:center;gap:5px}
+.agent-plat-btn:hover{border-color:var(--b);background:var(--b3)}
+.agent-plat-btn.active{border-color:var(--b);background:var(--b3);color:var(--b2)}
+.agent-summary{background:var(--b3);border:.5px solid var(--b);border-radius:12px;padding:14px;margin-bottom:20px;font-size:13px;color:var(--b2);line-height:1.6}
+.agent-week{margin-bottom:20px}
+.agent-week-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--t3);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--bor)}
+.agent-post-card{background:var(--w);border:.5px solid var(--bor);border-radius:12px;padding:14px;margin-bottom:8px;transition:box-shadow .15s}
+.agent-post-card:hover{box-shadow:0 3px 12px rgba(0,0,0,.08)}
+.agent-post-card.festivity{border-left:3px solid var(--g)}
+.apc-meta{display:flex;align-items:center;gap:6px;margin-bottom:8px;flex-wrap:wrap}
+.apc-date{font-size:11px;font-weight:700;color:var(--t2)}
+.apc-plat{font-size:11px;font-weight:700;padding:2px 9px;border-radius:20px}
+.apc-plat.instagram{background:#E6F1FB;color:#185FA5}
+.apc-plat.facebook{background:#EBF0FF;color:#1a3bc1}
+.apc-plat.tiktok{background:#FDE8F0;color:#b5006e}
+.apc-pilar{font-size:11px;padding:2px 9px;border-radius:20px;background:#EAF3DE;color:#3B6D11;font-weight:600}
+.apc-fest{font-size:10px;padding:2px 7px;border-radius:20px;background:var(--g2);color:var(--g3);font-weight:700}
+.apc-topic{font-size:13px;font-weight:700;color:var(--t1);margin-bottom:5px;line-height:1.3}
+.apc-prompt{font-size:12px;color:var(--t3);line-height:1.55;margin-bottom:10px}
+.apc-btns{display:flex;gap:7px;flex-wrap:wrap}
+.apc-btn{padding:7px 13px;border-radius:8px;border:none;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;transition:.15s}
+.apc-btn.create{background:var(--b);color:#fff}
+.apc-btn.create:hover{background:var(--b2)}
+.apc-btn.wa{background:#25D366;color:#fff}
+.apc-btn.wa:hover{background:#1fa851}
+.apc-btn.copy{background:var(--bg);color:var(--t2);border:.5px solid var(--bor)}
+.apc-btn.copy:hover{background:var(--bor)}
+.apc-btn.reminder{background:var(--bg);color:var(--t3);border:.5px solid var(--bor);padding:7px 10px;border-radius:8px;font-size:14px}
+.apc-btn.reminder:hover{background:#FDF0DC;border-color:#E8961A;color:#E8961A}
+.agent-bar{background:linear-gradient(135deg,var(--b),var(--b2));border-radius:12px;padding:12px 16px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:.15s}
+.agent-bar:hover{opacity:.92}
+.agent-bar-left{display:flex;align-items:center;gap:10px}
+.agent-bar-icon{font-size:20px}
+.agent-bar-title{font-size:13px;font-weight:700;color:#fff}
+.agent-bar-sub{font-size:11px;color:rgba(255,255,255,.75)}
+.agent-bar-cta{font-size:12px;font-weight:700;color:#fff;background:rgba(255,255,255,.2);padding:6px 14px;border-radius:8px;white-space:nowrap}
+
+/* ─── REMINDER TOGGLE CARD ────────────────────────── */
+.reminder-card{background:var(--w);border:1.5px solid var(--bor);border-radius:14px;padding:16px;margin-bottom:20px;display:flex;align-items:center;gap:14px;transition:all .2s}
+.reminder-card.active{border-color:#25D366;background:linear-gradient(135deg,rgba(37,211,102,.06),rgba(37,211,102,.02))}
+.reminder-icon{font-size:28px;flex-shrink:0}
+.reminder-info{flex:1}
+.reminder-title{font-size:13px;font-weight:700;color:var(--t1);margin-bottom:3px}
+.reminder-sub{font-size:12px;color:var(--t3);line-height:1.4}
+.reminder-card.active .reminder-sub{color:#1a8a4a}
+.reminder-toggle{flex-shrink:0}
+.reminder-btn{padding:9px 18px;border-radius:10px;border:none;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .18s;white-space:nowrap}
+.reminder-btn.off{background:var(--bg);color:var(--t2);border:1.5px solid var(--bor)}
+.reminder-btn.off:hover{border-color:#25D366;color:#25D366;background:rgba(37,211,102,.06)}
+.reminder-btn.on{background:#25D366;color:#fff}
+.reminder-btn.on:hover{background:#1fa851}
+
+/* ─── RESPONSIVE ──────────────────────────────────── */
 /* Responsive */
 @media(max-width:640px){
-  .mode-cards{grid-template-columns:1fr 1fr}
+  .mode-cards{grid-template-columns:repeat(3,1fr);gap:6px}
+  .mc-desc{display:none}
+  .mc-icon{font-size:20px}
   .result-grid{grid-template-columns:1fr}
   .fg{grid-template-columns:1fr}
   .fg-item.span2{grid-column:span 1}
@@ -334,13 +470,10 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
     <div class="logo-sq">P</div>
     Postimity
   </a>
-  <div style="display:flex;align-items:center;gap:8px">
-    <div class="brand-chip" id="brandChip" onclick="goToEdit()">
-      <div class="chip-logo" id="chipLogo">?</div>
-      <span id="chipName">Mi marca</span>
-      <span style="color:var(--t3);font-size:12px">✏️</span>
-    </div>
-    <button id="langBtn" onclick="event.stopPropagation();toggleLang()" title="Switch language" style="padding:5px 10px;border-radius:7px;border:1px solid var(--bor);background:var(--bg);color:var(--t2);font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;flex-shrink:0;line-height:1">🌐 EN</button>
+  <div class="brand-chip" id="brandChip" onclick="goToEdit()">
+    <div class="chip-logo" id="chipLogo">?</div>
+    <span id="chipName">Mi marca</span>
+    <span style="color:var(--t3)">✏️</span>
   </div>
 </nav>
 
@@ -353,7 +486,7 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
   </div>
   <div style="display:flex;align-items:center;gap:8px">
     <span style="font-size:11px;color:#5A9E2F">Tu enlace único:</span>
-    <span id="genCounterBadge" style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:5px;background:#EAF3DE;color:#3B6D11">25 gen restantes</span>
+    <span id="genCounterBadge" style="font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;background:#EAF3DE;color:#3B6D11;letter-spacing:.2px">25 gen restantes</span>
     <button class="cb-copy" onclick="copyBrandUrl()" id="cbCopyBtn">📋 Copiar link</button>
     <button class="cb-link" onclick="showRecoveryModal()">¿Cómo recuperarlo?</button>
   </div>
@@ -374,15 +507,74 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
   </div>
 </div>
 
-<!-- Post saved toast -->
+
+  <!-- ╔═══════════════════════════════════════════╗
+       ║  MARKETING AGENT SCREEN                    ║
+       ╚═══════════════════════════════════════════╝ -->
+  <div id="agentScreen" class="screen" style="overflow-y:auto">
+    <div class="agent-screen">
+      <!-- Header -->
+      <div class="agent-header">
+        <button class="agent-back" onclick="showCreatorFromAgent()" title="Volver al Studio" style="display:flex;align-items:center;gap:5px;padding:7px 12px;font-size:12px;font-weight:700;background:var(--bg);border:1.5px solid var(--bor);border-radius:8px;cursor:pointer;color:var(--t2);font-family:inherit">
+          ← Volver
+        </button>
+        <div class="agent-header-title">🤖 Marketing Agent</div>
+        <span class="agent-month-badge" id="agentMonthBadge">Este mes</span>
+      </div>
+
+      <!-- Config section (shown before generating) -->
+      <div id="agentConfigWrap">
+        <div class="agent-config">
+          <div class="agent-config-title">⚙️ Configura tu plan mensual</div>
+          <div class="ic-label">Posts por semana</div>
+          <div class="agent-freq-btns">
+            <button class="agent-freq-btn" data-freq="3" onclick="setAgentFreq(this)">3/semana<br><span style="font-size:10px;opacity:.7">~12 posts</span></button>
+            <button class="agent-freq-btn active" data-freq="5" onclick="setAgentFreq(this)">5/semana<br><span style="font-size:10px;opacity:.7">~20 posts</span></button>
+            <button class="agent-freq-btn" data-freq="7" onclick="setAgentFreq(this)">7/semana<br><span style="font-size:10px;opacity:.7">~28 posts</span></button>
+          </div>
+          <div class="ic-label">Plataformas</div>
+          <div class="agent-plat-btns">
+            <button class="agent-plat-btn active" data-plat="instagram" onclick="toggleAgentPlat(this)">📸 Instagram</button>
+            <button class="agent-plat-btn active" data-plat="facebook" onclick="toggleAgentPlat(this)">👥 Facebook</button>
+            <button class="agent-plat-btn" data-plat="tiktok" onclick="toggleAgentPlat(this)">🎵 TikTok</button>
+          </div>
+          <div id="agentConfigNote" style="font-size:12px;color:var(--t3);margin-bottom:14px;line-height:1.5">Las plataformas se distribuyen inteligentemente según tu audiencia del Brand Guide.</div>
+          <button class="btn btn-primary btn-full" id="btnGenAgent" onclick="generateAgentPlan()" style="font-size:14px;font-weight:700;padding:14px;border-radius:12px">
+            ✨ Generar plan de <span id="agentMonthLabel">este mes</span>
+          </button>
+          <div id="agentLoadNote" style="display:none;text-align:center;padding:12px;font-size:12px;color:var(--t3)">
+            ☕ Generando tu plan mensual... puede tomar hasta 30 segundos
+          </div>
+        </div>
+      </div>
+
+      <!-- Plan display (shown after generating) -->
+      <div id="agentPlanWrap" style="display:none">
+        <div class="agent-summary" id="agentSummary"></div>
+        <div id="agentPlanContent"></div>
+        <button class="btn btn-full" onclick="showAgentConfig()" style="margin-top:8px;background:var(--bg);color:var(--t2);border:.5px solid var(--bor);border-radius:10px;padding:10px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">
+          ↺ Regenerar plan
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ╔═══════════════════════════════════════════╗
+       ║  TOAST & MODALS                            ║
+       ╚═══════════════════════════════════════════╝ -->
+  <!-- Post saved toast -->
 <div class="toast" id="toast">✅ Post guardado en historial</div>
 
-<!-- ═══════════════ SETUP SCREEN ═══════════════ -->
+
+  <!-- ╔═══════════════════════════════════════════╗
+       ║  SETUP SCREEN                              ║
+       ╚═══════════════════════════════════════════╝ -->
+  <!-- ═══════════════ SETUP SCREEN ═══════════════ -->
 <div id="setupScreen" class="screen active">
   <div class="setup-wrap">
     <div class="setup-hero">
       <div class="setup-icon">✨</div>
-      <h1>Configura tu marca</h1>
+      <h1>Configura tu marca en 30 segundos</h1>
       <p>Esta información es el cerebro de la AI. Define el estilo, voz y estrategia de TODO tu contenido.</p>
     </div>
     <div class="setup-progress" id="setupProgress">
@@ -393,44 +585,98 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
       <div class="sp-dot" id="sp3"></div>
     </div>
 
-    <!-- Card 1: Identidad simplificada (Campo 1 + 2) -->
+    <!-- Card 1: Identidad del negocio -->
     <div class="scard">
-      <div class="scard-title">🏪 Tu negocio en 30 segundos</div>
+      <div class="scard-title">🏪 Identidad del negocio</div>
+      <div class="logo-upload-row">
+        <div class="logo-circle" id="logoCircle">
+          <input type="file" id="logoFile" accept="image/png,image/svg+xml,image/webp,image/jpeg">
+          <img id="logoImg" src="" alt="" style="display:none">
+          <span class="plus" id="logoPlus">+</span>
+        </div>
+        <div class="logo-info">
+          <div class="li-title">Logo del negocio <span style="font-size:11px;font-weight:400;color:var(--t3)">(opcional)</span></div>
+          <div class="li-sub">Se añadirá en todas las imágenes generadas</div>
+          <div class="li-hint">💡 Usa PNG con fondo transparente para mejores resultados</div>
+        </div>
+      </div>
+      <div class="fg">
+        <div class="fg-item">
+          <div class="fg-label">Nombre del negocio <span style="color:var(--pk)">*</span></div>
+          <input type="text" id="bName" placeholder="Ej: Wonderik Preschool">
+        </div>
+        <div class="fg-item">
+          <div class="fg-label">WhatsApp de contacto <span style="color:var(--pk)">*</span>
+            <div class="tooltip" data-tip="Número con lada internacional. Ej: +52 449 123 4567. Se usará en los CTAs de todos los posts.">?</div>
+          </div>
+          <input type="tel" id="bWhatsApp" placeholder="+52 449 123 4567">
+        </div>
+        <div class="fg-item span2">
+          <div class="fg-label">Tipo de negocio <span style="color:var(--pk)">*</span></div>
+          <input type="text" id="bType" placeholder="Ej: Kinder privado, Restaurante de comida italiana, Salón de belleza, Gym...">
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 2: Ubicación -->
+    <div class="scard">
+      <div class="scard-title">📍 Ubicación</div>
+      <div class="fg">
+        <div class="fg-item">
+          <div class="fg-label">País <span style="color:var(--pk)">*</span></div>
+          <select id="bCountry" onchange="updateStates()">
+            <option value="">— Selecciona —</option>
+            <option value="México">🇲🇽 México</option>
+            <option value="Estados Unidos">🇺🇸 Estados Unidos</option>
+            <option value="Colombia">🇨🇴 Colombia</option>
+            <option value="Argentina">🇦🇷 Argentina</option>
+            <option value="Chile">🇨🇱 Chile</option>
+            <option value="Perú">🇵🇪 Perú</option>
+            <option value="España">🇪🇸 España</option>
+            <option value="Guatemala">🇬🇹 Guatemala</option>
+            <option value="Costa Rica">🇨🇷 Costa Rica</option>
+            <option value="Otro">🌎 Otro</option>
+          </select>
+        </div>
+        <div class="fg-item">
+          <div class="fg-label">Estado / Provincia <span style="color:var(--pk)">*</span></div>
+          <select id="bState" disabled>
+            <option value="">— Selecciona país primero —</option>
+          </select>
+          <input type="text" id="bStateText" placeholder="Estado / Provincia" class="states-hidden" style="margin-top:6px">
+        </div>
+        <div class="fg-item span2">
+          <div class="fg-label">Ciudad</div>
+          <input type="text" id="bCity" placeholder="Ej: Aguascalientes, Houston, Bogotá...">
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 3: Estrategia de contenido -->
+    <div class="scard">
+      <div class="scard-title">🎯 Estrategia de contenido</div>
       <div class="fg full">
         <div class="fg-item span2">
-          <div class="fg-label">¿Cómo se llama y qué hace tu negocio? <span style="color:var(--pk)">*</span></div>
-          <input type="text" id="bName" placeholder='Ej: Wonderik, kinder privado en Aguascalientes'>
-          <div style="font-size:11px;color:var(--t3);margin-top:4px">Formato: <strong>Nombre del negocio, tipo de negocio en Ciudad</strong> — Ej: "La Trattoria, restaurante italiano en CDMX"</div>
+          <div class="fg-label">¿Qué te hace diferente? (Diferenciador clave) *
+            <div class="tooltip" data-tip="La razón única por la que un cliente te elige a ti y no a la competencia. Ej: 'Somos el único kinder que integra Neurociencias + Psicología en Aguascalientes'">?</div>
+          </div>
+          <input type="text" id="bDiff" placeholder="Ej: Somos el único kinder con enfoque en neurociencia aplicada en Aguascalientes">
         </div>
         <div class="fg-item span2">
-          <div class="fg-label">¿Qué hace especial a tu negocio? <span style="color:var(--pk)">*</span> <span style="font-size:10px;font-weight:400;color:var(--t3)">2-4 oraciones</span></div>
-          <textarea id="bStory" rows="4" placeholder="Ej: Somos el único kinder en Aguascalientes con enfoque en neurociencia aplicada. Desarrollamos el cerebro de niños de 1-6 años a través de metodologías basadas en evidencia científica. Nuestras familias nos eligen porque ven resultados reales en el desarrollo de sus hijos."></textarea>
-          <div style="font-size:11px;color:var(--t3);margin-top:4px;line-height:1.5">💡 La AI extrae: diferenciador, audiencia objetivo, tono, propuesta de valor y hashtags. <strong style="color:var(--t2)">Cuanto más específico, mejor el resultado.</strong></div>
-        </div>
-        <!-- WhatsApp field -->
-        <div class="fg-item">
-          <div class="fg-label">WhatsApp de contacto <span style="color:var(--pk)">*</span></div>
-          <div style="display:flex;align-items:center;gap:8px">
-            <span style="font-size:18px">📱</span>
-            <input type="tel" id="bWhatsApp" placeholder="+52 449 123 4567" style="flex:1">
+          <div class="fg-label">¿A quién le hablas? (Audiencia objetivo) *
+            <div class="tooltip" data-tip="Describe a tu cliente ideal: edad, profesión, situación de vida, qué les preocupa. Cuanto más específico, mejor contenido generará la AI.">?</div>
           </div>
-          <div style="font-size:11px;color:var(--t3);margin-top:4px">Se incluye automáticamente en todos los CTAs generados</div>
+          <textarea id="bAudience" rows="2" placeholder="Ej: Papás y mamás de 28-40 años, nivel medio-alto, que buscan la mejor educación inicial para sus hijos en Aguascalientes"></textarea>
         </div>
-        <!-- Logo field -->
-        <div class="fg-item">
-          <div class="fg-label">Logo <span style="font-size:10px;font-weight:400;color:var(--t3)">(opcional — puedes agregar esto después)</span></div>
-          <div style="display:flex;align-items:center;gap:12px;margin-top:6px;padding:10px 12px;background:var(--bg);border:1.5px dashed var(--bor);border-radius:10px;cursor:pointer" onclick="document.getElementById('logoFile').click()">
-            <div class="logo-circle" id="logoCircle" style="width:48px;height:48px;flex-shrink:0;margin:0;cursor:pointer">
-              <input type="file" id="logoFile" accept="image/png,image/svg+xml,image/webp,image/jpeg" style="display:none">
-              <img id="logoImg" src="" alt="" style="display:none;width:100%;height:100%;object-fit:contain;border-radius:50%">
-              <span class="plus" id="logoPlus" style="font-size:20px">+</span>
-            </div>
-            <div>
-              <div style="font-size:12px;font-weight:600;color:var(--t2)">Subir logo</div>
-              <div style="font-size:11px;color:var(--t3);margin-top:2px">PNG con fondo transparente para mejores resultados</div>
-              <div style="font-size:11px;color:var(--t3)">Se agrega como overlay en todas las imágenes</div>
-            </div>
-          </div>
+        <div class="fg-item span2">
+          <div class="fg-label">Tono de comunicación</div>
+          <select id="bTone">
+            <option value="Cálido, moderno y cercano">Cálido y moderno</option>
+            <option value="Profesional y confiable">Profesional y confiable</option>
+            <option value="Divertido y energético">Divertido y energético</option>
+            <option value="Inspiracional y motivador">Inspiracional y motivador</option>
+            <option value="Informativo y educativo">Informativo y educativo</option>
+          </select>
         </div>
       </div>
     </div>
@@ -490,7 +736,11 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
   </div>
 </div>
 
-<!-- ═══════════════ CREATOR SCREEN ═══════════════ -->
+
+  <!-- ╔═══════════════════════════════════════════╗
+       ║  CREATOR SCREEN                            ║
+       ╚═══════════════════════════════════════════╝ -->
+  <!-- ═══════════════ CREATOR SCREEN ═══════════════ -->
 <div id="creatorScreen" class="screen">
   <div class="creator-wrap">
 
@@ -530,6 +780,18 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
     <div class="plt-info show" id="pltInfo">📸 <strong>Instagram 2026:</strong> Keywords en caption, hook en primera línea, 3-5 hashtags. Meta: Guardados + compartidos por DM.</div>
 
     <!-- Mode Cards -->
+    <!-- Agent Bar -->
+    <div class="agent-bar" onclick="showAgentScreen()" id="agentBar">
+      <div class="agent-bar-left">
+        <span class="agent-bar-icon">🤖</span>
+        <div>
+          <div class="agent-bar-title">Marketing Agent</div>
+          <div class="agent-bar-sub" id="agentBarSub">Genera tu plan de contenido mensual</div>
+        </div>
+      </div>
+      <span class="agent-bar-cta">Ver plan →</span>
+    </div>
+
     <div class="mode-cards">
       <div class="mode-card active" id="mc1" onclick="setMode('post')">
         <div class="mc-icon">✍️</div>
@@ -551,6 +813,11 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
         <div class="mc-title">Testimonio</div>
         <div class="mc-desc">Reseña → post profesional</div>
       </div>
+      <div class="mode-card" id="mc5" onclick="setMode('carousel')">
+        <div class="mc-icon">🎠</div>
+        <div class="mc-title">Carrusel</div>
+        <div class="mc-desc">Multi-slide educativo</div>
+      </div>
     </div>
 
     <!-- Image Style Selector — below mode cards -->
@@ -560,7 +827,7 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
         <button class="style-btn" id="sPhoto" onclick="setImageStyle('photo',this)">
           <span class="sb-icon">📸</span>
           <span class="sb-name">Fotorrealista</span>
-          <span class="sb-desc">Niño genérico en actividad</span>
+          <span class="sb-desc">Persona o situación genérica</span>
         </button>
         <button class="style-btn active" id="sIllus" onclick="setImageStyle('illustrated',this)">
           <span class="sb-icon">🎨</span>
@@ -580,7 +847,7 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
       <!-- POST MODE -->
       <div id="postInput">
         <div class="ic-label">¿Qué quieres publicar?</div>
-        <textarea class="text-ta" id="postText" placeholder="Ej: Post sobre nuestra actividad de pintura con dedos en el salón de maternal, donde los niños descubrieron cómo mezclar colores..."></textarea>
+        <textarea class="text-ta" id="postText" placeholder="Ej: Post sobre nuestra nueva colección de verano · Promoción del menú del día · Tip de bienestar para esta semana · Testimonio de cliente satisfecho..."></textarea>
         <p style="font-size:11px;color:var(--t3);margin-top:6px">💡 Entre más detalle das, mejor es el resultado. Describe la actividad, el momento o el mensaje que quieres comunicar.</p>
       </div>
       <!-- ENHANCE MODE -->
@@ -641,32 +908,99 @@ Ej: &quot;Hazla blanco y negro estilo editorial de revista&quot;"></textarea>
           </div>
           <img id="flyerPrev" class="photo-prev" src="" alt="">
         </div>
-        <!-- Flyer form: 1 free text field + type selector — AI extracts everything -->
-        <div>
-          <div class="ff-label">¿Qué tipo de flyer?</div>
-          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">
-            <button class="flyer-type-btn active" data-type="Evento" onclick="setFlyerType(this)">📅 Evento</button>
-            <button class="flyer-type-btn" data-type="Promoción" onclick="setFlyerType(this)">🛍️ Promoción</button>
-            <button class="flyer-type-btn" data-type="Anuncio" onclick="setFlyerType(this)">📢 Anuncio</button>
-            <button class="flyer-type-btn" data-type="Nuevo servicio" onclick="setFlyerType(this)">📋 Servicio</button>
-            <button class="flyer-type-btn" data-type="Admisiones" onclick="setFlyerType(this)">🎓 Admisiones</button>
-            <button class="flyer-type-btn" data-type="Menú especial" onclick="setFlyerType(this)">🍽️ Menú</button>
+        <div class="flyer-form">
+          <div>
+            <div class="ff-label">Tipo de contenido *</div>
+            <select id="flyerType">
+              <option value="Evento">📅 Evento</option>
+              <option value="Inscripciones / Admisiones">🎓 Inscripciones</option>
+              <option value="Promoción / Oferta">🛍️ Promoción</option>
+              <option value="Información">📢 Información</option>
+              <option value="Curso o Taller">📋 Curso / Taller</option>
+              <option value="Lanzamiento">🚀 Lanzamiento</option>
+              <option value="Aniversario">🎉 Aniversario</option>
+              <option value="Menú especial">🍽️ Menú especial</option>
+              <option value="Otro">✨ Otro</option>
+            </select>
           </div>
-          <div class="ff-label">Pega o describe la información del flyer *</div>
-          <textarea class="text-ta" id="flyerFreeText" rows="5" placeholder="Pega todo lo que tengas — título, fechas, precio, horario, requisitos, etc. La AI lo estructura automáticamente.
-
-Ej: &quot;Curso de verano Wonderik, del 14 al 25 de julio, para niños de 1-6 años, $2,500 MXN todo incluido, actividades de neurociencia y arte, 8am-2pm, cupos limitados a 20 niños&quot;
-
-Ej: &quot;2x1 en margaritas todos los viernes, consumo mínimo $300, válido julio, no acumulable&quot;"></textarea>
-          <div style="font-size:11px;color:var(--t3);margin-top:4px">💡 Puedes pegar directamente desde WhatsApp, Word o tus notas. Entre más info des, mejor el resultado.</div>
-          <!-- Hidden fields kept for compatibility with Canvas flyer composition -->
-          <input type="hidden" id="flyerTitle2" value=""><input type="hidden" id="flyerSub" value="">
-          <input type="hidden" id="flyerTag" value=""><input type="hidden" id="flyerDates" value="">
-          <input type="hidden" id="flyerPrice" value=""><input type="hidden" id="flyerSched" value="">
-          <input type="hidden" id="flyerExtra" value=""><input type="hidden" id="flyerStyle" value="Colorido y vibrante">
-          <input type="hidden" id="flyerType" value="Evento">
+          <div>
+            <div class="ff-label">Estilo visual</div>
+            <select id="flyerStyle">
+              <option value="Colorido y vibrante, estilo agencia creativa">Colorido / Vibrante</option>
+              <option value="Profesional y elegante">Profesional / Elegante</option>
+              <option value="Minimalista y moderno">Minimalista</option>
+              <option value="Festivo y divertido">Festivo / Divertido</option>
+              <option value="Informativo y organizado">Informativo</option>
+            </select>
+          </div>
+          <div style="grid-column:span 2">
+            <div class="ff-label">Título principal *</div>
+            <input type="text" id="flyerTitle2" placeholder="Ej: Curso de Verano — Un Verano para Explorar">
+          </div>
+          <div>
+            <div class="ff-label">Subtítulo</div>
+            <input type="text" id="flyerSub" placeholder="Ej: Para niños de 1 a 7 años">
+          </div>
+          <div>
+            <div class="ff-label">Tagline</div>
+            <input type="text" id="flyerTag" placeholder="Ej: ¡El verano más divertido!">
+          </div>
+          <div>
+            <div class="ff-label">Fecha / Período</div>
+            <input type="text" id="flyerDates" placeholder="Ej: 14 al 25 de julio">
+          </div>
+          <div>
+            <div class="ff-label">Precio</div>
+            <input type="text" id="flyerPrice" placeholder="Ej: $2,500 MXN">
+          </div>
+          <div>
+            <div class="ff-label">Horario</div>
+            <input type="text" id="flyerSched" placeholder="Ej: 8am – 2pm">
+          </div>
+          <div>
+            <div class="ff-label">Info adicional</div>
+            <input type="text" id="flyerExtra" placeholder="Ej: Cupos limitados a 20 niños">
+          </div>
         </div>
       </div>
+      <!-- CAROUSEL MODE -->
+      <div id="carouselInput" style="display:none">
+        <div class="ic-label">Tema del carrusel <span style="color:var(--pk)">*</span></div>
+        <input type="text" class="text-in" id="carouselTopic" placeholder="Ej: 5 beneficios del sueño en el desarrollo de tu bebé · Los 4 pilares de nuestra metodología · Por qué elegirnos">
+        <div class="ic-label" style="margin-top:12px">Número de slides</div>
+        <div class="carousel-slide-count">
+          <button class="cs-count-btn" onclick="adjustSlides(-1)">−</button>
+          <span class="cs-count-val" id="slideCountVal">5</span>
+          <button class="cs-count-btn" onclick="adjustSlides(1)">+</button>
+          <span class="cs-count-label">slides (mín 3, máx 10)</span>
+        </div>
+        <div class="ic-label" style="margin-top:12px">Estilo del carrusel</div>
+        <div class="carousel-style-btns">
+          <button class="cs-style-btn active" data-style="Educativo" onclick="setCarouselStyle(this)">📚 Educativo</button>
+          <button class="cs-style-btn" data-style="Tips y consejos" onclick="setCarouselStyle(this)">💡 Tips</button>
+          <button class="cs-style-btn" data-style="Historia de marca" onclick="setCarouselStyle(this)">📖 Historia</button>
+          <button class="cs-style-btn" data-style="Datos y estadísticas" onclick="setCarouselStyle(this)">📊 Datos</button>
+          <button class="cs-style-btn" data-style="Tutorial paso a paso" onclick="setCarouselStyle(this)">🎯 Tutorial</button>
+          <button class="cs-style-btn" data-style="Preguntas y respuestas" onclick="setCarouselStyle(this)">❓ Q&A</button>
+        </div>
+        <!-- Cover source option -->
+        <div class="ic-label" style="margin-top:14px">Portada del carrusel</div>
+        <div style="display:flex;gap:8px;margin-bottom:10px">
+          <button class="em-btn active" id="cvrAI" onclick="setCarouselCoverMode('ai',this)">🤖 Generar con AI</button>
+          <button class="em-btn" id="cvrPhoto" onclick="setCarouselCoverMode('photo',this)">📸 Usar mi foto</button>
+        </div>
+        <div id="carouselPhotoWrap" style="display:none">
+          <div class="upload-zone" id="carouselCoverZone" style="padding:16px">
+            <input type="file" id="carouselCoverFile" accept="image/*">
+            <div class="uz-icon" style="font-size:24px">🖼️</div>
+            <div class="uz-title" id="carouselCoverTitle" style="font-size:13px">Arrastra tu foto o haz click</div>
+            <div class="uz-sub">Esta foto será el fondo del slide de portada</div>
+            <div class="uz-name" id="carouselCoverName"></div>
+          </div>
+          <img id="carouselCoverPrev" class="photo-prev" src="" alt="">
+        </div>
+      </div>
+
       <!-- TESTIMONIAL MODE -->
       <div id="testimonialInput" style="display:none">
         <div class="ic-label">Reseña del cliente</div>
@@ -720,6 +1054,22 @@ Ej: 'Wonderik es increíble. Mi hija de 3 años ya lee palabras cortas y su desa
         <div class="img-panel">
           <img id="resultImg" src="" alt="Generada por AI">
           <div class="photo-desc-bar" id="photoDescBar"></div>
+          <!-- Carousel slides preview -->
+          <div id="carouselPreviewWrap" style="display:none;padding:14px;background:var(--bg);border-bottom:1px solid var(--bor)">
+            <div class="carousel-slides-nav">
+              <span class="csn-label">🎠 Slides del carrusel</span>
+              <span class="csn-hint" id="csHint">← → para navegar · click para previsualizar</span>
+              <div class="cs-arrows">
+                <button class="cs-arrow" onclick="scrollCarousel(-1)" title="Anterior">‹</button>
+                <button class="cs-arrow" onclick="scrollCarousel(1)" title="Siguiente">›</button>
+              </div>
+            </div>
+            <div class="carousel-slides-wrap">
+              <div class="carousel-slides-preview" id="carouselSlidesPreview"></div>
+              <div class="cs-dots" id="csDots"></div>
+            </div>
+            <button class="carousel-dl-all" onclick="downloadAllSlides()">⬇️ Descargar todos los slides (ZIP)</button>
+          </div>
           <div id="keyQuoteWrap" style="display:none;padding:10px 14px;background:#FDF0DC;border-top:1px solid rgba(200,121,26,.2)">
             <div style="font-size:10px;font-weight:700;color:#854F0B;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px">⭐ Quote destacada del cliente</div>
             <div id="keyQuoteText" style="font-size:13px;font-style:italic;color:#633806;line-height:1.5;font-weight:500"></div>
@@ -820,8 +1170,8 @@ Ej: 'Wonderik es increíble. Mi hija de 3 años ya lee palabras cortas y su desa
 // ═══════════════════════════════════════════════════════
 // CONFIG
 // ═══════════════════════════════════════════════════════
-const WORKER = CONFIG.workerUrl; // set in CONFIG above
-const STORE_KEY = CONFIG.storeKey; // set in CONFIG above
+// WORKER already defined above
+// STORE_KEY already defined above
 const STATES = {
   'México':['Aguascalientes','Baja California','Baja California Sur','Campeche','Chiapas','Chihuahua','Ciudad de México','Coahuila','Colima','Durango','Estado de México','Guanajuato','Guerrero','Hidalgo','Jalisco','Michoacán','Morelos','Nayarit','Nuevo León','Oaxaca','Puebla','Querétaro','Quintana Roo','San Luis Potosí','Sinaloa','Sonora','Tabasco','Tamaulipas','Tlaxcala','Veracruz','Yucatán','Zacatecas'],
   'Estados Unidos':['California','Texas','Florida','New York','Illinois','Arizona','Colorado','Georgia','Nevada','New Jersey','New Mexico','North Carolina','Washington','Virginia','Pennsylvania','Ohio','Michigan'],
@@ -843,121 +1193,18 @@ const PLT_INFO = {
 // ═══════════════════════════════════════════════════════
 // STATE
 // ═══════════════════════════════════════════════════════
-// ═══════════════════════════════════════════════════════════
-// CONFIG — editar aquí para cambiar modelos, límites, precios
-// ═══════════════════════════════════════════════════════════
-const CONFIG = {
-  workerUrl: 'https://postimity-content.munir-go10.workers.dev/',
-  plans: {
-    trial:   { gens: 25, days: 14, name: 'Trial' },
-    starter: { gens: 25, price: 149, name: 'Starter' },
-    growth:  { gens: 60, price: 349, name: 'Growth' },
-    agency:  { gens: 200, price: 799, name: 'Agency' }
-  },
-  defaultPlan: 'trial',
-  storeKey: 'postimity_brand_v1',
-};
+// ╔═══════════════════════════════════════════════════╗
+// ║  JS: CONFIG & CONSTANTS                         ║
+// ╚═══════════════════════════════════════════════════╝
+// ── WORKER CONFIG ──────────────────────────────────────────
+const WORKER = 'https://postimity-content.munir-go10.workers.dev/';
+const STORE_KEY = 'postimity_brand_v1';
+const GEN_LIMITS = { trial: 25, starter: 25, growth: 60, agency: 200 };
 
-// ── LANGUAGE ────────────────────────────────────────────────
-const T = {
-  es: {
-    setup: 'Configura tu marca',
-    setupSub: 'Solo necesitamos 4 cosas para empezar',
-    field1Label: '¿Cómo se llama tu negocio y qué hace?',
-    field1Hint: 'Ej: "Wonderik, kinder privado en Aguascalientes" o "La Trattoria, restaurante italiano en CDMX"',
-    field2Label: '¿Qué hace especial a tu negocio? (2-4 oraciones)',
-    field2Hint: 'Cuéntanos en tus palabras — la AI construirá tu estrategia completa de aquí',
-    field3Label: 'WhatsApp de contacto',
-    field3Hint: 'Se incluye automáticamente en todos los CTAs generados',
-    field4Label: 'Logo y colores (opcional — puedes agregar esto después)',
-    generateBG: '✨ Generar mi Brand Guide con AI',
-    generating: 'Generando tu Brand Guide...',
-    generatingNote: '☕ Esto puede tomar hasta 1 minuto — la AI analiza tu negocio a fondo',
-    editBrand: 'Editar mi marca',
-    modes: { post: 'Post', enhance: 'Estudio Pro', flyer: 'Flyer', testimonial: 'Testimonio' },
-    generate: 'Generar contenido',
-    generating2: 'Generando...',
-    flyerPlaceholder: 'Pega o describe la información de tu flyer...
 
-Ej: "Curso de verano Wonderik, del 14 al 25 de julio, para niños de 1-6 años, $2,500 MXN todo incluido, actividades de neurociencia y arte, cupos limitados"
-
-La AI extrae el título, fechas, precio y genera el diseño automáticamente.',
-    flyerTypes: ['📅 Evento', '🛍️ Promoción', '📢 Anuncio', '📋 Nuevo servicio', '🎓 Admisiones', '🍽️ Menú especial'],
-    styleSel: 'Estilo de imagen',
-    stylePhoto: 'Fotorrealista', stylePhotoDesc: 'Persona genérica en actividad',
-    styleIllus: 'Ilustrado', styleIllusDesc: 'Gráfico colorido, sin personas',
-    styleAbstr: 'Abstracto', styleAbstrDesc: 'Fondo de marca para texto',
-    trial: 'días de prueba restantes',
-    trialExpired: 'Tu prueba ha vencido',
-    upgrade: 'Mejorar plan',
-  },
-  en: {
-    setup: 'Set up your brand',
-    setupSub: 'We only need 4 things to get started',
-    field1Label: 'What is your business called and what does it do?',
-    field1Hint: 'e.g. "Wonderik, private kindergarten in Aguascalientes" or "La Trattoria, Italian restaurant in Mexico City"',
-    field2Label: 'What makes your business special? (2-4 sentences)',
-    field2Hint: 'Tell us in your own words — the AI will build your complete strategy from this',
-    field3Label: 'WhatsApp contact number',
-    field3Hint: 'Automatically included in all generated CTAs',
-    field4Label: 'Logo and colors (optional — you can add this later)',
-    generateBG: '✨ Generate my Brand Guide with AI',
-    generating: 'Generating your Brand Guide...',
-    generatingNote: '☕ This may take up to 1 minute — the AI is deeply analyzing your business',
-    editBrand: 'Edit my brand',
-    modes: { post: 'Post', enhance: 'Pro Studio', flyer: 'Flyer', testimonial: 'Testimonial' },
-    generate: 'Generate content',
-    generating2: 'Generating...',
-    flyerPlaceholder: 'Paste or describe your flyer information...
-
-Ex: "Summer camp July 14-25, kids 1-6 years old, $2,500 MXN all inclusive, neuroscience activities, limited spots"
-
-The AI extracts title, dates, price and generates the design automatically.',
-    flyerTypes: ['📅 Event', '🛍️ Promotion', '📢 Announcement', '📋 New service', '🎓 Enrollments', '🍽️ Special menu'],
-    styleSel: 'Image style',
-    stylePhoto: 'Photorealistic', stylePhotoDesc: 'Generic person in activity',
-    styleIllus: 'Illustrated', styleIllusDesc: 'Colorful graphic, no people',
-    styleAbstr: 'Abstract', styleAbstrDesc: 'Brand background for text',
-    trial: 'trial days remaining',
-    trialExpired: 'Your trial has expired',
-    upgrade: 'Upgrade plan',
-  }
-};
-let lang = localStorage.getItem('postimity_lang') || 'es';
-function t(key) { return T[lang][key] || T.es[key] || key; }
-function toggleLang() {
-  lang = lang === 'es' ? 'en' : 'es';
-  localStorage.setItem('postimity_lang', lang);
-  applyTranslations();
-}
-function applyTranslations() {
-  // Update lang toggle button
-  const btn = document.getElementById('langBtn');
-  if (btn) btn.textContent = lang === 'es' ? '🌐 EN' : '🌐 ES';
-  // Update mode card labels
-  ['post','enhance','flyer','testimonial'].forEach(m => {
-    const el = document.getElementById('mc_' + m + '_label');
-    if (el) el.textContent = t('modes')[m];
-  });
-  // Update flyer placeholder
-  const fp = document.getElementById('flyerFreeText');
-  if (fp) fp.placeholder = t('flyerPlaceholder');
-  // Update flyer type buttons
-  const ftbs = document.querySelectorAll('.flyer-type-btn');
-  const types = t('flyerTypes');
-  ftbs.forEach((btn, i) => { if (types[i]) btn.textContent = types[i]; });
-  // Style selector labels
-  const sLabels = [
-    ['sPhotoName', 'stylePhoto'], ['sPhotoDesc', 'stylePhotoDesc'],
-    ['sIllusName', 'styleIllus'], ['sIllusDesc', 'styleIllusDesc'],
-    ['sAbstrName', 'styleAbstr'], ['sAbstrDesc', 'styleAbstrDesc'],
-  ];
-  sLabels.forEach(([id, key]) => { const el = document.getElementById(id); if (el) el.textContent = t(key); });
-  // Style selector section label
-  const ssLabel = document.getElementById('styleSelLabel');
-  if (ssLabel) ssLabel.textContent = t('styleSel');
-}
-
+// ╔═══════════════════════════════════════════════════╗
+// ║  STATE VARIABLES                                 ║
+// ╚═══════════════════════════════════════════════════╝
 // ── STATE ───────────────────────────────────────────────────
 let mode = 'post', platform = 'instagram', pillar = 'General', flyerMode = 'ai', imageStyle = 'illustrated';
 let brandId = null; // Phase 2: unique brand identifier for KV sync
@@ -971,6 +1218,7 @@ let lastResult = null, lastInput = null;
 // PHASE 2 — BRAND ID + CLOUD SYNC
 // ═══════════════════════════════════════════════════════
 
+// ─── BRAND ID ────────────────────────────────────────
 function generateBrandId() {
   // Generate UUID v4
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
@@ -1019,18 +1267,16 @@ async function sendRecoveryLink() {
   const email = document.getElementById('recoveryEmail').value.trim();
   if(!email) { alert('Ingresa tu email'); return; }
   // In Phase 2.5: send email. For now, just show the link
-  alert('✅ Guarda este link:
-
-' + getBrandUrl() + '
-
-En una próxima versión lo enviaremos a ' + email);
+  alert('Guarda este link: ' + getBrandUrl() + ' — En una próxima versión lo enviaremos a ' + email);
   closeRecoveryModal();
 }
 
+// ─── GENERATION COUNTER ───────────────────────────────
+function applyTranslations() { /* ES/EN toggle — full version in landing page */ }
 function updateGenCounter() {
   const brand = loadBrand();
-  const plan = brand?.plan || CONFIG.defaultPlan;
-  const limit = CONFIG.plans[plan]?.gens || CONFIG.plans.trial.gens;
+  const plan = brand?.plan || 'trial';
+  const limit = GEN_LIMITS[plan] || GEN_LIMITS['trial'];
   const monthKey = 'postimity_gens_' + new Date().toISOString().slice(0,7);
   const used = parseInt(localStorage.getItem(monthKey) || '0');
   const remaining = Math.max(0, limit - used);
@@ -1041,6 +1287,7 @@ function updateGenCounter() {
     el.style.color = remaining <= 3 ? '#C0392B' : remaining <= 8 ? '#854F0B' : '#3B6D11';
   }
 }
+// ─── UTILITIES ───────────────────────────────────────
 function showToast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg || '✅ Post guardado en historial';
@@ -1049,6 +1296,7 @@ function showToast(msg) {
 }
 
 // Sync brand to Cloudflare KV
+// ─── KV / CLOUD SYNC ──────────────────────────────────
 async function syncBrandToCloud(brand, id) {
   try {
     await fetch(WORKER, {
@@ -1120,9 +1368,9 @@ function convertToPNG(base64, mimeType, maxSize=1024) {
   });
 }
 
-// ═══════════════════════════════════════════════════════
-// INIT
-// ═══════════════════════════════════════════════════════
+// ╔═══════════════════════════════════════════════════╗
+// ║  INIT — DOMContentLoaded                        ║
+// ╚═══════════════════════════════════════════════════╝
 window.addEventListener('DOMContentLoaded', async () => {
   setupUploads();
   showSeasonalAlert();
@@ -1158,8 +1406,8 @@ window.addEventListener('DOMContentLoaded', async () => {
   } else {
     showScreen('setupScreen');
   }
-  applyTranslations();
   updateGenCounter();
+  checkDeepLink();
 });
 
 function showScreen(id) {
@@ -1199,13 +1447,39 @@ function showSeasonalAlert() {
 // STATES CASCADE
 // ═══════════════════════════════════════════════════════
 function updateStates() {
-  // Location fields removed in new Brand Setup (inferred from bName)
+  const country = document.getElementById('bCountry')?.value;
+  const sel = document.getElementById('bState');
+  const txt = document.getElementById('bStateText');
+  if (!sel || !txt) return;
+  const states = {
+    'México': ['Aguascalientes','Baja California','Baja California Sur','Campeche','Chiapas','Chihuahua','Ciudad de México','Coahuila','Colima','Durango','Estado de México','Guanajuato','Guerrero','Hidalgo','Jalisco','Michoacán','Morelos','Nayarit','Nuevo León','Oaxaca','Puebla','Querétaro','Quintana Roo','San Luis Potosí','Sinaloa','Sonora','Tabasco','Tamaulipas','Tlaxcala','Veracruz','Yucatán','Zacatecas'],
+    'Colombia': ['Antioquia','Bogotá D.C.','Valle del Cauca','Atlántico','Cundinamarca','Bolívar','Santander','Nariño','Córdoba','Tolima','Otro'],
+    'Argentina': ['Buenos Aires','Córdoba','Santa Fe','Mendoza','Tucumán','Salta','Entre Ríos','Misiones','Chaco','Corrientes','Otro'],
+    'Chile': ['Región Metropolitana','Valparaíso','Biobío','Maule','Araucanía','Los Lagos',"O'Higgins",'Coquimbo','Antofagasta','Otro'],
+    'Perú': ['Lima','Arequipa','La Libertad','Piura','Cusco','Lambayeque','Junín','Loreto','Callao','Otro'],
+    'España': ['Madrid','Cataluña','Andalucía','Comunitat Valenciana','País Vasco','Galicia','Castilla y León','Castilla-La Mancha','Canarias','Aragón','Otro'],
+    'Guatemala': ['Guatemala','Quetzaltenango','Huehuetenango','Alta Verapaz','San Marcos','Escuintla','Otro'],
+    'Costa Rica': ['San José','Alajuela','Cartago','Heredia','Guanacaste','Puntarenas','Limón'],
+    'Estados Unidos': ['California','Texas','Florida','New York','Illinois','Pennsylvania','Ohio','Georgia','North Carolina','Michigan','Otro'],
+  };
+  const list = states[country];
+  if (list) {
+    sel.innerHTML = '<option value="">— Selecciona estado —</option>' + list.map(s => '<option value="' + s + '">' + s + '</option>').join('');
+    sel.disabled = false; sel.style.display = '';
+    txt.style.display = 'none';
+  } else {
+    sel.innerHTML = '<option value="">— Selecciona estado —</option>';
+    sel.disabled = true; sel.style.display = 'none';
+    txt.style.display = ''; txt.value = '';
+  }
 }
 function getLocation() {
-  // Location is now inferred from the bName field (e.g. "Wonderik, kinder en Aguascalientes")
-  const bName = document.getElementById('bName')?.value || '';
-  const parts = bName.split(',');
-  return parts.slice(1).join(',').trim() || '';
+  const c = document.getElementById('bCountry')?.value || '';
+  const s = (document.getElementById('bState')?.style.display !== 'none'
+    ? document.getElementById('bState')?.value
+    : document.getElementById('bStateText')?.value) || '';
+  const ci = document.getElementById('bCity')?.value.trim() || '';
+  return [ci, s, c].filter(Boolean).join(', ');
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1225,6 +1499,10 @@ function setupUploads() {
     reader.readAsDataURL(e.target.files[0]);
   });
   // Enhance
+  setupDropzone('carouselCoverZone','carouselCoverFile','carouselCoverPrev','carouselCoverTitle','carouselCoverName', async (b64,mime)=>{
+    const conv = await convertToPNG(b64, mime, 1024);
+    carouselCoverB64 = conv.b64; carouselCoverMime = 'image/png';
+  });
   setupDropzone('enhanceZone','enhanceFile','enhancePrev','enhanceTitle','enhanceName', async (b64,mime)=>{
     // Convert to PNG for OpenAI Edit API compatibility
     const converted = await convertToPNG(b64, mime, 1024);
@@ -1258,36 +1536,38 @@ function handleDrop(file, zone, prevId, titleId, nameId, cb) {
   reader.readAsDataURL(file);
 }
 
-// ═══════════════════════════════════════════════════════
-// BRAND SETUP
-// ═══════════════════════════════════════════════════════
+// ╔═══════════════════════════════════════════════════╗
+// ║  BRAND SETUP                                     ║
+// ╚═══════════════════════════════════════════════════╝
 async function generateBrandGuide() {
-  const name=document.getElementById('bName').value.trim();
-  const story=document.getElementById('bStory')?.value.trim() || '';
-  const wa=document.getElementById('bWhatsApp')?.value.trim() || '';
-  if(!name||!story){ alert(lang==='es'?'Completa el nombre y la descripción de tu negocio.':'Fill in your business name and description.'); return; }
+  const name = document.getElementById('bName')?.value.trim() || '';
+  const bType = document.getElementById('bType')?.value.trim() || '';
+  const diff = document.getElementById('bDiff')?.value.trim() || '';
+  const aud = document.getElementById('bAudience')?.value.trim() || '';
+  const wa = document.getElementById('bWhatsApp')?.value.trim() || '';
+  const tone = document.getElementById('bTone')?.value || 'Cálido, moderno y cercano';
+  if(!name || !bType || !diff || !aud) {
+    alert('Completa: Nombre, Tipo de negocio y la descripción de lo que te hace especial.');
+    return;
+  }
   const btn=document.getElementById('btnGenBG');
   btn.innerHTML='<div class="spin-sm"></div> Generando tu Brand Guide...'; btn.disabled=true;
-  // Show time estimate to user
   const timeNote = document.createElement('p');
   timeNote.id='bgTimeNote';
   timeNote.style.cssText='font-size:12px;color:var(--t3);margin-top:8px;text-align:center';
   timeNote.textContent='☕ Esto puede tomar hasta 1 minuto — la AI está analizando tu negocio a fondo';
   btn.parentNode.insertBefore(timeNote, btn.nextSibling);
   try {
-    const nameParts = name.split(',');
-    const parsedName = nameParts[0].trim();
-    const parsedTypeLocation = nameParts.slice(1).join(',').trim();
     const res=await fetch(WORKER,{ method:'POST', headers:{'Content-Type':'application/json'},
       body:JSON.stringify({ mode:'brand-guide', brandData:{
-        name: parsedName,
-        type: parsedTypeLocation,
-        location: parsedTypeLocation,
+        name: name,
+        type: bType,
+        location: getLocation(),
         whatsapp: wa,
-        differentiator: story,
-        story: story,
-        audience: '',
-        tone: 'Cálido y moderno',
+        differentiator: diff,
+        story: diff + ' ' + aud,
+        audience: aud,
+        tone: tone,
         colors:{ primary:document.getElementById('bC1').value, secondary:document.getElementById('bC2').value, accent:document.getElementById('bC3').value }
       }})
     });
@@ -1316,25 +1596,37 @@ async function generateBrandGuide() {
 }
 
 function saveBrand() {
-  const rawName = document.getElementById('bName').value.trim();
-  const story = document.getElementById('bStory')?.value.trim() || '';
-  const wa = document.getElementById('bWhatsApp')?.value.trim() || '';
-  if(!rawName||!story){ alert(lang==='es'?'Completa el nombre y la descripción.':'Fill in name and description.'); return; }
-  const nameParts = rawName.split(',');
-  const parsedName = nameParts[0].trim();
-  const parsedTypeLocation = nameParts.slice(1).join(',').trim();
+  const bNameVal = document.getElementById('bName')?.value.trim() || '';
+  const bTypeVal = document.getElementById('bType')?.value.trim() || '';
+  const bDiffVal = document.getElementById('bDiff')?.value.trim() || '';
+  const bAudienceVal = document.getElementById('bAudience')?.value.trim() || '';
+  const bWaVal = document.getElementById('bWhatsApp')?.value.trim() || '';
+  const bCountryVal = document.getElementById('bCountry')?.value || '';
+  const bStateVal = (document.getElementById('bState')?.style.display !== 'none'
+    ? document.getElementById('bState')?.value
+    : document.getElementById('bStateText')?.value) || '';
+  const bCityVal = document.getElementById('bCity')?.value.trim() || '';
+  const bToneVal = document.getElementById('bTone')?.value || 'Cálido, moderno y cercano';
+  if(!bNameVal || !bTypeVal || !bDiffVal || !bAudienceVal) {
+    alert('Completa: Nombre, Tipo de negocio y la descripción de lo que te hace especial.');
+    return;
+  }
+  if(!bCountryVal || !bStateVal) {
+    alert('Selecciona tu país y estado/provincia.');
+    return;
+  }
   const brand={
-    name: parsedName,
-    type: parsedTypeLocation,
-    whatsapp: wa,
-    country: '',
-    state: '',
-    city: parsedTypeLocation,
-    location: parsedTypeLocation,
-    differentiator: story,
-    story: story,
-    audience: '',
-    tone: 'Cálido y moderno',
+    name: bNameVal,
+    type: bTypeVal,
+    whatsapp: bWaVal,
+    country: bCountryVal,
+    state: bStateVal,
+    city: bCityVal,
+    location: getLocation(),
+    differentiator: bDiffVal,
+    story: bDiffVal + ' ' + bAudienceVal,
+    audience: bAudienceVal,
+    tone: bToneVal,
     colors:{ primary:document.getElementById('bC1').value, secondary:document.getElementById('bC2').value, accent:document.getElementById('bC3').value },
     brandGuide:document.getElementById('bgText').value,
     pillars:(()=>{
@@ -1411,12 +1703,14 @@ function buildPillarBtns(pillars) {
 function goToEdit() {
   const b=loadBrand();
   if(b){
-    document.getElementById('bName').value=b.name||(b.type?b.name+', '+b.type:b.name)||'';
-    const bStoryEl=document.getElementById('bStory'); if(bStoryEl) bStoryEl.value=b.story||b.differentiator||'';
+    document.getElementById('bName').value = b.name||'';
+    const bTypeEl=document.getElementById('bType'); if(bTypeEl) bTypeEl.value=b.type||'';
+    const bDiffEl=document.getElementById('bDiff'); if(bDiffEl) bDiffEl.value=b.differentiator||'';
+    const bAudEl=document.getElementById('bAudience'); if(bAudEl) bAudEl.value=b.audience||'';
+    const bToneEl=document.getElementById('bTone'); if(bToneEl) bToneEl.value=b.tone||'Cálido, moderno y cercano';
     document.getElementById('bWhatsApp').value=b.whatsapp||'';
-    // bDiff and bAudience removed — story field replaces them
-    // bTone, bCountry, bState, bCity removed in new simplified Brand Setup
-    // Story is populated by the goToEdit fix above
+    if(b.country){ const cEl=document.getElementById('bCountry'); if(cEl){ cEl.value=b.country; updateStates(); } setTimeout(()=>{ const sEl=document.getElementById('bState'); if(sEl&&b.state) sEl.value=b.state; },100); }
+    const bCityEl=document.getElementById('bCity'); if(bCityEl) bCityEl.value=b.city||'';
     if(b.colors){ document.getElementById('bC1').value=b.colors.primary; document.getElementById('bC2').value=b.colors.secondary; document.getElementById('bC3').value=b.colors.accent; }
     if(b.logo){ logoB64=b.logo; const img=document.getElementById('logoImg'); img.src=b.logo; img.style.display='block'; document.getElementById('logoPlus').style.display='none'; }
     if(b.brandGuide){
@@ -1451,8 +1745,11 @@ function setImageStyle(style, btn) {
 }
 function updateStyleSelector() {
   const sel = document.getElementById('styleSel');
-  // Show for post mode, and flyer-ai mode only
-  const visible = mode === 'post' || (mode === 'flyer' && flyerMode === 'ai');
+  // Show for post, flyer-ai, carousel-AI only
+  // Hide when using real photos (enhance, flyer-photo, carousel-photo)
+  const visible = mode === 'post' ||
+    (mode === 'flyer' && flyerMode === 'ai') ||
+    (mode === 'carousel' && carouselCoverMode === 'ai');
   sel.classList.toggle('show', visible);
   // For testimonials: force abstract (hidden from user)
   if (mode === 'testimonial') { imageStyle = 'abstract'; }
@@ -1482,10 +1779,11 @@ async function aiUpdateBrandGuide() {
     btn.textContent = 'Aplicar →'; btn.disabled = false;
   }
 }
+// ─── MODE & UI CONTROLS ──────────────────────────────
 function setMode(m) {
   mode=m;
-  ['post','enhance','flyer','testimonial'].forEach(n=>{ document.getElementById(n+'Input').style.display=n===m?'block':'none'; });
-  ['mc1','mc2','mc3','mc4'].forEach((id,i)=>{ document.getElementById(id).classList.toggle('active',['post','enhance','flyer','testimonial'][i]===m); });
+  ['post','enhance','flyer','testimonial','carousel'].forEach(n=>{ document.getElementById(n+'Input').style.display=n===m?'block':'none'; });
+  ['mc1','mc2','mc3','mc4','mc5'].forEach((id,i)=>{ const el=document.getElementById(id); if(el) el.classList.toggle('active',['post','enhance','flyer','testimonial','carousel'][i]===m); });
   updateStyleSelector();
 }
 function setPlatform(btn) {
@@ -1523,6 +1821,245 @@ function setEnhanceExample(el) {
   ta.value = examples[el.textContent.trim()] || el.textContent;
   ta.focus();
 }
+
+// ╔═══════════════════════════════════════════════════╗
+// ║  CAROUSEL                                        ║
+// ╚═══════════════════════════════════════════════════╝
+// ── CAROUSEL FUNCTIONS ─────────────────────────────────────────────────────
+let carouselSlides = 5;
+let carouselStyle = 'Educativo';
+let carouselResults = []; // stores rendered slide data URLs
+let carouselCoverMode = 'ai'; // 'ai' or 'photo'
+let carouselCoverB64 = null;
+let carouselCoverMime = 'image/jpeg';
+
+function scrollCarousel(dir) {
+  const el = document.getElementById('carouselSlidesPreview');
+  if(el) el.scrollBy({ left: dir * 150, behavior: 'smooth' });
+}
+function updateCarouselDots(activeIdx) {
+  const dots = document.querySelectorAll('.cs-dot');
+  dots.forEach((d,i) => d.classList.toggle('active', i === activeIdx));
+  // Update active thumbnail
+  const previews = document.querySelectorAll('.cs-preview');
+  previews.forEach((p,i) => p.classList.toggle('active', i === activeIdx));
+  if(carouselResults[activeIdx]) document.getElementById('resultImg').src = carouselResults[activeIdx];
+}
+function adjustSlides(delta) {
+  carouselSlides = Math.min(Math.max(carouselSlides + delta, 3), 10);
+  document.getElementById('slideCountVal').textContent = carouselSlides;
+}
+function setCarouselCoverMode(m, btn) {
+  carouselCoverMode = m;
+  document.querySelectorAll('#cvrAI,#cvrPhoto').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('carouselPhotoWrap').style.display = m==='photo' ? 'block' : 'none';
+  updateStyleSelector(); // Hide/show fotorrealista selector based on photo vs AI
+}
+function setCarouselStyle(btn) {
+  document.querySelectorAll('.cs-style-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  carouselStyle = btn.dataset.style;
+}
+
+async function genCarousel(brand, bg) {
+  const topic = document.getElementById('carouselTopic')?.value.trim();
+  if(!topic) { alert('Escribe el tema del carrusel.'); return; }
+  if(carouselCoverMode==='photo' && !carouselCoverB64) { alert('Sube una foto para la portada.'); return; }
+  setStep(1);
+  // If photo mode, convert to PNG first
+  let coverPhoto = null, coverMime = null;
+  if(carouselCoverMode==='photo' && carouselCoverB64) {
+    const conv = await convertToPNG(carouselCoverB64, carouselCoverMime, 1024);
+    coverPhoto = conv.b64; coverMime = 'image/png';
+  }
+  const res = await postWithTimeout({
+    mode: 'carousel',
+    topic, slideCount: carouselSlides, style: carouselStyle,
+    brandGuide: bg, brandData: brand, imageStyle,
+    coverPhotoB64: coverPhoto, coverPhotoType: coverMime
+  }, 55000);
+  setStep(2);
+  // Render all slides using Canvas
+  carouselResults = [];
+  const slides = res.slides || [];
+  for (let i = 0; i < slides.length; i++) {
+    const dataUrl = await renderCarouselSlide(slides[i], brand, res.coverImage, slides.length);
+    carouselResults.push(dataUrl);
+  }
+  setStep(3); setStep(4);
+  showResult({ ...res, carouselImages: carouselResults });
+}
+
+async function renderCarouselSlide(slide, brand, coverImageUrl, totalSlides) {
+  const W = 1080, H = 1080;
+  const canvas = document.createElement('canvas');
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+  const primary = brand?.colors?.primary || '#2979FF';
+  const secondary = brand?.colors?.secondary || '#76C442';
+  const accent = brand?.colors?.accent || '#E91E8C';
+
+  if (slide.type === 'cover') {
+    // Cover: AI image + dark overlay + title
+    try {
+      const img = await loadImg(coverImageUrl);
+      if(img) {
+        const ps = Math.min(img.width, img.height);
+        ctx.drawImage(img, (img.width-ps)/2, (img.height-ps)/2, ps, ps, 0, 0, W, H);
+      }
+    } catch(e) {
+      ctx.fillStyle = primary; ctx.fillRect(0,0,W,H);
+    }
+    const grad = ctx.createLinearGradient(0, H*0.3, 0, H);
+    grad.addColorStop(0,'rgba(0,0,0,0.1)');
+    grad.addColorStop(1,'rgba(0,0,0,0.78)');
+    ctx.fillStyle = grad; ctx.fillRect(0,0,W,H);
+    // Headline
+    ctx.fillStyle = '#fff'; ctx.textAlign = 'center';
+    ctx.font = 'bold 68px sans-serif';
+    carouselWrapText(ctx, slide.headline || '', W/2, H*0.65, W-120, 80);
+    if(slide.subheadline) {
+      ctx.font = '34px sans-serif'; ctx.fillStyle = 'rgba(255,255,255,0.85)';
+      ctx.fillText(slide.subheadline.slice(0,60), W/2, H*0.82);
+    }
+    // Swipe cta
+    ctx.font = 'bold 26px sans-serif'; ctx.fillStyle = 'rgba(255,255,255,0.7)';
+    ctx.fillText((slide.swipe || 'Desliza para saber más →'), W/2, H-40);
+
+  } else if (slide.type === 'cta') {
+    // CTA: gradient background
+    const grad = ctx.createLinearGradient(0, 0, W, H);
+    grad.addColorStop(0, primary); grad.addColorStop(1, darkenHex(primary, 0.35));
+    ctx.fillStyle = grad; ctx.fillRect(0,0,W,H);
+    // Decorative circles
+    ctx.beginPath(); ctx.arc(W-80, 80, 200, 0, Math.PI*2);
+    ctx.fillStyle = 'rgba(255,255,255,0.06)'; ctx.fill();
+    ctx.beginPath(); ctx.arc(80, H-80, 160, 0, Math.PI*2);
+    ctx.fillStyle = 'rgba(255,255,255,0.04)'; ctx.fill();
+    // Headline
+    ctx.fillStyle = '#fff'; ctx.textAlign = 'center';
+    ctx.font = 'bold 66px sans-serif';
+    carouselWrapText(ctx, slide.headline || '', W/2, H*0.35, W-120, 80);
+    // Body
+    if(slide.body) {
+      ctx.font = '34px sans-serif'; ctx.fillStyle = 'rgba(255,255,255,0.88)';
+      carouselWrapText(ctx, slide.body, W/2, H*0.55, W-140, 48);
+    }
+    // CTA button
+    ctx.fillStyle = accent;
+    const btnW = 480, btnH = 80, btnX = (W-btnW)/2, btnY = H*0.7;
+    carouselRoundRect(ctx, btnX, btnY, btnW, btnH, 40);
+    ctx.fillStyle = '#fff'; ctx.font = 'bold 30px sans-serif';
+    ctx.fillText(slide.cta || 'Contáctanos', W/2, btnY + btnH*0.62);
+    // WhatsApp
+    if(brand?.whatsapp) {
+      ctx.font = '24px sans-serif'; ctx.fillStyle = 'rgba(255,255,255,0.65)';
+      ctx.fillText('📱 ' + brand.whatsapp, W/2, H-50);
+    }
+
+  } else {
+    // Content slide: clean white + brand accents
+    ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0,0,W,H);
+    // Top accent bar
+    ctx.fillStyle = primary; ctx.fillRect(0,0,W,10);
+    // Bottom accent bar
+    ctx.fillStyle = primary; ctx.fillRect(0,H-10,W,10);
+    // Slide number pill (top right)
+    ctx.fillStyle = primary;
+    carouselRoundRect(ctx, W-130, 24, 100, 36, 18);
+    ctx.fillStyle = '#fff'; ctx.font = 'bold 18px sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText(slide.n + ' / ' + totalSlides, W-80, 47);
+    // Icon
+    ctx.font = '90px sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText(slide.icon || '💡', W/2, H*0.28);
+    // Headline
+    ctx.fillStyle = '#0C1F35'; ctx.font = 'bold 54px sans-serif';
+    carouselWrapText(ctx, slide.headline || '', W/2, H*0.45, W-100, 68);
+    // Body
+    if(slide.body) {
+      ctx.fillStyle = '#4A6080'; ctx.font = '34px sans-serif';
+      carouselWrapText(ctx, slide.body, W/2, H*0.65, W-120, 48);
+    }
+    // Brand name bottom center
+    ctx.font = 'bold 22px sans-serif'; ctx.fillStyle = primary;
+    ctx.fillText(brand?.name || '', W/2, H-30);
+  }
+
+  // Logo overlay (top left for content/cta, top left for cover)
+  const logoSrc = logoB64 || brand?.logo;
+  if(logoSrc) {
+    try {
+      const logo = await loadImg(logoSrc);
+      if(logo) {
+        const sz = 56, lx = 20, ly = 16;
+        ctx.save();
+        ctx.beginPath(); ctx.arc(lx+sz/2, ly+sz/2, sz/2+3, 0, Math.PI*2);
+        ctx.fillStyle = 'rgba(255,255,255,0.9)'; ctx.fill();
+        ctx.beginPath(); ctx.arc(lx+sz/2, ly+sz/2, sz/2, 0, Math.PI*2); ctx.clip();
+        ctx.drawImage(logo, lx, ly, sz, sz);
+        ctx.restore();
+      }
+    } catch(e) {}
+  }
+
+  return new Promise(res => canvas.toBlob(b => {
+    const reader = new FileReader();
+    reader.onload = e => res(e.target.result);
+    reader.readAsDataURL(b);
+  }, 'image/jpeg', 0.93));
+}
+
+function carouselWrapText(ctx, text, x, y, maxW, lineH) {
+  if(!text) return y;
+  const words = text.split(' ');
+  let line = '', cy = y;
+  for(const w of words) {
+    const test = line ? line + ' ' + w : w;
+    if(ctx.measureText(test).width > maxW && line) {
+      ctx.fillText(line, x, cy); line = w; cy += lineH;
+    } else line = test;
+  }
+  if(line) ctx.fillText(line, x, cy);
+  return cy + lineH;
+}
+
+function carouselRoundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x+r, y);
+  ctx.lineTo(x+w-r, y); ctx.quadraticCurveTo(x+w, y, x+w, y+r);
+  ctx.lineTo(x+w, y+h-r); ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+  ctx.lineTo(x+r, y+h); ctx.quadraticCurveTo(x, y+h, x, y+h-r);
+  ctx.lineTo(x, y+r); ctx.quadraticCurveTo(x, y, x+r, y);
+  ctx.closePath(); ctx.fill();
+}
+
+function darkenHex(hex, amount) {
+  try {
+    const r = Math.max(0, parseInt(hex.slice(1,3),16) - Math.round(255*amount));
+    const g = Math.max(0, parseInt(hex.slice(3,5),16) - Math.round(255*amount));
+    const b = Math.max(0, parseInt(hex.slice(5,7),16) - Math.round(255*amount));
+    return '#'+[r,g,b].map(v=>v.toString(16).padStart(2,'0')).join('');
+  } catch(e) { return hex; }
+}
+
+function downloadCarouselSlide(idx) {
+  const a = document.createElement('a');
+  a.href = carouselResults[idx];
+  a.download = 'slide-' + (idx+1) + '.jpg';
+  a.click();
+}
+
+function downloadAllSlides() {
+  carouselResults.forEach((url, i) => {
+    setTimeout(() => {
+      const a = document.createElement('a');
+      a.href = url; a.download = 'slide-' + (i+1) + '.jpg';
+      a.click();
+    }, i * 400);
+  });
+}
+
 function setFlyerMode(m) {
   flyerMode=m;
   document.getElementById('flyerAIBtn').classList.toggle('active',m==='ai');
@@ -1536,24 +2073,23 @@ function setFlyerMode(m) {
 // ═══════════════════════════════════════════════════════
 async function generate() {
   const brand=loadBrand();
-  if(!brand){ alert(lang==='es'?'Primero configura tu marca.':'Please set up your brand first.'); return; }
+  if(!brand){ alert('Primero configura tu marca.'); return; }
   // ── Generation limit check (Phase 2 model) ────────────────────────────
-  const plan = brand?.plan || CONFIG.defaultPlan;
-  const limit = (CONFIG.plans[plan] || CONFIG.plans.trial).gens;
+  const plan = brand?.plan || 'trial';
+  const limit = GEN_LIMITS[plan] || GEN_LIMITS['trial'];
   const monthKey = 'postimity_gens_' + new Date().toISOString().slice(0,7);
   const usedThisMonth = parseInt(localStorage.getItem(monthKey) || '0');
   if (usedThisMonth >= limit) {
-    const msg = lang === 'es'
-      ? `Llegaste al límite de ${limit} generaciones este mes (plan ${plan}). ¿Quieres ver los planes de Postimity?`
-      : `You've reached the ${limit} generation limit this month (${plan} plan). View Postimity plans?`;
-    if (confirm(msg)) alert(lang==='es'?'Escríbenos a postimity@gmail.com para hacer upgrade.':'Contact postimity@gmail.com to upgrade.');
+    const msg = `Llegaste al límite de ${limit} generaciones este mes. Escríbenos a postimity@gmail.com para hacer upgrade.`;
+    alert(msg);
     return;
   }
   // Validate inputs
   if(mode==='post'&&!document.getElementById('postText').value.trim()){ alert('Escribe qué quieres publicar.'); return; }
   if(mode==='enhance'&&!enhanceB64){ alert('Sube una foto primero.'); return; }
-  if(mode==='flyer'&&flyerMode==='ai'&&!document.getElementById('flyerFreeText')?.value.trim()){ alert(lang==='es'?'Describe el contenido del flyer.':'Describe your flyer content.'); return; }
+  if(mode==='flyer'&&flyerMode==='ai'&&!document.getElementById('flyerTitle2')?.value.trim()){ alert('Escribe el título del flyer.'); return; }
   if(mode==='flyer'&&flyerMode==='photo'&&!flyerPhotoB64){ alert('Sube una foto para el flyer.'); return; }
+  if(mode==='carousel'&&!document.getElementById('carouselTopic')?.value.trim()){ alert('Escribe el tema del carrusel.'); return; }
   if(mode==='testimonial'&&!document.getElementById('testText').value.trim()&&!testPhotoB64){
     alert('Pega una reseña de tu cliente o sube su foto para continuar.'); return;
   }
@@ -1568,6 +2104,7 @@ async function generate() {
     else if(mode==='flyer'&&flyerMode==='ai') await genFlyerAI(brand,bg);
     else if(mode==='flyer'&&flyerMode==='photo') await genFlyerPhoto(brand,bg);
     else if(mode==='testimonial') await genTestimonial(brand,bg);
+    else if(mode==='carousel') await genCarousel(brand,bg);
   } catch(err) {
     showLoading(false);
     document.getElementById('errWrap').classList.add('show');
@@ -1575,6 +2112,7 @@ async function generate() {
   }
 }
 
+// ─── POST GENERATION ─────────────────────────────────
 async function genPost(brand,bg) {
   setStep(1);
   const capRes=await post({ mode:'captions', textInput:document.getElementById('postText').value.trim(), brandGuide:bg, brandData:brand, pillar, platform, imageStyle });
@@ -1584,6 +2122,7 @@ async function genPost(brand,bg) {
   setStep(4);
   showResult({ ...capRes, imageUrl:imgRes.imageUrl });
 }
+// ─── ESTUDIO PRO (ENHANCE) ────────────────────────────
 async function genEnhance(brand,bg) {
   setStep(1);
   setStep(2);
@@ -1606,6 +2145,341 @@ async function genEnhance(brand,bg) {
   setStep(3); setStep(4);
   showResult(res);
 }
+// ╔═══════════════════════════════════════════════════╗
+// ║  MARKETING AGENT                                 ║
+// ╚═══════════════════════════════════════════════════╝
+let agentFreq = 5;
+let agentPlats = ['instagram', 'facebook'];
+let agentPlan = null;
+let agentPostsCache = []; // Stores posts indexed for onclick access
+
+function getCurrentMonth() {
+  const now = new Date();
+  return now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+}
+
+function getMonthLabel(monthStr) {
+  const [y, m] = monthStr.split('-');
+  const names = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  return names[parseInt(m) - 1] + ' ' + y;
+}
+
+function showAgentScreen() {
+  const month = getCurrentMonth();
+  const label = getMonthLabel(month);
+  const el = document.getElementById('agentMonthLabel');
+  if(el) el.textContent = label;
+  const badge = document.getElementById('agentMonthBadge');
+  if(badge) badge.textContent = label;
+
+  // Make sure config is shown (reset state)
+  showAgentConfig();
+
+  // Try to load saved plan for this month
+  const brand = loadBrand();
+  if(brand?.brandId) {
+    fetch(WORKER, { method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ mode:'get-agent-plan', brandId: brand.brandId, month })
+    }).then(r=>r.json()).then(data => {
+      if(data.success && data.plan) {
+        agentPlan = data.plan;
+        renderAgentPlan(data.plan);
+      }
+    }).catch(() => {});
+  }
+
+  // Show the screen
+  document.querySelectorAll('.screen').forEach(s => {
+    s.classList.remove('active');
+    if(s.id !== 'agentScreen') s.style.display = '';
+  });
+  const agentEl = document.getElementById('agentScreen');
+  if(agentEl) {
+    agentEl.classList.add('active');
+    agentEl.style.display = 'block';
+  }
+  window.scrollTo(0, 0);
+}
+
+function showCreatorFromAgent() {
+  const agentEl = document.getElementById('agentScreen');
+  if(agentEl) { agentEl.classList.remove('active'); agentEl.style.display = ''; }
+  showScreen('creatorScreen');
+}
+
+function showAgentConfig() {
+  document.getElementById('agentConfigWrap').style.display = 'block';
+  document.getElementById('agentPlanWrap').style.display = 'none';
+}
+
+function setAgentFreq(btn) {
+  document.querySelectorAll('.agent-freq-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  agentFreq = parseInt(btn.dataset.freq);
+}
+
+function toggleAgentPlat(btn) {
+  const plat = btn.dataset.plat;
+  btn.classList.toggle('active');
+  if(btn.classList.contains('active')) {
+    if(!agentPlats.includes(plat)) agentPlats.push(plat);
+  } else {
+    agentPlats = agentPlats.filter(p => p !== plat);
+    if(agentPlats.length === 0) { btn.classList.add('active'); agentPlats = [plat]; } // min 1
+  }
+}
+
+async function generateAgentPlan() {
+  const brand = loadBrand();
+  const bg = brand?.brandGuide;
+  if(!bg) { alert('Primero completa tu Brand Guide para generar el plan.'); return; }
+  if(agentPlats.length === 0) { alert('Selecciona al menos una plataforma.'); return; }
+
+  const btn = document.getElementById('btnGenAgent');
+  const note = document.getElementById('agentLoadNote');
+  btn.disabled = true;
+  btn.textContent = '⏳ Generando plan...';
+  if(note) note.style.display = 'block';
+
+  try {
+    const month = getCurrentMonth();
+    const lang = localStorage.getItem('postimity_lang') || 'es';
+    const res = await fetch(WORKER, { method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        mode: 'marketing-agent',
+        brandGuide: bg,
+        brandData: { ...brand, brandId: brandId || '' },
+        month, postsPerWeek: agentFreq,
+        platforms: agentPlats, language: lang
+      })
+    });
+    const data = await res.json();
+    if(!data.success) throw new Error(data.error || 'Error del servidor');
+
+    agentPlan = data;
+
+    // Save plan to KV
+    if(brandId) {
+      fetch(WORKER, { method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ mode:'save-agent-plan', brandId, month, plan: data })
+      }).catch(() => {});
+    }
+
+    renderAgentPlan(data);
+
+    // Update agent bar
+    const sub = document.getElementById('agentBarSub');
+    if(sub) sub.textContent = data.totalPosts + ' posts planificados para ' + getMonthLabel(month);
+
+  } catch(e) {
+    console.error('Marketing Agent error:', e);
+    const msg = e.message || 'Error desconocido';
+    alert('No se pudo generar el plan. ' + (msg.includes('Could not parse') ? 'La AI devolvió una respuesta inválida — intenta de nuevo en unos segundos.' : msg));
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '✨ Generar plan de <span id="agentMonthLabel">' + getMonthLabel(getCurrentMonth()) + '</span>';
+    if(note) note.style.display = 'none';
+  }
+}
+
+function renderAgentPlan(plan) {
+  document.getElementById('agentConfigWrap').style.display = 'none';
+  document.getElementById('agentPlanWrap').style.display = 'block';
+
+  const summary = document.getElementById('agentSummary');
+  if(summary) summary.innerHTML = '📋 <strong>' + (plan.month||'') + '</strong> · ' + (plan.totalPosts||0) + ' posts · ' + (plan.summary||'');
+
+  const container = document.getElementById('agentPlanContent');
+  if(!container) return;
+
+  // Cache posts by index for clean onclick access
+  const posts = plan.posts || [];
+  agentPostsCache = posts;
+  const weeks = {};
+  posts.forEach(post => {
+    const d = new Date(post.date + 'T12:00:00');
+    const weekStart = new Date(d);
+    weekStart.setDate(d.getDate() - d.getDay() + 1); // Monday
+    const wKey = weekStart.toISOString().slice(0,10);
+    if(!weeks[wKey]) weeks[wKey] = [];
+    weeks[wKey].push(post);
+  });
+
+  // Reminder toggle card
+  const brandForReminder = loadBrand();
+  const remActive = localStorage.getItem('postimity_reminders_' + getCurrentMonth()) === 'on';
+  container.innerHTML = renderReminderCard(remActive, brandForReminder);
+
+  const monthNames = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
+  Object.keys(weeks).sort().forEach((wKey, wi) => {
+    const wPosts = weeks[wKey];
+    const firstDate = new Date(wKey + 'T12:00:00');
+    const lastDate = new Date(wPosts[wPosts.length-1].date + 'T12:00:00');
+    const weekDiv = document.createElement('div');
+    weekDiv.className = 'agent-week';
+    weekDiv.innerHTML = '<div class="agent-week-label">Semana ' + (wi+1) + ' · ' + firstDate.getDate() + ' al ' + lastDate.getDate() + ' de ' + monthNames[firstDate.getMonth()] + '</div>';
+
+    wPosts.forEach(post => {
+      const card = document.createElement('div');
+      card.className = 'agent-post-card' + (post.festivity ? ' festivity' : '');
+      const platClass = post.platform || 'instagram';
+      const platLabel = post.platform === 'instagram' ? '📸 Instagram' : post.platform === 'facebook' ? '👥 Facebook' : '🎵 TikTok';
+      const postIdx = agentPostsCache.indexOf(post);
+      card.innerHTML = '<div class="apc-meta">' +
+        '<span class="apc-date">' + (post.dayName||'') + ' ' + (post.dateShort||post.date) + '</span>' +
+        '<span class="apc-plat ' + platClass + '">' + platLabel + '</span>' +
+        '<span class="apc-pilar">' + (post.pilar||'') + '</span>' +
+        (post.festivity ? '<span class="apc-fest">🎉 ' + post.festivity + '</span>' : '') +
+        '</div>' +
+        '<div class="apc-topic">' + (post.topic||'') + '</div>' +
+        '<div class="apc-prompt">' + (post.prompt||'') + '</div>' +
+        '<div class="apc-btns">' +
+        '<button class="apc-btn create" onclick="goCreatePost(' + postIdx + ')">→ Crear este post</button>' +
+        '<button class="apc-btn copy" onclick="copyPrompt(' + postIdx + ')">📋 Copiar prompt</button>' +
+
+        '</div>';
+      weekDiv.appendChild(card);
+    });
+    container.appendChild(weekDiv);
+  });
+}
+
+function goCreatePost(idx) {
+  const post = agentPostsCache[idx];
+  if(!post) { showToast('Error: post no encontrado'); return; }
+  // Pre-fill the creator screen
+  setMode('post');
+  const ta = document.getElementById('postText');
+  if(ta) ta.value = post.prompt || '';
+  if(post.pilar) setPillarByName(post.pilar);
+  if(post.platform) setPlatformByName(post.platform);
+  // Go back to creator
+  const agentEl = document.getElementById('agentScreen');
+  if(agentEl) { agentEl.classList.remove('active'); agentEl.style.display = ''; }
+  showScreen('creatorScreen');
+  showToast('✨ Post pre-cargado — solo dale Generar');
+  setTimeout(() => { ta?.focus(); ta?.scrollIntoView({behavior:'smooth', block:'center'}); }, 350);
+}
+
+function setPillarByName(pilarName) {
+  const btns = document.querySelectorAll('.pillar-btn');
+  let found = false;
+  btns.forEach(btn => {
+    if(btn.textContent.trim().toLowerCase().includes(pilarName.toLowerCase().slice(0,8))) {
+      btn.click(); found = true;
+    }
+  });
+  if(!found) pillar = pilarName; // set directly if button not found
+}
+
+function setPlatformByName(platName) {
+  const tabs = document.querySelectorAll('.plat-tab');
+  tabs.forEach(tab => {
+    if(tab.dataset.plat === platName || tab.textContent.toLowerCase().includes(platName)) {
+      tab.click();
+    }
+  });
+}
+
+function renderReminderCard(active, brand) {
+  const businessName = brand?.name || 'tu negocio';
+  const waNum = brand?.whatsapp || '';
+  const month = getCurrentMonth();
+  const monthLabel = getMonthLabel(month);
+  if(active) {
+    return '<div class="reminder-card active" id="reminderCard">' +
+      '<span class="reminder-icon">🔔</span>' +
+      '<div class="reminder-info">' +
+        '<div class="reminder-title">Recordatorios activos para ' + monthLabel + '</div>' +
+        '<div class="reminder-sub">Cuando conectes Twilio, recibirás un mensaje personal cada mañana antes de tu post del día</div>' +
+      '</div>' +
+      '<div class="reminder-toggle">' +
+        '<button class="reminder-btn on" onclick="toggleReminders(false)">✓ Activo</button>' +
+      '</div>' +
+    '</div>';
+  } else {
+    return '<div class="reminder-card" id="reminderCard">' +
+      '<span class="reminder-icon">🔔</span>' +
+      '<div class="reminder-info">' +
+        '<div class="reminder-title">Recordatorios por WhatsApp</div>' +
+        '<div class="reminder-sub">Recibe un mensaje cálido cada mañana con el post del día y un link directo para generarlo</div>' +
+      '</div>' +
+      '<div class="reminder-toggle">' +
+        '<button class="reminder-btn off" onclick="toggleReminders(true)">Activar →</button>' +
+      '</div>' +
+    '</div>';
+  }
+}
+
+function toggleReminders(activate) {
+  const month = getCurrentMonth();
+  const brand = loadBrand();
+  const businessName = brand?.name || 'tu negocio';
+
+  if(activate) {
+    localStorage.setItem('postimity_reminders_' + month, 'on');
+    // Update card in place
+    const card = document.getElementById('reminderCard');
+    if(card) card.outerHTML = renderReminderCard(true, brand);
+    // Show warm confirmation message
+    const monthLabel = getMonthLabel(month);
+    showToast('🔔 Recordatorios activados para ' + monthLabel);
+    setTimeout(() => {
+      // Show info modal about what will happen
+      const msg = '✅ Recordatorios activados para ' + monthLabel + '\n\n' +
+        'Cuando conectemos Twilio recibirás cada mañana un mensaje así:\n\n' +
+        '☀️ Buenos días! Hoy es tu momento de brillar.\n' +
+        'Tu post: [tema del día]\n' +
+        'Un solo toque y está listo → [link]\n\n' +
+        'Por ahora tu plan está guardado aquí.';
+      alert(msg);
+    }, 500);
+  } else {
+    localStorage.removeItem('postimity_reminders_' + month);
+    const card = document.getElementById('reminderCard');
+    if(card) card.outerHTML = renderReminderCard(false, brand);
+    showToast('Recordatorios desactivados');
+  }
+}
+
+function copyPrompt(idx) {
+  const post = agentPostsCache[idx];
+  if(!post) { showToast('Error: post no encontrado'); return; }
+  const text = post.prompt || '';
+  navigator.clipboard.writeText(text)
+    .then(() => showToast('📋 Prompt copiado'))
+    .catch(() => {
+      const ta = document.createElement('textarea');
+      ta.value = text; document.body.appendChild(ta); ta.select();
+      document.execCommand('copy'); document.body.removeChild(ta);
+      showToast('📋 Prompt copiado');
+    });
+}
+
+// ── Deep-link pre-fill from URL params ────────────────────────────────────
+function checkDeepLink() {
+  const params = new URLSearchParams(window.location.search);
+  const dlMode = params.get('mode');
+  const dlPillar = params.get('pillar');
+  const dlPrompt = params.get('prompt');
+  const dlPlatform = params.get('platform');
+  if(!dlPrompt && !dlPillar && !dlMode) return; // no deep-link params
+
+  setTimeout(() => { // wait for brand to load
+    if(dlMode && ['post','enhance','flyer','testimonial','carousel'].includes(dlMode)) setMode(dlMode);
+    if(dlPrompt) { const ta = document.getElementById('postText'); if(ta) ta.value = decodeURIComponent(dlPrompt); }
+    if(dlPillar) setPillarByName(decodeURIComponent(dlPillar));
+    if(dlPlatform) setPlatformByName(dlPlatform);
+    showToast('✨ Post pre-cargado desde tu plan mensual — solo dale Generar');
+    // Clean URL keeping only brandId
+    const base = window.location.href.split('?')[0];
+    const bId = new URLSearchParams(window.location.search).get('b');
+    history.replaceState({}, '', base + (bId ? '?b=' + bId : ''));
+  }, 500);
+}
+
+// ─── FLYER GENERATION ─────────────────────────────────
 async function genFlyerAI(brand,bg) {
   const fd=getFlyerData();
   setStep(1);
@@ -1626,6 +2500,7 @@ async function genFlyerPhoto(brand,bg) {
   setStep(4);
   showResult({ ...capRes, imageUrl, postType:fd.type });
 }
+// ─── TESTIMONIAL ───────────────────────────────────────
 async function genTestimonial(brand,bg) {
   setStep(1); setStep(2); setStep(3);
   const res=await post({ mode:'testimonial', reviewText:document.getElementById('testText').value.trim(), imageBase64:testPhotoB64||undefined, imageType:testPhotoMime, brandGuide:bg, brandData:brand, pillar });
@@ -1633,25 +2508,17 @@ async function genTestimonial(brand,bg) {
   showResult(res);
 }
 
-function setFlyerType(btn) {
-  document.querySelectorAll('.flyer-type-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  document.getElementById('flyerType').value = btn.dataset.type;
-}
 function getFlyerData() {
-  const freeText = document.getElementById('flyerFreeText')?.value.trim() || '';
-  const type = document.querySelector('.flyer-type-btn.active')?.dataset.type || document.getElementById('flyerType').value || 'Evento';
   return {
-    type, freeText,
-    style: document.getElementById('flyerStyle')?.value || 'Colorido y vibrante',
-    // Legacy fields — used by Canvas composition for photo flyers
-    title: freeText.split(',')[0]?.trim() || freeText.slice(0,60),
+    type:     document.getElementById('flyerType')?.value || 'Evento',
+    style:    document.getElementById('flyerStyle')?.value || 'Colorido y vibrante, estilo agencia creativa',
+    title:    document.getElementById('flyerTitle2')?.value.trim() || '',
     subtitle: document.getElementById('flyerSub')?.value.trim() || '',
-    tagline: document.getElementById('flyerTag')?.value.trim() || '',
-    dates: document.getElementById('flyerDates')?.value.trim() || '',
-    price: document.getElementById('flyerPrice')?.value.trim() || '',
+    tagline:  document.getElementById('flyerTag')?.value.trim() || '',
+    dates:    document.getElementById('flyerDates')?.value.trim() || '',
+    price:    document.getElementById('flyerPrice')?.value.trim() || '',
     schedule: document.getElementById('flyerSched')?.value.trim() || '',
-    extraInfo: document.getElementById('flyerExtra')?.value.trim() || ''
+    extraInfo:document.getElementById('flyerExtra')?.value.trim() || ''
   };
 }
 
@@ -1720,6 +2587,7 @@ async function regenText() {
 // ═══════════════════════════════════════════════════════
 // SHOW RESULT
 // ═══════════════════════════════════════════════════════
+// ─── RESULT DISPLAY ──────────────────────────────────
 function showResult(data) {
   lastResult=data;
   showLoading(false);
@@ -1727,6 +2595,33 @@ function showResult(data) {
   document.getElementById('resultImg').src=data.imageUrl||'';
   const pd=document.getElementById('photoDescBar');
   if(data.photoDescription){ pd.textContent='📷 '+data.photoDescription; pd.classList.add('show'); } else pd.classList.remove('show');
+  // Show carousel slides preview
+  const carouselPreviewWrap = document.getElementById('carouselPreviewWrap');
+  if(data.carouselImages && data.carouselImages.length && carouselPreviewWrap) {
+    carouselPreviewWrap.style.display = 'block';
+    const preview = document.getElementById('carouselSlidesPreview');
+    preview.innerHTML = '';
+    const dots = document.getElementById('csDots');
+    if(dots) dots.innerHTML = '';
+    data.carouselImages.forEach((url, i) => {
+      const div = document.createElement('div');
+      div.className = 'cs-preview' + (i===0?' active':'');
+      div.innerHTML = '<img src="'+url+'" alt="Slide '+(i+1)+'"><span class="cs-num">'+(i+1)+'</span><button class="cs-dl" onclick="event.stopPropagation();downloadCarouselSlide('+i+')" title="Descargar slide">⬇</button>';
+      div.onclick = () => updateCarouselDots(i);
+      preview.appendChild(div);
+      // Add dot
+      if(dots) {
+        const dot = document.createElement('div');
+        dot.className = 'cs-dot' + (i===0?' active':'');
+        dot.onclick = () => { updateCarouselDots(i); document.querySelectorAll('.cs-preview')[i]?.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'}); };
+        dots.appendChild(dot);
+      }
+    });
+    // Show first slide in main result img
+    document.getElementById('resultImg').src = data.carouselImages[0];
+  } else if(carouselPreviewWrap) {
+    carouselPreviewWrap.style.display = 'none';
+  }
   // Show keyQuote for testimonials
   const kqWrap = document.getElementById('keyQuoteWrap');
   if(data.keyQuote && data.postType==='Testimonio') {
@@ -1753,6 +2648,7 @@ function showResult(data) {
   updateGenCounter();
 }
 
+// ─── CAPTIONS ────────────────────────────────────────
 function fillCaptions(data) {
   const ig=data.instagram||{}, fb=data.facebook||{}, tt=data.tiktok||{};
   set('igCap', ig.caption||'');
@@ -1834,6 +2730,7 @@ function toggleAdBrief() {
 // ═══════════════════════════════════════════════════════
 // CANVAS — DOWNLOAD + LOGO OVERLAY
 // ═══════════════════════════════════════════════════════
+// ─── DOWNLOAD ─────────────────────────────────────────
 async function downloadImg(format) {
   const imgEl=document.getElementById('resultImg');
   if(!imgEl.src||imgEl.src===window.location.href) return;
@@ -1984,6 +2881,7 @@ function hexToRgba(hex,alpha){
   return 'rgba('+r+','+g+','+b+','+alpha+')';
 }
 
+// ─── IMAGE UTILS ─────────────────────────────────────
 function loadImg(src) {
   return new Promise((res,rej)=>{
     const i=new Image();
@@ -2003,6 +2901,8 @@ function darken(hex,amt) {
 // LOADING
 // ═══════════════════════════════════════════════════════
 const MODE_LOADING = {
+  carousel:    { title:'Creando tu Carrusel...', time:'~35 segundos — generando slides con AI',
+    steps:['Generando contenido de los slides','Creando imagen de portada','Renderizando slides','Listo'] },
   post:        { title:'Creando tu Post...', time:'~20 segundos',
     steps:['Analizando tu solicitud','Generando captions para 3 plataformas','Creando imagen con AI','Preparando resultado'] },
   enhance:     { title:'Editando tu foto profesionalmente...', time:'~35 segundos — editando tu foto real con AI',
@@ -2014,7 +2914,7 @@ const MODE_LOADING = {
 };
 function showLoading(on) {
   document.getElementById('inputCard').style.display=on?'none':'block';
-  document.querySelector('.mode-cards').style.display=on?'none':'grid';
+  document.querySelector('.mode-cards').style.display=on?'none':'';
   const ss=document.getElementById('styleSel'); if(ss) ss.style.display=on?'none':'';
   document.getElementById('loadWrap').classList.toggle('show',on);
   document.getElementById('resultWrap').classList.remove('show');
