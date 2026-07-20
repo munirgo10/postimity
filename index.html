@@ -221,6 +221,22 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
 /* Download */
 .dl-label{font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:7px}
 .dl-btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+/* ─── WATERMARK TOGGLE ─────────────────────────────── */
+.wm-toggle-row{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-top:.5px solid var(--bor)}
+.wm-label{font-size:12px;color:var(--t3);display:flex;align-items:center;gap:5px}
+.wm-label .wm-lock{font-size:10px;padding:1px 6px;border-radius:10px;background:#E6F1FB;color:#185FA5;font-weight:700;margin-left:4px}
+/* ─── ADJUST RESULT ────────────────────────────────── */
+.adjust-wrap{padding:12px 14px;border-top:.5px solid var(--bor);background:var(--bg)}
+.adjust-label{font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px}
+.adjust-row{display:flex;gap:8px;margin-bottom:8px}
+.adjust-input{flex:1;padding:8px 12px;border-radius:9px;border:1.5px solid var(--bor);background:var(--w);font-size:12px;font-family:inherit;color:var(--t1)}
+.adjust-input:focus{border-color:var(--b);outline:none}
+.adjust-btn{padding:8px 16px;border-radius:9px;border:none;background:var(--b);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0}
+.adjust-btn:hover{background:var(--b2)}
+.adjust-btn:disabled{opacity:.5;cursor:default}
+.adjust-chips{display:flex;gap:6px;flex-wrap:wrap}
+.adj-chip{padding:5px 11px;border-radius:20px;border:1px solid var(--bor);background:var(--w);font-size:11px;font-weight:600;cursor:pointer;color:var(--t2);transition:.15s;font-family:inherit}
+.adj-chip:hover{border-color:var(--b);color:var(--b);background:var(--b3)}
 .btn-dl{flex:1;padding:7px 4px;border:1px solid var(--bor);border-radius:7px;background:var(--bg);font-size:11px;font-weight:700;cursor:pointer;transition:.15s;color:var(--t2);text-align:center;line-height:1.3}
 .btn-dl:hover{border-color:var(--b);color:var(--b);background:var(--b3)}
 /* Caption panel */
@@ -1082,6 +1098,13 @@ Ej: 'Wonderik es increíble. Mi hija de 3 años ya lee palabras cortas y su desa
                 <span class="lt-slider"></span>
               </label>
             </div>
+            <div class="wm-toggle-row" id="wmToggleRow">
+              <span class="wm-label">✦ Watermark Postimity <span class="wm-lock" id="wmLockBadge">Starter</span></span>
+              <label class="lt-switch" id="wmToggleWrap" style="display:none">
+                <input type="checkbox" id="wmToggle" checked>
+                <span class="lt-slider"></span>
+              </label>
+            </div>
             <div class="dl-label">⬇ Descargar</div>
             <div class="dl-btns">
               <button class="btn-dl" onclick="downloadImg('square')">1:1<br><span style="font-size:9px;font-weight:400">Feed</span></button>
@@ -1129,6 +1152,23 @@ Ej: 'Wonderik es increíble. Mi hija de 3 años ya lee palabras cortas y su desa
               <button class="cap-copy-btn" onclick="copyCaption('tt',this)">📋 Copiar para TikTok</button>
             </div>
           </div>
+        </div>
+      </div>
+
+      <!-- Adjust Result -->
+      <div class="adjust-wrap" id="adjustWrap" style="display:none">
+        <div class="adjust-label">✏️ Ajustar el contenido</div>
+        <div class="adjust-row">
+          <input type="text" class="adjust-input" id="adjustInput" placeholder="Ej: hazlo más corto · más formal · agrega urgencia · cambia el CTA">
+          <button class="adjust-btn" id="adjustBtn" onclick="adjustResult()">Aplicar</button>
+        </div>
+        <div class="adjust-chips">
+          <button class="adj-chip" onclick="setAdjust('Hazlo más corto, máximo 3 líneas')">Más corto</button>
+          <button class="adj-chip" onclick="setAdjust('Tono más formal y profesional')">Más formal</button>
+          <button class="adj-chip" onclick="setAdjust('Tono más cercano y conversacional')">Más cercano</button>
+          <button class="adj-chip" onclick="setAdjust('Agrega más urgencia y llamada a la acción')">Más urgencia</button>
+          <button class="adj-chip" onclick="setAdjust('Cambia el CTA por uno más directo')">Cambiar CTA</button>
+          <button class="adj-chip" onclick="setAdjust('Añade 2-3 emojis relevantes')">+ Emojis</button>
         </div>
       </div>
 
@@ -2050,6 +2090,56 @@ function downloadCarouselSlide(idx) {
   a.click();
 }
 
+// ─── ADJUST RESULT ─────────────────────────────────────────────────────
+let lastGeneratedData = null; // stores last result for adjust
+
+function setAdjust(text) {
+  const inp = document.getElementById('adjustInput');
+  if(inp) { inp.value = text; inp.focus(); }
+}
+
+async function adjustResult() {
+  const adjustment = document.getElementById('adjustInput')?.value.trim();
+  if(!adjustment) { showToast('Escribe qué quieres ajustar'); return; }
+  const brand = loadBrand();
+  const bg = brand?.brandGuide;
+  if(!bg || !lastGeneratedData) { showToast('Primero genera contenido'); return; }
+
+  const btn = document.getElementById('adjustBtn');
+  if(btn) { btn.disabled = true; btn.textContent = '...'; }
+
+  try {
+    const currentIG = document.getElementById('igCap')?.textContent || '';
+    const currentFB = document.getElementById('fbCap')?.textContent || '';
+    const currentTT = document.getElementById('ttCap')?.textContent || '';
+
+    const res = await fetch(WORKER, { method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        mode: 'adjust',
+        adjustment,
+        currentCaptions: { instagram: currentIG, facebook: currentFB, tiktok: currentTT },
+        brandGuide: bg,
+        brandData: brand,
+        pillar,
+        platform
+      })
+    });
+    const data = await res.json();
+    if(!data.success) throw new Error(data.error || 'Error al ajustar');
+
+    // Update captions in place (don't touch image)
+    if(data.instagram) document.getElementById('igCap').textContent = data.instagram.caption || '';
+    if(data.facebook) document.getElementById('fbCap').textContent = data.facebook.caption || '';
+    if(data.tiktok) document.getElementById('ttCap').textContent = data.tiktok.caption || '';
+    document.getElementById('adjustInput').value = '';
+    showToast('✅ Contenido ajustado');
+  } catch(e) {
+    showToast('Error: ' + e.message);
+  } finally {
+    if(btn) { btn.disabled = false; btn.textContent = 'Aplicar'; }
+  }
+}
+
 function downloadAllSlides() {
   carouselResults.forEach((url, i) => {
     setTimeout(() => {
@@ -2590,11 +2680,27 @@ async function regenText() {
 // ─── RESULT DISPLAY ──────────────────────────────────
 function showResult(data) {
   lastResult=data;
+  lastGeneratedData=data;
   showLoading(false);
+  // Watermark toggle: only Growth+ can disable it
+  const srBrand = loadBrand();
+  const srPlan = srBrand?.plan || 'trial';
+  const wmWrap = document.getElementById('wmToggleWrap');
+  const wmBadge = document.getElementById('wmLockBadge');
+  if(['growth','agency'].includes(srPlan)) {
+    if(wmWrap) wmWrap.style.display = 'flex';
+    if(wmBadge) wmBadge.style.display = 'none';
+  } else {
+    if(wmWrap) wmWrap.style.display = 'none';
+    if(wmBadge) { wmBadge.style.display = 'inline'; wmBadge.textContent = 'Growth+ para quitar'; }
+  }
   // Image
   document.getElementById('resultImg').src=data.imageUrl||'';
   const pd=document.getElementById('photoDescBar');
   if(data.photoDescription){ pd.textContent='📷 '+data.photoDescription; pd.classList.add('show'); } else pd.classList.remove('show');
+  // Show/hide adjust section
+  const adjWrap = document.getElementById('adjustWrap');
+  if(adjWrap) adjWrap.style.display = (mode === 'carousel') ? 'none' : 'block';
   // Show carousel slides preview
   const carouselPreviewWrap = document.getElementById('carouselPreviewWrap');
   if(data.carouselImages && data.carouselImages.length && carouselPreviewWrap) {
@@ -2775,7 +2881,31 @@ async function downloadImg(format) {
     } catch(e){ console.warn('Logo overlay failed:', e); }
   }
 
-  canvas.toBlob(blob=>{ const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=`post-${format}-${Date.now()}.jpg`; a.click(); setTimeout(()=>URL.revokeObjectURL(url),1000); },'image/jpeg',.93);
+  // ── Watermark "✦ postimity.com" ──────────────────────────────────────
+  const wmBrand = loadBrand();
+  const wmPlan = wmBrand?.plan || 'trial';
+  const wmToggleEl = document.getElementById('wmToggle');
+  const wmOff = wmToggleEl && !wmToggleEl.checked;
+  const showWm = !(['growth','agency'].includes(wmPlan) && wmOff);
+  if(showWm) {
+    const wmText = '✦ postimity.com';
+    const wfs = Math.round(canvas.width * 0.021);
+    ctx.font = '600 ' + wfs + 'px -apple-system,sans-serif';
+    const wtw = ctx.measureText(wmText).width;
+    const wpw = wtw + 20, wph = wfs + 12;
+    const wpx = canvas.width - wpw - 16, wpy = canvas.height - wph - 16;
+    ctx.save();
+    ctx.fillStyle = 'rgba(0,0,0,0.42)';
+    ctx.beginPath();
+    if(ctx.roundRect) ctx.roundRect(wpx, wpy, wpw, wph, 6); else ctx.rect(wpx, wpy, wpw, wph);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.88)';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(wmText, wpx + 10, wpy + wph/2);
+    ctx.restore();
+  }
+
+  canvas.toBlob(blob=>{ const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='post-'+format+'-'+Date.now()+'.jpg'; a.click(); setTimeout(()=>URL.revokeObjectURL(url),1000); },'image/jpeg',.93);
 }
 
 async function redrawCanvas() { /* visual refresh only — logo toggle affects download */ }
