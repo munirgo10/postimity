@@ -465,6 +465,132 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
 .reminder-btn.off:hover{border-color:#25D366;color:#25D366;background:rgba(37,211,102,.06)}
 .reminder-btn.on{background:#25D366;color:#fff}
 .reminder-btn.on:hover{background:#1fa851}
+.rem-fields{margin-top:12px;display:flex;flex-direction:column;gap:8px}
+.rem-field-label{font-size:11px;font-weight:700;color:var(--t3);margin-bottom:3px}
+.rem-field-input{width:100%;padding:9px 12px;border-radius:9px;border:1.5px solid var(--bor);background:var(--w);font-size:13px;font-family:inherit;color:var(--t1);transition:border .15s}
+.rem-field-input:focus{border-color:var(--b);outline:none}
+.rem-channel-btns{display:flex;gap:7px}
+.rem-ch-btn{flex:1;padding:8px;border-radius:9px;border:1.5px solid var(--bor);background:var(--w);font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;color:var(--t2);transition:all .15s;text-align:center}
+.rem-ch-btn:hover{border-color:var(--b);color:var(--b)}
+.rem-ch-btn.active{background:var(--b);border-color:var(--b);color:#fff}
+.rem-save-btn{width:100%;padding:10px;border-radius:9px;border:none;background:var(--b);color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:4px;transition:.15s}
+.rem-save-btn:hover{background:var(--b2)}
+
+/* ─── HISTORIAL ────────────────────────────────────── */
+.hist-screen{max-width:700px;margin:0 auto;padding:0 16px 80px}
+.hist-header{display:flex;align-items:center;gap:12px;padding:16px 0;border-bottom:1.5px solid var(--bor);margin-bottom:16px}
+.hist-back{background:none;border:1.5px solid var(--bor);border-radius:8px;cursor:pointer;font-size:12px;font-weight:700;color:var(--t2);padding:7px 12px;font-family:inherit}
+.hist-back:hover{background:var(--bg)}
+.hist-title{font-size:18px;font-weight:800;color:var(--t1);flex:1}
+.hist-count{font-size:12px;color:var(--t3);padding:3px 10px;background:var(--bg);border-radius:20px}
+.hist-filters{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
+.hist-filter{padding:6px 14px;border-radius:20px;border:1.5px solid var(--bor);background:var(--w);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--t2);transition:.15s}
+.hist-filter:hover{border-color:var(--b);color:var(--b)}
+.hist-filter.active{background:var(--b);border-color:var(--b);color:#fff}
+.hist-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.hist-card{background:var(--w);border:.5px solid var(--bor);border-radius:12px;overflow:hidden;cursor:pointer;transition:all .18s}
+.hist-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.1);transform:translateY(-2px)}
+.hist-thumb{width:100%;aspect-ratio:1;object-fit:cover;background:var(--bg);display:block}
+.hist-thumb-placeholder{width:100%;aspect-ratio:1;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:28px}
+.hist-card-meta{padding:8px}
+.hist-card-date{font-size:10px;color:var(--t3);margin-bottom:3px}
+.hist-card-plat{font-size:10px;font-weight:700;padding:1px 7px;border-radius:10px;display:inline-block;margin-bottom:3px}
+.hist-card-plat.instagram{background:#E6F1FB;color:#185FA5}
+.hist-card-plat.facebook{background:#EBF0FF;color:#1a3bc1}
+.hist-card-plat.tiktok{background:#FDE8F0;color:#b5006e}
+.hist-card-pilar{font-size:11px;font-weight:600;color:var(--t2);overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.hist-empty{text-align:center;padding:48px 20px;color:var(--t3)}
+.hist-empty-icon{font-size:48px;margin-bottom:12px}
+.hist-empty-t{font-size:15px;font-weight:700;color:var(--t2);margin-bottom:6px}
+.hist-empty-d{font-size:13px;line-height:1.5}
+/* Hist detail modal */
+.hist-detail{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1000;display:flex;align-items:center;justify-content:center;padding:16px}
+.hist-detail-card{background:var(--w);border-radius:16px;max-width:480px;width:100%;max-height:90vh;overflow-y:auto}
+.hist-detail-img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:16px 16px 0 0;background:var(--bg)}
+.hist-detail-body{padding:16px}
+.hist-detail-close{float:right;background:none;border:none;font-size:20px;cursor:pointer;color:var(--t3);line-height:1}
+.hist-detail-caption{font-size:13px;color:var(--t1);line-height:1.6;margin:10px 0;background:var(--bg);border-radius:8px;padding:10px}
+.hist-detail-btns{display:flex;gap:8px;margin-top:12px}
+
+/* ─── PUBLISH / OPEN IN SOCIAL ────────────────────── */
+.pub-section{border-top:.5px solid var(--bor);padding-top:10px;margin-top:10px}
+.pub-label{font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:7px}
+.pub-btns{display:flex;gap:7px}
+.pub-btn{flex:1;padding:8px 4px;border-radius:8px;border:1.5px solid var(--bor);background:var(--w);cursor:pointer;font-size:11px;font-weight:700;color:var(--t2);text-align:center;transition:all .18s;font-family:inherit;line-height:1.3}
+.pub-btn:hover{transform:translateY(-1px);box-shadow:0 3px 10px rgba(0,0,0,.1)}
+.pub-btn.ig:hover{border-color:#E1306C;color:#E1306C;background:#FEF0F5}
+.pub-btn.fb:hover{border-color:#1877F2;color:#1877F2;background:#EEF4FF}
+.pub-btn.tk:hover{border-color:#010101;color:#010101;background:#F5F5F5}
+.pub-hint{font-size:10px;color:var(--t3);margin-top:6px;line-height:1.4;text-align:center}
+
+/* ─── CUENTA / DASHBOARD USUARIO ──────────────────── */
+.cuenta-screen{max-width:700px;margin:0 auto;padding:0 16px 80px}
+.cuenta-header{display:flex;align-items:center;gap:12px;padding:16px 0;border-bottom:1.5px solid var(--bor);margin-bottom:20px}
+.cuenta-back{background:none;border:1.5px solid var(--bor);border-radius:8px;cursor:pointer;font-size:12px;font-weight:700;color:var(--t2);padding:7px 12px;font-family:inherit}
+.cuenta-back:hover{background:var(--bg)}
+.cuenta-title{font-size:18px;font-weight:800;color:var(--t1);flex:1}
+.plan-card{border-radius:14px;padding:18px;margin-bottom:12px;position:relative;overflow:hidden}
+.plan-card.trial{background:linear-gradient(135deg,#FDF0DC,#FEF7EC);border:1.5px solid rgba(200,121,26,.3)}
+.plan-card.starter{background:linear-gradient(135deg,#E6F1FB,#EEF7FF);border:1.5px solid rgba(24,95,165,.25)}
+.plan-card.growth{background:linear-gradient(135deg,#EAF3DE,#F0F9E8);border:1.5px solid rgba(59,109,17,.25)}
+.plan-card.agency{background:linear-gradient(135deg,#FDF0DC,#FEF6E8);border:1.5px solid rgba(133,79,11,.25)}
+.plan-badge{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;padding:3px 10px;border-radius:20px;display:inline-block;margin-bottom:8px}
+.plan-card.trial  .plan-badge{background:#E8961A;color:#fff}
+.plan-card.starter .plan-badge{background:#185FA5;color:#fff}
+.plan-card.growth  .plan-badge{background:#3B6D11;color:#fff}
+.plan-card.agency  .plan-badge{background:#854F0B;color:#fff}
+.plan-name{font-size:22px;font-weight:800;color:var(--t1);margin-bottom:4px}
+.plan-desc{font-size:12px;color:var(--t3);margin-bottom:12px;line-height:1.5}
+.plan-days{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.7);border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;color:var(--t2);margin-bottom:12px}
+.plan-upgrade-btn{display:block;width:100%;padding:11px;border-radius:10px;border:none;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;text-align:center;transition:.18s}
+.plan-card.trial   .plan-upgrade-btn{background:#E8961A;color:#fff}
+.plan-card.starter .plan-upgrade-btn{background:#185FA5;color:#fff}
+.plan-card.growth  .plan-upgrade-btn{background:#3B6D11;color:#fff}
+.plan-upgrade-btn:hover{opacity:.88}
+.gen-card{background:var(--w);border:.5px solid var(--bor);border-radius:14px;padding:18px;margin-bottom:12px}
+.gen-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.gen-title{font-size:14px;font-weight:700;color:var(--t1)}
+.gen-count{font-size:22px;font-weight:800;color:var(--b)}
+.gen-label{font-size:11px;color:var(--t3);text-align:right}
+.gen-bar-wrap{background:var(--bg);border-radius:20px;height:10px;overflow:hidden;margin-bottom:8px}
+.gen-bar{height:100%;border-radius:20px;transition:width .5s}
+.gen-renewal{font-size:11px;color:var(--t3)}
+.brand-card{background:var(--w);border:.5px solid var(--bor);border-radius:14px;padding:18px;margin-bottom:12px}
+.brand-card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.brand-card-title{font-size:14px;font-weight:700;color:var(--t1)}
+.brand-edit-btn{font-size:11px;font-weight:700;color:var(--b);background:var(--b3);border:.5px solid var(--b);border-radius:7px;padding:4px 10px;cursor:pointer;border:none;font-family:inherit}
+.brand-row{display:flex;gap:12px;align-items:center;padding:8px 0;border-bottom:.5px solid var(--bor)}
+.brand-row:last-child{border:none}
+.brand-row-icon{font-size:18px;width:28px;flex-shrink:0;text-align:center}
+.brand-row-label{font-size:11px;color:var(--t3);margin-bottom:1px}
+.brand-row-val{font-size:13px;font-weight:600;color:var(--t1)}
+.pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.pricing-tile{border-radius:12px;padding:14px 10px;text-align:center;border:1.5px solid var(--bor);background:var(--w)}
+.pricing-tile.current{border-color:var(--b);background:var(--b3)}
+.pt-name{font-size:12px;font-weight:700;color:var(--t2);margin-bottom:4px}
+.pt-price{font-size:18px;font-weight:800;color:var(--t1);margin-bottom:2px}
+.pt-gens{font-size:10px;color:var(--t3)}
+.pt-current{font-size:10px;font-weight:700;color:var(--b);margin-top:4px}
+
+/* ─── WELCOME / ONBOARDING ────────────────────────── */
+.welcome-wrap{max-width:480px;margin:0 auto;padding:40px 20px 60px;text-align:center;display:flex;flex-direction:column;align-items:center;min-height:100vh;justify-content:center}
+.welcome-logo-pill{background:var(--b);color:#fff;font-size:28px;font-weight:900;width:64px;height:64px;border-radius:18px;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;letter-spacing:-1px;box-shadow:0 8px 24px rgba(41,121,255,.3)}
+.welcome-tagline{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--b);margin-bottom:10px}
+.welcome-h1{font-size:28px;font-weight:900;color:var(--t1);line-height:1.2;margin-bottom:10px}
+.welcome-sub{font-size:14px;color:var(--t3);line-height:1.6;margin-bottom:28px;max-width:340px}
+.welcome-steps{display:flex;align-items:center;gap:8px;margin-bottom:28px;background:var(--bg);border-radius:14px;padding:16px}
+.ws-item{flex:1;text-align:center}
+.ws-num{width:28px;height:28px;border-radius:50%;background:var(--b);color:#fff;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;margin:0 auto 6px}
+.ws-label{font-size:11px;font-weight:700;color:var(--t1);margin-bottom:2px}
+.ws-time{font-size:10px;color:var(--t3)}
+.ws-arrow{font-size:16px;color:var(--bor);flex-shrink:0}
+.welcome-examples{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:28px}
+.we-chip{font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;background:var(--bg);border:.5px solid var(--bor);color:var(--t2)}
+.welcome-cta{width:100%;padding:15px;border-radius:12px;border:none;background:var(--b);color:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 6px 20px rgba(41,121,255,.3);margin-bottom:10px;transition:.18s}
+.welcome-cta:hover{background:var(--b2);transform:translateY(-1px)}
+.welcome-note{font-size:11px;color:var(--t3);margin:0}
+/* Setup progress improved */
+.setup-step-label{font-size:11px;font-weight:700;color:var(--t3);text-align:center;margin-bottom:14px;letter-spacing:.2px}
 
 /* ─── RESPONSIVE ──────────────────────────────────── */
 /* Responsive */
@@ -503,6 +629,8 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
   <div style="display:flex;align-items:center;gap:8px">
     <span style="font-size:11px;color:#5A9E2F">Tu enlace único:</span>
     <span id="genCounterBadge" style="font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;background:#EAF3DE;color:#3B6D11;letter-spacing:.2px">25 gen restantes</span>
+    <button class="cb-hist" onclick="showCuentaScreen()" style="font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;border:.5px solid var(--bor);background:var(--bg);color:var(--t2);cursor:pointer;font-family:inherit">👤 Mi cuenta</button>
+    <button class="cb-hist" onclick="showHistorialScreen()" style="font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;border:.5px solid var(--bor);background:var(--bg);color:var(--t2);cursor:pointer;font-family:inherit">📚 Historial</button>
     <button class="cb-copy" onclick="copyBrandUrl()" id="cbCopyBtn">📋 Copiar link</button>
     <button class="cb-link" onclick="showRecoveryModal()">¿Cómo recuperarlo?</button>
   </div>
@@ -523,6 +651,94 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
   </div>
 </div>
 
+
+  <!-- ╔═══════════════════════════════════════════╗
+       ║  CUENTA / DASHBOARD SCREEN                 ║
+       ╚═══════════════════════════════════════════╝ -->
+  <div id="cuentaScreen" class="screen" style="overflow-y:auto">
+    <div class="cuenta-screen">
+      <div class="cuenta-header">
+        <button class="cuenta-back" onclick="showCreatorFromCuenta()">← Volver</button>
+        <div class="cuenta-title">👤 Mi cuenta</div>
+      </div>
+      <!-- Plan card (rendered by JS) -->
+      <div id="cuentaPlanCard"></div>
+      <!-- Generaciones -->
+      <div class="gen-card">
+        <div class="gen-header">
+          <span class="gen-title">📊 Generaciones este mes</span>
+          <div style="text-align:right">
+            <div class="gen-count"><span id="cuentaGensUsed">0</span>/<span id="cuentaGensLimit">60</span></div>
+            <div class="gen-label">usadas / disponibles</div>
+          </div>
+        </div>
+        <div class="gen-bar-wrap">
+          <div class="gen-bar" id="cuentaGenBar" style="width:0%;background:var(--b)"></div>
+        </div>
+        <div class="gen-renewal" id="cuentaRenewal">Se renuevan el 1 del próximo mes</div>
+      </div>
+      <!-- Mi marca -->
+      <div class="brand-card">
+        <div class="brand-card-header">
+          <span class="brand-card-title">🏢 Mi marca</span>
+          <button class="brand-edit-btn" onclick="goEditBrand()">✏️ Editar Brand Guide</button>
+        </div>
+        <div id="cuentaBrandInfo"></div>
+      </div>
+      <!-- Planes -->
+      <div class="brand-card">
+        <div class="brand-card-title" style="margin-bottom:12px">💳 Planes disponibles</div>
+        <div class="pricing-grid" id="cuentaPricingGrid"></div>
+        <div style="font-size:11px;color:var(--t3);text-align:center;margin-top:6px">
+          Los pagos se activarán próximamente con Stripe
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ╔═══════════════════════════════════════════╗
+       ║  HISTORIAL SCREEN                          ║
+       ╚═══════════════════════════════════════════╝ -->
+  <div id="historialScreen" class="screen" style="overflow-y:auto">
+    <div class="hist-screen">
+      <div class="hist-header">
+        <button class="hist-back" onclick="showCreatorFromHistorial()">← Volver</button>
+        <div class="hist-title">📚 Mi historial</div>
+        <span class="hist-count" id="histCount">0 posts</span>
+      </div>
+      <div class="hist-filters">
+        <button class="hist-filter active" data-filter="all" onclick="filterHist(this)">Todos</button>
+        <button class="hist-filter" data-filter="post" onclick="filterHist(this)">Posts</button>
+        <button class="hist-filter" data-filter="flyer" onclick="filterHist(this)">Flyers</button>
+        <button class="hist-filter" data-filter="carousel" onclick="filterHist(this)">Carruseles</button>
+        <button class="hist-filter" data-filter="testimonial" onclick="filterHist(this)">Testimonios</button>
+      </div>
+      <div class="hist-grid" id="histGrid">
+        <div class="hist-empty" style="grid-column:span 3">
+          <div class="hist-empty-icon">📭</div>
+          <div class="hist-empty-t">Aún no hay posts guardados</div>
+          <div class="hist-empty-d">Genera tu primer post y aparecerá aquí automáticamente</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Historial detail modal -->
+  <div id="histDetailModal" class="hist-detail" style="display:none" onclick="closeHistDetail(event)">
+    <div class="hist-detail-card" onclick="event.stopPropagation()">
+      <img id="histDetailImg" class="hist-detail-img" src="" alt="">
+      <div class="hist-detail-body">
+        <button class="hist-detail-close" onclick="closeHistDetail()">✕</button>
+        <div style="font-size:11px;color:var(--t3);margin-bottom:4px" id="histDetailMeta"></div>
+        <div style="font-size:14px;font-weight:700;color:var(--t1);margin-bottom:8px" id="histDetailPilar"></div>
+        <div class="hist-detail-caption" id="histDetailCaption"></div>
+        <div class="hist-detail-btns">
+          <button class="btn btn-primary" style="flex:1;padding:10px;font-size:12px;border-radius:8px" onclick="reuseHistPost()">↺ Reutilizar prompt</button>
+          <button class="btn" style="flex:1;padding:10px;font-size:12px;border-radius:8px;background:var(--bg);color:var(--t2);border:.5px solid var(--bor)" onclick="copyHistCaption()">📋 Copiar caption</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- ╔═══════════════════════════════════════════╗
        ║  MARKETING AGENT SCREEN                    ║
@@ -583,6 +799,49 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
 
 
   <!-- ╔═══════════════════════════════════════════╗
+       ║  WELCOME / ONBOARDING SCREEN               ║
+       ╚═══════════════════════════════════════════╝ -->
+  <div id="welcomeScreen" class="screen">
+    <div class="welcome-wrap">
+      <div class="welcome-logo-pill">P</div>
+      <div class="welcome-tagline">✦ Postimity</div>
+      <h1 class="welcome-h1" id="wlcH1">Crea contenido que suena como tú</h1>
+      <p class="welcome-sub" id="wlcSub">La AI que aprende la voz de tu marca y genera posts, flyers y carruseles profesionales en segundos. Sin diseñadores. Sin agencias.</p>
+
+      <div class="welcome-steps">
+        <div class="ws-item">
+          <div class="ws-num">1</div>
+          <div class="ws-label">Tu marca</div>
+          <div class="ws-time">~60 seg</div>
+        </div>
+        <div class="ws-arrow">→</div>
+        <div class="ws-item">
+          <div class="ws-num">2</div>
+          <div class="ws-label">Brand Guide AI</div>
+          <div class="ws-time">automático</div>
+        </div>
+        <div class="ws-arrow">→</div>
+        <div class="ws-item">
+          <div class="ws-num">3</div>
+          <div class="ws-label">Primer post</div>
+          <div class="ws-time">~20 seg</div>
+        </div>
+      </div>
+
+      <div class="welcome-examples">
+        <span class="we-chip">🖊️ Posts</span>
+        <span class="we-chip">🎨 Flyers</span>
+        <span class="we-chip">🎠 Carruseles</span>
+        <span class="we-chip">⭐ Testimonios</span>
+        <span class="we-chip">🤖 Plan mensual</span>
+      </div>
+
+      <button class="welcome-cta" id="wlcCta" onclick="startOnboarding()">¡Comenzar gratis — 14 días →</button>
+      <p class="welcome-note" id="wlcNote">Sin tarjeta de crédito · Sin compromiso · Cancela cuando quieras</p>
+    </div>
+  </div>
+
+  <!-- ╔═══════════════════════════════════════════╗
        ║  SETUP SCREEN                              ║
        ╚═══════════════════════════════════════════╝ -->
   <!-- ═══════════════ SETUP SCREEN ═══════════════ -->
@@ -590,9 +849,10 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
   <div class="setup-wrap">
     <div class="setup-hero">
       <div class="setup-icon">✨</div>
-      <h1>Configura tu marca en 30 segundos</h1>
-      <p>Esta información es el cerebro de la AI. Define el estilo, voz y estrategia de TODO tu contenido.</p>
+      <h1>Configura tu marca</h1>
+      <p>En menos de 2 minutos. Esta información es el cerebro de la AI — define el estilo, voz y estrategia de TODO tu contenido.</p>
     </div>
+    <div class="setup-step-label" id="setupStepLabel">Paso 1 de 5 · Identidad del negocio</div>
     <div class="setup-progress" id="setupProgress">
       <div class="sp-dot active" id="sp1"></div>
       <div style="width:30px;height:2px;background:var(--bor)"></div>
@@ -1111,6 +1371,22 @@ Ej: 'Wonderik es increíble. Mi hija de 3 años ya lee palabras cortas y su desa
               <button class="btn-dl" onclick="downloadImg('portrait')">4:5<br><span style="font-size:9px;font-weight:400">IG Feed</span></button>
               <button class="btn-dl" onclick="downloadImg('story')">9:16<br><span style="font-size:9px;font-weight:400">Stories</span></button>
             </div>
+            <!-- Open in social -->
+            <div class="pub-section" id="pubSection">
+              <div class="pub-label">📤 Abrir en red social</div>
+              <div class="pub-btns">
+                <button class="pub-btn ig" onclick="openInSocial('instagram')">
+                  📸<br><span style="font-size:9px;font-weight:400">Instagram</span>
+                </button>
+                <button class="pub-btn fb" onclick="openInSocial('facebook')">
+                  👥<br><span style="font-size:9px;font-weight:400">Facebook</span>
+                </button>
+                <button class="pub-btn tk" onclick="openInSocial('tiktok')">
+                  🎵<br><span style="font-size:9px;font-weight:400">TikTok</span>
+                </button>
+              </div>
+              <div class="pub-hint">Descarga la imagen y copia el caption · luego pégalo en la app</div>
+            </div>
           </div>
         </div>
         <!-- Captions -->
@@ -1239,7 +1515,38 @@ const PLT_INFO = {
 // ── WORKER CONFIG ──────────────────────────────────────────
 const WORKER = 'https://postimity-content.munir-go10.workers.dev/';
 const STORE_KEY = 'postimity_brand_v1';
-const GEN_LIMITS = { trial: 25, starter: 25, growth: 60, agency: 200 };
+const GEN_LIMITS = { trial: 60, starter: 25, growth: 60, agency: 200 };
+
+// ── BILINGUAL STRINGS ─────────────────────────────────────────────────────
+const T = {
+  es: {
+    welcomeTagline:  '✦ Postimity',
+    welcomeH1:       'Crea contenido que suena como tú',
+    welcomeSub:      'La AI que aprende la voz de tu marca y genera posts, flyers y carruseles profesionales en segundos. Sin diseñadores. Sin agencias.',
+    welcomeStep1:    'Tu marca', welcomeStep1t: '~60 seg',
+    welcomeStep2:    'Brand Guide AI', welcomeStep2t: 'automático',
+    welcomeStep3:    'Primer post', welcomeStep3t: '~20 seg',
+    welcomeCta:      '¡Comenzar gratis — 14 días →',
+    welcomeNote:     'Sin tarjeta de crédito · Sin compromiso · Cancela cuando quieras',
+    setupTitle:      'Configura tu marca',
+    setupSub:        "Less than 2 minutes. The AI's brain defines the style, voice and strategy for ALL your content.",
+    adjustPlaceholder: 'Ej: hazlo más corto · más formal · agrega urgencia · cambia el CTA',
+  },
+  en: {
+    welcomeTagline:  '✦ Postimity',
+    welcomeH1:       'Content that sounds like you.',
+    welcomeSub:      'The AI that learns your brand voice and generates professional posts, flyers and carousels in seconds. No designers. No agencies.',
+    welcomeStep1:    'Your brand', welcomeStep1t: '~60 sec',
+    welcomeStep2:    'Brand Guide AI', welcomeStep2t: 'automatic',
+    welcomeStep3:    'First post', welcomeStep3t: '~20 sec',
+    welcomeCta:      'Start free — 14 days →',
+    welcomeNote:     'No credit card · No commitment · Cancel anytime',
+    setupTitle:      'Set up your brand',
+    setupSub:        "Less than 2 minutes. The AI's brain defines the style, voice and strategy for ALL your content.",
+    adjustPlaceholder: 'E.g.: make it shorter · more formal · add urgency · change the CTA',
+  }
+};
+function t(key) { const lang = detectLanguage(); return (T[lang] || T.es)[key] || (T.es)[key] || key; }
 
 
 // ╔═══════════════════════════════════════════════════╗
@@ -1312,6 +1619,26 @@ async function sendRecoveryLink() {
 }
 
 // ─── GENERATION COUNTER ───────────────────────────────
+function detectLanguage() {
+  // 1. Saved user preference wins
+  const saved = localStorage.getItem('postimity_lang');
+  if(saved === 'es' || saved === 'en') return saved;
+  // 2. URL param (for targeted ads: postimity.com?lang=en)
+  const urlLang = new URLSearchParams(window.location.search).get('lang');
+  if(urlLang === 'en' || urlLang === 'es') { localStorage.setItem('postimity_lang', urlLang); return urlLang; }
+  // 3. Browser language
+  const bl = navigator.language?.slice(0,2);
+  if(bl === 'es') return 'es';
+  if(bl === 'en') return 'en';
+  // 4. Timezone fallback — LATAM timezones default to ES
+  try {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const usZones = ['New_York','Chicago','Denver','Phoenix','Los_Angeles','Anchorage','Honolulu'];
+    if(tz.startsWith('America/') && !usZones.some(z => tz.includes(z))) return 'es';
+  } catch(e) {}
+  return 'en'; // Default to EN for unknown/US
+}
+
 function applyTranslations() { /* ES/EN toggle — full version in landing page */ }
 function updateGenCounter() {
   const brand = loadBrand();
@@ -1352,20 +1679,27 @@ async function syncBrandToCloud(brand, id) {
 // Auto-save post to history after generation
 async function autoSavePost(resultData) {
   if (!brandId) return;
-  const brand = loadBrand();
   try {
+    const imgEl = document.getElementById('resultImg');
+    // Only save https:// URLs (not data: URLs — too large for KV)
+    const imageUrl = (imgEl?.src && imgEl.src.startsWith('http')) ? imgEl.src : null;
     const postData = {
       mode, platform, pillar, imageStyle,
       postType: resultData.postType || pillar,
+      imageUrl,
       caption: resultData.instagram?.caption || resultData.facebook?.caption || '',
+      captionSnippet: (resultData.instagram?.caption || '').slice(0, 120),
       hashtags: resultData.instagram?.hashtags || '',
+      captions: {
+        instagram: { caption: resultData.instagram?.caption||'', hashtags: resultData.instagram?.hashtags||'' },
+        facebook:  { caption: resultData.facebook?.caption||'',  hashtags: resultData.facebook?.hashtags||'' },
+        tiktok:    { caption: resultData.tiktok?.caption||'',    hashtags: resultData.tiktok?.hashtags||'' },
+      }
     };
     await fetch(WORKER, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ mode: 'save-post', brandId, postData })
     });
-    showToast('✅ Post guardado en historial');
   } catch(e) {
     console.warn('Auto-save failed:', e.message);
   }
@@ -1444,10 +1778,14 @@ window.addEventListener('DOMContentLoaded', async () => {
     if (brandId) showCloudBar(brand.name);
     showScreen('creatorScreen');
   } else {
-    showScreen('setupScreen');
+    // New user — show welcome screen (unless coming from a shared brand link)
+    const hasSharedBrand = new URLSearchParams(window.location.search).get('b');
+    showScreen(hasSharedBrand ? 'setupScreen' : 'welcomeScreen');
   }
+  applyBilingualUI();
   updateGenCounter();
   checkDeepLink();
+  initSetupScrollTracking();
 });
 
 function showScreen(id) {
@@ -1699,6 +2037,12 @@ function saveBrand() {
   showCloudBar(brand.name);
   applyBrand(brand);
   showScreen('creatorScreen');
+  // First-time celebration
+  const firstBrandKey = 'postimity_first_brand_' + brandId;
+  if(!localStorage.getItem(firstBrandKey)) {
+    localStorage.setItem(firstBrandKey, '1');
+    setTimeout(() => showToast('🎉 ¡Tu Brand Guide está listo! Postimity ya conoce tu negocio. Genera tu primer post 👇'), 600);
+  }
 }
 
 function loadBrand() { try{ return JSON.parse(localStorage.getItem(STORE_KEY)); }catch{ return null; } }
@@ -2236,6 +2580,271 @@ async function genEnhance(brand,bg) {
   showResult(res);
 }
 // ╔═══════════════════════════════════════════════════╗
+// ║  CUENTA / DASHBOARD USUARIO                      ║
+// ╚═══════════════════════════════════════════════════╝
+
+const PLAN_CONFIG = {
+  trial:   { name: 'Trial Gratuito', badge: '⭐ Trial', gens: 60,  price: 'Gratis 14 días', upgradeLabel: '🚀 Activar plan Starter — $149/mes', color: 'trial' },
+  starter: { name: 'Starter',        badge: '💙 Starter', gens: 25, price: '$149 MXN/mes',   upgradeLabel: '⬆️ Cambiar a Growth — $349/mes',    color: 'starter' },
+  growth:  { name: 'Growth',         badge: '💚 Growth',  gens: 60, price: '$349 MXN/mes',   upgradeLabel: '⬆️ Cambiar a Agency — $799/mes',   color: 'growth' },
+  agency:  { name: 'Agency',         badge: '🏆 Agency',  gens: 200, price: '$799 MXN/mes',  upgradeLabel: '✅ Plan máximo activo',             color: 'agency' },
+};
+
+function getTrialDaysLeft() {
+  if(!brandId) return 14;
+  const key = 'postimity_trial_start_' + brandId;
+  let start = localStorage.getItem(key);
+  if(!start) { start = new Date().toISOString(); localStorage.setItem(key, start); }
+  const elapsed = (Date.now() - new Date(start).getTime()) / (86400000);
+  return Math.max(0, Math.ceil(14 - elapsed));
+}
+
+function getNextRenewalDate() {
+  const now = new Date();
+  const next = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+  const months = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  return '1 de ' + months[next.getMonth()] + ' de ' + next.getFullYear();
+}
+
+function showCuentaScreen() {
+  document.querySelectorAll('.screen').forEach(s => { s.classList.remove('active'); s.style.display = ''; });
+  const el = document.getElementById('cuentaScreen');
+  if(el) { el.classList.add('active'); el.style.display = 'block'; }
+  window.scrollTo(0, 0);
+  renderCuenta();
+}
+
+function showCreatorFromCuenta() {
+  const el = document.getElementById('cuentaScreen');
+  if(el) { el.classList.remove('active'); el.style.display = ''; }
+  showScreen('creatorScreen');
+}
+
+function goEditBrand() {
+  showCreatorFromCuenta();
+  setTimeout(() => showScreen('setupScreen'), 100);
+}
+
+function renderCuenta() {
+  const brand = loadBrand();
+  const planKey = brand?.plan || 'trial';
+  const plan = PLAN_CONFIG[planKey] || PLAN_CONFIG.trial;
+  const limit = GEN_LIMITS[planKey] || 60;
+  const monthKey = 'postimity_gens_' + new Date().toISOString().slice(0,7);
+  const used = parseInt(localStorage.getItem(monthKey) || '0');
+  const pct = Math.min(100, Math.round((used / limit) * 100));
+  const barColor = pct >= 90 ? '#C0392B' : pct >= 70 ? '#E8961A' : '#2979FF';
+
+  // Plan card
+  const daysLeft = planKey === 'trial' ? getTrialDaysLeft() : null;
+  const planCard = document.getElementById('cuentaPlanCard');
+  if(planCard) {
+    planCard.innerHTML = '<div class="plan-card ' + plan.color + '">' +
+      '<span class="plan-badge">' + plan.badge + '</span>' +
+      '<div class="plan-name">' + plan.name + '</div>' +
+      '<div class="plan-desc">' + plan.price + (planKey === 'trial' ? ' · Acceso completo Growth' : ' · ' + limit + ' generaciones/mes') + '</div>' +
+      (daysLeft !== null ? '<div class="plan-days">⏳ Quedan <strong>' + daysLeft + ' días</strong> de trial</div>' : '') +
+      (planKey !== 'agency' ? '<button class="plan-upgrade-btn" onclick="showUpgradeInfo()">' + plan.upgradeLabel + '</button>' : '<div style="font-size:12px;font-weight:700;color:var(--g3);text-align:center;padding:8px">✅ Estás en el plan máximo</div>') +
+    '</div>';
+  }
+
+  // Generaciones bar
+  const usedEl = document.getElementById('cuentaGensUsed');
+  const limitEl = document.getElementById('cuentaGensLimit');
+  const barEl = document.getElementById('cuentaGenBar');
+  const renewEl = document.getElementById('cuentaRenewal');
+  if(usedEl) usedEl.textContent = used;
+  if(limitEl) limitEl.textContent = limit;
+  if(barEl) { barEl.style.width = pct + '%'; barEl.style.background = barColor; }
+  if(renewEl) renewEl.textContent = 'Se renuevan el ' + getNextRenewalDate();
+
+  // Brand info
+  const brandInfo = document.getElementById('cuentaBrandInfo');
+  if(brandInfo && brand) {
+    const rows = [
+      ['🏢', 'Negocio', brand.name || '—'],
+      ['📍', 'Tipo y ubicación', (brand.type || '—') + (brand.location ? ' · ' + brand.location : '')],
+      ['📱', 'WhatsApp', brand.whatsapp || '—'],
+      ['🆔', 'Brand ID', (brandId || '—').slice(0,8) + '...'],
+    ];
+    brandInfo.innerHTML = rows.map(([icon, label, val]) =>
+      '<div class="brand-row">' +
+        '<span class="brand-row-icon">' + icon + '</span>' +
+        '<div><div class="brand-row-label">' + label + '</div>' +
+        '<div class="brand-row-val">' + val + '</div></div>' +
+      '</div>'
+    ).join('');
+  } else if(brandInfo) {
+    brandInfo.innerHTML = '<div style="color:var(--t3);font-size:13px;text-align:center;padding:12px">No hay marca configurada</div>';
+  }
+
+  // Pricing grid
+  const grid = document.getElementById('cuentaPricingGrid');
+  if(grid) {
+    const tiers = [
+      { key:'starter', name:'Starter', price:'$149', gens:'25 gen/mes' },
+      { key:'growth',  name:'Growth',  price:'$349', gens:'60 gen/mes' },
+      { key:'agency',  name:'Agency',  price:'$799', gens:'200 gen/mes' },
+    ];
+    grid.innerHTML = tiers.map(t =>
+      '<div class="pricing-tile' + (t.key === planKey ? ' current' : '') + '">' +
+        '<div class="pt-name">' + t.name + '</div>' +
+        '<div class="pt-price">' + t.price + '<span style="font-size:10px;font-weight:400;color:var(--t3)"> MXN</span></div>' +
+        '<div class="pt-gens">' + t.gens + '</div>' +
+        (t.key === planKey ? '<div class="pt-current">Plan actual</div>' : '') +
+      '</div>'
+    ).join('');
+  }
+}
+
+function showUpgradeInfo() {
+  showToast('💳 Pagos con Stripe — disponibles muy pronto. ¡Gracias por tu paciencia!');
+}
+
+// ╔═══════════════════════════════════════════════════╗
+// ║  HISTORIAL                                       ║
+// ╚═══════════════════════════════════════════════════╝
+let histAllPosts = [];
+let histCurrentPost = null;
+let histActiveFilter = 'all';
+
+async function showHistorialScreen() {
+  // Show screen first
+  document.querySelectorAll('.screen').forEach(s => { s.classList.remove('active'); s.style.display = ''; });
+  const el = document.getElementById('historialScreen');
+  if(el) { el.classList.add('active'); el.style.display = 'block'; }
+  window.scrollTo(0, 0);
+  // Load history from KV
+  await loadHistorial();
+}
+
+function showCreatorFromHistorial() {
+  const el = document.getElementById('historialScreen');
+  if(el) { el.classList.remove('active'); el.style.display = ''; }
+  showScreen('creatorScreen');
+}
+
+async function loadHistorial() {
+  if(!brandId) {
+    renderHistGrid([]);
+    return;
+  }
+  try {
+    const res = await fetch(WORKER, { method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ mode:'get-history', brandId, limit: 200 })
+    });
+    const data = await res.json();
+    histAllPosts = data.history || [];
+    renderHistGrid(histAllPosts);
+  } catch(e) {
+    console.warn('Historial load failed:', e.message);
+    renderHistGrid([]);
+  }
+}
+
+function filterHist(btn) {
+  document.querySelectorAll('.hist-filter').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  histActiveFilter = btn.dataset.filter;
+  const filtered = histActiveFilter === 'all'
+    ? histAllPosts
+    : histAllPosts.filter(p => p.mode === histActiveFilter);
+  renderHistGrid(filtered);
+}
+
+function histImgError(img) {
+  img.style.display = 'none';
+  const ph = img.nextElementSibling;
+  if(ph) ph.style.display = 'flex';
+}
+
+function renderHistGrid(posts) {
+  const grid = document.getElementById('histGrid');
+  const countEl = document.getElementById('histCount');
+  if(!grid) return;
+  if(countEl) countEl.textContent = posts.length + (posts.length === 1 ? ' post' : ' posts');
+
+  if(!posts.length) {
+    grid.innerHTML = '<div class="hist-empty" style="grid-column:span 3">' +
+      '<div class="hist-empty-icon">📭</div>' +
+      '<div class="hist-empty-t">No hay posts en este filtro</div>' +
+      '<div class="hist-empty-d">Genera contenido y aparecerá aquí</div></div>';
+    return;
+  }
+
+  grid.innerHTML = posts.map((p, i) => {
+    const date = new Date(p.timestamp);
+    const dateStr = date.getDate() + '/' + (date.getMonth()+1) + '/' + date.getFullYear();
+    const modeIcon = p.mode === 'flyer' ? '🎨' : p.mode === 'carousel' ? '🎠' : p.mode === 'testimonial' ? '⭐' : p.mode === 'enhance' ? '📸' : '🖊️';
+    const platClass = p.platform || 'instagram';
+    const platLabel = platClass === 'instagram' ? 'IG' : platClass === 'facebook' ? 'FB' : 'TK';
+    // Handle both full URLs and relative /r2/ paths
+    let imgSrc = p.imageUrl || '';
+    if(imgSrc && imgSrc.startsWith('/r2/')) imgSrc = WORKER.replace('/api','') + imgSrc;
+    const thumb = imgSrc
+      ? '<img class="hist-thumb" src="' + imgSrc + '" alt="post" onload="this.style.opacity=1" onerror="histImgError(this)">' +
+        '<div class="hist-thumb-placeholder" id="htp-' + i + '" style="display:none">' + modeIcon + '</div>'
+      : '<div class="hist-thumb-placeholder">' + modeIcon + '</div>';
+    return '<div class="hist-card" onclick="openHistDetail(' + i + ')">' +
+      thumb +
+      '<div class="hist-card-meta">' +
+        '<div class="hist-card-date">' + dateStr + '</div>' +
+        '<span class="hist-card-plat ' + platClass + '">' + platLabel + '</span>' +
+        '<div class="hist-card-pilar">' + (p.pillar || 'General') + '</div>' +
+      '</div></div>';
+  }).join('');
+}
+
+function openHistDetail(idx) {
+  const filtered = histActiveFilter === 'all'
+    ? histAllPosts
+    : histAllPosts.filter(p => p.mode === histActiveFilter);
+  histCurrentPost = filtered[idx];
+  if(!histCurrentPost) return;
+
+  const modal = document.getElementById('histDetailModal');
+  const img = document.getElementById('histDetailImg');
+  const meta = document.getElementById('histDetailMeta');
+  const pilar = document.getElementById('histDetailPilar');
+  const cap = document.getElementById('histDetailCaption');
+
+  if(histCurrentPost.imageUrl) {
+    img.src = histCurrentPost.imageUrl;
+    img.style.display = 'block';
+  } else {
+    img.style.display = 'none';
+  }
+  const date = new Date(histCurrentPost.timestamp);
+  const platLabel = histCurrentPost.platform === 'instagram' ? '📸 Instagram' : histCurrentPost.platform === 'facebook' ? '👥 Facebook' : '🎵 TikTok';
+  meta.textContent = date.toLocaleDateString('es-MX', {day:'numeric',month:'long',year:'numeric'}) + ' · ' + platLabel;
+  pilar.textContent = histCurrentPost.pillar || 'General';
+  cap.textContent = histCurrentPost.caption || histCurrentPost.captionSnippet || 'Sin caption guardado';
+  if(modal) modal.style.display = 'flex';
+}
+
+function closeHistDetail(event) {
+  const modal = document.getElementById('histDetailModal');
+  if(modal) modal.style.display = 'none';
+}
+
+function reuseHistPost() {
+  if(!histCurrentPost) return;
+  closeHistDetail();
+  setMode(histCurrentPost.mode || 'post');
+  if(histCurrentPost.pillar) setPillarByName(histCurrentPost.pillar);
+  if(histCurrentPost.platform) setPlatformByName(histCurrentPost.platform);
+  showCreatorFromHistorial();
+  showToast('✅ Modo y pilar pre-cargados — ajusta el texto y genera');
+}
+
+function copyHistCaption() {
+  const text = histCurrentPost?.caption || histCurrentPost?.captionSnippet || '';
+  navigator.clipboard.writeText(text)
+    .then(() => showToast('📋 Caption copiado'))
+    .catch(() => showToast('Error al copiar'));
+}
+
+// ╔═══════════════════════════════════════════════════╗
 // ║  MARKETING AGENT                                 ║
 // ╚═══════════════════════════════════════════════════╝
 let agentFreq = 5;
@@ -2333,7 +2942,7 @@ async function generateAgentPlan() {
 
   try {
     const month = getCurrentMonth();
-    const lang = localStorage.getItem('postimity_lang') || 'es';
+    const lang = detectLanguage();
     const res = await fetch(WORKER, { method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({
         mode: 'marketing-agent',
@@ -2473,33 +3082,88 @@ function setPlatformByName(platName) {
 }
 
 function renderReminderCard(active, brand) {
-  const businessName = brand?.name || 'tu negocio';
-  const waNum = brand?.whatsapp || '';
   const month = getCurrentMonth();
   const monthLabel = getMonthLabel(month);
+  const bizName = brand?.name || '';
+  const savedEmail = localStorage.getItem('postimity_rem_email_' + (brandId||'')) || (brand?.email||'');
+  const savedWA = localStorage.getItem('postimity_rem_wa_' + (brandId||'')) || (brand?.whatsapp||'');
+  const savedCh = localStorage.getItem('postimity_rem_ch_' + (brandId||'')) || 'email';
+
   if(active) {
-    return '<div class="reminder-card active" id="reminderCard">' +
-      '<span class="reminder-icon">🔔</span>' +
-      '<div class="reminder-info">' +
-        '<div class="reminder-title">Recordatorios activos para ' + monthLabel + '</div>' +
-        '<div class="reminder-sub">Cuando conectes Twilio, recibirás un mensaje personal cada mañana antes de tu post del día</div>' +
+    return '<div class="reminder-card active" id="reminderCard" style="flex-direction:column;align-items:flex-start">' +
+      '<div style="display:flex;align-items:center;gap:14px;width:100%;margin-bottom:10px">' +
+        '<span class="reminder-icon">🔔</span>' +
+        '<div class="reminder-info"><div class="reminder-title">Recordatorios activos — ' + monthLabel + '</div>' +
+        '<div class="reminder-sub" style="color:#1a8a4a">Recibirás un aviso cada mañana antes de tu post del día</div></div>' +
+        '<button class="reminder-btn on" onclick="toggleReminders(false)" style="flex-shrink:0">✓ Activo</button>' +
       '</div>' +
-      '<div class="reminder-toggle">' +
-        '<button class="reminder-btn on" onclick="toggleReminders(false)">✓ Activo</button>' +
-      '</div>' +
-    '</div>';
-  } else {
-    return '<div class="reminder-card" id="reminderCard">' +
-      '<span class="reminder-icon">🔔</span>' +
-      '<div class="reminder-info">' +
-        '<div class="reminder-title">Recordatorios por WhatsApp</div>' +
-        '<div class="reminder-sub">Recibe un mensaje cálido cada mañana con el post del día y un link directo para generarlo</div>' +
-      '</div>' +
-      '<div class="reminder-toggle">' +
-        '<button class="reminder-btn off" onclick="toggleReminders(true)">Activar →</button>' +
+      '<div style="font-size:11px;color:#1a8a4a;background:rgba(37,211,102,.08);border-radius:8px;padding:8px 10px;width:100%">' +
+        (savedCh==='email'||savedCh==='both' ? '📧 ' + savedEmail + '  ' : '') +
+        (savedCh==='whatsapp'||savedCh==='both' ? '📱 ' + savedWA : '') +
       '</div>' +
     '</div>';
   }
+
+  return '<div class="reminder-card" id="reminderCard" style="flex-direction:column;align-items:flex-start">' +
+    '<div style="display:flex;align-items:center;gap:14px;width:100%">' +
+      '<span class="reminder-icon">🔔</span>' +
+      '<div class="reminder-info"><div class="reminder-title">Recordatorios automáticos</div>' +
+      '<div class="reminder-sub">Aviso cálido cada mañana antes de tu post del día</div></div>' +
+    '</div>' +
+    '<div class="rem-fields">' +
+      '<div><div class="rem-field-label">📧 Email para recordatorios</div>' +
+      '<input class="rem-field-input" id="remEmail" type="email" value="' + savedEmail + '" placeholder="tu@email.com"></div>' +
+      '<div><div class="rem-field-label">📱 WhatsApp personal (opcional)</div>' +
+      '<input class="rem-field-input" id="remWA" type="tel" value="' + savedWA + '" placeholder="+52 449 000 0000"></div>' +
+      '<div><div class="rem-field-label">Canal de notificación</div>' +
+      '<div class="rem-channel-btns">' +
+        '<button class="rem-ch-btn' + (savedCh==='email'?' active':'') + '" data-ch="email" onclick="setRemChannel(this)">📧 Email</button>' +
+        '<button class="rem-ch-btn' + (savedCh==='whatsapp'?' active':'') + '" data-ch="whatsapp" onclick="setRemChannel(this)">📱 WhatsApp</button>' +
+        '<button class="rem-ch-btn' + (savedCh==='both'?' active':'') + '" data-ch="both" onclick="setRemChannel(this)">Ambos</button>' +
+      '</div></div>' +
+      '<button class="rem-save-btn" onclick="activateReminders()">🔔 Activar recordatorios</button>' +
+    '</div>' +
+  '</div>';
+}
+
+function setRemChannel(btn) {
+  document.querySelectorAll('.rem-ch-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+async function activateReminders() {
+  const email = document.getElementById('remEmail')?.value.trim();
+  const wa = document.getElementById('remWA')?.value.trim();
+  const chBtn = document.querySelector('.rem-ch-btn.active');
+  const ch = chBtn?.dataset.ch || 'email';
+
+  if((ch === 'email' || ch === 'both') && !email) { showToast('Ingresa tu email para recibir recordatorios'); return; }
+  if(ch === 'whatsapp' && !wa) { showToast('Ingresa tu WhatsApp para recibir recordatorios'); return; }
+
+  const brand = loadBrand();
+  const month = getCurrentMonth();
+  const lang = detectLanguage();
+
+  // Save locally
+  localStorage.setItem('postimity_rem_email_' + (brandId||''), email || '');
+  localStorage.setItem('postimity_rem_wa_' + (brandId||''), wa || '');
+  localStorage.setItem('postimity_rem_ch_' + (brandId||''), ch);
+  localStorage.setItem('postimity_reminders_' + month, 'on');
+
+  // Save to KV
+  try {
+    await fetch(WORKER, { method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ mode:'save-reminders', brandId, reminder: {
+        active: true, channel: ch, email, whatsappPersonal: wa,
+        month, language: lang, businessName: brand?.name || ''
+      }})
+    });
+  } catch(e) { console.warn('KV reminder save failed:', e.message); }
+
+  // Update card in place
+  const card = document.getElementById('reminderCard');
+  if(card) card.outerHTML = renderReminderCard(true, brand);
+  showToast('🔔 Recordatorios activados para ' + getMonthLabel(month));
 }
 
 function toggleReminders(activate) {
@@ -2527,6 +3191,12 @@ function toggleReminders(activate) {
     }, 500);
   } else {
     localStorage.removeItem('postimity_reminders_' + month);
+    // Deactivate in KV
+    if(brandId) {
+      fetch(WORKER, { method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ mode:'save-reminders', brandId, reminder: { active: false, month } })
+      }).catch(()=>{});
+    }
     const card = document.getElementById('reminderCard');
     if(card) card.outerHTML = renderReminderCard(false, brand);
     showToast('Recordatorios desactivados');
@@ -2545,6 +3215,77 @@ function copyPrompt(idx) {
       document.execCommand('copy'); document.body.removeChild(ta);
       showToast('📋 Prompt copiado');
     });
+}
+
+// ╔═══════════════════════════════════════════════════╗
+// ║  ONBOARDING WIZARD                               ║
+// ╚═══════════════════════════════════════════════════╝
+const SETUP_STEPS = [
+  'Identidad del negocio',
+  'Ubicación',
+  'Estrategia de contenido',
+  'Colores de marca',
+  'Brand Guide con AI'
+];
+
+function startOnboarding() {
+  applyBilingualUI();
+  showScreen('setupScreen');
+  updateSetupStepLabel(1);
+}
+
+function applyBilingualUI() {
+  // Welcome screen
+  const lang = detectLanguage();
+  const els = {
+    wlcH1: t('welcomeH1'), wlcSub: t('welcomeSub'),
+    wlcCta: t('welcomeCta'), wlcNote: t('welcomeNote'),
+  };
+  Object.entries(els).forEach(([id, txt]) => {
+    const el = document.getElementById(id);
+    if(el) el.textContent = txt;
+  });
+  // Adjust input placeholder
+  const adjInp = document.getElementById('adjustInput');
+  if(adjInp) adjInp.placeholder = t('adjustPlaceholder');
+}
+
+function updateSetupStepLabel(step) {
+  const el = document.getElementById('setupStepLabel');
+  if(el) el.textContent = 'Paso ' + step + ' de 5 · ' + (SETUP_STEPS[step-1] || '');
+}
+
+// Hook into scroll to update step label
+function initSetupScrollTracking() {
+  const scards = document.querySelectorAll('.scard');
+  if(!scards.length) return;
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if(entry.isIntersecting) {
+        const idx = Array.from(scards).indexOf(entry.target) + 1;
+        updateSetupStepLabel(idx);
+      }
+    });
+  }, { threshold: 0.5 });
+  scards.forEach(c => observer.observe(c));
+}
+
+// First-post celebration (called after very first generation)
+let isFirstPost = false;
+function checkIsFirstPost() {
+  const key = 'postimity_first_post_' + (brandId || '');
+  if(!localStorage.getItem(key)) {
+    isFirstPost = true;
+    localStorage.setItem(key, '1');
+  }
+}
+
+function showFirstPostCelebration() {
+  if(!isFirstPost) return;
+  isFirstPost = false;
+  setTimeout(() => {
+    showToast('🎉 ¡Tu primer post generado con Postimity! Bienvenido al club.');
+  }, 1200);
 }
 
 // ── Deep-link pre-fill from URL params ────────────────────────────────────
@@ -2681,6 +3422,7 @@ async function regenText() {
 function showResult(data) {
   lastResult=data;
   lastGeneratedData=data;
+  checkIsFirstPost();
   showLoading(false);
   // Watermark toggle: only Growth+ can disable it
   const srBrand = loadBrand();
@@ -2698,9 +3440,13 @@ function showResult(data) {
   document.getElementById('resultImg').src=data.imageUrl||'';
   const pd=document.getElementById('photoDescBar');
   if(data.photoDescription){ pd.textContent='📷 '+data.photoDescription; pd.classList.add('show'); } else pd.classList.remove('show');
-  // Show/hide adjust section
+  // Show/hide adjust + publish sections (hidden for carousel)
   const adjWrap = document.getElementById('adjustWrap');
   if(adjWrap) adjWrap.style.display = (mode === 'carousel') ? 'none' : 'block';
+  const pubSec = document.getElementById('pubSection');
+  if(pubSec) pubSec.style.display = (mode === 'carousel') ? 'none' : 'block';
+  // First post celebration
+  showFirstPostCelebration();
   // Show carousel slides preview
   const carouselPreviewWrap = document.getElementById('carouselPreviewWrap');
   if(data.carouselImages && data.carouselImages.length && carouselPreviewWrap) {
@@ -2836,6 +3582,48 @@ function toggleAdBrief() {
 // ═══════════════════════════════════════════════════════
 // CANVAS — DOWNLOAD + LOGO OVERLAY
 // ═══════════════════════════════════════════════════════
+// ─── OPEN IN SOCIAL ───────────────────────────────────
+async function openInSocial(platform) {
+  // 1. Get caption for this platform
+  const capMap = {
+    instagram: () => (document.getElementById('igCap')?.textContent||'') + '\n' + (document.getElementById('igHash')?.textContent||''),
+    facebook:  () => (document.getElementById('fbCap')?.textContent||'') + '\n' + (document.getElementById('fbHash')?.textContent||''),
+    tiktok:    () => (document.getElementById('ttCap')?.textContent||'') + '\n' + (document.getElementById('ttHash')?.textContent||''),
+  };
+  const caption = (capMap[platform] || capMap.instagram)().trim();
+
+  // 2. Copy caption to clipboard
+  try {
+    await navigator.clipboard.writeText(caption);
+  } catch(e) {
+    // Fallback copy
+    const ta = document.createElement('textarea');
+    ta.value = caption; document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta);
+  }
+
+  // 3. Download image (1:1 square — best for all platforms)
+  await downloadImg('square');
+
+  // 4. Toast with next step
+  const toastMsg = {
+    instagram: '📸 Imagen descargada · Caption copiado — abre Instagram y pégalo',
+    facebook:  '👥 Imagen descargada · Caption copiado — abre Facebook y pégalo',
+    tiktok:    '🎵 Imagen descargada · Caption copiado — abre TikTok y pégalo',
+  };
+  showToast(toastMsg[platform] || '✅ Listo — pega el caption en la app');
+
+  // 5. Open platform (mobile auto-redirects to native app if installed)
+  const urls = {
+    instagram: 'https://www.instagram.com/',
+    facebook:  'https://www.facebook.com/',
+    tiktok:    'https://www.tiktok.com/',
+  };
+  setTimeout(() => {
+    window.open(urls[platform] || 'https://www.instagram.com/', '_blank');
+  }, 900); // Small delay so download starts first
+}
+
 // ─── DOWNLOAD ─────────────────────────────────────────
 async function downloadImg(format) {
   const imgEl=document.getElementById('resultImg');
