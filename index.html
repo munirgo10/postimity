@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Postimity — Content that sounds like you</title>
+<meta name="description" content="The AI that creates content in your brand's voice. Professional posts, flyers, carousels and videos in seconds. No designers. No agencies.">
+<meta property="og:title" content="Postimity — Content that sounds like you">
+<meta property="og:description" content="The AI that creates content in your brand's voice. Posts, flyers, carousels in seconds.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://postimity.com">
+<meta property="og:image" content="https://postimity.com/og-image.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Crect width='32' height='32' rx='8' fill='%232979FF'/%3E%3Ctext x='8.5' y='22' font-family='sans-serif' font-size='16' font-weight='800' fill='white'%3E%E2%9C%A6%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --blue:#2979FF;--blue2:#1565C0;--blue-light:#E3F0FF;--blue-glow:rgba(41,121,255,.15);
+  --green:#76C442;--green-bg:#EAF3DE;--pink:#E91E8C;
+  --dark:#0F1117;--t1:#111827;--t2:#374151;--t3:#6B7280;--t4:#9CA3AF;
+  --bg:#FAFAF8;--bg2:#F5F5F3;--white:#FFFFFF;
+  --bor:#E5E7EB;--r:12px;--r2:16px;
+}
+*,::before,::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--bg);color:var(--t1);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+
+/* ANIMATIONS */
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+@keyframes pulse-glow{0%,100%{box-shadow:0 0 20px rgba(41,121,255,.15)}50%{box-shadow:0 0 40px rgba(41,121,255,.25)}}
+.fade-up{opacity:0;transform:translateY(20px);transition:opacity .6s,transform .6s}
+.fade-up.visible{opacity:1;transform:translateY(0)}
+
+/* NAV */
+.nav{position:sticky;top:0;z-index:100;background:rgba(250,250,248,.88);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid rgba(0,0,0,.06);padding:0 24px;height:60px;display:flex;align-items:center}
+.nav-inner{max-width:1100px;margin:0 auto;width:100%;display:flex;align-items:center;justify-content:space-between}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.nav-logo-sq{width:30px;height:30px;border-radius:8px;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800}
+.nav-logo-text{font-size:18px;font-weight:800;color:var(--t1)}
+.nav-right{display:flex;align-items:center;gap:14px}
+.nav-links{display:flex;gap:24px;margin-right:12px}
+.nav-links a{font-size:13px;font-weight:500;color:var(--t3);text-decoration:none;transition:.15s}
+.nav-links a:hover{color:var(--t1)}
+.lang-toggle{background:var(--bg2);border:1px solid var(--bor);border-radius:20px;padding:3px;display:flex;cursor:pointer}
+.lang-opt{padding:4px 10px;border-radius:16px;font-size:11px;font-weight:600;color:var(--t3);transition:.15s}
+.lang-opt.active{background:var(--white);color:var(--t1);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.nav-cta{background:var(--blue);color:#fff;padding:8px 18px;border-radius:8px;font-size:13px;font-weight:700;text-decoration:none;transition:.2s;border:none;cursor:pointer}
+.nav-cta:hover{background:var(--blue2);transform:translateY(-1px);box-shadow:0 4px 12px rgba(41,121,255,.25)}
+
+/* ═══ HERO ═══ */
+.hero-wrap{background:linear-gradient(175deg,#F0F6FF 0%,var(--bg) 50%,#F8F6FF 100%);padding-bottom:20px;position:relative;overflow:hidden}
+.hero-wrap::before{content:'';position:absolute;top:-200px;right:-200px;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(41,121,255,.06) 0%,transparent 70%);pointer-events:none}
+.hero-wrap::after{content:'';position:absolute;bottom:-100px;left:-200px;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(118,196,66,.05) 0%,transparent 70%);pointer-events:none}
+.hero{max-width:1100px;margin:0 auto;padding:56px 24px 0;display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center}
+.hero-content{animation:fadeUp .8s ease-out}
+.hero-badge{display:inline-flex;align-items:center;gap:6px;background:var(--white);border:1px solid var(--bor);color:var(--blue);font-size:12px;font-weight:700;padding:6px 14px;border-radius:20px;margin-bottom:20px;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+.hero h1{font-size:clamp(32px,4.5vw,52px);font-weight:800;line-height:1.08;letter-spacing:-1.5px;color:var(--t1);margin-bottom:16px}
+.hero h1 .accent{background:linear-gradient(135deg,var(--blue),#7C4DFF);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-sub{font-size:17px;color:var(--t2);line-height:1.65;margin-bottom:28px}
+.hero-ctas{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.btn-hero{background:var(--blue);color:#fff;padding:13px 28px;border-radius:10px;font-size:15px;font-weight:700;text-decoration:none;transition:.2s;border:none;cursor:pointer;font-family:inherit;box-shadow:0 4px 20px rgba(41,121,255,.3);position:relative;overflow:hidden}
+.btn-hero::after{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.15),transparent);transition:.5s}
+.btn-hero:hover::after{left:100%}
+.btn-hero:hover{background:var(--blue2);transform:translateY(-2px);box-shadow:0 8px 28px rgba(41,121,255,.35)}
+.btn-demo{background:transparent;color:var(--t1);padding:13px 28px;border-radius:10px;font-size:15px;font-weight:600;text-decoration:none;border:1.5px solid var(--bor);transition:.2s;cursor:pointer;font-family:inherit}
+.btn-demo:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-light)}
+.hero-trust{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--t3);margin-top:6px}
+.hero-trust span{display:flex;align-items:center;gap:4px}
+
+/* HERO MOCKUP — Product showcase */
+.hero-visual{animation:fadeUp .8s ease-out .2s both;position:relative}
+.product-showcase{position:relative}
+.showcase-phone{width:280px;margin:0 auto;background:var(--white);border-radius:24px;border:1px solid var(--bor);box-shadow:0 20px 60px rgba(0,0,0,.1),0 1px 3px rgba(0,0,0,.05);overflow:hidden;animation:pulse-glow 4s ease-in-out infinite}
+.phone-notch{height:28px;background:var(--dark);border-radius:0 0 16px 16px;margin:0 40px;position:relative}
+.phone-notch::after{content:'';position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:40px;height:4px;border-radius:2px;background:rgba(255,255,255,.3)}
+.phone-content{padding:12px}
+.phone-header{display:flex;align-items:center;gap:8px;padding:8px 4px;margin-bottom:8px}
+.phone-logo{width:22px;height:22px;border-radius:6px;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800}
+.phone-brand{font-size:11px;font-weight:700}
+.phone-post{border-radius:10px;overflow:hidden;border:1px solid var(--bor)}
+.phone-img{width:100%;height:170px;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:700;text-align:center;padding:12px;line-height:1.5}
+.phone-caption{padding:10px;font-size:10px;line-height:1.6;color:var(--t2)}
+.phone-caption strong{display:block;font-size:10px;font-weight:700;color:var(--t1);margin-bottom:4px}
+.phone-hashtags{color:var(--blue);font-size:9px;font-weight:500}
+.phone-actions{display:flex;gap:8px;padding:10px 4px}
+.phone-action{flex:1;text-align:center;font-size:9px;font-weight:700;padding:7px 4px;border-radius:8px;color:#fff;letter-spacing:.2px}
+
+/* Floating elements around mockup */
+.float-card{position:absolute;background:var(--white);border:1px solid var(--bor);border-radius:10px;padding:10px 14px;box-shadow:0 8px 24px rgba(0,0,0,.08);font-size:11px;animation:float 3s ease-in-out infinite;white-space:nowrap}
+.float-1{top:20px;right:-20px;animation-delay:0s}
+.float-2{bottom:80px;left:-30px;animation-delay:1s}
+.float-3{bottom:20px;right:-10px;animation-delay:2s}
+.float-icon{margin-right:4px}
+
+/* ═══ METRICS STRIP ═══ */
+.metrics{background:var(--white);border-top:1px solid var(--bor);border-bottom:1px solid var(--bor);padding:28px 24px}
+.metrics-inner{max-width:900px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:16px;text-align:center}
+.metric-num{font-size:28px;font-weight:800;color:var(--t1);letter-spacing:-1px}
+.metric-num .metric-accent{color:var(--blue)}
+.metric-label{font-size:12px;color:var(--t3);margin-top:2px}
+
+/* ═══ CONTRAST SECTION ═══ */
+.contrast{max-width:1100px;margin:0 auto;padding:56px 24px}
+.contrast-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:800px;margin:0 auto}
+.contrast-card{padding:28px 24px;border-radius:var(--r2);position:relative;overflow:hidden}
+.contrast-card.without{background:#FFF5F5;border:1px solid #FDD}
+.contrast-card.with{background:#F0FFF4;border:1px solid #C6F6D5}
+.contrast-label{font-size:12px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:6px}
+.contrast-card.without .contrast-label{color:#C53030}
+.contrast-card.with .contrast-label{color:#276749}
+.contrast-items{list-style:none}
+.contrast-items li{font-size:13px;padding:5px 0;display:flex;align-items:flex-start;gap:6px;line-height:1.5}
+.contrast-card.without .contrast-items li{color:#9B2C2C}
+.contrast-card.with .contrast-items li{color:#276749}
+
+/* ═══ SECTIONS ═══ */
+.section{max-width:1100px;margin:0 auto;padding:56px 24px}
+.section-label{font-size:12px;font-weight:800;color:var(--blue);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px;text-align:center}
+.section-title{font-size:clamp(26px,3.5vw,38px);font-weight:800;text-align:center;letter-spacing:-.5px;margin-bottom:14px;line-height:1.15}
+.section-sub{font-size:15px;color:var(--t2);text-align:center;max-width:540px;margin:0 auto 32px;line-height:1.65}
+
+/* ═══ HOW IT WORKS ═══ */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:0;position:relative}
+.steps::before{content:'';position:absolute;top:50px;left:16%;right:16%;height:2px;background:linear-gradient(90deg,var(--blue),var(--green));border-radius:1px;z-index:0}
+.step{text-align:center;padding:24px 20px;position:relative;z-index:1}
+.step-num{width:44px;height:44px;border-radius:50%;background:var(--blue);color:#fff;font-size:16px;font-weight:800;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;box-shadow:0 4px 16px rgba(41,121,255,.25);position:relative}
+.step:nth-child(2) .step-num{background:linear-gradient(135deg,var(--blue),#7C4DFF)}
+.step:nth-child(3) .step-num{background:var(--green);box-shadow:0 4px 16px rgba(118,196,66,.25)}
+.step-icon{font-size:28px;margin-bottom:10px}
+.step h3{font-size:15px;font-weight:700;margin-bottom:6px}
+.step p{font-size:13px;color:var(--t3);line-height:1.6}
+.step-time{display:inline-block;font-size:11px;color:var(--blue);font-weight:700;margin-top:10px;background:var(--blue-light);padding:3px 10px;border-radius:10px}
+
+/* ═══ FEATURES ═══ */
+.features-section{background:var(--dark);color:#fff;padding:56px 24px;position:relative;overflow:hidden}
+.features-section::before{content:'';position:absolute;top:-100px;right:-100px;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(41,121,255,.08) 0%,transparent 70%)}
+.features-section .section-label{color:rgba(255,255,255,.5)}
+.features-section .section-title{color:#fff}
+.features-section .section-sub{color:rgba(255,255,255,.6)}
+.features-inner{max-width:1100px;margin:0 auto}
+.features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.feat-card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:var(--r2);padding:28px 22px;transition:.25s;position:relative;overflow:hidden}
+.feat-card:hover{background:rgba(255,255,255,.08);border-color:rgba(41,121,255,.3);transform:translateY(-3px)}
+.feat-card.wide{grid-column:span 3}
+.feat-icon{font-size:28px;margin-bottom:14px}
+.feat-card h3{font-size:15px;font-weight:700;margin-bottom:6px;color:#fff}
+.feat-card p{font-size:13px;color:rgba(255,255,255,.55);line-height:1.6}
+.feat-badge{display:inline-block;font-size:10px;font-weight:700;padding:3px 10px;border-radius:8px;margin-top:10px;letter-spacing:.3px}
+.feat-badge.live{background:rgba(118,196,66,.15);color:#76C442}
+.feat-badge.soon{background:rgba(124,77,255,.15);color:#B39DFF}
+
+/* ═══ PRICING ═══ */
+.pricing-section{background:linear-gradient(175deg,#F5F8FF 0%,var(--bg) 100%)}
+.pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;max-width:940px;margin:0 auto}
+.price-card{background:var(--white);border:1.5px solid var(--bor);border-radius:20px;padding:36px 24px 28px;text-align:center;position:relative;transition:.25s}
+.price-card:hover{transform:translateY(-4px);box-shadow:0 12px 36px rgba(0,0,0,.08)}
+.price-card.featured{border:2px solid var(--blue);box-shadow:0 12px 40px rgba(41,121,255,.12);transform:scale(1.03)}
+.price-card.featured:hover{transform:scale(1.03) translateY(-4px)}
+.price-popular{position:absolute;top:-13px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--blue),#7C4DFF);color:#fff;font-size:11px;font-weight:700;padding:5px 16px;border-radius:20px;white-space:nowrap;box-shadow:0 4px 12px rgba(41,121,255,.25)}
+.price-name{font-size:20px;font-weight:800;margin-bottom:4px}
+.price-amount{font-size:40px;font-weight:800;margin:8px 0 2px;letter-spacing:-1px}
+.price-amount span{font-size:14px;font-weight:500;color:var(--t4)}
+.price-period{font-size:13px;color:var(--t3);margin-bottom:20px}
+.price-divider{height:1px;background:var(--bor);margin:0 0 16px}
+.price-features{list-style:none;text-align:left;margin-bottom:24px}
+.price-features li{font-size:13px;color:var(--t2);padding:5px 0;display:flex;align-items:center;gap:8px}
+.pf-check{color:var(--green);font-weight:700;flex-shrink:0;font-size:14px}
+.pf-x{color:var(--t4);flex-shrink:0}
+.pf-highlight{font-weight:600;color:var(--t1)}
+.price-cta{display:block;width:100%;padding:13px;border-radius:10px;font-size:14px;font-weight:700;text-align:center;text-decoration:none;transition:.2s;cursor:pointer;border:none;font-family:inherit}
+.price-cta.primary{background:var(--blue);color:#fff;box-shadow:0 4px 16px rgba(41,121,255,.25)}
+.price-cta.primary:hover{background:var(--blue2);box-shadow:0 6px 20px rgba(41,121,255,.3)}
+.price-cta.outline{background:var(--white);color:var(--t1);border:1.5px solid var(--bor)}
+.price-cta.outline:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-light)}
+.trial-note{text-align:center;margin-top:28px;padding:16px 20px;background:var(--white);border:1px solid var(--bor);border-radius:12px;max-width:600px;margin-left:auto;margin-right:auto;font-size:14px;color:var(--t2)}
+.trial-note strong{color:var(--t1)}
+.pricing-note{text-align:center;margin-top:12px;font-size:12px;color:var(--t4)}
+
+/* ═══ FAQ ═══ */
+.faq-list{max-width:680px;margin:0 auto}
+.faq-item{border-bottom:1px solid var(--bor);padding:18px 0}
+.faq-q{font-size:15px;font-weight:700;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:12px;transition:.15s}
+.faq-q:hover{color:var(--blue)}
+.faq-chevron{font-size:16px;color:var(--t4);transition:transform .25s;flex-shrink:0}
+.faq-a{font-size:14px;color:var(--t2);line-height:1.7;max-height:0;overflow:hidden;transition:max-height .3s,padding .3s}
+.faq-item.open .faq-a{max-height:300px;padding-top:10px}
+.faq-item.open .faq-chevron{transform:rotate(180deg)}
+
+/* ═══ FINAL CTA ═══ */
+.final-cta{background:linear-gradient(135deg,#1a56db,var(--blue),#7C4DFF);border-radius:24px;padding:52px 24px;text-align:center;max-width:1060px;margin:0 auto;color:#fff;position:relative;overflow:hidden}
+.final-cta::before{content:'';position:absolute;top:-50%;right:-20%;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.08) 0%,transparent 70%)}
+.final-cta h2{font-size:clamp(24px,4vw,36px);font-weight:800;margin-bottom:10px;position:relative}
+.final-cta p{font-size:16px;opacity:.8;margin-bottom:24px;max-width:460px;margin-left:auto;margin-right:auto;position:relative}
+.btn-white{background:#fff;color:var(--blue);padding:14px 36px;border-radius:10px;font-size:16px;font-weight:700;text-decoration:none;transition:.2s;border:none;cursor:pointer;font-family:inherit;position:relative;box-shadow:0 4px 20px rgba(0,0,0,.15)}
+.btn-white:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,.2)}
+.final-note{font-size:12px;opacity:.6;margin-top:20px;position:relative}
+
+/* ═══ FOOTER ═══ */
+.footer{background:var(--dark);color:rgba(255,255,255,.5);padding:36px 24px;text-align:center;font-size:12px}
+.footer-inner{max-width:1100px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+.footer-brand{font-size:15px;font-weight:800;color:#fff;display:flex;align-items:center;gap:6px}
+.footer-links{display:flex;gap:18px}
+.footer-links a{color:rgba(255,255,255,.4);text-decoration:none;font-size:12px;transition:.15s}
+.footer-links a:hover{color:#fff}
+
+/* ═══ RESPONSIVE ═══ */
+@media(max-width:900px){
+  .hero{grid-template-columns:1fr;text-align:center;padding:48px 20px 0}
+  .hero-ctas{justify-content:center}
+  .hero-trust{justify-content:center}
+  .hero-visual{margin-top:32px}
+  .float-card{display:none}
+  .steps::before{display:none}
+  .steps{grid-template-columns:1fr;gap:12px}
+  .contrast-grid{grid-template-columns:1fr}
+  .features-grid{grid-template-columns:1fr}
+  .feat-card.wide{grid-column:span 1}
+  .pricing-grid{grid-template-columns:1fr;max-width:380px}
+  .price-card.featured{transform:none}
+  .price-card.featured:hover{transform:translateY(-4px)}
+  .metrics-inner{grid-template-columns:repeat(2,1fr);gap:12px}
+  .nav-links{display:none}
+  .nav-cta{display:none}
+  .final-cta{margin:0 16px;border-radius:16px;padding:36px 20px}
+  .section{padding:40px 20px}
+  .footer-inner{flex-direction:column;text-align:center}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="/" class="nav-logo"><div class="nav-logo-sq">✦</div><span class="nav-logo-text">Postimity</span></a>
+    <div class="nav-right">
+      <div class="nav-links">
+        <a href="#como" data-es="Cómo funciona" data-en="How it works">Cómo funciona</a>
+        <a href="#features" data-es="Funciones" data-en="Features">Funciones</a>
+        <a href="#pricing" data-es="Precios" data-en="Pricing">Precios</a>
+      </div>
+      <div class="lang-toggle" onclick="toggleLang()"><span class="lang-opt active" id="langES">ES</span><span class="lang-opt" id="langEN">EN</span></div>
+      <a href="studio.html" class="nav-cta" id="navCta">Comenzar gratis</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero-wrap">
+<section class="hero">
+  <div class="hero-content">
+    <div class="hero-badge">✦ <span data-es="Powered by AI" data-en="Powered by AI">Powered by AI</span></div>
+    <h1 data-es="Contenido que suena <span class='accent'>como tú</span>" data-en="Content that sounds <span class='accent'>like you</span>">Contenido que suena <span class="accent">como tú</span></h1>
+    <p class="hero-sub" data-es="Describe tu negocio una vez. La AI aprende tu voz y genera posts, flyers, carruseles y videos profesionales listos para publicar." data-en="Describe your business once. AI learns your voice and generates professional posts, flyers, carousels and videos ready to publish.">Describe tu negocio una vez. La AI aprende tu voz y genera posts, flyers, carruseles y videos profesionales listos para publicar.</p>
+    <div class="hero-ctas">
+      <a href="studio.html" class="btn-hero" data-es="Crear mi primer post gratis →" data-en="Create my first post free →">Crear mi primer post gratis →</a>
+      <a href="#como" class="btn-demo" data-es="Ver cómo funciona" data-en="See how it works">Ver cómo funciona</a>
+    </div>
+    <div class="hero-trust">
+      <span data-es="✓ Sin tarjeta de crédito" data-en="✓ No credit card">✓ Sin tarjeta de crédito</span>
+      <span data-es="✓ 20 generaciones gratis" data-en="✓ 20 free generations">✓ 20 generaciones gratis</span>
+      <span data-es="✓ Listo en 2 min" data-en="✓ Ready in 2 min">✓ Listo en 2 min</span>
+    </div>
+  </div>
+
+  <div class="hero-visual">
+    <div class="product-showcase">
+      <!-- Floating context cards -->
+      <div class="float-card float-1"><span class="float-icon">📱</span> <span data-es="3 plataformas a la vez" data-en="3 platforms at once">3 plataformas a la vez</span></div>
+      <div class="float-card float-2"><span class="float-icon">⚡</span> <span data-es="20 seg por post" data-en="20 sec per post">20 seg por post</span></div>
+      <div class="float-card float-3"><span class="float-icon">🎨</span> <span data-es="Tu estilo, siempre" data-en="Your style, always">Tu estilo, siempre</span></div>
+
+      <!-- Phone mockup -->
+      <div class="showcase-phone">
+        <div class="phone-notch"></div>
+        <div class="phone-content">
+          <div class="phone-header">
+            <div class="phone-logo">✦</div>
+            <div class="phone-brand">Postimity Studio</div>
+          </div>
+          <div class="phone-post">
+            <div class="phone-img">
+              <span data-es="✦ Imagen generada con AI<br>para tu marca" data-en="✦ AI-generated image<br>for your brand">✦ Imagen generada con AI<br>para tu marca</span>
+            </div>
+            <div class="phone-caption">
+              <strong data-es="📱 Caption listo para publicar:" data-en="📱 Caption ready to publish:">📱 Caption listo para publicar:</strong>
+              <span data-es="«Cada detalle cuenta. Nuestro equipo cuida tu experiencia de principio a fin porque sabemos que mereces lo mejor...»" data-en="«Every detail counts. Our team cares for your experience from start to finish because we know you deserve the best...»">«Cada detalle cuenta. Nuestro equipo cuida tu experiencia de principio a fin porque sabemos que mereces lo mejor...»</span>
+              <div class="phone-hashtags">#TuMarca #AI #ContentCreation</div>
+            </div>
+          </div>
+          <div class="phone-actions">
+            <div class="phone-action" style="background:linear-gradient(135deg,#833AB4,#E1306C,#F77737)">Instagram</div>
+            <div class="phone-action" style="background:#1877F2">Facebook</div>
+            <div class="phone-action" style="background:#010101">TikTok</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+</div>
+
+<!-- METRICS -->
+<div class="metrics">
+  <div class="metrics-inner">
+    <div><div class="metric-num"><span class="metric-accent">5</span></div><div class="metric-label" data-es="Modos de creación" data-en="Creation modes">Modos de creación</div></div>
+    <div><div class="metric-num"><span class="metric-accent">20</span>s</div><div class="metric-label" data-es="Por generación" data-en="Per generation">Por generación</div></div>
+    <div><div class="metric-num"><span class="metric-accent">3</span></div><div class="metric-label" data-es="Plataformas a la vez" data-en="Platforms at once">Plataformas a la vez</div></div>
+    <div><div class="metric-num"><span class="metric-accent">0</span></div><div class="metric-label" data-es="Diseñadores necesarios" data-en="Designers needed">Diseñadores necesarios</div></div>
+  </div>
+</div>
+
+<!-- CONTRAST: WITHOUT vs WITH -->
+<section class="contrast fade-up">
+  <h2 class="section-title" data-es="Antes y después de Postimity" data-en="Before and after Postimity">Antes y después de Postimity</h2>
+  <p class="section-sub" style="margin-bottom:28px" data-es="Lo que cambia cuando tu contenido lo crea una AI que conoce tu marca." data-en="What changes when your content is created by an AI that knows your brand.">Lo que cambia cuando tu contenido lo crea una AI que conoce tu marca.</p>
+  <div class="contrast-grid">
+    <div class="contrast-card without">
+      <div class="contrast-label" data-es="✕ Sin Postimity" data-en="✕ Without Postimity">✕ Sin Postimity</div>
+      <ul class="contrast-items">
+        <li data-es="🕐 2-3 horas por post entre diseño y copy" data-en="🕐 2-3 hours per post between design and copy">🕐 2-3 horas por post entre diseño y copy</li>
+        <li data-es="💸 $3,000-15,000/mes en agencia o freelancer" data-en="💸 $200-1,000/month on agency or freelancer">💸 $3,000-15,000/mes en agencia o freelancer</li>
+        <li data-es="😓 Inconsistencia en tono y visual" data-en="😓 Inconsistent tone and visuals">😓 Inconsistencia en tono y visual</li>
+        <li data-es="📉 Publicas 2-3 veces por semana (cuando te acuerdas)" data-en="📉 You post 2-3 times a week (when you remember)">📉 Publicas 2-3 veces por semana (cuando te acuerdas)</li>
+      </ul>
+    </div>
+    <div class="contrast-card with">
+      <div class="contrast-label" data-es="✓ Con Postimity" data-en="✓ With Postimity">✓ Con Postimity</div>
+      <ul class="contrast-items">
+        <li data-es="⚡ 20 segundos por post completo" data-en="⚡ 20 seconds per complete post">⚡ 20 segundos por post completo</li>
+        <li data-es="💰 Desde $149 MXN/mes (~$8 USD)" data-en="💰 Starting at $9 USD/month">💰 Desde $149 MXN/mes (~$8 USD)</li>
+        <li data-es="🎯 Siempre con tu voz y estilo" data-en="🎯 Always in your voice and style">🎯 Siempre con tu voz y estilo</li>
+        <li data-es="📈 Contenido diario para 3 plataformas" data-en="📈 Daily content for 3 platforms">📈 Contenido diario para 3 plataformas</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="section fade-up" id="como">
+  <div class="section-label" data-es="Cómo funciona" data-en="How it works">Cómo funciona</div>
+  <h2 class="section-title" data-es="Tu primer post en 2 minutos" data-en="Your first post in 2 minutes">Tu primer post en 2 minutos</h2>
+  <p class="section-sub" data-es="Sin tutoriales ni curvas de aprendizaje. Cuéntale a la AI sobre tu negocio y ella hace el resto." data-en="No tutorials or learning curves. Tell the AI about your business and it does the rest.">Sin tutoriales ni curvas de aprendizaje. Cuéntale a la AI sobre tu negocio y ella hace el resto.</p>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-icon">🏪</div>
+      <h3 data-es="Describe tu marca" data-en="Describe your brand">Describe tu marca</h3>
+      <p data-es="Nombre, qué haces y qué te hace especial. La AI crea tu Brand Guide personalizado con tono, pilares y estrategia." data-en="Name, what you do and what makes you special. AI creates your personalized Brand Guide with tone, pillars and strategy.">Nombre, qué haces y qué te hace especial. La AI crea tu Brand Guide personalizado con tono, pilares y estrategia.</p>
+      <div class="step-time">~60 seg</div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-icon">✨</div>
+      <h3 data-es="Genera contenido" data-en="Generate content">Genera contenido</h3>
+      <p data-es="Elige: post, flyer, carrusel, testimonio o video. Escribe tu tema. La AI genera imagen + captions para 3 plataformas." data-en="Choose: post, flyer, carousel, testimonial or video. Write your topic. AI generates image + captions for 3 platforms.">Elige: post, flyer, carrusel, testimonio o video. Escribe tu tema. La AI genera imagen + captions para 3 plataformas.</p>
+      <div class="step-time">~20 seg</div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-icon">🚀</div>
+      <h3 data-es="Publica directo" data-en="Publish directly">Publica directo</h3>
+      <p data-es="Toca Instagram, Facebook o TikTok. Se copia el caption, se descarga la imagen y se abre la app. Solo pega y publica." data-en="Tap Instagram, Facebook or TikTok. Caption copied, image downloaded and app opens. Just paste and publish.">Toca Instagram, Facebook o TikTok. Se copia el caption, se descarga la imagen y se abre la app. Solo pega y publica.</p>
+      <div class="step-time" data-es="1 toque" data-en="1 tap">1 toque</div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features-section" id="features">
+  <div class="features-inner">
+    <div class="section-label" data-es="Funcionalidades" data-en="Features">Funcionalidades</div>
+    <h2 class="section-title" data-es="Todo lo que necesitas para brillar" data-en="Everything you need to shine">Todo lo que necesitas para brillar</h2>
+    <p class="section-sub" data-es="5 modos de generación, cada uno optimizado para un objetivo. Todos con la voz de tu marca." data-en="5 generation modes, each optimized for a goal. All in your brand's voice.">5 modos de generación, cada uno optimizado para un objetivo. Todos con la voz de tu marca.</p>
+    <div class="features-grid">
+      <div class="feat-card"><div class="feat-icon">🖊️</div><h3 data-es="Post inteligente" data-en="Smart post">Post inteligente</h3><p data-es="Escribe un tema → imagen AI + captions para 3 redes + Ad Brief + hashtags. Todo optimizado para tu audiencia." data-en="Write a topic → AI image + captions for 3 networks + Ad Brief + hashtags. All optimized for your audience.">Escribe un tema → imagen AI + captions para 3 redes + Ad Brief + hashtags. Todo optimizado para tu audiencia.</p><span class="feat-badge live">✓ Live</span></div>
+      <div class="feat-card"><div class="feat-icon">📸</div><h3 data-es="Estudio Pro" data-en="Pro Studio">Estudio Pro</h3><p data-es="Sube la foto real de tu producto o local. La AI la mejora y genera captions que venden." data-en="Upload your real product or venue photo. AI enhances it and generates captions that sell.">Sube la foto real de tu producto o local. La AI la mejora y genera captions que venden.</p><span class="feat-badge live">✓ Live</span></div>
+      <div class="feat-card"><div class="feat-icon">🎨</div><h3 data-es="Flyer profesional" data-en="Professional flyer">Flyer profesional</h3><p data-es="Eventos, promos, aperturas. Diseño automático con los datos de tu evento y colores de tu marca." data-en="Events, promos, openings. Automatic design with your event details and brand colors.">Eventos, promos, aperturas. Diseño automático con los datos de tu evento y colores de tu marca.</p><span class="feat-badge live">✓ Live</span></div>
+      <div class="feat-card"><div class="feat-icon">🎠</div><h3 data-es="Carrusel multi-slide" data-en="Multi-slide carousel">Carrusel multi-slide</h3><p data-es="3 a 10 slides con portada, contenido y CTA final. Renderizados y listos para subir." data-en="3 to 10 slides with cover, content and final CTA. Rendered and ready to upload.">3 a 10 slides con portada, contenido y CTA final. Renderizados y listos para subir.</p><span class="feat-badge live">✓ Live</span></div>
+      <div class="feat-card"><div class="feat-icon">⭐</div><h3 data-es="Testimonios" data-en="Testimonials">Testimonios</h3><p data-es="Pega una reseña real de tu cliente y la AI la convierte en un post persuasivo con imagen." data-en="Paste a real client review and AI converts it into a persuasive post with image.">Pega una reseña real de tu cliente y la AI la convierte en un post persuasivo con imagen.</p><span class="feat-badge live">✓ Live</span></div>
+      <div class="feat-card"><div class="feat-icon">🎬</div><h3 data-es="Video AI" data-en="AI Video">Video AI</h3><p data-es="Videos cortos para Reels, TikTok y Shorts. El formato que más crece en 2026." data-en="Short videos for Reels, TikTok and Shorts. The fastest growing format in 2026.">Videos cortos para Reels, TikTok y Shorts. El formato que más crece en 2026.</p><span class="feat-badge soon">Próximamente</span></div>
+      <div class="feat-card wide"><div class="feat-icon">📅</div><h3 data-es="Marketing Agent — Tu estratega personal" data-en="Marketing Agent — Your personal strategist">Marketing Agent — Tu estratega personal</h3><p data-es="Plan mensual completo: 20+ posts por plataforma, pilar y festividades de tu país. Cada post con deep-link directo al Creator — un toque y está listo." data-en="Complete monthly plan: 20+ posts by platform, pillar and your country's holidays. Each post with deep-link to Creator — one tap and it's ready.">Plan mensual completo: 20+ posts por plataforma, pilar y festividades de tu país. Cada post con deep-link directo al Creator — un toque y está listo.</p><span class="feat-badge live">✓ Live</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="section pricing-section" id="pricing">
+  <div class="section-label" data-es="Precios" data-en="Pricing">Precios</div>
+  <h2 class="section-title" data-es="Simple. Transparente. Sin sorpresas." data-en="Simple. Transparent. No surprises.">Simple. Transparente. Sin sorpresas.</h2>
+  <p class="section-sub" data-es="1 generación = 1 contenido completo. Sin créditos confusos. Sabes exactamente lo que tienes." data-en="1 generation = 1 complete content. No confusing credits. You know exactly what you have.">1 generación = 1 contenido completo. Sin créditos confusos. Sabes exactamente lo que tienes.</p>
+  <div class="pricing-grid">
+    <div class="price-card">
+      <div class="price-name">Starter</div>
+      <div class="price-amount" data-es="$149 <span>MXN</span>" data-en="$9 <span>USD</span>">$149 <span>MXN</span></div>
+      <div class="price-period" data-es="por mes" data-en="per month">por mes</div>
+      <div class="price-divider"></div>
+      <ul class="price-features">
+        <li><span class="pf-check">✓</span> <span class="pf-highlight" data-es="30 generaciones/mes" data-en="30 generations/month">30 generaciones/mes</span></li>
+        <li><span class="pf-check">✓</span> <span data-es="Post, Flyer, Estudio, Carrusel" data-en="Post, Flyer, Studio, Carousel">Post, Flyer, Estudio, Carrusel</span></li>
+        <li><span class="pf-check">✓</span> <span data-es="Testimonios" data-en="Testimonials">Testimonios</span></li>
+        <li><span class="pf-check">✓</span> <span data-es="Descarga 3 formatos + logo" data-en="Download 3 formats + logo">Descarga 3 formatos + logo</span></li>
+        <li><span class="pf-x">—</span> <span style="color:var(--t4)" data-es="Sin Video AI" data-en="No AI Video">Sin Video AI</span></li>
+      </ul>
+      <a href="studio.html" class="price-cta outline" data-es="Comenzar gratis" data-en="Start free">Comenzar gratis</a>
+    </div>
+    <div class="price-card featured">
+      <div class="price-popular" data-es="⭐ Más popular" data-en="⭐ Most popular">⭐ Más popular</div>
+      <div class="price-name">Growth</div>
+      <div class="price-amount" data-es="$349 <span>MXN</span>" data-en="$19 <span>USD</span>">$349 <span>MXN</span></div>
+      <div class="price-period" data-es="por mes" data-en="per month">por mes</div>
+      <div class="price-divider"></div>
+      <ul class="price-features">
+        <li><span class="pf-check">✓</span> <span class="pf-highlight" data-es="100 generaciones/mes" data-en="100 generations/month">100 generaciones/mes</span></li>
+        <li><span class="pf-check">✓</span> <span class="pf-highlight" data-es="🎬 8 videos AI/mes" data-en="🎬 8 AI videos/month">🎬 8 videos AI/mes</span></li>
+        <li><span class="pf-check">✓</span> <span data-es="Todos los modos" data-en="All modes">Todos los modos</span></li>
+        <li><span class="pf-check">✓</span> <span data-es="Marketing Agent" data-en="Marketing Agent">Marketing Agent</span></li>
+        <li><span class="pf-check">✓</span> <span data-es="Sin watermark" data-en="No watermark">Sin watermark</span></li>
+      </ul>
+      <a href="studio.html" class="price-cta primary" data-es="Comenzar gratis" data-en="Start free">Comenzar gratis</a>
+    </div>
+    <div class="price-card">
+      <div class="price-name">Agency</div>
+      <div class="price-amount" data-es="$799 <span>MXN</span>" data-en="$45 <span>USD</span>">$799 <span>MXN</span></div>
+      <div class="price-period" data-es="por mes" data-en="per month">por mes</div>
+      <div class="price-divider"></div>
+      <ul class="price-features">
+        <li><span class="pf-check">✓</span> <span class="pf-highlight" data-es="250 generaciones/mes" data-en="250 generations/month">250 generaciones/mes</span></li>
+        <li><span class="pf-check">✓</span> <span class="pf-highlight" data-es="🎬 20 videos AI/mes" data-en="🎬 20 AI videos/month">🎬 20 videos AI/mes</span></li>
+        <li><span class="pf-check">✓</span> <span data-es="Todo en Growth +" data-en="Everything in Growth +">Todo en Growth +</span></li>
+        <li><span class="pf-check">✓</span> <span data-es="Multi-marca" data-en="Multi-brand">Multi-marca</span></li>
+        <li><span class="pf-check">✓</span> <span data-es="Soporte prioritario" data-en="Priority support">Soporte prioritario</span></li>
+      </ul>
+      <a href="studio.html" class="price-cta outline" data-es="Comenzar gratis" data-en="Start free">Comenzar gratis</a>
+    </div>
+  </div>
+  <div class="trial-note" data-es="🎁 Todos los planes incluyen <strong>14 días de prueba gratis</strong> con 20 generaciones + 2 videos. Sin tarjeta de crédito." data-en="🎁 All plans include a <strong>14-day free trial</strong> with 20 generations + 2 videos. No credit card required.">🎁 Todos los planes incluyen <strong>14 días de prueba gratis</strong> con 20 generaciones + 2 videos. Sin tarjeta de crédito.</div>
+  <p class="pricing-note" data-es="Precios en pesos mexicanos. Precio final en tu moneda local al momento del pago." data-en="Prices shown in USD. Final price in your local currency at checkout.">Precios en pesos mexicanos. Precio final en tu moneda local al momento del pago.</p>
+</section>
+
+<!-- FAQ -->
+<section class="section">
+  <div class="section-label">FAQ</div>
+  <h2 class="section-title" data-es="Preguntas frecuentes" data-en="Frequently asked questions">Preguntas frecuentes</h2>
+  <p class="section-sub" style="margin-bottom:28px" data-es="Todo lo que necesitas saber antes de empezar." data-en="Everything you need to know before getting started.">Todo lo que necesitas saber antes de empezar.</p>
+  <div class="faq-list">
+    <div class="faq-item" onclick="this.classList.toggle('open')"><div class="faq-q"><span data-es="¿Qué es una generación?" data-en="What is a generation?">¿Qué es una generación?</span><span class="faq-chevron">▼</span></div><div class="faq-a" data-es="Cada vez que la AI crea contenido para ti: un post con imagen + captions, un flyer, un carrusel o un testimonio. Cada uno cuenta como 1 generación. Simple: 1 gen = 1 contenido completo listo para publicar." data-en="Each time AI creates content for you: a post with image + captions, a flyer, a carousel or a testimonial. Each counts as 1 generation. Simple: 1 gen = 1 complete content ready to publish.">Cada vez que la AI crea contenido para ti: un post con imagen + captions, un flyer, un carrusel o un testimonio. Cada uno cuenta como 1 generación. Simple: 1 gen = 1 contenido completo listo para publicar.</div></div>
+    <div class="faq-item" onclick="this.classList.toggle('open')"><div class="faq-q"><span data-es="¿Necesito saber de diseño o marketing?" data-en="Do I need design or marketing skills?">¿Necesito saber de diseño o marketing?</span><span class="faq-chevron">▼</span></div><div class="faq-a" data-es="No. Postimity genera imagen, captions, hashtags y hasta el brief publicitario automáticamente. Solo describes tu tema y la AI hace el resto. Cero Canva, cero Photoshop, cero agencia." data-en="No. Postimity generates image, captions, hashtags and even the ad brief automatically. Just describe your topic and AI does the rest. Zero Canva, zero Photoshop, zero agency.">No. Postimity genera imagen, captions, hashtags y hasta el brief publicitario automáticamente. Solo describes tu tema y la AI hace el resto. Cero Canva, cero Photoshop, cero agencia.</div></div>
+    <div class="faq-item" onclick="this.classList.toggle('open')"><div class="faq-q"><span data-es="¿Cómo publico el contenido?" data-en="How do I publish the content?">¿Cómo publico el contenido?</span><span class="faq-chevron">▼</span></div><div class="faq-a" data-es="Toca el botón de Instagram, Facebook o TikTok. Postimity copia el caption, descarga la imagen y abre la app — solo pegas y publicas. Un toque." data-en="Tap the Instagram, Facebook or TikTok button. Postimity copies the caption, downloads the image and opens the app — just paste and publish. One tap.">Toca el botón de Instagram, Facebook o TikTok. Postimity copia el caption, descarga la imagen y abre la app — solo pegas y publicas. Un toque.</div></div>
+    <div class="faq-item" onclick="this.classList.toggle('open')"><div class="faq-q"><span data-es="¿Funciona para cualquier tipo de negocio?" data-en="Does it work for any type of business?">¿Funciona para cualquier tipo de negocio?</span><span class="faq-chevron">▼</span></div><div class="faq-a" data-es="Sí. El Brand Guide AI se adapta a restaurantes, salones, gimnasios, escuelas, tiendas, consultorios, agencias y más. La AI aprende tu voz y genera contenido que suena como tú, no como un template." data-en="Yes. The AI Brand Guide adapts to restaurants, salons, gyms, schools, shops, clinics, agencies and more. AI learns your voice and generates content that sounds like you, not a template.">Sí. El Brand Guide AI se adapta a restaurantes, salones, gimnasios, escuelas, tiendas, consultorios, agencias y más. La AI aprende tu voz y genera contenido que suena como tú, no como un template.</div></div>
+    <div class="faq-item" onclick="this.classList.toggle('open')"><div class="faq-q"><span data-es="¿Puedo probar sin pagar?" data-en="Can I try without paying?">¿Puedo probar sin pagar?</span><span class="faq-chevron">▼</span></div><div class="faq-a" data-es="Sí. 14 días gratis con 20 generaciones + 2 videos, todas las funcionalidades de Growth. Sin tarjeta de crédito." data-en="Yes. 14 free days with 20 generations + 2 videos, all Growth features. No credit card.">Sí. 14 días gratis con 20 generaciones + 2 videos, todas las funcionalidades de Growth. Sin tarjeta de crédito.</div></div>
+    <div class="faq-item" onclick="this.classList.toggle('open')"><div class="faq-q"><span data-es="¿Los videos cuentan como generaciones?" data-en="Do videos count as generations?">¿Los videos cuentan como generaciones?</span><span class="faq-chevron">▼</span></div><div class="faq-a" data-es="No. Videos y generaciones son contadores separados y claros. Si se acaban tus videos, sigues generando posts, flyers y carruseles normalmente. Ambos se reinician cada mes." data-en="No. Videos and generations are separate, clear counters. If you run out of videos, you can still generate posts, flyers and carousels normally. Both reset every month.">No. Videos y generaciones son contadores separados y claros. Si se acaban tus videos, sigues generando posts, flyers y carruseles normalmente. Ambos se reinician cada mes.</div></div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section style="padding:0 24px 40px">
+  <div class="final-cta">
+    <h2 data-es="Tu marca merece contenido que suene como tú" data-en="Your brand deserves content that sounds like you">Tu marca merece contenido que suene como tú</h2>
+    <p data-es="Primer post listo en menos de 2 minutos. Sin tarjeta de crédito." data-en="First post ready in under 2 minutes. No credit card.">Primer post listo en menos de 2 minutos. Sin tarjeta de crédito.</p>
+    <a href="studio.html" class="btn-white" data-es="Crear mi primer post gratis →" data-en="Create my first post free →">Crear mi primer post gratis →</a>
+    <div class="final-note" data-es="14 días gratis · 20 generaciones + 2 videos · Sin compromiso" data-en="14 free days · 20 generations + 2 videos · No commitment">14 días gratis · 20 generaciones + 2 videos · Sin compromiso</div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-brand">✦ Postimity</div>
+    <div class="footer-links">
+      <a href="#pricing" data-es="Precios" data-en="Pricing">Precios</a>
+      <a href="mailto:postimity@gmail.com">Contacto</a>
+      <a href="privacy.html" data-es="Privacidad" data-en="Privacy">Privacidad</a>
+      <a href="terms.html" data-es="Términos" data-en="Terms">Términos</a>
+    </div>
+    <div>© 2026 Postimity</div>
+  </div>
+</footer>
+
+<script>
+// Language
+function detectLang(){const s=localStorage.getItem('postimity_lang');if(s==='es'||s==='en')return s;const u=new URLSearchParams(location.search).get('lang');if(u==='en'||u==='es'){localStorage.setItem('postimity_lang',u);return u}const b=navigator.language?.slice(0,2);if(b==='es')return'es';if(b==='en')return'en';try{const t=Intl.DateTimeFormat().resolvedOptions().timeZone;const us=['New_York','Chicago','Denver','Phoenix','Los_Angeles','Anchorage','Honolulu'];if(t.startsWith('America/')&&!us.some(z=>t.includes(z)))return'es'}catch(e){}return'en'}
+function applyLang(l){localStorage.setItem('postimity_lang',l);document.documentElement.lang=l;document.getElementById('langES').classList.toggle('active',l==='es');document.getElementById('langEN').classList.toggle('active',l==='en');document.querySelectorAll('[data-es]').forEach(el=>{const t=el.getAttribute('data-'+l);if(t)el.innerHTML=t});const n=document.getElementById('navCta');if(n)n.textContent=l==='es'?'Comenzar gratis':'Start free'}
+function toggleLang(){applyLang(detectLang()==='es'?'en':'es')}
+
+// Scroll fade-in
+const obs=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible')})},{threshold:.15});
+document.querySelectorAll('.fade-up').forEach(el=>obs.observe(el));
+
+document.addEventListener('DOMContentLoaded',()=>applyLang(detectLang()));
+</script>
+</body>
+</html>
