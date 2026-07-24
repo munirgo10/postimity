@@ -2115,8 +2115,9 @@ function applyBrand(b) {
 
 function buildPillarBtns(pillars) {
   const wrap=document.getElementById('pillarBtns'); wrap.innerHTML='';
-  // All pillars come from Brand Guide — no fixed conversion pillar (handled by Agent + Brand Guide)
-  const all = ['General', ...(pillars||[])];
+  // Clean markdown formatting from pillar names (** bold **)
+  const clean = (pillars||[]).map(p => p.replace(/\*\*/g, '').replace(/\*/g, '').trim()).filter(p => p.length > 0);
+  const all = ['General', ...clean];
   all.forEach(p=>{
     const btn=document.createElement('button');
     btn.className='pillar-btn'+(p==='General'?' active':'');
