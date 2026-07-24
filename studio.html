@@ -431,6 +431,10 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
 .apc-plat.facebook{background:#EBF0FF;color:#1a3bc1}
 .apc-plat.tiktok{background:#FDE8F0;color:#b5006e}
 .apc-pilar{font-size:11px;padding:2px 9px;border-radius:20px;background:#EAF3DE;color:#3B6D11;font-weight:600}
+.apc-mode{font-size:10px;padding:2px 8px;border-radius:20px;font-weight:700}
+.apc-mode.post{background:#E6F1FB;color:#185FA5}
+.apc-mode.carousel{background:#FDF0DC;color:#B5750B}
+.apc-style{font-size:10px;padding:2px 8px;border-radius:20px;background:#F3F0FF;color:#6B46C1;font-weight:600}
 .apc-fest{font-size:10px;padding:2px 7px;border-radius:20px;background:var(--g2);color:var(--g3);font-weight:700}
 .apc-topic{font-size:13px;font-weight:700;color:var(--t1);margin-bottom:5px;line-height:1.3}
 .apc-prompt{font-size:12px;color:var(--t3);line-height:1.55;margin-bottom:10px}
@@ -3068,17 +3072,22 @@ function renderAgentPlan(plan) {
       card.className = 'agent-post-card' + (post.festivity ? ' festivity' : '');
       const platClass = post.platform || 'instagram';
       const platLabel = post.platform === 'instagram' ? '📸 Instagram' : post.platform === 'facebook' ? '👥 Facebook' : '🎵 TikTok';
+      const modeLabel = post.suggestedMode === 'carousel' ? '🎠 Carrusel' : '📌 Post';
+      const modeClass = post.suggestedMode === 'carousel' ? 'carousel' : 'post';
+      const styleLabel = post.suggestedStyle === 'photo' ? '📷 Foto' : post.suggestedStyle === 'abstract' ? '🎨 Abstracto' : '🖼️ Ilustrado';
       const postIdx = agentPostsCache.indexOf(post);
       card.innerHTML = '<div class="apc-meta">' +
         '<span class="apc-date">' + (post.dayName||'') + ' ' + (post.dateShort||post.date) + '</span>' +
         '<span class="apc-plat ' + platClass + '">' + platLabel + '</span>' +
         '<span class="apc-pilar">' + (post.pilar||'') + '</span>' +
+        '<span class="apc-mode ' + modeClass + '">' + modeLabel + '</span>' +
+        '<span class="apc-style">' + styleLabel + '</span>' +
         (post.festivity ? '<span class="apc-fest">🎉 ' + post.festivity + '</span>' : '') +
         '</div>' +
         '<div class="apc-topic">' + (post.topic||'') + '</div>' +
         '<div class="apc-prompt">' + (post.prompt||'') + '</div>' +
         '<div class="apc-btns">' +
-        '<button class="apc-btn create" onclick="goCreatePost(' + postIdx + ')">→ Crear este post</button>' +
+        '<button class="apc-btn create" onclick="goCreatePost(' + postIdx + ')">→ Crear ' + (post.suggestedMode === 'carousel' ? 'carrusel' : 'post') + '</button>' +
         '<button class="apc-btn copy" onclick="copyPrompt(' + postIdx + ')">📋 Copiar prompt</button>' +
 
         '</div>';
@@ -3091,18 +3100,37 @@ function renderAgentPlan(plan) {
 function goCreatePost(idx) {
   const post = agentPostsCache[idx];
   if(!post) { showToast('Error: post no encontrado'); return; }
-  // Pre-fill the creator screen
-  setMode('post');
-  const ta = document.getElementById('postText');
-  if(ta) ta.value = post.prompt || '';
+  // Route to the correct mode (post or carousel)
+  const targetMode = (post.suggestedMode === 'carousel') ? 'carousel' : 'post';
+  setMode(targetMode);
+  // Pre-fill prompt in the correct textarea
+  if(targetMode === 'carousel') {
+    const ta = document.getElementById('carouselTopic');
+    if(ta) ta.value = post.prompt || post.topic || '';
+  } else {
+    const ta = document.getElementById('postText');
+    if(ta) ta.value = post.prompt || '';
+  }
+  // Set image style if suggested
+  if(post.suggestedStyle && ['photo','illustrated','abstract'].includes(post.suggestedStyle)) {
+    imageStyle = post.suggestedStyle;
+    document.querySelectorAll('.style-opt').forEach(el => {
+      el.classList.toggle('active', el.dataset.style === post.suggestedStyle);
+    });
+  }
   if(post.pilar) setPillarByName(post.pilar);
   if(post.platform) setPlatformByName(post.platform);
   // Go back to creator
   const agentEl = document.getElementById('agentScreen');
   if(agentEl) { agentEl.classList.remove('active'); agentEl.style.display = ''; }
   showScreen('creatorScreen');
-  showToast('✨ Post pre-cargado — solo dale Generar');
-  setTimeout(() => { ta?.focus(); ta?.scrollIntoView({behavior:'smooth', block:'center'}); }, 350);
+  const modeLabel = targetMode === 'carousel' ? 'Carrusel' : 'Post';
+  const styleLabel = post.suggestedStyle === 'photo' ? '📷 Foto' : post.suggestedStyle === 'abstract' ? '🎨 Abstracto' : '🖼️ Ilustrado';
+  showToast('✨ ' + modeLabel + ' pre-cargado · ' + styleLabel + ' — solo dale Generar');
+  setTimeout(() => {
+    const input = targetMode === 'carousel' ? document.getElementById('carouselTopic') : document.getElementById('postText');
+    input?.focus(); input?.scrollIntoView({behavior:'smooth', block:'center'});
+  }, 350);
 }
 
 function setPillarByName(pilarName) {
@@ -3117,9 +3145,9 @@ function setPillarByName(pilarName) {
 }
 
 function setPlatformByName(platName) {
-  const tabs = document.querySelectorAll('.plat-tab');
+  const tabs = document.querySelectorAll('.plt-tab');
   tabs.forEach(tab => {
-    if(tab.dataset.plat === platName || tab.textContent.toLowerCase().includes(platName)) {
+    if(tab.dataset.plt === platName || tab.textContent.toLowerCase().includes(platName)) {
       tab.click();
     }
   });
@@ -3351,14 +3379,27 @@ function checkDeepLink() {
   const dlPillar = params.get('pillar');
   const dlPrompt = params.get('prompt');
   const dlPlatform = params.get('platform');
+  const dlStyle = params.get('style');
   if(!dlPrompt && !dlPillar && !dlMode) return; // no deep-link params
 
   setTimeout(() => { // wait for brand to load
     if(dlMode && ['post','enhance','flyer','testimonial','carousel'].includes(dlMode)) setMode(dlMode);
-    if(dlPrompt) { const ta = document.getElementById('postText'); if(ta) ta.value = decodeURIComponent(dlPrompt); }
+    if(dlMode === 'carousel') {
+      const ta = document.getElementById('carouselTopic');
+      if(ta && dlPrompt) ta.value = decodeURIComponent(dlPrompt);
+    } else {
+      if(dlPrompt) { const ta = document.getElementById('postText'); if(ta) ta.value = decodeURIComponent(dlPrompt); }
+    }
     if(dlPillar) setPillarByName(decodeURIComponent(dlPillar));
     if(dlPlatform) setPlatformByName(dlPlatform);
-    showToast('✨ Post pre-cargado desde tu plan mensual — solo dale Generar');
+    if(dlStyle && ['photo','illustrated','abstract'].includes(dlStyle)) {
+      imageStyle = dlStyle;
+      document.querySelectorAll('.style-opt').forEach(el => {
+        el.classList.toggle('active', el.dataset.style === dlStyle);
+      });
+    }
+    const modeLabel = dlMode === 'carousel' ? 'Carrusel' : 'Post';
+    showToast('✨ ' + modeLabel + ' pre-cargado desde tu plan — solo dale Generar');
     // Clean URL keeping only brandId
     const base = window.location.href.split('?')[0];
     const bId = new URLSearchParams(window.location.search).get('b');
