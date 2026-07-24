@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Postimity Studio — Crea contenido con IA</title>
+<title>Postimity Studio</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Crect width='32' height='32' rx='8' fill='%232979FF'/%3E%3Ctext x='8.5' y='22' font-family='sans-serif' font-size='16' font-weight='800' fill='white'%3E%E2%9C%A6%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -1513,7 +1513,7 @@ Ej: 'Wonderik es increíble. Mi hija de 3 años ya lee palabras cortas y su desa
 // ═══════════════════════════════════════════════════════
 // CONFIG
 // ═══════════════════════════════════════════════════════
-const POSTIMITY_VERSION = '2.2.0'; // Jul 2026 — prompt engineering + agent routing + UX audit
+const POSTIMITY_VERSION = '2.3.0'; // Jul 2026 — full bilingual studio ES/EN
 console.log('Postimity Studio v' + POSTIMITY_VERSION);
 
 // ── GLOBAL ERROR HANDLER — prevents silent failures ──
@@ -1524,7 +1524,7 @@ window.onerror = function(msg, src, line) {
   if (loadWrap && loadWrap.classList.contains('show')) {
     showLoading(false);
     document.getElementById('errWrap').classList.add('show');
-    document.getElementById('errMsg').textContent = 'Error inesperado. Intenta de nuevo. (v' + POSTIMITY_VERSION + ')';
+    document.getElementById('errMsg').textContent = t('errUnexpected').replace('{ver}', POSTIMITY_VERSION);
   }
   return false;
 };
@@ -1532,16 +1532,14 @@ window.onerror = function(msg, src, line) {
 function cancelGeneration() {
   showLoading(false);
   if (_loadingTimeout) { clearTimeout(_loadingTimeout); _loadingTimeout = null; }
-  showToast('Generación cancelada');
+  showToast(t('toastCancelGen'));
 }
 
 // WORKER already defined above
 // STORE_KEY already defined above
-const PLT_INFO = {
-  instagram:'📸 <strong>Instagram 2026:</strong> Keywords en caption, hook primera línea, 3-5 hashtags. Meta: Guardados + DMs.',
-  facebook:'👥 <strong>Facebook 2026:</strong> Preguntas y conversación, CTAs de comentarios. Meta: Respuestas y conversaciones.',
-  tiktok:'🎵 <strong>TikTok 2026:</strong> Caption 50-150 chars con keywords SEO (es motor de búsqueda). Hook en 1.5 seg. Meta: Completion rate 70%+'
-};
+function getPltInfo() {
+  return { instagram: t('pltIG'), facebook: t('pltFB'), tiktok: t('pltTK') };
+}
 
 // ═══════════════════════════════════════════════════════
 // STATE
@@ -1558,30 +1556,462 @@ const VIDEO_LIMITS = { trial: 2, starter: 0, growth: 8, agency: 20 };
 // ── BILINGUAL STRINGS ─────────────────────────────────────────────────────
 const T = {
   es: {
-    welcomeTagline:  '✦ Postimity',
-    welcomeH1:       'Crea contenido que suena como tú',
-    welcomeSub:      'La AI que aprende la voz de tu marca y genera posts, flyers y carruseles profesionales en segundos. Sin diseñadores. Sin agencias.',
-    welcomeStep1:    'Tu marca', welcomeStep1t: '~60 seg',
-    welcomeStep2:    'Brand Guide AI', welcomeStep2t: 'automático',
-    welcomeStep3:    'Primer post', welcomeStep3t: '~20 seg',
-    welcomeCta:      '¡Comenzar gratis — 14 días →',
-    welcomeNote:     'Sin tarjeta de crédito · Sin compromiso · Cancela cuando quieras',
-    setupTitle:      'Configura tu marca',
-    setupSub:        'Menos de 2 minutos. El cerebro de la AI define el estilo, voz y estrategia de TODO tu contenido.',
-    adjustPlaceholder: 'Ej: hazlo más corto · más formal · agrega urgencia · cambia el CTA',
+    // ── Welcome screen ──
+    welcomeTagline:'✦ Postimity', welcomeH1:'Crea contenido que suena como tú',
+    welcomeSub:'La AI que aprende la voz de tu marca y genera posts, flyers y carruseles profesionales en segundos. Sin diseñadores. Sin agencias.',
+    welcomeStep1:'Tu marca', welcomeStep1t:'~60 seg', welcomeStep2:'Brand Guide AI', welcomeStep2t:'automático',
+    welcomeStep3:'Primer post', welcomeStep3t:'~20 seg',
+    welcomeCta:'¡Comenzar gratis — 14 días →', welcomeNote:'Sin tarjeta de crédito · Sin compromiso · Cancela cuando quieras',
+    weChipPosts:'🖊️ Posts', weChipFlyers:'🎨 Flyers', weChipCarousels:'🎠 Carruseles', weChipTestimonials:'⭐ Testimonios', weChipPlan:'🤖 Plan mensual',
+    // ── Setup screen ──
+    setupTitle:'Configura tu marca', setupSub:'En menos de 2 minutos. Esta información es el cerebro de la AI — define el estilo, voz y estrategia de TODO tu contenido.',
+    setupStep:'Paso {n} de 5 · {label}',
+    setupStep1:'Identidad del negocio', setupStep2:'Ubicación', setupStep3:'Estrategia de contenido', setupStep4:'Colores de marca', setupStep5:'Brand Guide con AI',
+    scardIdentity:'🏪 Identidad del negocio', scardLocation:'📍 Ubicación', scardStrategy:'🎯 Estrategia de contenido', scardColors:'🎨 Colores de marca', scardBG:'🤖 Brand Guide con AI',
+    logoTitle:'Logo del negocio', logoOptional:'(opcional)', logoSub:'Se añadirá en todas las imágenes generadas', logoHint:'💡 Usa PNG con fondo transparente para mejores resultados',
+    labelName:'Nombre del negocio', labelWA:'WhatsApp de contacto', labelEmail:'Email del negocio', labelType:'Tipo de negocio',
+    tipWA:'Número con lada internacional. Ej: +52 449 123 4567. Se usará en los CTAs de todos los posts.',
+    tipEmail:'Recibirás recordatorios de tus posts, tips y tu link de acceso. Nunca compartimos tu email.',
+    phName:'Ej: Wonderik Preschool', phWA:'+52 449 123 4567', phEmail:'tu@negocio.com',
+    phType:'Ej: Kinder privado, Restaurante de comida italiana, Salón de belleza, Gym...',
+    labelCountry:'País', labelState:'Estado / Provincia', labelCity:'Ciudad',
+    selDefault:'— Selecciona —', selStatePlaceholder:'— Selecciona país primero —', selState:'— Selecciona estado —',
+    phState:'Estado / Provincia', phCity:'Ej: Aguascalientes, Houston, Bogotá...',
+    labelDiff:'¿Qué te hace diferente? (Diferenciador clave)',
+    tipDiff:'La razón única por la que un cliente te elige a ti y no a la competencia. Ej: \'Somos el único kinder que integra Neurociencias + Psicología en Aguascalientes\'',
+    phDiff:'Ej: Somos el único kinder con enfoque en neurociencia aplicada en Aguascalientes',
+    labelAudience:'¿A quién le hablas? (Audiencia objetivo)',
+    tipAudience:'Describe a tu cliente ideal: edad, profesión, situación de vida, qué les preocupa. Cuanto más específico, mejor contenido generará la AI.',
+    phAudience:'Ej: Papás y mamás de 28-40 años, nivel medio-alto, que buscan la mejor educación inicial para sus hijos en Aguascalientes',
+    labelTone:'Tono de comunicación',
+    toneWarm:'Cálido y moderno', tonePro:'Profesional y confiable', toneFun:'Divertido y energético', toneInsp:'Inspiracional y motivador', toneEdu:'Informativo y educativo',
+    toneWarmVal:'Cálido, moderno y cercano', toneProVal:'Profesional y confiable', toneFunVal:'Divertido y energético', toneInspVal:'Inspiracional y motivador', toneEduVal:'Informativo y educativo',
+    colorPrimary:'Primario', colorSecondary:'Secundario', colorAccent:'Acento',
+    bgCardDesc:'La AI analizará tu negocio y generará la estrategia de contenido completa: pilares, voz de marca, estrategia por plataforma y hashtags. Puedes editarlo antes de guardar.',
+    bgGenBtn:'✨ Generar Brand Guide con AI', bgGenerating:'Generando tu Brand Guide...', bgGenerated:'✅ Brand Guide generado',
+    bgLabel:'📋 Brand Guide generado — puedes editarlo', bgHint:'Este texto guía a la AI en cada post. Edita cualquier cosa que quieras ajustar.',
+    bgEditToggle:'📋 ¿Cómo editar el Brand Guide?',
+    bgEditFree:'✅ <strong>Puedes cambiar libremente:</strong> % de pilares, descripciones, tono, hashtags',
+    bgEditAdd:'➕ <strong>Agregar pilar:</strong> <code>5. Nombre (XX%) — descripción en 1 línea</code>',
+    bgEditModify:'✏️ <strong>Modificar pilar:</strong> Cambia el nombre, % o descripción directamente',
+    bgEditDelete:'🗑️ <strong>Eliminar pilar:</strong> Borra la línea completa del pilar',
+    bgEditFormat:'⚠️ <strong>Importante:</strong> Usa el formato <code>N. Nombre (XX%) —</code> para que los botones se actualicen',
+    bgAILabel:'🤖 Pedir a la AI que haga el cambio por ti',
+    bgAIPlaceholder:'Ej: "Cambia Neurociencia a 25% y agrega pilar de Eventos al 15%"', bgAIBtn:'Aplicar →',
+    bgLoaded:'✅ Brand Guide cargado — puedes regenerar',
+    termsLabel:'He leído y acepto los <a href="terms.html" target="_blank" style="color:var(--b);font-weight:600">Términos y Condiciones</a> y el <a href="privacy.html" target="_blank" style="color:var(--b);font-weight:600">Aviso de Privacidad</a> de Postimity.',
+    commsLabel:'Acepto recibir recordatorios y tips por email. Puedes desuscribirte en cualquier momento.',
+    btnSave:'Guardar y empezar a crear →',
+    // ── Creator screen ──
+    brandBarEdit:'✏️ Editar marca',
+    pillarLabel:'¿Para qué pilar es este contenido?',
+    mcPost:'Post', mcPostDesc:'Texto → imagen AI + captions',
+    mcEnhance:'Estudio Pro', mcEnhanceDesc:'Tu foto → versión publicitaria',
+    mcFlyer:'Flyer', mcFlyerDesc:'Gráfico promocional completo',
+    mcTestimonial:'Testimonio', mcTestimonialDesc:'Reseña → post profesional',
+    mcCarousel:'Carrusel', mcCarouselDesc:'Multi-slide educativo',
+    styleLabel:'Estilo de imagen generada',
+    stylePhoto:'Fotorrealista', stylePhotoDesc:'Persona o situación genérica',
+    styleIllus:'Ilustrado', styleIllusDesc:'Gráfico colorido, sin personas',
+    styleAbstr:'Abstracto', styleAbstrDesc:'Fondo de marca para texto',
+    // ── Input labels ──
+    inputPost:'¿Qué quieres publicar?',
+    phPost:'Ej: Post sobre nuestra nueva colección de verano · Promoción del menú del día · Tip de bienestar para esta semana · Testimonio de cliente satisfecho...',
+    inputPostHint:'💡 Entre más detalle das, mejor es el resultado. Describe la actividad, el momento o el mensaje que quieres comunicar.',
+    inputEnhance:'Sube una foto de tu negocio',
+    uploadDrag:'Arrastra tu foto o haz click', uploadSpec:'JPG, PNG · Máx 10MB',
+    enhanceWhat:'¿Qué quieres hacer con la foto?',
+    enhanceAuto:'✨ Mejorar automáticamente', enhanceCustom:'✏️ Instrucciones personalizadas',
+    enhancePH:'Describe qué quieres hacer con la foto...\n\nEj: "Quita el fondo y ponlo blanco limpio"\nEj: "Agrega efecto de estudio con luz suave y profesional"\nEj: "Convierte en estilo flyer, agrega una banda azul arriba con el texto Curso de Verano"\nEj: "Hazla blanco y negro estilo editorial de revista"',
+    epWhiteBG:'Fondo blanco', epStudioLight:'Luz de estudio', epEditorial:'Estilo editorial', epVibrant:'Colores vibrantes', epBW:'Blanco y negro', epFlyerStyle:'Estilo flyer',
+    epHint:'💡 Sé específico — la AI seguirá tus instrucciones exactas. Cuanto más detalle, mejor resultado.',
+    flyerAI:'🤖 Imagen con AI', flyerPhoto:'📸 Usar mi foto',
+    flyerUploadTitle:'Sube la foto base del flyer', flyerUploadSub:'Tu foto será el elemento central del flyer',
+    ffType:'Tipo de contenido *', ffStyle:'Estilo visual', ffTitle:'Título principal *', ffSubtitle:'Subtítulo', ffTagline:'Tagline', ffDates:'Fecha / Período', ffPrice:'Precio', ffSchedule:'Horario', ffExtra:'Info adicional',
+    flyerEvento:'📅 Evento', flyerInscripciones:'🎓 Inscripciones', flyerPromo:'🛍️ Promoción', flyerInfo:'📢 Información', flyerCurso:'📋 Curso / Taller', flyerLaunch:'🚀 Lanzamiento', flyerAniversario:'🎉 Aniversario', flyerMenu:'🍽️ Menú especial', flyerOther:'✨ Otro',
+    flyerStyleColorful:'Colorido / Vibrante', flyerStylePro:'Profesional / Elegante', flyerStyleMin:'Minimalista', flyerStyleFestive:'Festivo / Divertido', flyerStyleInfo:'Informativo',
+    phFlyerTitle:'Ej: Curso de Verano — Un Verano para Explorar', phFlyerSub:'Ej: Para niños de 1 a 7 años', phFlyerTag:'Ej: ¡El verano más divertido!',
+    phFlyerDates:'Ej: 14 al 25 de julio', phFlyerPrice:'Ej: $2,500 MXN', phFlyerSched:'Ej: 8am – 2pm', phFlyerExtra:'Ej: Cupos limitados a 20 niños',
+    carouselTopicLabel:'Tema del carrusel', phCarousel:'Ej: 5 beneficios del sueño en el desarrollo de tu bebé · Los 4 pilares de nuestra metodología · Por qué elegirnos',
+    carouselSlideCount:'Número de slides', slideCountLabel:'slides (mín 3, máx 10)',
+    carouselStyleLabel:'Estilo del carrusel',
+    csEducativo:'📚 Educativo', csTips:'💡 Tips', csHistoria:'📖 Historia', csDatos:'📊 Datos', csTutorial:'🎯 Tutorial', csQA:'❓ Q&A',
+    carouselCoverLabel:'Portada del carrusel', coverAI:'🤖 Generar con AI', coverPhoto:'📸 Usar mi foto',
+    coverUploadTitle:'Arrastra tu foto o haz click', coverUploadSub:'Esta foto será el fondo del slide de portada',
+    testLabel:'Reseña del cliente',
+    phTest:'Pega aquí la reseña de tu cliente tal como la escribió...\n\nEj: \'Wonderik es increíble. Mi hija de 3 años ya lee palabras cortas y su desarrollo emocional ha mejorado muchísimo. Las maestras son excepcionales ⭐⭐⭐⭐⭐ — Fernanda R.\'',
+    testDivider:'o también sube una foto del cliente', testPhotoTitle:'Foto del cliente (opcional)', testPhotoSub:'El contenido UGC auténtico convierte 3-5x más',
+    btnGenerate:'✨ Generar contenido con AI',
+    // ── Loading ──
+    loadDefault:'Creando tu contenido...', loadHint:'15–45 segundos · Imágenes de alta calidad toman más',
+    loadCancel:'✕ Cancelar y volver', loadTimeout:'La solicitud tardó demasiado. Intenta de nuevo — si el problema persiste, prueba con un texto más corto.',
+    // ── Error ──
+    errTitle:'Algo salió mal', errDefault:'Error inesperado. Intenta de nuevo.', errRetry:'Intentar de nuevo',
+    // ── Results ──
+    regenImg:'🔄 Nueva imagen', regenText:'✍️ Nuevo texto', regenBack:'← Crear otro',
+    carouselSlidesLabel:'🎠 Slides del carrusel', carouselNavHint:'← → para navegar · click para previsualizar',
+    carouselDlAll:'⬇️ Descargar todos los slides (ZIP)',
+    quoteLabel:'⭐ Quote destacada del cliente',
+    logoInImgLabel:'🏷️ Logo en la imagen',
+    wmLabel:'✦ Watermark Postimity', wmLock:'Growth+ para quitar',
+    pubLabel:'📤 Publicar en redes sociales',
+    pubCopySub:'Copiar + Descargar + Abrir', pubHint:'💡 Un toque: se copia el caption, se descarga la imagen y se abre la app — solo pega y publica',
+    dlLabel:'⬇ Solo descargar imagen',
+    copyForIG:'📋 Copiar para Instagram', copyForFB:'📋 Copiar para Facebook', copyForTK:'📋 Copiar para TikTok',
+    postHintIG:'⏰ <strong>Mejor hora:</strong> Martes a Viernes, 9-11am o 6-8pm · Objetivo: que lo guarden y lo compartan por DM',
+    postHintFB:'⏰ <strong>Mejor hora:</strong> Miércoles a Viernes, 9am-1pm · Objetivo: que comenten y lo compartan en grupos',
+    postHintTK:'⏰ <strong>Mejor hora:</strong> 6-10pm cualquier día · Caption ideal: 50-150 caracteres con keywords de búsqueda',
+    ttHookLabel:'🎬 Hook (primeros 1.5 seg)', ttScriptLabel:'📝 Script',
+    // ── Adjust ──
+    adjustLabel:'✏️ Ajustar el contenido', adjustPlaceholder:'Ej: hazlo más corto · más formal · agrega urgencia · cambia el CTA', adjustBtn:'Aplicar',
+    adjShorter:'Más corto', adjFormal:'Más formal', adjCloser:'Más cercano', adjUrgency:'Más urgencia', adjCTA:'Cambiar CTA', adjEmoji:'+ Emojis',
+    adjShorterVal:'Hazlo más corto, máximo 3 líneas', adjFormalVal:'Tono más formal y profesional', adjCloserVal:'Tono más cercano y conversacional',
+    adjUrgencyVal:'Agrega más urgencia y llamada a la acción', adjCTAVal:'Cambia el CTA por uno más directo', adjEmojiVal:'Añade 2-3 emojis relevantes',
+    // ── Ad Brief ──
+    adBriefToggle:'💡 ¿Vas a invertir dinero en este post? Ver recomendaciones de targeting',
+    abAudience:'👥 Audiencia', abInterests:'🎯 Intereses', abObjective:'🎯 Objetivo de campaña', abDuration:'⏱️ Duración', abPlacements:'📱 Placements',
+    abBudgetMin:'Presupuesto mínimo', abBudgetOpt:'⭐ Presupuesto óptimo', abCopy:'📋 Copiar parámetros para Meta Ads Manager',
+    resultBack:'← Crear otro post', resultCopyAll:'📋 Copiar todo',
+    // ── Creator bar ──
+    barUniqueLink:'Tu enlace único:', barGenRemaining:'{n} gen restantes', barMyAccount:'👤 Mi cuenta', barHistory:'📚 Historial',
+    barCopyLink:'📋 Copiar link', barRecovery:'¿Cómo recuperarlo?',
+    // ── Recovery modal ──
+    recoveryTitle:'🔗 Tu enlace único de acceso', recoverySub:'Este link es tu acceso a la plataforma desde cualquier dispositivo. Guárdalo o compártelo — quien tenga el link tiene acceso a tu marca.',
+    recoveryEmailHint:'💡 También puedes recuperarlo en cualquier momento ingresando tu email o WhatsApp:',
+    recoveryClose:'Cerrar', recoverySend:'Enviar mi link por WhatsApp',
+    // ── Dashboard ──
+    dashTitle:'👤 Mi cuenta', dashBack:'← Volver',
+    dashGensTitle:'📊 Generaciones este mes', dashGensUsed:'usadas / disponibles', dashRenewal:'Se renuevan el {date}',
+    dashBrandTitle:'🏢 Mi marca', dashEditBG:'✏️ Editar Brand Guide',
+    dashBrandBusiness:'Negocio', dashBrandTypeLocation:'Tipo y ubicación', dashBrandWA:'WhatsApp', dashBrandID:'Brand ID',
+    dashNoBrand:'No hay marca configurada',
+    dashPlansTitle:'💳 Planes disponibles', dashStripeNote:'Los pagos se activarán próximamente con Stripe',
+    dashUpgradeToast:'💳 Pagos con Stripe — disponibles muy pronto. ¡Gracias por tu paciencia!',
+    dashTrialDays:'⏳ Quedan <strong>{n} días</strong> de trial', dashMaxPlan:'✅ Estás en el plan máximo', dashCurrentPlan:'Plan actual',
+    dashNoVideo:'Sin video',
+    // ── History ──
+    histTitle:'📚 Mi historial', histBack:'← Volver',
+    histAll:'Todos', histPosts:'Posts', histFlyers:'Flyers', histCarousels:'Carruseles', histTestimonials:'Testimonios',
+    histEmpty:'📭', histEmptyTitle:'Aún no hay posts guardados', histEmptySub:'Genera tu primer post y aparecerá aquí automáticamente',
+    histEmptyFilter:'No hay posts en este filtro', histEmptyFilterSub:'Genera contenido y aparecerá aquí',
+    histReuse:'↺ Reutilizar prompt', histCopyCaption:'📋 Copiar caption', histNoCaption:'Sin caption guardado',
+    histDlSlide:'Descargar slide',
+    // ── Agent screen ──
+    agentBack:'← Volver', agentTitle:'🤖 Marketing Agent',
+    agentBarSub:'Genera tu plan de contenido mensual', agentBarCta:'Ver plan →',
+    agentConfigTitle:'⚙️ Configura tu plan mensual',
+    agentFreqLabel:'Posts por semana', agentPlatsLabel:'Plataformas',
+    agentPlatNote:'Las plataformas se distribuyen inteligentemente según tu audiencia del Brand Guide.',
+    agentGenBtn:'✨ Generar plan de {month}', agentGenLoading:'☕ Generando tu plan mensual... puede tomar hasta 30 segundos',
+    agentRegenPlan:'↺ Regenerar plan',
+    agentGenerating:'⏳ Generando plan...',
+    agentPlannedSub:'{n} posts planificados para {month}',
+    agentWeekLabel:'Semana {n} · {range}',
+    agentCreatePost:'→ Crear post', agentCreateCarousel:'→ Crear carrusel', agentCopyPrompt:'📋 Copiar prompt',
+    // ── Agent labels ──
+    agentModePost:'📌 Post', agentModeCarousel:'🎠 Carrusel',
+    agentStylePhoto:'📷 Fotorrealista', agentStyleIllus:'🖼️ Ilustrado', agentStyleAbstract:'🎨 Abstracto',
+    // ── Reminders ──
+    remTitle:'Recordatorios automáticos', remSub:'Aviso cálido cada mañana antes de tu post del día',
+    remActiveTitle:'Recordatorios activos — {month}', remActiveSub:'Recibirás un aviso cada mañana antes de tu post del día',
+    remActiveBtn:'✓ Activo', remEmailLabel:'📧 Email para recordatorios', remWALabel:'📱 WhatsApp personal (opcional)',
+    remChannelLabel:'Canal de notificación', remBoth:'Ambos', remActivate:'🔔 Activar recordatorios',
+    // ── PLT_INFO ──
+    pltIG:'📸 <strong>Instagram 2026:</strong> Keywords en caption, hook primera línea, 3-5 hashtags. Meta: Guardados + DMs.',
+    pltFB:'👥 <strong>Facebook 2026:</strong> Preguntas y conversación, CTAs de comentarios. Meta: Respuestas y conversaciones.',
+    pltTK:'🎵 <strong>TikTok 2026:</strong> Caption 50-150 chars con keywords SEO (es motor de búsqueda). Hook en 1.5 seg. Meta: Completion rate 70%+',
+    // ── Loading by mode ──
+    loadPostTitle:'Creando tu Post...', loadPostTime:'~20 segundos',
+    loadPostS1:'Analizando tu solicitud', loadPostS2:'Generando captions para 3 plataformas', loadPostS3:'Creando imagen con AI', loadPostS4:'Preparando resultado',
+    loadCarouselTitle:'Creando tu Carrusel...', loadCarouselTime:'~35 segundos — generando slides con AI',
+    loadCarouselS1:'Generando contenido de los slides', loadCarouselS2:'Creando imagen de portada', loadCarouselS3:'Renderizando slides', loadCarouselS4:'Listo',
+    loadEnhanceTitle:'Editando tu foto profesionalmente...', loadEnhanceTime:'~35 segundos — editando tu foto real con AI',
+    loadEnhanceS1:'Analizando tu foto', loadEnhanceS2:'Generando captions optimizados', loadEnhanceS3:'Aplicando mejoras profesionales a la imagen', loadEnhanceS4:'Preparando resultado',
+    loadFlyerTitle:'Diseñando tu Flyer...', loadFlyerTime:'~30 segundos',
+    loadFlyerS1:'Analizando el contenido del flyer', loadFlyerS2:'Generando captions para 3 plataformas', loadFlyerS3:'Diseñando el gráfico con AI', loadFlyerS4:'Preparando resultado',
+    loadTestTitle:'Transformando el testimonio...', loadTestTime:'~25 segundos',
+    loadTestS1:'Analizando la reseña del cliente', loadTestS2:'Generando captions auténticos', loadTestS3:'Creando imagen de fondo', loadTestS4:'Preparando resultado',
+    // ── Toasts/alerts ──
+    toastSaved:'✅ Post guardado en historial', toastCopied:'✓ ¡Copiado!', toastCopyLink:'📋 Copiar link',
+    toastCancelGen:'Generación cancelada', toastBGReady:'🎉 ¡Tu Brand Guide está listo! Postimity ya conoce tu negocio. Genera tu primer post 👇',
+    toastAdjusted:'✅ Contenido ajustado', toastCaptionCopied:'📋 Caption copiado', toastCopyError:'Error al copiar',
+    toastPromptCopied:'📋 Prompt copiado', toastPostNotFound:'Error: post no encontrado',
+    toastRemindersOn:'🔔 Recordatorios activados para {month}', toastRemindersOff:'Recordatorios desactivados',
+    toastPreloaded:'✨ {mode} pre-cargado · {style} — solo dale Generar',
+    toastPreloadedPlan:'✨ {mode} pre-cargado desde tu plan — solo dale Generar',
+    toastModePreloaded:'✅ Modo y pilar pre-cargados — ajusta el texto y genera',
+    toastFirstPost:'🎉 ¡Tu primer post está listo! Toca Instagram, Facebook o TikTok para publicarlo — copiamos el caption y descargamos la imagen por ti.',
+    toastAllCopied:'✓ ¡Todo copiado!', toastCopyAll:'📋 Copiar todo',
+    toastAdCopied:'✓ Copiado!', toastAdCopyBtn:'📋 Copiar parámetros para Meta Ads Manager',
+    toastAdjustEmpty:'Escribe qué quieres ajustar', toastGenFirst:'Primero genera contenido',
+    toastEmailReminder:'Ingresa tu email para recibir recordatorios', toastWAReminder:'Ingresa tu WhatsApp para recibir recordatorios',
+    // ── Alerts ──
+    alertNoBG:'Primero completa tu Brand Guide para generar el plan.', alertNoPlats:'Selecciona al menos una plataforma.',
+    alertNoName:'Completa: Nombre, Tipo de negocio y la descripción de lo que te hace especial.',
+    alertNoEmail:'Ingresa tu email — lo necesitamos para enviarte recordatorios y tu link de acceso.',
+    alertNoTerms:'Para continuar, acepta los Términos y Condiciones y el Aviso de Privacidad.',
+    alertNoLocation:'Selecciona tu país y estado/provincia.',
+    alertNoBrand:'Primero configura tu marca.', alertBGFirst:'Primero genera el Brand Guide.',
+    alertNoInstr:'Describe el cambio que quieres hacer.',
+    alertPostEmpty:'Escribe qué quieres publicar.', alertPhotoFirst:'Sube una foto primero.',
+    alertFlyerTitle:'Escribe el título del flyer.', alertFlyerPhoto:'Sube una foto para el flyer.',
+    alertCarouselTopic:'Escribe el tema del carrusel.', alertCarouselPhoto:'Sube una foto para la portada.',
+    alertTestimonial:'Pega una reseña de tu cliente o sube su foto para continuar.',
+    alertEnhanceDescribe:'Describe qué quieres hacer con la foto.',
+    alertImgOnly:'Solo imágenes.', alertMaxSize:'Máximo 10MB.',
+    alertRecoveryEmail:'Ingresa tu email',
+    alertAgentParseError:'La AI devolvió una respuesta inválida — intenta de nuevo en unos segundos.',
+    alertAgentFailed:'No se pudo generar el plan. ',
+    alertRecoveryLink:'Guarda este link: {url} — En una próxima versión lo enviaremos a {email}',
+    // ── Plan names ──
+    planTrialName:'Trial Gratuito', planTrialBadge:'⭐ Trial', planTrialPrice:'Gratis 14 días',
+    planTrialAllModes:'Todos los modos + 2 videos',
+    planStarterUp:'🚀 Activar plan Starter — $149/mes', planGrowthUp:'⬆️ Cambiar a Growth — $349/mes', planAgencyUp:'⬆️ Cambiar a Agency — $799/mes', planAgencyMax:'✅ Plan máximo activo',
+    genPerMonth:'gen/mes',
+    // ── Month names ──
+    months:['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'],
+    monthsLower:['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'],
+    renewalPrefix:'Se renuevan el ', renewalDatePrefix:'1 de ',
+    // ── Reminders confirm ──
+    remConfirmTitle:'✅ Recordatorios activados para {month}\n\nCuando conectemos Twilio recibirás cada mañana un mensaje así:\n\n☀️ Buenos días! Hoy es tu momento de brillar.\nTu post: [tema del día]\nUn solo toque y está listo → [link]\n\nPor ahora tu plan está guardado aquí.',
+    // ── Flyer select values ──
+    flyerEventoVal:'Evento', flyerInscripcionesVal:'Inscripciones / Admisiones', flyerPromoVal:'Promoción / Oferta',
+    flyerInfoVal:'Información', flyerCursoVal:'Curso o Taller', flyerLaunchVal:'Lanzamiento',
+    flyerAniversarioVal:'Aniversario', flyerMenuVal:'Menú especial', flyerOtherVal:'Otro',
+    flyerStyleColorfulVal:'Colorido y vibrante, estilo agencia creativa', flyerStyleProVal:'Profesional y elegante',
+    flyerStyleMinVal:'Minimalista y moderno', flyerStyleFestiveVal:'Festivo y divertido', flyerStyleInfoVal:'Informativo y organizado',
+    // ── Misc ──
+    noClose:'No cierres esta pestaña', copyForPlatform:'📋 Copiar para {plat}',
+    errUnexpected:'Error inesperado. Intenta de nuevo. (v{ver})', errServer:'Error del servidor', errUnknown:'Error desconocido',
   },
   en: {
-    welcomeTagline:  '✦ Postimity',
-    welcomeH1:       'Content that sounds like you.',
-    welcomeSub:      'The AI that learns your brand voice and generates professional posts, flyers and carousels in seconds. No designers. No agencies.',
-    welcomeStep1:    'Your brand', welcomeStep1t: '~60 sec',
-    welcomeStep2:    'Brand Guide AI', welcomeStep2t: 'automatic',
-    welcomeStep3:    'First post', welcomeStep3t: '~20 sec',
-    welcomeCta:      'Start free — 14 days →',
-    welcomeNote:     'No credit card · No commitment · Cancel anytime',
-    setupTitle:      'Set up your brand',
-    setupSub:        "Less than 2 minutes. The AI's brain defines the style, voice and strategy for ALL your content.",
-    adjustPlaceholder: 'E.g.: make it shorter · more formal · add urgency · change the CTA',
+    // ── Welcome screen ──
+    welcomeTagline:'✦ Postimity', welcomeH1:'Content that sounds like you.',
+    welcomeSub:'The AI that learns your brand voice and generates professional posts, flyers and carousels in seconds. No designers. No agencies.',
+    welcomeStep1:'Your brand', welcomeStep1t:'~60 sec', welcomeStep2:'Brand Guide AI', welcomeStep2t:'automatic',
+    welcomeStep3:'First post', welcomeStep3t:'~20 sec',
+    welcomeCta:'Start free — 14 days →', welcomeNote:'No credit card · No commitment · Cancel anytime',
+    weChipPosts:'🖊️ Posts', weChipFlyers:'🎨 Flyers', weChipCarousels:'🎠 Carousels', weChipTestimonials:'⭐ Testimonials', weChipPlan:'🤖 Monthly plan',
+    // ── Setup screen ──
+    setupTitle:'Set up your brand', setupSub:"Less than 2 minutes. This is the AI's brain — it defines the style, voice and strategy for ALL your content.",
+    setupStep:'Step {n} of 5 · {label}',
+    setupStep1:'Business identity', setupStep2:'Location', setupStep3:'Content strategy', setupStep4:'Brand colors', setupStep5:'Brand Guide AI',
+    scardIdentity:'🏪 Business identity', scardLocation:'📍 Location', scardStrategy:'🎯 Content strategy', scardColors:'🎨 Brand colors', scardBG:'🤖 Brand Guide AI',
+    logoTitle:'Business logo', logoOptional:'(optional)', logoSub:'Will be added to all generated images', logoHint:'💡 Use a transparent PNG for best results',
+    labelName:'Business name', labelWA:'Contact WhatsApp', labelEmail:'Business email', labelType:'Type of business',
+    tipWA:'Number with country code. E.g.: +1 555 123 4567. Used in CTAs across all posts.',
+    tipEmail:"You'll receive post reminders, tips, and your access link. We never share your email.",
+    phName:'E.g.: Wonderik Preschool', phWA:'+1 555 123 4567', phEmail:'you@business.com',
+    phType:'E.g.: Private preschool, Italian restaurant, Beauty salon, Gym...',
+    labelCountry:'Country', labelState:'State / Province', labelCity:'City',
+    selDefault:'— Select —', selStatePlaceholder:'— Select country first —', selState:'— Select state —',
+    phState:'State / Province', phCity:'E.g.: Miami, New York, London...',
+    labelDiff:'What makes you different? (Key differentiator)',
+    tipDiff:"The unique reason a customer chooses you over the competition. E.g.: 'We're the only preschool integrating Neuroscience + Psychology in the city'",
+    phDiff:"E.g.: We're the only preschool with an applied neuroscience approach in the city",
+    labelAudience:'Who do you talk to? (Target audience)',
+    tipAudience:'Describe your ideal customer: age, profession, life situation, what concerns them. The more specific, the better content the AI generates.',
+    phAudience:'E.g.: Parents aged 28-40, mid-to-high income, looking for the best early education for their kids',
+    labelTone:'Communication tone',
+    toneWarm:'Warm & modern', tonePro:'Professional & reliable', toneFun:'Fun & energetic', toneInsp:'Inspirational & motivating', toneEdu:'Informative & educational',
+    toneWarmVal:'Warm, modern and friendly', toneProVal:'Professional and reliable', toneFunVal:'Fun and energetic', toneInspVal:'Inspirational and motivating', toneEduVal:'Informative and educational',
+    colorPrimary:'Primary', colorSecondary:'Secondary', colorAccent:'Accent',
+    bgCardDesc:'The AI will analyze your business and generate the complete content strategy: pillars, brand voice, platform strategy and hashtags. You can edit before saving.',
+    bgGenBtn:'✨ Generate Brand Guide with AI', bgGenerating:'Generating your Brand Guide...', bgGenerated:'✅ Brand Guide generated',
+    bgLabel:'📋 Brand Guide generated — you can edit it', bgHint:'This text guides the AI in every post. Edit anything you want to adjust.',
+    bgEditToggle:'📋 How to edit the Brand Guide?',
+    bgEditFree:'✅ <strong>You can freely change:</strong> pillar %, descriptions, tone, hashtags',
+    bgEditAdd:'➕ <strong>Add pillar:</strong> <code>5. Name (XX%) — description in 1 line</code>',
+    bgEditModify:'✏️ <strong>Modify pillar:</strong> Change name, % or description directly',
+    bgEditDelete:'🗑️ <strong>Delete pillar:</strong> Delete the entire pillar line',
+    bgEditFormat:'⚠️ <strong>Important:</strong> Use the format <code>N. Name (XX%) —</code> so buttons update',
+    bgAILabel:'🤖 Ask AI to make the change for you',
+    bgAIPlaceholder:'E.g.: "Change Neuroscience to 25% and add Events pillar at 15%"', bgAIBtn:'Apply →',
+    bgLoaded:'✅ Brand Guide loaded — you can regenerate',
+    termsLabel:'I have read and accept the <a href="terms.html" target="_blank" style="color:var(--b);font-weight:600">Terms & Conditions</a> and <a href="privacy.html" target="_blank" style="color:var(--b);font-weight:600">Privacy Policy</a> of Postimity.',
+    commsLabel:'I agree to receive reminders and tips by email. You can unsubscribe at any time.',
+    btnSave:'Save and start creating →',
+    // ── Creator screen ──
+    brandBarEdit:'✏️ Edit brand',
+    pillarLabel:'Which pillar is this content for?',
+    mcPost:'Post', mcPostDesc:'Text → AI image + captions',
+    mcEnhance:'Studio Pro', mcEnhanceDesc:'Your photo → ad-quality version',
+    mcFlyer:'Flyer', mcFlyerDesc:'Complete promotional graphic',
+    mcTestimonial:'Testimonial', mcTestimonialDesc:'Review → professional post',
+    mcCarousel:'Carousel', mcCarouselDesc:'Multi-slide educational',
+    styleLabel:'Generated image style',
+    stylePhoto:'Photorealistic', stylePhotoDesc:'Generic person or situation',
+    styleIllus:'Illustrated', styleIllusDesc:'Colorful graphic, no people',
+    styleAbstr:'Abstract', styleAbstrDesc:'Brand background for text',
+    // ── Input labels ──
+    inputPost:'What do you want to post?',
+    phPost:'E.g.: Post about our new summer collection · Daily menu promo · Wellness tip for the week · Satisfied customer testimonial...',
+    inputPostHint:'💡 The more detail you give, the better the result. Describe the activity, the moment, or the message you want to communicate.',
+    inputEnhance:'Upload a photo of your business',
+    uploadDrag:'Drag your photo or click', uploadSpec:'JPG, PNG · Max 10MB',
+    enhanceWhat:'What do you want to do with the photo?',
+    enhanceAuto:'✨ Auto-enhance', enhanceCustom:'✏️ Custom instructions',
+    enhancePH:'Describe what you want to do with the photo...\n\nE.g.: "Remove the background and make it clean white"\nE.g.: "Add studio lighting effect, soft and professional"\nE.g.: "Convert to flyer style, add a blue band on top with the text Summer Camp"\nE.g.: "Make it black and white, editorial magazine style"',
+    epWhiteBG:'White background', epStudioLight:'Studio lighting', epEditorial:'Editorial style', epVibrant:'Vibrant colors', epBW:'Black & white', epFlyerStyle:'Flyer style',
+    epHint:'💡 Be specific — the AI will follow your exact instructions. The more detail, the better the result.',
+    flyerAI:'🤖 AI-generated image', flyerPhoto:'📸 Use my photo',
+    flyerUploadTitle:'Upload the base photo for the flyer', flyerUploadSub:'Your photo will be the central element',
+    ffType:'Content type *', ffStyle:'Visual style', ffTitle:'Main title *', ffSubtitle:'Subtitle', ffTagline:'Tagline', ffDates:'Date / Period', ffPrice:'Price', ffSchedule:'Schedule', ffExtra:'Additional info',
+    flyerEvento:'📅 Event', flyerInscripciones:'🎓 Enrollments', flyerPromo:'🛍️ Promotion', flyerInfo:'📢 Information', flyerCurso:'📋 Course / Workshop', flyerLaunch:'🚀 Launch', flyerAniversario:'🎉 Anniversary', flyerMenu:'🍽️ Special menu', flyerOther:'✨ Other',
+    flyerStyleColorful:'Colorful / Vibrant', flyerStylePro:'Professional / Elegant', flyerStyleMin:'Minimalist', flyerStyleFestive:'Festive / Fun', flyerStyleInfo:'Informative',
+    phFlyerTitle:'E.g.: Summer Camp — A Summer to Explore', phFlyerSub:'E.g.: For kids ages 1 to 7', phFlyerTag:'E.g.: The most fun summer!',
+    phFlyerDates:'E.g.: July 14 to 25', phFlyerPrice:'E.g.: $99 USD', phFlyerSched:'E.g.: 8am – 2pm', phFlyerExtra:'E.g.: Limited to 20 spots',
+    carouselTopicLabel:'Carousel topic', phCarousel:'E.g.: 5 benefits of sleep in your child\'s development · The 4 pillars of our methodology · Why choose us',
+    carouselSlideCount:'Number of slides', slideCountLabel:'slides (min 3, max 10)',
+    carouselStyleLabel:'Carousel style',
+    csEducativo:'📚 Educational', csTips:'💡 Tips', csHistoria:'📖 Story', csDatos:'📊 Data', csTutorial:'🎯 Tutorial', csQA:'❓ Q&A',
+    carouselCoverLabel:'Carousel cover', coverAI:'🤖 Generate with AI', coverPhoto:'📸 Use my photo',
+    coverUploadTitle:'Drag your photo or click', coverUploadSub:'This photo will be the cover slide background',
+    testLabel:'Customer review',
+    phTest:"Paste your customer's review exactly as they wrote it...\n\nE.g.: 'Wonderik is amazing. My 3-year-old already reads short words and her emotional development has improved greatly. The teachers are exceptional ⭐⭐⭐⭐⭐ — Fernanda R.'",
+    testDivider:'or upload a customer photo', testPhotoTitle:'Customer photo (optional)', testPhotoSub:'Authentic UGC content converts 3-5x more',
+    btnGenerate:'✨ Generate content with AI',
+    // ── Loading ──
+    loadDefault:'Creating your content...', loadHint:'15–45 seconds · High quality images take longer',
+    loadCancel:'✕ Cancel and go back', loadTimeout:'The request took too long. Try again — if the problem persists, try a shorter text.',
+    // ── Error ──
+    errTitle:'Something went wrong', errDefault:'Unexpected error. Try again.', errRetry:'Try again',
+    // ── Results ──
+    regenImg:'🔄 New image', regenText:'✍️ New text', regenBack:'← Create another',
+    carouselSlidesLabel:'🎠 Carousel slides', carouselNavHint:'← → to navigate · click to preview',
+    carouselDlAll:'⬇️ Download all slides (ZIP)',
+    quoteLabel:'⭐ Featured customer quote',
+    logoInImgLabel:'🏷️ Logo on image',
+    wmLabel:'✦ Watermark Postimity', wmLock:'Growth+ to remove',
+    pubLabel:'📤 Publish to social media',
+    pubCopySub:'Copy + Download + Open', pubHint:'💡 One tap: copies the caption, downloads the image and opens the app — just paste and publish',
+    dlLabel:'⬇ Download image only',
+    copyForIG:'📋 Copy for Instagram', copyForFB:'📋 Copy for Facebook', copyForTK:'📋 Copy for TikTok',
+    postHintIG:'⏰ <strong>Best time:</strong> Tue–Fri, 9-11am or 6-8pm · Goal: saves + DM shares',
+    postHintFB:'⏰ <strong>Best time:</strong> Wed–Fri, 9am-1pm · Goal: comments + group shares',
+    postHintTK:'⏰ <strong>Best time:</strong> 6-10pm any day · Ideal caption: 50-150 chars with search keywords',
+    ttHookLabel:'🎬 Hook (first 1.5 sec)', ttScriptLabel:'📝 Script',
+    // ── Adjust ──
+    adjustLabel:'✏️ Adjust the content', adjustPlaceholder:'E.g.: make it shorter · more formal · add urgency · change the CTA', adjustBtn:'Apply',
+    adjShorter:'Shorter', adjFormal:'More formal', adjCloser:'More personal', adjUrgency:'More urgency', adjCTA:'Change CTA', adjEmoji:'+ Emojis',
+    adjShorterVal:'Make it shorter, max 3 lines', adjFormalVal:'More formal and professional tone', adjCloserVal:'More personal and conversational tone',
+    adjUrgencyVal:'Add more urgency and call to action', adjCTAVal:'Change the CTA to a more direct one', adjEmojiVal:'Add 2-3 relevant emojis',
+    // ── Ad Brief ──
+    adBriefToggle:'💡 Investing money on this post? See targeting recommendations',
+    abAudience:'👥 Audience', abInterests:'🎯 Interests', abObjective:'🎯 Campaign objective', abDuration:'⏱️ Duration', abPlacements:'📱 Placements',
+    abBudgetMin:'Minimum budget', abBudgetOpt:'⭐ Optimal budget', abCopy:'📋 Copy settings for Meta Ads Manager',
+    resultBack:'← Create another post', resultCopyAll:'📋 Copy all',
+    // ── Creator bar ──
+    barUniqueLink:'Your unique link:', barGenRemaining:'{n} gen remaining', barMyAccount:'👤 My account', barHistory:'📚 History',
+    barCopyLink:'📋 Copy link', barRecovery:'How to recover it?',
+    // ── Recovery modal ──
+    recoveryTitle:'🔗 Your unique access link', recoverySub:'This link is your access to the platform from any device. Save it or share it — whoever has the link has access to your brand.',
+    recoveryEmailHint:'💡 You can also recover it anytime by entering your email or WhatsApp:',
+    recoveryClose:'Close', recoverySend:'Send my link via WhatsApp',
+    // ── Dashboard ──
+    dashTitle:'👤 My account', dashBack:'← Back',
+    dashGensTitle:'📊 Generations this month', dashGensUsed:'used / available', dashRenewal:'Renews on {date}',
+    dashBrandTitle:'🏢 My brand', dashEditBG:'✏️ Edit Brand Guide',
+    dashBrandBusiness:'Business', dashBrandTypeLocation:'Type & location', dashBrandWA:'WhatsApp', dashBrandID:'Brand ID',
+    dashNoBrand:'No brand configured',
+    dashPlansTitle:'💳 Available plans', dashStripeNote:'Payments will be enabled soon with Stripe',
+    dashUpgradeToast:'💳 Stripe payments — coming very soon. Thanks for your patience!',
+    dashTrialDays:'⏳ <strong>{n} days</strong> of trial remaining', dashMaxPlan:'✅ You are on the top plan', dashCurrentPlan:'Current plan',
+    dashNoVideo:'No video',
+    // ── History ──
+    histTitle:'📚 My history', histBack:'← Back',
+    histAll:'All', histPosts:'Posts', histFlyers:'Flyers', histCarousels:'Carousels', histTestimonials:'Testimonials',
+    histEmpty:'📭', histEmptyTitle:'No saved posts yet', histEmptySub:'Generate your first post and it will appear here',
+    histEmptyFilter:'No posts in this filter', histEmptyFilterSub:'Generate content and it will appear here',
+    histReuse:'↺ Reuse prompt', histCopyCaption:'📋 Copy caption', histNoCaption:'No saved caption',
+    histDlSlide:'Download slide',
+    // ── Agent screen ──
+    agentBack:'← Back', agentTitle:'🤖 Marketing Agent',
+    agentBarSub:'Generate your monthly content plan', agentBarCta:'View plan →',
+    agentConfigTitle:'⚙️ Set up your monthly plan',
+    agentFreqLabel:'Posts per week', agentPlatsLabel:'Platforms',
+    agentPlatNote:'Platforms are intelligently distributed based on your Brand Guide audience.',
+    agentGenBtn:'✨ Generate plan for {month}', agentGenLoading:'☕ Generating your monthly plan... may take up to 30 seconds',
+    agentRegenPlan:'↺ Regenerate plan',
+    agentGenerating:'⏳ Generating plan...',
+    agentPlannedSub:'{n} posts planned for {month}',
+    agentWeekLabel:'Week {n} · {range}',
+    agentCreatePost:'→ Create post', agentCreateCarousel:'→ Create carousel', agentCopyPrompt:'📋 Copy prompt',
+    // ── Agent labels ──
+    agentModePost:'📌 Post', agentModeCarousel:'🎠 Carousel',
+    agentStylePhoto:'📷 Photorealistic', agentStyleIllus:'🖼️ Illustrated', agentStyleAbstract:'🎨 Abstract',
+    // ── Reminders ──
+    remTitle:'Auto reminders', remSub:'A warm nudge every morning before your daily post',
+    remActiveTitle:'Reminders active — {month}', remActiveSub:"You'll receive a reminder every morning before your daily post",
+    remActiveBtn:'✓ Active', remEmailLabel:'📧 Reminder email', remWALabel:'📱 Personal WhatsApp (optional)',
+    remChannelLabel:'Notification channel', remBoth:'Both', remActivate:'🔔 Activate reminders',
+    // ── PLT_INFO ──
+    pltIG:'📸 <strong>Instagram 2026:</strong> Keywords in caption, hook on first line, 3-5 hashtags. Goal: Saves + DMs.',
+    pltFB:'👥 <strong>Facebook 2026:</strong> Questions & conversation, comment CTAs. Goal: Replies & conversations.',
+    pltTK:'🎵 <strong>TikTok 2026:</strong> Caption 50-150 chars with SEO keywords (it\'s a search engine). Hook in 1.5 sec. Goal: 70%+ completion rate',
+    // ── Loading by mode ──
+    loadPostTitle:'Creating your Post...', loadPostTime:'~20 seconds',
+    loadPostS1:'Analyzing your request', loadPostS2:'Generating captions for 3 platforms', loadPostS3:'Creating image with AI', loadPostS4:'Preparing result',
+    loadCarouselTitle:'Creating your Carousel...', loadCarouselTime:'~35 seconds — generating slides with AI',
+    loadCarouselS1:'Generating slide content', loadCarouselS2:'Creating cover image', loadCarouselS3:'Rendering slides', loadCarouselS4:'Done',
+    loadEnhanceTitle:'Editing your photo professionally...', loadEnhanceTime:'~35 seconds — editing your real photo with AI',
+    loadEnhanceS1:'Analyzing your photo', loadEnhanceS2:'Generating optimized captions', loadEnhanceS3:'Applying professional enhancements', loadEnhanceS4:'Preparing result',
+    loadFlyerTitle:'Designing your Flyer...', loadFlyerTime:'~30 seconds',
+    loadFlyerS1:'Analyzing flyer content', loadFlyerS2:'Generating captions for 3 platforms', loadFlyerS3:'Designing graphic with AI', loadFlyerS4:'Preparing result',
+    loadTestTitle:'Transforming the testimonial...', loadTestTime:'~25 seconds',
+    loadTestS1:'Analyzing customer review', loadTestS2:'Generating authentic captions', loadTestS3:'Creating background image', loadTestS4:'Preparing result',
+    // ── Toasts/alerts ──
+    toastSaved:'✅ Post saved to history', toastCopied:'✓ Copied!', toastCopyLink:'📋 Copy link',
+    toastCancelGen:'Generation cancelled', toastBGReady:'🎉 Your Brand Guide is ready! Postimity now knows your business. Generate your first post 👇',
+    toastAdjusted:'✅ Content adjusted', toastCaptionCopied:'📋 Caption copied', toastCopyError:'Copy error',
+    toastPromptCopied:'📋 Prompt copied', toastPostNotFound:'Error: post not found',
+    toastRemindersOn:'🔔 Reminders activated for {month}', toastRemindersOff:'Reminders deactivated',
+    toastPreloaded:'✨ {mode} pre-loaded · {style} — just hit Generate',
+    toastPreloadedPlan:'✨ {mode} pre-loaded from your plan — just hit Generate',
+    toastModePreloaded:'✅ Mode and pillar pre-loaded — adjust the text and generate',
+    toastFirstPost:'🎉 Your first post is ready! Tap Instagram, Facebook or TikTok to publish it — we copy the caption and download the image for you.',
+    toastAllCopied:'✓ All copied!', toastCopyAll:'📋 Copy all',
+    toastAdCopied:'✓ Copied!', toastAdCopyBtn:'📋 Copy settings for Meta Ads Manager',
+    toastAdjustEmpty:'Enter what you want to adjust', toastGenFirst:'Generate content first',
+    toastEmailReminder:'Enter your email to receive reminders', toastWAReminder:'Enter your WhatsApp to receive reminders',
+    // ── Alerts ──
+    alertNoBG:'Complete your Brand Guide first to generate the plan.', alertNoPlats:'Select at least one platform.',
+    alertNoName:'Complete: Business name, Type and what makes you special.',
+    alertNoEmail:'Enter your email — we need it to send you reminders and your access link.',
+    alertNoTerms:'To continue, accept the Terms & Conditions and Privacy Policy.',
+    alertNoLocation:'Select your country and state/province.',
+    alertNoBrand:'Set up your brand first.', alertBGFirst:'Generate the Brand Guide first.',
+    alertNoInstr:'Describe the change you want to make.',
+    alertPostEmpty:'Write what you want to post.', alertPhotoFirst:'Upload a photo first.',
+    alertFlyerTitle:'Enter the flyer title.', alertFlyerPhoto:'Upload a photo for the flyer.',
+    alertCarouselTopic:'Enter the carousel topic.', alertCarouselPhoto:'Upload a photo for the cover.',
+    alertTestimonial:'Paste a customer review or upload their photo to continue.',
+    alertEnhanceDescribe:'Describe what you want to do with the photo.',
+    alertImgOnly:'Images only.', alertMaxSize:'Maximum 10MB.',
+    alertRecoveryEmail:'Enter your email',
+    alertAgentParseError:'The AI returned an invalid response — try again in a few seconds.',
+    alertAgentFailed:'Could not generate the plan. ',
+    alertRecoveryLink:'Save this link: {url} — In a future version we will send it to {email}',
+    // ── Plan names ──
+    planTrialName:'Free Trial', planTrialBadge:'⭐ Trial', planTrialPrice:'Free for 14 days',
+    planTrialAllModes:'All modes + 2 videos',
+    planStarterUp:'🚀 Activate Starter — $9/mo', planGrowthUp:'⬆️ Upgrade to Growth — $19/mo', planAgencyUp:'⬆️ Upgrade to Agency — $45/mo', planAgencyMax:'✅ Top plan active',
+    genPerMonth:'gen/mo',
+    // ── Month names ──
+    months:['January','February','March','April','May','June','July','August','September','October','November','December'],
+    monthsLower:['january','february','march','april','may','june','july','august','september','october','november','december'],
+    renewalPrefix:'Renews on ', renewalDatePrefix:'',
+    // ── Reminders confirm ──
+    remConfirmTitle:'✅ Reminders activated for {month}\n\nOnce we connect Twilio you will receive a message every morning like this:\n\n☀️ Good morning! Time to shine.\nYour post: [topic of the day]\nOne tap and it\'s done → [link]\n\nFor now your plan is saved here.',
+    // ── Flyer select values ──
+    flyerEventoVal:'Event', flyerInscripcionesVal:'Enrollments / Admissions', flyerPromoVal:'Promotion / Offer',
+    flyerInfoVal:'Information', flyerCursoVal:'Course / Workshop', flyerLaunchVal:'Launch',
+    flyerAniversarioVal:'Anniversary', flyerMenuVal:'Special menu', flyerOtherVal:'Other',
+    flyerStyleColorfulVal:'Colorful and vibrant, creative agency style', flyerStyleProVal:'Professional and elegant',
+    flyerStyleMinVal:'Minimalist and modern', flyerStyleFestiveVal:'Festive and fun', flyerStyleInfoVal:'Informative and organized',
+    // ── Misc ──
+    noClose:"Don't close this tab", copyForPlatform:'📋 Copy for {plat}',
+    errUnexpected:'Unexpected error. Try again. (v{ver})', errServer:'Server error', errUnknown:'Unknown error',
   }
 };
 function t(key) { const lang = detectLanguage(); return (T[lang] || T.es)[key] || (T.es)[key] || key; }
@@ -1635,8 +2065,8 @@ function showCloudBar(name) {
 function copyBrandUrl() {
   navigator.clipboard.writeText(getBrandUrl()).then(() => {
     const btn = document.getElementById('cbCopyBtn');
-    btn.textContent = '✅ ¡Copiado!';
-    setTimeout(() => btn.textContent = '📋 Copiar link', 2500);
+    btn.textContent = t('toastCopied');
+    setTimeout(() => btn.textContent = t('barCopyLink'), 2500);
   });
 }
 
@@ -1650,9 +2080,9 @@ function closeRecoveryModal() {
 
 async function sendRecoveryLink() {
   const email = document.getElementById('recoveryEmail').value.trim();
-  if(!email) { alert('Ingresa tu email'); return; }
+  if(!email) { alert(t('alertRecoveryEmail')); return; }
   // In Phase 2.5: send email. For now, just show the link
-  alert('Guarda este link: ' + getBrandUrl() + ' — En una próxima versión lo enviaremos a ' + email);
+  alert(t('alertRecoveryLink').replace('{url}', getBrandUrl()).replace('{email}', email));
   closeRecoveryModal();
 }
 
@@ -1694,7 +2124,7 @@ function updateGenCounter() {
 // ─── UTILITIES ───────────────────────────────────────
 function showToast(msg) {
   const t = document.getElementById('toast');
-  t.textContent = msg || '✅ Post guardado en historial';
+  t.textContent = msg || T[detectLanguage()]?.toastSaved || '✅ Post saved';
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 3000);
 }
@@ -1878,11 +2308,11 @@ function updateStates() {
   };
   const list = states[country];
   if (list) {
-    sel.innerHTML = '<option value="">— Selecciona estado —</option>' + list.map(s => '<option value="' + s + '">' + s + '</option>').join('');
+    sel.innerHTML = '<option value="">— ' + t('selState').replace('— ','').replace(' —','') + ' —</option>' + list.map(s => '<option value="' + s + '">' + s + '</option>').join('');
     sel.disabled = false; sel.style.display = '';
     txt.style.display = 'none';
   } else {
-    sel.innerHTML = '<option value="">— Selecciona estado —</option>';
+    sel.innerHTML = '<option value="">' + t('selStatePlaceholder') + '</option>';
     sel.disabled = true; sel.style.display = 'none';
     txt.style.display = ''; txt.value = '';
   }
@@ -1936,10 +2366,10 @@ function setupDropzone(zoneId, inputId, prevId, titleId, nameId, cb) {
   zone.addEventListener('drop',e=>{ e.preventDefault(); zone.classList.remove('drag'); if(e.dataTransfer.files[0]) handleDrop(e.dataTransfer.files[0],zone,prevId,titleId,nameId,cb); });
 }
 function handleDrop(file, zone, prevId, titleId, nameId, cb) {
-  if(!file.type.startsWith('image/')){alert('Solo imágenes.');return;}
-  if(file.size>10*1024*1024){alert('Máximo 10MB.');return;}
+  if(!file.type.startsWith('image/')){alert(t('alertImgOnly'));return;}
+  if(file.size>10*1024*1024){alert(t('alertMaxSize'));return;}
   zone.classList.add('has-file');
-  document.getElementById(titleId).textContent='¡Foto lista!';
+  document.getElementById(titleId).textContent=detectLanguage()==='en'?'Photo ready!':'¡Foto lista!';
   document.getElementById(nameId).textContent='📷 '+file.name;
   const reader=new FileReader();
   reader.onload=ev=>{
@@ -1959,17 +2389,17 @@ async function generateBrandGuide() {
   const diff = document.getElementById('bDiff')?.value.trim() || '';
   const aud = document.getElementById('bAudience')?.value.trim() || '';
   const wa = document.getElementById('bWhatsApp')?.value.trim() || '';
-  const tone = document.getElementById('bTone')?.value || 'Cálido, moderno y cercano';
+  const tone = document.getElementById('bTone')?.value || t('toneWarmVal');
   if(!name || !bType || !diff || !aud) {
-    alert('Completa: Nombre, Tipo de negocio y la descripción de lo que te hace especial.');
+    alert(t('alertNoName'));
     return;
   }
   const btn=document.getElementById('btnGenBG');
-  btn.innerHTML='<div class="spin-sm"></div> Generando tu Brand Guide...'; btn.disabled=true;
+  btn.innerHTML='<div class="spin-sm"></div> ' + t('bgGenerating'); btn.disabled=true;
   const timeNote = document.createElement('p');
   timeNote.id='bgTimeNote';
   timeNote.style.cssText='font-size:12px;color:var(--t3);margin-top:8px;text-align:center';
-  timeNote.textContent='☕ Esto puede tomar hasta 1 minuto — la AI está analizando tu negocio a fondo';
+  timeNote.textContent = detectLanguage()==='en' ? '☕ This may take up to 1 minute — the AI is deeply analyzing your business' : '☕ Esto puede tomar hasta 1 minuto — la AI está analizando tu negocio a fondo';
   btn.parentNode.insertBefore(timeNote, btn.nextSibling);
   try {
     const res=await fetch(WORKER,{ method:'POST', headers:{'Content-Type':'application/json'},
@@ -1990,7 +2420,7 @@ async function generateBrandGuide() {
     document.getElementById('bgText').value=data.brandGuide;
     document.getElementById('bgSection').classList.add('show');
     document.getElementById('btnSave').disabled=false;
-    btn.innerHTML='✅ Brand Guide generado'; btn.style.background='var(--g)';
+    btn.innerHTML=t('bgGenerated'); btn.style.background='var(--g)';
     const tn=document.getElementById('bgTimeNote'); if(tn) tn.remove();
     document.getElementById('bgEditGuide').style.display='block';
     document.getElementById('bgAIUpdate').classList.add('show');
@@ -2004,7 +2434,7 @@ async function generateBrandGuide() {
     // Also reset button so user can regenerate cleanly
     btn.disabled = false;
   } catch(err) {
-    btn.innerHTML='✨ Generar Brand Guide con AI'; btn.disabled=false;
+    btn.innerHTML=t('bgGenBtn'); btn.disabled=false;
     alert('Error: '+err.message);
   }
 }
@@ -2021,22 +2451,22 @@ function saveBrand() {
     ? document.getElementById('bState')?.value
     : document.getElementById('bStateText')?.value) || '';
   const bCityVal = document.getElementById('bCity')?.value.trim() || '';
-  const bToneVal = document.getElementById('bTone')?.value || 'Cálido, moderno y cercano';
+  const bToneVal = document.getElementById('bTone')?.value || t('toneWarmVal');
   if(!bNameVal || !bTypeVal || !bDiffVal || !bAudienceVal) {
-    alert('Completa: Nombre, Tipo de negocio y la descripción de lo que te hace especial.');
+    alert(t('alertNoName'));
     return;
   }
   if(!bEmailVal || !bEmailVal.includes('@') || !bEmailVal.includes('.')) {
-    alert('Ingresa tu email — lo necesitamos para enviarte recordatorios y tu link de acceso.');
+    alert(t('alertNoEmail'));
     document.getElementById('bEmail')?.focus();
     return;
   }
   if(!document.getElementById('chkTerms')?.checked) {
-    alert('Para continuar, acepta los Términos y Condiciones y el Aviso de Privacidad.');
+    alert(t('alertNoTerms'));
     return;
   }
   if(!bCountryVal || !bStateVal) {
-    alert('Selecciona tu país y estado/provincia.');
+    alert(t('alertNoLocation'));
     return;
   }
   const brand={
@@ -2090,7 +2520,7 @@ function saveBrand() {
   const firstBrandKey = 'postimity_first_brand_' + brandId;
   if(!localStorage.getItem(firstBrandKey)) {
     localStorage.setItem(firstBrandKey, '1');
-    setTimeout(() => showToast('🎉 ¡Tu Brand Guide está listo! Postimity ya conoce tu negocio. Genera tu primer post 👇'), 600);
+    setTimeout(() => showToast(t('toastBGReady')), 600);
   }
 }
 
@@ -2156,7 +2586,7 @@ function goToEdit() {
       if(!pp.length) pp = b.pillars||[];
       window._pillars = pp.slice(0,4);
       const btn=document.getElementById('btnGenBG');
-      btn.innerHTML='✅ Brand Guide cargado — puedes regenerar';
+      btn.innerHTML=t('bgLoaded');
       btn.style.background='var(--g)'; btn.disabled=false;
       document.getElementById('bgEditGuide').style.display='block';
       document.getElementById('bgAIUpdate').classList.add('show');
@@ -2192,9 +2622,9 @@ function toggleBGGuide() {
 }
 async function aiUpdateBrandGuide() {
   const instr = document.getElementById('bgUpdateInstr').value.trim();
-  if(!instr) { alert('Describe el cambio que quieres hacer.'); return; }
+  if(!instr) { alert(t('alertNoInstr')); return; }
   const currentBG = document.getElementById('bgText').value;
-  if(!currentBG) { alert('Primero genera el Brand Guide.'); return; }
+  if(!currentBG) { alert(t('alertBGFirst')); return; }
   const btn = document.getElementById('btnAIUpdate');
   btn.textContent = '...'; btn.disabled = true;
   try {
@@ -2202,11 +2632,11 @@ async function aiUpdateBrandGuide() {
     document.getElementById('bgText').value = res.brandGuide;
     if(res.pillars && res.pillars.length) window._pillars = res.pillars;
     document.getElementById('bgUpdateInstr').value = '';
-    btn.textContent = '✅ Aplicado';
-    setTimeout(() => { btn.textContent = 'Aplicar →'; btn.disabled = false; }, 2000);
+    btn.textContent = '✅';
+    setTimeout(() => { btn.textContent = t('bgAIBtn'); btn.disabled = false; }, 2000);
   } catch(e) {
     alert('Error: ' + e.message);
-    btn.textContent = 'Aplicar →'; btn.disabled = false;
+    btn.textContent = t('bgAIBtn'); btn.disabled = false;
   }
 }
 // ─── MODE & UI CONTROLS ──────────────────────────────
@@ -2219,7 +2649,7 @@ function setMode(m) {
 function setPlatform(btn) {
   document.querySelectorAll('.plt-tab').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active'); platform=btn.dataset.plt;
-  document.getElementById('pltInfo').innerHTML=PLT_INFO[platform];
+  document.getElementById('pltInfo').innerHTML=getPltInfo()[platform];
   // Auto-switch caption tab
   const tabMap={instagram:'ig',facebook:'fb',tiktok:'tt'};
   showCapTabById(tabMap[platform]);
@@ -2294,8 +2724,8 @@ function setCarouselStyle(btn) {
 
 async function genCarousel(brand, bg) {
   const topic = document.getElementById('carouselTopic')?.value.trim();
-  if(!topic) { alert('Escribe el tema del carrusel.'); return; }
-  if(carouselCoverMode==='photo' && !carouselCoverB64) { alert('Sube una foto para la portada.'); return; }
+  if(!topic) { alert(t('alertCarouselTopic')); return; }
+  if(carouselCoverMode==='photo' && !carouselCoverB64) { alert(t('alertCarouselPhoto')); return; }
   setStep(1);
   // If photo mode, convert to PNG first
   let coverPhoto = null, coverMime = null;
@@ -2490,10 +2920,10 @@ function setAdjust(text) {
 
 async function adjustResult() {
   const adjustment = document.getElementById('adjustInput')?.value.trim();
-  if(!adjustment) { showToast('Escribe qué quieres ajustar'); return; }
+  if(!adjustment) { showToast(t('toastAdjustEmpty')); return; }
   const brand = loadBrand();
   const bg = brand?.brandGuide;
-  if(!bg || !lastGeneratedData) { showToast('Primero genera contenido'); return; }
+  if(!bg || !lastGeneratedData) { showToast(t('toastGenFirst')); return; }
 
   const btn = document.getElementById('adjustBtn');
   if(btn) { btn.disabled = true; btn.textContent = '...'; }
@@ -2522,11 +2952,11 @@ async function adjustResult() {
     if(data.facebook) document.getElementById('fbCap').textContent = data.facebook.caption || '';
     if(data.tiktok) document.getElementById('ttCap').textContent = data.tiktok.caption || '';
     document.getElementById('adjustInput').value = '';
-    showToast('✅ Contenido ajustado');
+    showToast(t('toastAdjusted'));
   } catch(e) {
     showToast('Error: ' + e.message);
   } finally {
-    if(btn) { btn.disabled = false; btn.textContent = 'Aplicar'; }
+    if(btn) { btn.disabled = false; btn.textContent = t('adjustBtn'); }
   }
 }
 
@@ -2553,29 +2983,31 @@ function setFlyerMode(m) {
 // ═══════════════════════════════════════════════════════
 async function generate() {
   const brand=loadBrand();
-  if(!brand){ alert('Primero configura tu marca.'); return; }
+  if(!brand){ alert(t('alertNoBrand')); return; }
   // ── Generation limit check (Phase 2 model) ────────────────────────────
   const plan = brand?.plan || 'trial';
   const limit = GEN_LIMITS[plan] || GEN_LIMITS['trial'];
   const monthKey = 'postimity_gens_' + new Date().toISOString().slice(0,7);
   const usedThisMonth = parseInt(localStorage.getItem(monthKey) || '0');
   if (usedThisMonth >= limit) {
-    const msg = `Llegaste al límite de ${limit} generaciones este mes. Escríbenos a postimity@gmail.com para hacer upgrade.`;
+    const msg = detectLanguage()==='en'
+      ? `You've reached the limit of ${limit} generations this month. Email us at postimity@gmail.com to upgrade.`
+      : `Llegaste al límite de ${limit} generaciones este mes. Escríbenos a postimity@gmail.com para hacer upgrade.`;
     alert(msg);
     return;
   }
   // Validate inputs
-  if(mode==='post'&&!document.getElementById('postText').value.trim()){ alert('Escribe qué quieres publicar.'); return; }
-  if(mode==='enhance'&&!enhanceB64){ alert('Sube una foto primero.'); return; }
-  if(mode==='flyer'&&flyerMode==='ai'&&!document.getElementById('flyerTitle2')?.value.trim()){ alert('Escribe el título del flyer.'); return; }
-  if(mode==='flyer'&&flyerMode==='photo'&&!flyerPhotoB64){ alert('Sube una foto para el flyer.'); return; }
-  if(mode==='carousel'&&!document.getElementById('carouselTopic')?.value.trim()){ alert('Escribe el tema del carrusel.'); return; }
+  if(mode==='post'&&!document.getElementById('postText').value.trim()){ alert(t('alertPostEmpty')); return; }
+  if(mode==='enhance'&&!enhanceB64){ alert(t('alertPhotoFirst')); return; }
+  if(mode==='flyer'&&flyerMode==='ai'&&!document.getElementById('flyerTitle2')?.value.trim()){ alert(t('alertFlyerTitle')); return; }
+  if(mode==='flyer'&&flyerMode==='photo'&&!flyerPhotoB64){ alert(t('alertFlyerPhoto')); return; }
+  if(mode==='carousel'&&!document.getElementById('carouselTopic')?.value.trim()){ alert(t('alertCarouselTopic')); return; }
   if(mode==='testimonial'&&!document.getElementById('testText').value.trim()&&!testPhotoB64){
-    alert('Pega una reseña de tu cliente o sube su foto para continuar.'); return;
+    alert(t('alertTestimonial')); return;
   }
 
   showLoading(true);
-  const bg=brand.brandGuide||`Negocio: ${brand.name}. Diferenciador: ${brand.differentiator}. Audiencia: ${brand.audience}.`;
+  const bg=brand.brandGuide||(detectLanguage()==='en'?`Business: ${brand.name}. Differentiator: ${brand.differentiator}. Audience: ${brand.audience}.`:`Negocio: ${brand.name}. Diferenciador: ${brand.differentiator}. Audiencia: ${brand.audience}.`);
   lastInput={mode,platform,pillar,bg,brand};
 
   try {
@@ -2610,7 +3042,7 @@ async function genEnhance(brand,bg) {
     ? document.getElementById('enhancePrompt').value.trim()
     : null;
   if(enhanceMode === 'custom' && !customPrompt) {
-    alert('Describe qué quieres hacer con la foto.'); return;
+    alert(t('alertEnhanceDescribe')); return;
   }
   const res=await postWithTimeout({
     mode:'enhance',
@@ -2629,12 +3061,16 @@ async function genEnhance(brand,bg) {
 // ║  CUENTA / DASHBOARD USUARIO                      ║
 // ╚═══════════════════════════════════════════════════╝
 
-const PLAN_CONFIG = {
-  trial:   { name: 'Trial Gratuito', badge: '⭐ Trial', gens: 20, videos: 2,  price: 'Gratis 14 días', upgradeLabel: '🚀 Activar plan Starter — $149/mes', color: 'trial' },
-  starter: { name: 'Starter',        badge: '💙 Starter', gens: 30, videos: 0, price: '$149 MXN/mes',   upgradeLabel: '⬆️ Cambiar a Growth — $349/mes',    color: 'starter' },
-  growth:  { name: 'Growth',         badge: '💚 Growth',  gens: 100, videos: 8, price: '$349 MXN/mes',   upgradeLabel: '⬆️ Cambiar a Agency — $799/mes',   color: 'growth' },
-  agency:  { name: 'Agency',         badge: '🏆 Agency',  gens: 250, videos: 20, price: '$799 MXN/mes',  upgradeLabel: '✅ Plan máximo activo',             color: 'agency' },
-};
+function getPlanConfig() {
+  const lang = detectLanguage();
+  const mxn = lang === 'es';
+  return {
+    trial:   { name: t('planTrialName'), badge: t('planTrialBadge'), gens: 20, videos: 2, price: t('planTrialPrice'), upgradeLabel: t('planStarterUp'), color: 'trial' },
+    starter: { name: 'Starter', badge: '💙 Starter', gens: 30, videos: 0, price: mxn?'$149 MXN/mes':'$9 USD/mo', upgradeLabel: t('planGrowthUp'), color: 'starter' },
+    growth:  { name: 'Growth',  badge: '💚 Growth',  gens: 100, videos: 8, price: mxn?'$349 MXN/mes':'$19 USD/mo', upgradeLabel: t('planAgencyUp'), color: 'growth' },
+    agency:  { name: 'Agency',  badge: '🏆 Agency',  gens: 250, videos: 20, price: mxn?'$799 MXN/mes':'$45 USD/mo', upgradeLabel: t('planAgencyMax'), color: 'agency' },
+  };
+}
 
 function getTrialDaysLeft() {
   if(!brandId) return 14;
@@ -2648,8 +3084,9 @@ function getTrialDaysLeft() {
 function getNextRenewalDate() {
   const now = new Date();
   const next = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-  const months = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
-  return '1 de ' + months[next.getMonth()] + ' de ' + next.getFullYear();
+  const lang = detectLanguage();
+  if(lang === 'en') return t('months')[next.getMonth()] + ' 1, ' + next.getFullYear();
+  return '1 de ' + t('monthsLower')[next.getMonth()] + ' de ' + next.getFullYear();
 }
 
 function showCuentaScreen() {
@@ -2674,7 +3111,7 @@ function goEditBrand() {
 function renderCuenta() {
   const brand = loadBrand();
   const planKey = brand?.plan || 'trial';
-  const plan = PLAN_CONFIG[planKey] || PLAN_CONFIG.trial;
+  const pc = getPlanConfig(); const plan = pc[planKey] || pc.trial;
   const limit = GEN_LIMITS[planKey] || 20;
   const monthKey = 'postimity_gens_' + new Date().toISOString().slice(0,7);
   const used = parseInt(localStorage.getItem(monthKey) || '0');
@@ -2688,9 +3125,9 @@ function renderCuenta() {
     planCard.innerHTML = '<div class="plan-card ' + plan.color + '">' +
       '<span class="plan-badge">' + plan.badge + '</span>' +
       '<div class="plan-name">' + plan.name + '</div>' +
-      '<div class="plan-desc">' + plan.price + (planKey === 'trial' ? ' · Todos los modos + 2 videos' : ' · ' + limit + ' gen/mes' + (plan.videos > 0 ? ' + ' + plan.videos + ' videos' : '')) + '</div>' +
-      (daysLeft !== null ? '<div class="plan-days">⏳ Quedan <strong>' + daysLeft + ' días</strong> de trial</div>' : '') +
-      (planKey !== 'agency' ? '<button class="plan-upgrade-btn" onclick="showUpgradeInfo()">' + plan.upgradeLabel + '</button>' : '<div style="font-size:12px;font-weight:700;color:var(--g3);text-align:center;padding:8px">✅ Estás en el plan máximo</div>') +
+      '<div class="plan-desc">' + plan.price + (planKey === 'trial' ? ' · ' + t('planTrialAllModes') : ' · ' + limit + ' ' + t('genPerMonth') + (plan.videos > 0 ? ' + ' + plan.videos + ' videos' : '')) + '</div>' +
+      (daysLeft !== null ? '<div class="plan-days">' + t('dashTrialDays').replace('{n}', daysLeft) + '</div>' : '') +
+      (planKey !== 'agency' ? '<button class="plan-upgrade-btn" onclick="showUpgradeInfo()">' + plan.upgradeLabel + '</button>' : '<div style="font-size:12px;font-weight:700;color:var(--g3);text-align:center;padding:8px">' + t('dashMaxPlan') + '</div>') +
     '</div>';
   }
 
@@ -2702,16 +3139,16 @@ function renderCuenta() {
   if(usedEl) usedEl.textContent = used;
   if(limitEl) limitEl.textContent = limit;
   if(barEl) { barEl.style.width = pct + '%'; barEl.style.background = barColor; }
-  if(renewEl) renewEl.textContent = 'Se renuevan el ' + getNextRenewalDate();
+  if(renewEl) renewEl.textContent = t('dashRenewal').replace('{date}', getNextRenewalDate());
 
   // Brand info
   const brandInfo = document.getElementById('cuentaBrandInfo');
   if(brandInfo && brand) {
     const rows = [
-      ['🏢', 'Negocio', brand.name || '—'],
-      ['📍', 'Tipo y ubicación', (brand.type || '—') + (brand.location ? ' · ' + brand.location : '')],
-      ['📱', 'WhatsApp', brand.whatsapp || '—'],
-      ['🆔', 'Brand ID', (brandId || '—').slice(0,8) + '...'],
+      ['🏢', t('dashBrandBusiness'), brand.name || '—'],
+      ['📍', t('dashBrandTypeLocation'), (brand.type || '—') + (brand.location ? ' · ' + brand.location : '')],
+      ['📱', t('dashBrandWA'), brand.whatsapp || '—'],
+      ['🆔', t('dashBrandID'), (brandId || '—').slice(0,8) + '...'],
     ];
     brandInfo.innerHTML = rows.map(([icon, label, val]) =>
       '<div class="brand-row">' +
@@ -2721,31 +3158,32 @@ function renderCuenta() {
       '</div>'
     ).join('');
   } else if(brandInfo) {
-    brandInfo.innerHTML = '<div style="color:var(--t3);font-size:13px;text-align:center;padding:12px">No hay marca configurada</div>';
+    brandInfo.innerHTML = '<div style="color:var(--t3);font-size:13px;text-align:center;padding:12px">' + t('dashNoBrand') + '</div>';
   }
 
   // Pricing grid
   const grid = document.getElementById('cuentaPricingGrid');
   if(grid) {
+    const mxn = detectLanguage() === 'es';
     const tiers = [
-      { key:'starter', name:'Starter', price:'$149', gens:'30 gen/mes', videos:null },
-      { key:'growth',  name:'Growth',  price:'$349', gens:'100 gen/mes', videos:'8 videos' },
-      { key:'agency',  name:'Agency',  price:'$799', gens:'250 gen/mes', videos:'20 videos' },
+      { key:'starter', name:'Starter', price: mxn?'$149':'$9', gens:'30 '+t('genPerMonth'), videos:null },
+      { key:'growth',  name:'Growth',  price: mxn?'$349':'$19', gens:'100 '+t('genPerMonth'), videos:'8 videos' },
+      { key:'agency',  name:'Agency',  price: mxn?'$799':'$45', gens:'250 '+t('genPerMonth'), videos:'20 videos' },
     ];
-    grid.innerHTML = tiers.map(t =>
-      '<div class="pricing-tile' + (t.key === planKey ? ' current' : '') + '">' +
-        '<div class="pt-name">' + t.name + '</div>' +
-        '<div class="pt-price">' + t.price + '<span style="font-size:10px;font-weight:400;color:var(--t3)"> MXN</span></div>' +
-        '<div class="pt-gens">' + t.gens + '</div>' +
-        (t.videos ? '<div style="font-size:11px;color:var(--b);font-weight:600;margin-top:2px">🎬 ' + t.videos + '/mes</div>' : '<div style="font-size:11px;color:var(--t3);margin-top:2px">Sin video</div>') +
-        (t.key === planKey ? '<div class="pt-current">Plan actual</div>' : '') +
+    grid.innerHTML = tiers.map(tr =>
+      '<div class="pricing-tile' + (tr.key === planKey ? ' current' : '') + '">' +
+        '<div class="pt-name">' + tr.name + '</div>' +
+        '<div class="pt-price">' + tr.price + '<span style="font-size:10px;font-weight:400;color:var(--t3)"> ' + (mxn?'MXN':'USD') + '</span></div>' +
+        '<div class="pt-gens">' + tr.gens + '</div>' +
+        (tr.videos ? '<div style="font-size:11px;color:var(--b);font-weight:600;margin-top:2px">🎬 ' + tr.videos + '/' + (detectLanguage()==='en'?'mo':'mes') + '</div>' : '<div style="font-size:11px;color:var(--t3);margin-top:2px">' + t('dashNoVideo') + '</div>') +
+        (tr.key === planKey ? '<div class="pt-current">' + t('dashCurrentPlan') + '</div>' : '') +
       '</div>'
     ).join('');
   }
 }
 
 function showUpgradeInfo() {
-  showToast('💳 Pagos con Stripe — disponibles muy pronto. ¡Gracias por tu paciencia!');
+  showToast(t('dashUpgradeToast'));
 }
 
 // ╔═══════════════════════════════════════════════════╗
@@ -2813,9 +3251,9 @@ function renderHistGrid(posts) {
 
   if(!posts.length) {
     grid.innerHTML = '<div class="hist-empty" style="grid-column:span 3">' +
-      '<div class="hist-empty-icon">📭</div>' +
-      '<div class="hist-empty-t">No hay posts en este filtro</div>' +
-      '<div class="hist-empty-d">Genera contenido y aparecerá aquí</div></div>';
+      '<div class="hist-empty-icon">' + t('histEmpty') + '</div>' +
+      '<div class="hist-empty-t">' + t('histEmptyFilter') + '</div>' +
+      '<div class="hist-empty-d">' + t('histEmptyFilterSub') + '</div></div>';
     return;
   }
 
@@ -2863,9 +3301,9 @@ function openHistDetail(idx) {
   }
   const date = new Date(histCurrentPost.timestamp);
   const platLabel = histCurrentPost.platform === 'instagram' ? '📸 Instagram' : histCurrentPost.platform === 'facebook' ? '👥 Facebook' : '🎵 TikTok';
-  meta.textContent = date.toLocaleDateString('es-MX', {day:'numeric',month:'long',year:'numeric'}) + ' · ' + platLabel;
+  meta.textContent = date.toLocaleDateString(detectLanguage()==='en'?'en-US':'es-MX', {day:'numeric',month:'long',year:'numeric'}) + ' · ' + platLabel;
   pilar.textContent = histCurrentPost.pillar || 'General';
-  cap.textContent = histCurrentPost.caption || histCurrentPost.captionSnippet || 'Sin caption guardado';
+  cap.textContent = histCurrentPost.caption || histCurrentPost.captionSnippet || t('histNoCaption');
   if(modal) modal.style.display = 'flex';
 }
 
@@ -2881,14 +3319,14 @@ function reuseHistPost() {
   if(histCurrentPost.pillar) setPillarByName(histCurrentPost.pillar);
   if(histCurrentPost.platform) setPlatformByName(histCurrentPost.platform);
   showCreatorFromHistorial();
-  showToast('✅ Modo y pilar pre-cargados — ajusta el texto y genera');
+  showToast(t('toastModePreloaded'));
 }
 
 function copyHistCaption() {
   const text = histCurrentPost?.caption || histCurrentPost?.captionSnippet || '';
   navigator.clipboard.writeText(text)
-    .then(() => showToast('📋 Caption copiado'))
-    .catch(() => showToast('Error al copiar'));
+    .then(() => showToast(t('toastCaptionCopied')))
+    .catch(() => showToast(t('toastCopyError')));
 }
 
 // ╔═══════════════════════════════════════════════════╗
@@ -2906,8 +3344,7 @@ function getCurrentMonth() {
 
 function getMonthLabel(monthStr) {
   const [y, m] = monthStr.split('-');
-  const names = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-  return names[parseInt(m) - 1] + ' ' + y;
+  return t('months')[parseInt(m) - 1] + ' ' + y;
 }
 
 function showAgentScreen() {
@@ -2978,13 +3415,13 @@ function toggleAgentPlat(btn) {
 async function generateAgentPlan() {
   const brand = loadBrand();
   const bg = brand?.brandGuide;
-  if(!bg) { alert('Primero completa tu Brand Guide para generar el plan.'); return; }
-  if(agentPlats.length === 0) { alert('Selecciona al menos una plataforma.'); return; }
+  if(!bg) { alert(t('alertNoBG')); return; }
+  if(agentPlats.length === 0) { alert(t('alertNoPlats')); return; }
 
   const btn = document.getElementById('btnGenAgent');
   const note = document.getElementById('agentLoadNote');
   btn.disabled = true;
-  btn.textContent = '⏳ Generando plan...';
+  btn.textContent = t('agentGenerating');
   if(note) note.style.display = 'block';
 
   try {
@@ -3000,7 +3437,7 @@ async function generateAgentPlan() {
       })
     });
     const data = await res.json();
-    if(!data.success) throw new Error(data.error || 'Error del servidor');
+    if(!data.success) throw new Error(data.error || t('errServer'));
 
     agentPlan = data;
 
@@ -3015,15 +3452,15 @@ async function generateAgentPlan() {
 
     // Update agent bar
     const sub = document.getElementById('agentBarSub');
-    if(sub) sub.textContent = data.totalPosts + ' posts planificados para ' + getMonthLabel(month);
+    if(sub) sub.textContent = t('agentPlannedSub').replace('{n}', data.totalPosts).replace('{month}', getMonthLabel(month));
 
   } catch(e) {
     console.error('Marketing Agent error:', e);
-    const msg = e.message || 'Error desconocido';
-    alert('No se pudo generar el plan. ' + (msg.includes('Could not parse') ? 'La AI devolvió una respuesta inválida — intenta de nuevo en unos segundos.' : msg));
+    const msg = e.message || t('errUnknown');
+    alert(t('alertAgentFailed') + (msg.includes('Could not parse') ? t('alertAgentParseError') : msg));
   } finally {
     btn.disabled = false;
-    btn.innerHTML = '✨ Generar plan de <span id="agentMonthLabel">' + getMonthLabel(getCurrentMonth()) + '</span>';
+    btn.innerHTML = t('agentGenBtn').replace('{month}', '<span id="agentMonthLabel">' + getMonthLabel(getCurrentMonth()) + '</span>');
     if(note) note.style.display = 'none';
   }
 }
@@ -3056,7 +3493,7 @@ function renderAgentPlan(plan) {
   const remActive = localStorage.getItem('postimity_reminders_' + getCurrentMonth()) === 'on';
   container.innerHTML = renderReminderCard(remActive, brandForReminder);
 
-  const monthNames = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  const monthNames = t('months');
 
   Object.keys(weeks).sort().forEach((wKey, wi) => {
     const wPosts = weeks[wKey];
@@ -3064,16 +3501,17 @@ function renderAgentPlan(plan) {
     const lastDate = new Date(wPosts[wPosts.length-1].date + 'T12:00:00');
     const weekDiv = document.createElement('div');
     weekDiv.className = 'agent-week';
-    weekDiv.innerHTML = '<div class="agent-week-label">Semana ' + (wi+1) + ' · ' + firstDate.getDate() + ' al ' + lastDate.getDate() + ' de ' + monthNames[firstDate.getMonth()] + '</div>';
+    const range = firstDate.getDate() + ' – ' + lastDate.getDate() + ' ' + monthNames[firstDate.getMonth()];
+    weekDiv.innerHTML = '<div class="agent-week-label">' + t('agentWeekLabel').replace('{n}', wi+1).replace('{range}', range) + '</div>';
 
     wPosts.forEach(post => {
       const card = document.createElement('div');
       card.className = 'agent-post-card' + (post.festivity ? ' festivity' : '');
       const platClass = post.platform || 'instagram';
       const platLabel = post.platform === 'instagram' ? '📸 Instagram' : post.platform === 'facebook' ? '👥 Facebook' : '🎵 TikTok';
-      const modeLabel = post.suggestedMode === 'carousel' ? '🎠 Carrusel' : '📌 Post';
+      const modeLabel = post.suggestedMode === 'carousel' ? t('agentModeCarousel') : t('agentModePost');
       const modeClass = post.suggestedMode === 'carousel' ? 'carousel' : 'post';
-      const styleLabel = post.suggestedStyle === 'photo' ? '📷 Fotorrealista' : post.suggestedStyle === 'abstract' ? '🎨 Abstracto' : '🖼️ Ilustrado';
+      const styleLabel = post.suggestedStyle === 'photo' ? t('agentStylePhoto') : post.suggestedStyle === 'abstract' ? t('agentStyleAbstract') : t('agentStyleIllus');
       const postIdx = agentPostsCache.indexOf(post);
       card.innerHTML = '<div class="apc-meta">' +
         '<span class="apc-date">' + (post.dayName||'') + ' ' + (post.dateShort||post.date) + '</span>' +
@@ -3086,8 +3524,8 @@ function renderAgentPlan(plan) {
         '<div class="apc-topic">' + (post.topic||'') + '</div>' +
         '<div class="apc-prompt">' + (post.prompt||'') + '</div>' +
         '<div class="apc-btns">' +
-        '<button class="apc-btn create" onclick="goCreatePost(' + postIdx + ')">→ Crear ' + (post.suggestedMode === 'carousel' ? 'carrusel' : 'post') + '</button>' +
-        '<button class="apc-btn copy" onclick="copyPrompt(' + postIdx + ')">📋 Copiar prompt</button>' +
+        '<button class="apc-btn create" onclick="goCreatePost(' + postIdx + ')">' + (post.suggestedMode === 'carousel' ? t('agentCreateCarousel') : t('agentCreatePost')) + '</button>' +
+        '<button class="apc-btn copy" onclick="copyPrompt(' + postIdx + ')">' + t('agentCopyPrompt') + '</button>' +
 
         '</div>';
       weekDiv.appendChild(card);
@@ -3098,7 +3536,7 @@ function renderAgentPlan(plan) {
 
 function goCreatePost(idx) {
   const post = agentPostsCache[idx];
-  if(!post) { showToast('Error: post no encontrado'); return; }
+  if(!post) { showToast(t('toastPostNotFound')); return; }
   // Route to the correct mode (post or carousel)
   const targetMode = (post.suggestedMode === 'carousel') ? 'carousel' : 'post';
   setMode(targetMode);
@@ -3122,9 +3560,9 @@ function goCreatePost(idx) {
   const agentEl = document.getElementById('agentScreen');
   if(agentEl) { agentEl.classList.remove('active'); agentEl.style.display = ''; }
   showScreen('creatorScreen');
-  const modeLabel = targetMode === 'carousel' ? 'Carrusel' : 'Post';
-  const styleLabel = post.suggestedStyle === 'photo' ? '📷 Fotorrealista' : post.suggestedStyle === 'abstract' ? '🎨 Abstracto' : '🖼️ Ilustrado';
-  showToast('✨ ' + modeLabel + ' pre-cargado · ' + styleLabel + ' — solo dale Generar');
+  const modeLabel = targetMode === 'carousel' ? t('mcCarousel') : t('mcPost');
+  const styleLabel = post.suggestedStyle === 'photo' ? t('agentStylePhoto') : post.suggestedStyle === 'abstract' ? t('agentStyleAbstract') : t('agentStyleIllus');
+  showToast(t('toastPreloaded').replace('{mode}', modeLabel).replace('{style}', styleLabel));
   setTimeout(() => {
     const input = targetMode === 'carousel' ? document.getElementById('carouselTopic') : document.getElementById('postText');
     input?.focus(); input?.scrollIntoView({behavior:'smooth', block:'center'});
@@ -3163,9 +3601,9 @@ function renderReminderCard(active, brand) {
     return '<div class="reminder-card active" id="reminderCard" style="flex-direction:column;align-items:flex-start">' +
       '<div style="display:flex;align-items:center;gap:14px;width:100%;margin-bottom:10px">' +
         '<span class="reminder-icon">🔔</span>' +
-        '<div class="reminder-info"><div class="reminder-title">Recordatorios activos — ' + monthLabel + '</div>' +
-        '<div class="reminder-sub" style="color:#1a8a4a">Recibirás un aviso cada mañana antes de tu post del día</div></div>' +
-        '<button class="reminder-btn on" onclick="toggleReminders(false)" style="flex-shrink:0">✓ Activo</button>' +
+        '<div class="reminder-info"><div class="reminder-title">' + t('remActiveTitle').replace('{month}', monthLabel) + '</div>' +
+        '<div class="reminder-sub" style="color:#1a8a4a">' + t('remActiveSub') + '</div></div>' +
+        '<button class="reminder-btn on" onclick="toggleReminders(false)" style="flex-shrink:0">' + t('remActiveBtn') + '</button>' +
       '</div>' +
       '<div style="font-size:11px;color:#1a8a4a;background:rgba(37,211,102,.08);border-radius:8px;padding:8px 10px;width:100%">' +
         (savedCh==='email'||savedCh==='both' ? '📧 ' + savedEmail + '  ' : '') +
@@ -3177,21 +3615,21 @@ function renderReminderCard(active, brand) {
   return '<div class="reminder-card" id="reminderCard" style="flex-direction:column;align-items:flex-start">' +
     '<div style="display:flex;align-items:center;gap:14px;width:100%">' +
       '<span class="reminder-icon">🔔</span>' +
-      '<div class="reminder-info"><div class="reminder-title">Recordatorios automáticos</div>' +
-      '<div class="reminder-sub">Aviso cálido cada mañana antes de tu post del día</div></div>' +
+      '<div class="reminder-info"><div class="reminder-title">' + t('remTitle') + '</div>' +
+      '<div class="reminder-sub">' + t('remSub') + '</div></div>' +
     '</div>' +
     '<div class="rem-fields">' +
-      '<div><div class="rem-field-label">📧 Email para recordatorios</div>' +
-      '<input class="rem-field-input" id="remEmail" type="email" value="' + savedEmail + '" placeholder="tu@email.com"></div>' +
-      '<div><div class="rem-field-label">📱 WhatsApp personal (opcional)</div>' +
-      '<input class="rem-field-input" id="remWA" type="tel" value="' + savedWA + '" placeholder="+52 449 000 0000"></div>' +
-      '<div><div class="rem-field-label">Canal de notificación</div>' +
+      '<div><div class="rem-field-label">' + t('remEmailLabel') + '</div>' +
+      '<input class="rem-field-input" id="remEmail" type="email" value="' + savedEmail + '" placeholder="' + t('phEmail') + '"></div>' +
+      '<div><div class="rem-field-label">' + t('remWALabel') + '</div>' +
+      '<input class="rem-field-input" id="remWA" type="tel" value="' + savedWA + '" placeholder="' + t('phWA') + '"></div>' +
+      '<div><div class="rem-field-label">' + t('remChannelLabel') + '</div>' +
       '<div class="rem-channel-btns">' +
         '<button class="rem-ch-btn' + (savedCh==='email'?' active':'') + '" data-ch="email" onclick="setRemChannel(this)">📧 Email</button>' +
         '<button class="rem-ch-btn' + (savedCh==='whatsapp'?' active':'') + '" data-ch="whatsapp" onclick="setRemChannel(this)">📱 WhatsApp</button>' +
-        '<button class="rem-ch-btn' + (savedCh==='both'?' active':'') + '" data-ch="both" onclick="setRemChannel(this)">Ambos</button>' +
+        '<button class="rem-ch-btn' + (savedCh==='both'?' active':'') + '" data-ch="both" onclick="setRemChannel(this)">' + t('remBoth') + '</button>' +
       '</div></div>' +
-      '<button class="rem-save-btn" onclick="activateReminders()">🔔 Activar recordatorios</button>' +
+      '<button class="rem-save-btn" onclick="activateReminders()">' + t('remActivate') + '</button>' +
     '</div>' +
   '</div>';
 }
@@ -3207,8 +3645,8 @@ async function activateReminders() {
   const chBtn = document.querySelector('.rem-ch-btn.active');
   const ch = chBtn?.dataset.ch || 'email';
 
-  if((ch === 'email' || ch === 'both') && !email) { showToast('Ingresa tu email para recibir recordatorios'); return; }
-  if(ch === 'whatsapp' && !wa) { showToast('Ingresa tu WhatsApp para recibir recordatorios'); return; }
+  if((ch === 'email' || ch === 'both') && !email) { showToast(t('toastEmailReminder')); return; }
+  if(ch === 'whatsapp' && !wa) { showToast(t('toastWAReminder')); return; }
 
   const brand = loadBrand();
   const month = getCurrentMonth();
@@ -3233,35 +3671,24 @@ async function activateReminders() {
   // Update card in place
   const card = document.getElementById('reminderCard');
   if(card) card.outerHTML = renderReminderCard(true, brand);
-  showToast('🔔 Recordatorios activados para ' + getMonthLabel(month));
+  showToast(t('toastRemindersOn').replace('{month}', getMonthLabel(month)));
 }
 
 function toggleReminders(activate) {
   const month = getCurrentMonth();
   const brand = loadBrand();
-  const businessName = brand?.name || 'tu negocio';
 
   if(activate) {
     localStorage.setItem('postimity_reminders_' + month, 'on');
-    // Update card in place
     const card = document.getElementById('reminderCard');
     if(card) card.outerHTML = renderReminderCard(true, brand);
-    // Show warm confirmation message
     const monthLabel = getMonthLabel(month);
-    showToast('🔔 Recordatorios activados para ' + monthLabel);
+    showToast(t('toastRemindersOn').replace('{month}', monthLabel));
     setTimeout(() => {
-      // Show info modal about what will happen
-      const msg = '✅ Recordatorios activados para ' + monthLabel + '\n\n' +
-        'Cuando conectemos Twilio recibirás cada mañana un mensaje así:\n\n' +
-        '☀️ Buenos días! Hoy es tu momento de brillar.\n' +
-        'Tu post: [tema del día]\n' +
-        'Un solo toque y está listo → [link]\n\n' +
-        'Por ahora tu plan está guardado aquí.';
-      alert(msg);
+      alert(t('remConfirmTitle').replace('{month}', monthLabel));
     }, 500);
   } else {
     localStorage.removeItem('postimity_reminders_' + month);
-    // Deactivate in KV
     if(brandId) {
       fetch(WORKER, { method:'POST', headers:{'Content-Type':'application/json'},
         body: JSON.stringify({ mode:'save-reminders', brandId, reminder: { active: false, month } })
@@ -3269,34 +3696,30 @@ function toggleReminders(activate) {
     }
     const card = document.getElementById('reminderCard');
     if(card) card.outerHTML = renderReminderCard(false, brand);
-    showToast('Recordatorios desactivados');
+    showToast(t('toastRemindersOff'));
   }
 }
 
 function copyPrompt(idx) {
   const post = agentPostsCache[idx];
-  if(!post) { showToast('Error: post no encontrado'); return; }
+  if(!post) { showToast(t('toastPostNotFound')); return; }
   const text = post.prompt || '';
   navigator.clipboard.writeText(text)
-    .then(() => showToast('📋 Prompt copiado'))
+    .then(() => showToast(t('toastPromptCopied')))
     .catch(() => {
       const ta = document.createElement('textarea');
       ta.value = text; document.body.appendChild(ta); ta.select();
       document.execCommand('copy'); document.body.removeChild(ta);
-      showToast('📋 Prompt copiado');
+      showToast(t('toastPromptCopied'));
     });
 }
 
 // ╔═══════════════════════════════════════════════════╗
 // ║  ONBOARDING WIZARD                               ║
 // ╚═══════════════════════════════════════════════════╝
-const SETUP_STEPS = [
-  'Identidad del negocio',
-  'Ubicación',
-  'Estrategia de contenido',
-  'Colores de marca',
-  'Brand Guide con AI'
-];
+function getSetupSteps() {
+  return [t('setupStep1'), t('setupStep2'), t('setupStep3'), t('setupStep4'), t('setupStep5')];
+}
 
 function startOnboarding() {
   applyBilingualUI();
@@ -3306,35 +3729,312 @@ function startOnboarding() {
 
 function applyBilingualUI() {
   const lang = detectLanguage();
-  // Welcome screen
-  const els = {
-    wlcH1: t('welcomeH1'), wlcSub: t('welcomeSub'),
-    wlcCta: t('welcomeCta'), wlcNote: t('welcomeNote'),
-  };
-  Object.entries(els).forEach(([id, txt]) => {
-    const el = document.getElementById(id);
-    if(el) el.textContent = txt;
+  // ── Helper: set textContent by ID ──
+  function st(id, key) { const el = document.getElementById(id); if(el) el.textContent = t(key); }
+  function sh(id, key) { const el = document.getElementById(id); if(el) el.innerHTML = t(key); }
+  function sp(id, key) { const el = document.getElementById(id); if(el) el.placeholder = t(key); }
+
+  // ── Welcome screen ──
+  st('wlcH1','welcomeH1'); st('wlcSub','welcomeSub'); st('wlcCta','welcomeCta'); st('wlcNote','welcomeNote');
+  // Welcome chips
+  document.querySelectorAll('.we-chip').forEach((chip, i) => {
+    const keys = ['weChipPosts','weChipFlyers','weChipCarousels','weChipTestimonials','weChipPlan'];
+    if(keys[i]) chip.textContent = t(keys[i]);
   });
-  // Setup screen
-  const setupH1 = document.getElementById('setupH1');
-  if(setupH1) setupH1.textContent = t('setupTitle');
-  const setupSub = document.getElementById('setupSub');
-  if(setupSub) setupSub.textContent = t('setupSub');
-  // Adjust input placeholder
-  const adjInp = document.getElementById('adjustInput');
-  if(adjInp) adjInp.placeholder = t('adjustPlaceholder');
-  // Gen counter label
-  const genBadge = document.getElementById('genCounterBadge');
-  if(genBadge) {
-    const txt = genBadge.textContent;
-    const num = txt.match(/\d+/);
-    if(num) genBadge.textContent = num[0] + (lang === 'en' ? ' gen remaining' : ' gen restantes');
+  // Welcome steps
+  document.querySelectorAll('.ws-item').forEach((item, i) => {
+    const labelKeys = ['welcomeStep1','welcomeStep2','welcomeStep3'];
+    const timeKeys = ['welcomeStep1t','welcomeStep2t','welcomeStep3t'];
+    const lbl = item.querySelector('.ws-label'); if(lbl && labelKeys[i]) lbl.textContent = t(labelKeys[i]);
+    const tm = item.querySelector('.ws-time'); if(tm && timeKeys[i]) tm.textContent = t(timeKeys[i]);
+  });
+
+  // ── Setup screen ──
+  st('setupH1','setupTitle'); st('setupSub','setupSub');
+  // Setup card titles
+  const scardTitles = document.querySelectorAll('.scard-title');
+  const scardKeys = ['scardIdentity','scardLocation','scardStrategy','scardColors','scardBG'];
+  scardTitles.forEach((el, i) => { if(scardKeys[i]) el.textContent = t(scardKeys[i]); });
+  // Card 1: Identity
+  const logoT = document.querySelector('.li-title'); if(logoT) logoT.innerHTML = t('logoTitle') + ' <span style="font-size:11px;font-weight:400;color:var(--t3)">' + t('logoOptional') + '</span>';
+  const logoS = document.querySelector('.li-sub'); if(logoS) logoS.textContent = t('logoSub');
+  const logoH = document.querySelector('.li-hint'); if(logoH) logoH.textContent = t('logoHint');
+  // Form labels & placeholders
+  const fgLabels = document.querySelectorAll('.fg-label');
+  const labelMap = {0:'labelName',1:'labelWA',2:'labelEmail',3:'labelType',4:'labelCountry',5:'labelState',6:'labelCity',
+    7:'labelDiff',8:'labelAudience',9:'labelTone'};
+  fgLabels.forEach((el, i) => {
+    const key = labelMap[i];
+    if(!key) return;
+    // Preserve required asterisk and tooltip
+    const asterisk = el.querySelector('span[style]');
+    const tooltip = el.querySelector('.tooltip');
+    el.childNodes.forEach(n => { if(n.nodeType === 3) n.textContent = ''; });
+    el.insertBefore(document.createTextNode(t(key) + ' '), el.firstChild);
+    // Update tooltips
+    if(tooltip) {
+      const tipMap = {1:'tipWA',2:'tipEmail',7:'tipDiff',8:'tipAudience'};
+      if(tipMap[i]) tooltip.setAttribute('data-tip', t(tipMap[i]));
+    }
+  });
+  // Placeholders
+  sp('bName','phName'); sp('bWhatsApp','phWA'); sp('bEmail','phEmail'); sp('bType','phType');
+  sp('bCity','phCity'); sp('bDiff','phDiff'); sp('bAudience','phAudience');
+  sp('bStateText','phState');
+  // Country select
+  const countryDef = document.querySelector('#bCountry option[value=""]');
+  if(countryDef) countryDef.textContent = t('selDefault');
+  const stateDef = document.querySelector('#bState option[value=""]');
+  if(stateDef) stateDef.textContent = t('selStatePlaceholder');
+  // Tone select
+  const toneOpts = document.querySelectorAll('#bTone option');
+  const toneTextKeys = ['toneWarm','tonePro','toneFun','toneInsp','toneEdu'];
+  const toneValKeys = ['toneWarmVal','toneProVal','toneFunVal','toneInspVal','toneEduVal'];
+  toneOpts.forEach((opt, i) => { if(toneTextKeys[i]) { opt.textContent = t(toneTextKeys[i]); opt.value = t(toneValKeys[i]); } });
+  // Color labels
+  const colorLabels = document.querySelectorAll('.color-pick label');
+  const colorKeys = ['colorPrimary','colorSecondary','colorAccent'];
+  colorLabels.forEach((el, i) => { if(colorKeys[i]) el.textContent = t(colorKeys[i]); });
+  // Card 5: Brand Guide
+  const bgDesc = document.querySelector('.scard:nth-child(5) > p'); if(bgDesc) bgDesc.textContent = t('bgCardDesc');
+  st('btnGenBG','bgGenBtn');
+  const bgLbl = document.querySelector('.bg-label'); if(bgLbl) bgLbl.textContent = t('bgLabel');
+  const bgHint = document.querySelector('.bg-section > p'); if(bgHint) bgHint.textContent = t('bgHint');
+  // BG edit guide
+  const begToggle = document.querySelector('.beg-toggle'); if(begToggle) { begToggle.innerHTML = t('bgEditToggle') + ' <span id="begChevron">▼</span>'; }
+  const begBody = document.getElementById('begBody');
+  if(begBody) {
+    const divs = begBody.querySelectorAll('div');
+    const begKeys = ['bgEditFree','bgEditAdd','bgEditModify','bgEditDelete','bgEditFormat'];
+    divs.forEach((d, i) => { if(begKeys[i]) d.innerHTML = t(begKeys[i]); });
   }
+  // AI update
+  const bauLabel = document.querySelector('.bau-label'); if(bauLabel) bauLabel.textContent = t('bgAILabel');
+  sp('bgUpdateInstr','bgAIPlaceholder');
+  st('btnAIUpdate','bgAIBtn');
+  // Legal checkboxes
+  const chkTermsSpan = document.querySelector('#chkTerms')?.parentElement?.querySelector('span');
+  if(chkTermsSpan) chkTermsSpan.innerHTML = t('termsLabel');
+  const chkCommsSpan = document.querySelector('#chkComms')?.parentElement?.querySelector('span');
+  if(chkCommsSpan) chkCommsSpan.textContent = t('commsLabel');
+  // Save button
+  st('btnSave','btnSave');
+
+  // ── Creator screen ──
+  // Edit brand button
+  const editBtn = document.querySelector('.btn-edit'); if(editBtn) editBtn.textContent = t('brandBarEdit');
+  // Pillar label
+  const pillarLbl = document.querySelector('.pillar-label'); if(pillarLbl) pillarLbl.textContent = t('pillarLabel');
+  // Agent bar
+  const agentBarTitle = document.querySelector('.agent-bar-title'); if(agentBarTitle) agentBarTitle.textContent = 'Marketing Agent';
+  st('agentBarSub','agentBarSub');
+  const agentBarCta = document.querySelector('.agent-bar-cta'); if(agentBarCta) agentBarCta.textContent = t('agentBarCta');
+  // Mode cards
+  const modeData = [
+    {id:'mc1',title:'mcPost',desc:'mcPostDesc'},{id:'mc2',title:'mcEnhance',desc:'mcEnhanceDesc'},
+    {id:'mc3',title:'mcFlyer',desc:'mcFlyerDesc'},{id:'mc4',title:'mcTestimonial',desc:'mcTestimonialDesc'},
+    {id:'mc5',title:'mcCarousel',desc:'mcCarouselDesc'}
+  ];
+  modeData.forEach(m => {
+    const card = document.getElementById(m.id);
+    if(!card) return;
+    const ti = card.querySelector('.mc-title'); if(ti) ti.textContent = t(m.title);
+    const de = card.querySelector('.mc-desc'); if(de) de.textContent = t(m.desc);
+  });
+  // Style selector
+  const styleLbl = document.querySelector('.style-sel-label'); if(styleLbl) styleLbl.textContent = t('styleLabel');
+  const styleData = [{id:'sPhoto',name:'stylePhoto',desc:'stylePhotoDesc'},{id:'sIllus',name:'styleIllus',desc:'styleIllusDesc'},{id:'sAbstr',name:'styleAbstr',desc:'styleAbstrDesc'}];
+  styleData.forEach(s => {
+    const btn = document.getElementById(s.id); if(!btn) return;
+    const nm = btn.querySelector('.sb-name'); if(nm) nm.textContent = t(s.name);
+    const ds = btn.querySelector('.sb-desc'); if(ds) ds.textContent = t(s.desc);
+  });
+  // Input labels
+  const postLbl = document.querySelector('#postInput .ic-label'); if(postLbl) postLbl.textContent = t('inputPost');
+  sp('postText','phPost');
+  const postHint = document.querySelector('#postInput > p'); if(postHint) postHint.textContent = t('inputPostHint');
+  // Enhance
+  const enhLbl = document.querySelector('#enhanceInput > .ic-label'); if(enhLbl) enhLbl.textContent = t('inputEnhance');
+  st('enhanceTitle','uploadDrag');
+  const enhSpec = document.querySelector('#enhanceZone .uz-sub'); if(enhSpec) enhSpec.textContent = t('uploadSpec');
+  const enhWhat = document.querySelector('.enhance-mode-wrap .ic-label'); if(enhWhat) enhWhat.textContent = t('enhanceWhat');
+  st('emAuto','enhanceAuto'); st('emCustom','enhanceCustom');
+  sp('enhancePrompt','enhancePH');
+  // Enhance example chips
+  const epExs = document.querySelectorAll('.ep-ex');
+  const epKeys = ['epWhiteBG','epStudioLight','epEditorial','epVibrant','epBW','epFlyerStyle'];
+  epExs.forEach((ex, i) => { if(epKeys[i]) ex.textContent = t(epKeys[i]); });
+  const epHintEl = document.querySelector('.ep-hint'); if(epHintEl) epHintEl.textContent = t('epHint');
+  // Flyer
+  st('flyerAIBtn','flyerAI'); st('flyerPhotoBtn','flyerPhoto');
+  const flyerUpT = document.querySelector('#flyerZone .uz-title'); if(flyerUpT) flyerUpT.textContent = t('flyerUploadTitle');
+  const flyerUpS = document.querySelector('#flyerZone .uz-sub'); if(flyerUpS) flyerUpS.textContent = t('flyerUploadSub');
+  // Flyer form labels
+  const ffLabels = document.querySelectorAll('.ff-label');
+  const ffKeys = ['ffType','ffStyle','ffTitle','ffSubtitle','ffTagline','ffDates','ffPrice','ffSchedule','ffExtra'];
+  ffLabels.forEach((el, i) => { if(ffKeys[i]) el.textContent = t(ffKeys[i]); });
+  // Flyer type select
+  const flyerTypeOpts = document.querySelectorAll('#flyerType option');
+  const ftKeys = ['flyerEvento','flyerInscripciones','flyerPromo','flyerInfo','flyerCurso','flyerLaunch','flyerAniversario','flyerMenu','flyerOther'];
+  const ftValKeys = ['flyerEventoVal','flyerInscripcionesVal','flyerPromoVal','flyerInfoVal','flyerCursoVal','flyerLaunchVal','flyerAniversarioVal','flyerMenuVal','flyerOtherVal'];
+  flyerTypeOpts.forEach((opt, i) => { if(ftKeys[i]) { opt.textContent = t(ftKeys[i]); opt.value = t(ftValKeys[i]); } });
+  // Flyer style select
+  const flyerStyleOpts = document.querySelectorAll('#flyerStyle option');
+  const fsKeys = ['flyerStyleColorful','flyerStylePro','flyerStyleMin','flyerStyleFestive','flyerStyleInfo'];
+  const fsValKeys = ['flyerStyleColorfulVal','flyerStyleProVal','flyerStyleMinVal','flyerStyleFestiveVal','flyerStyleInfoVal'];
+  flyerStyleOpts.forEach((opt, i) => { if(fsKeys[i]) { opt.textContent = t(fsKeys[i]); opt.value = t(fsValKeys[i]); } });
+  // Flyer placeholders
+  sp('flyerTitle2','phFlyerTitle'); sp('flyerSub','phFlyerSub'); sp('flyerTag','phFlyerTag');
+  sp('flyerDates','phFlyerDates'); sp('flyerPrice','phFlyerPrice'); sp('flyerSched','phFlyerSched'); sp('flyerExtra','phFlyerExtra');
+  // Carousel
+  const crTopicLbl = document.querySelector('#carouselInput > .ic-label'); if(crTopicLbl) crTopicLbl.textContent = t('carouselTopicLabel');
+  sp('carouselTopic','phCarousel');
+  const crSlideLbl = document.querySelectorAll('#carouselInput .ic-label'); if(crSlideLbl[1]) crSlideLbl[1].textContent = t('carouselSlideCount');
+  const crSlideCountLbl = document.querySelector('.cs-count-label'); if(crSlideCountLbl) crSlideCountLbl.textContent = t('slideCountLabel');
+  if(crSlideLbl[2]) crSlideLbl[2].textContent = t('carouselStyleLabel');
+  // Carousel style buttons
+  const csStyleBtns = document.querySelectorAll('.cs-style-btn');
+  const csKeys = ['csEducativo','csTips','csHistoria','csDatos','csTutorial','csQA'];
+  csStyleBtns.forEach((btn, i) => { if(csKeys[i]) btn.textContent = t(csKeys[i]); });
+  // Carousel cover
+  if(crSlideLbl[3]) crSlideLbl[3].textContent = t('carouselCoverLabel');
+  st('cvrAI','coverAI'); st('cvrPhoto','coverPhoto');
+  st('carouselCoverTitle','coverUploadTitle');
+  const crCoverSub = document.querySelector('#carouselCoverZone .uz-sub'); if(crCoverSub) crCoverSub.textContent = t('coverUploadSub');
+  // Testimonial
+  const testLbl = document.querySelector('#testimonialInput > .ic-label'); if(testLbl) testLbl.textContent = t('testLabel');
+  sp('testText','phTest');
+  const testDiv = document.querySelector('.test-divider'); if(testDiv) testDiv.textContent = t('testDivider');
+  const testPhT = document.querySelector('#testZone .uz-title'); if(testPhT) testPhT.textContent = t('testPhotoTitle');
+  const testPhS = document.querySelector('#testZone .uz-sub'); if(testPhS) testPhS.textContent = t('testPhotoSub');
+  // Generate button
+  st('btnGen','btnGenerate');
+  // Loading
+  const loadHintEl = document.querySelector('.load-wrap > p'); if(loadHintEl) loadHintEl.textContent = t('loadHint');
+  st('loadCancelBtn','loadCancel');
+  // Error
+  const errTitleEl = document.querySelector('#errWrap > div:nth-child(2)'); if(errTitleEl) errTitleEl.textContent = t('errTitle');
+  st('errMsg','errDefault');
+  const errBtn = document.querySelector('#errWrap .btn'); if(errBtn) errBtn.textContent = t('errRetry');
+  // Result buttons
+  st('regenImg','regenImg'); st('regenText','regenText');
+  const regenBackBtn = document.querySelector('.regen-btns .btn-regen:last-child'); if(regenBackBtn) regenBackBtn.textContent = t('regenBack');
+  // Carousel result labels
+  const csnLbl = document.querySelector('.csn-label'); if(csnLbl) csnLbl.textContent = t('carouselSlidesLabel');
+  st('csHint','carouselNavHint');
+  const dlAllBtn = document.querySelector('.carousel-dl-all'); if(dlAllBtn) dlAllBtn.textContent = t('carouselDlAll');
+  // Quote label
+  const quoteLbl = document.querySelector('#keyQuoteWrap > div:first-child'); if(quoteLbl) quoteLbl.textContent = t('quoteLabel');
+  // Logo/Watermark
+  const ltLbl = document.querySelector('.lt-label'); if(ltLbl) ltLbl.textContent = t('logoInImgLabel');
+  const wmLbl = document.querySelector('.wm-label'); if(wmLbl) wmLbl.innerHTML = t('wmLabel') + ' <span class="wm-lock" id="wmLockBadge">' + t('wmLock') + '</span>';
+  // Publish section
+  const pubLbl = document.querySelector('.pub-label'); if(pubLbl) pubLbl.textContent = t('pubLabel');
+  document.querySelectorAll('.pub-btn span').forEach(s => s.textContent = t('pubCopySub'));
+  const pubHintEl = document.querySelector('.pub-hint'); if(pubHintEl) pubHintEl.textContent = t('pubHint');
+  const dlLbl = document.querySelector('.dl-label'); if(dlLbl) dlLbl.textContent = t('dlLabel');
+  // Caption copy buttons
+  document.querySelectorAll('.cap-copy-btn').forEach((btn, i) => {
+    const keys = ['copyForIG','copyForFB','copyForTK'];
+    if(keys[i]) btn.textContent = t(keys[i]);
+  });
+  // Post hints
+  const postHints = document.querySelectorAll('.post-hint');
+  const phKeys = ['postHintIG','postHintFB','postHintTK'];
+  postHints.forEach((el, i) => { if(phKeys[i]) el.innerHTML = t(phKeys[i]); });
+  // TT labels
+  const ttHookLbl = document.querySelector('.tsb-label'); if(ttHookLbl) ttHookLbl.textContent = t('ttHookLabel');
+  const ttScriptLbl = document.querySelectorAll('.tsb-label')[1]; if(ttScriptLbl) ttScriptLbl.textContent = t('ttScriptLabel');
+  // Adjust section
+  const adjLbl = document.querySelector('.adjust-label'); if(adjLbl) adjLbl.textContent = t('adjustLabel');
+  sp('adjustInput','adjustPlaceholder');
+  st('adjustBtn','adjustBtn');
+  const adjChips = document.querySelectorAll('.adj-chip');
+  const adjTextKeys = ['adjShorter','adjFormal','adjCloser','adjUrgency','adjCTA','adjEmoji'];
+  const adjValKeys = ['adjShorterVal','adjFormalVal','adjCloserVal','adjUrgencyVal','adjCTAVal','adjEmojiVal'];
+  adjChips.forEach((chip, i) => {
+    if(adjTextKeys[i]) chip.textContent = t(adjTextKeys[i]);
+    if(adjValKeys[i]) chip.setAttribute('onclick', "setAdjust('" + t(adjValKeys[i]).replace(/'/g,"\\'") + "')");
+  });
+  // Ad Brief
+  const abToggle = document.querySelector('.ab-toggle span:first-child'); if(abToggle) abToggle.textContent = t('adBriefToggle');
+  const abKeys = document.querySelectorAll('.ab-k');
+  const abKKeys = ['abAudience','abInterests','abObjective','abDuration','abPlacements'];
+  abKeys.forEach((el, i) => { if(abKKeys[i]) el.textContent = t(abKKeys[i]); });
+  const abMinDesc = document.querySelector('.ab-b-min .ab-b-desc'); if(abMinDesc) abMinDesc.textContent = t('abBudgetMin');
+  const abOptDesc = document.querySelector('.ab-b-opt .ab-b-desc'); if(abOptDesc) abOptDesc.textContent = t('abBudgetOpt');
+  const abCopyBtn = document.querySelector('.ab-copy-btn'); if(abCopyBtn) abCopyBtn.textContent = t('abCopy');
+  // Result actions
+  const resActions = document.querySelectorAll('.result-actions .btn');
+  if(resActions[0]) resActions[0].textContent = t('resultBack');
+  if(resActions[1]) resActions[1].textContent = t('resultCopyAll');
+
+  // ── Creator bar ──
+  const barLink = document.querySelector('[style*="color:#5A9E2F"]'); if(barLink) barLink.textContent = t('barUniqueLink');
+  const genBadge = document.getElementById('genCounterBadge');
+  if(genBadge) { const num = genBadge.textContent.match(/\d+/); if(num) genBadge.textContent = t('barGenRemaining').replace('{n}', num[0]); }
+  const acctBtn = document.querySelectorAll('.cb-hist');
+  if(acctBtn[0]) acctBtn[0].textContent = t('barMyAccount');
+  if(acctBtn[1]) acctBtn[1].textContent = t('barHistory');
+  const copyLinkBtn = document.querySelector('.cb-copy'); if(copyLinkBtn) copyLinkBtn.textContent = t('barCopyLink');
+  const recBtn = document.querySelector('.cb-link'); if(recBtn) recBtn.textContent = t('barRecovery');
+
+  // ── Recovery modal ──
+  const recTitle = document.querySelector('.modal-title'); if(recTitle) recTitle.textContent = t('recoveryTitle');
+  const recSubs = document.querySelectorAll('.modal-sub');
+  if(recSubs[0]) recSubs[0].textContent = t('recoverySub');
+  if(recSubs[1]) recSubs[1].textContent = t('recoveryEmailHint');
+  const recBtns = document.querySelectorAll('.modal-actions .btn');
+  if(recBtns[0]) recBtns[0].textContent = t('recoveryClose');
+  if(recBtns[1]) recBtns[1].textContent = t('recoverySend');
+
+  // ── Dashboard ──
+  const dashTitleEl = document.querySelector('.cuenta-title'); if(dashTitleEl) dashTitleEl.textContent = t('dashTitle');
+  const dashBackEl = document.querySelector('.cuenta-back'); if(dashBackEl) dashBackEl.textContent = t('dashBack');
+  const genTitleEl = document.querySelector('.gen-title'); if(genTitleEl) genTitleEl.textContent = t('dashGensTitle');
+  const genLabelEl = document.querySelector('.gen-label'); if(genLabelEl) genLabelEl.textContent = t('dashGensUsed');
+  const brandCardTitle = document.querySelector('.brand-card-title'); if(brandCardTitle) brandCardTitle.textContent = t('dashBrandTitle');
+  const brandEditBtn = document.querySelector('.brand-edit-btn'); if(brandEditBtn) brandEditBtn.textContent = t('dashEditBG');
+  const plansTitle = document.querySelectorAll('.brand-card-title')[1]; if(plansTitle) plansTitle.textContent = t('dashPlansTitle');
+  const stripeNote = document.querySelector('.pricing-grid + div'); if(stripeNote) stripeNote.textContent = t('dashStripeNote');
+
+  // ── History ──
+  const histTitleEl = document.querySelector('.hist-title'); if(histTitleEl) histTitleEl.textContent = t('histTitle');
+  const histBackEl = document.querySelector('.hist-back'); if(histBackEl) histBackEl.textContent = t('histBack');
+  const histFilters = document.querySelectorAll('.hist-filter');
+  const hfKeys = ['histAll','histPosts','histFlyers','histCarousels','histTestimonials'];
+  histFilters.forEach((f, i) => { if(hfKeys[i]) f.textContent = t(hfKeys[i]); });
+  // History empty state
+  const histEmptyT = document.querySelector('.hist-empty-t'); if(histEmptyT) histEmptyT.textContent = t('histEmptyTitle');
+  const histEmptyD = document.querySelector('.hist-empty-d'); if(histEmptyD) histEmptyD.textContent = t('histEmptySub');
+  // History detail buttons
+  const histReuseBtn = document.querySelector('[onclick="reuseHistPost()"]'); if(histReuseBtn) histReuseBtn.textContent = t('histReuse');
+  const histCopyBtn = document.querySelector('[onclick="copyHistCaption()"]'); if(histCopyBtn) histCopyBtn.textContent = t('histCopyCaption');
+
+  // ── Agent screen ──
+  const agBackBtn = document.querySelector('.agent-back'); if(agBackBtn) agBackBtn.textContent = t('agentBack');
+  const agTitleEl = document.querySelector('.agent-header-title'); if(agTitleEl) agTitleEl.textContent = t('agentTitle');
+  const agConfigTitle = document.querySelector('.agent-config-title'); if(agConfigTitle) agConfigTitle.textContent = t('agentConfigTitle');
+  const agFreqLbl = document.querySelector('#agentConfigWrap .ic-label'); if(agFreqLbl) agFreqLbl.textContent = t('agentFreqLabel');
+  const agPlatsLbl = document.querySelectorAll('#agentConfigWrap .ic-label')[1]; if(agPlatsLbl) agPlatsLbl.textContent = t('agentPlatsLabel');
+  st('agentConfigNote','agentPlatNote');
+  const agLoadNote = document.querySelector('#agentLoadNote'); if(agLoadNote) agLoadNote.textContent = t('agentGenLoading');
+  const agRegenBtn = document.querySelector('#agentPlanWrap > button'); if(agRegenBtn) agRegenBtn.textContent = t('agentRegenPlan');
+
+  // ── Toast default ──
+  const toast = document.getElementById('toast'); if(toast) toast.textContent = t('toastSaved');
+
+  // ── Update platform info ──
+  document.getElementById('pltInfo').innerHTML = getPltInfo()[platform] || '';
+
+  // ── Update page title and lang ──
+  document.title = lang === 'en' ? 'Postimity Studio — Create content with AI' : 'Postimity Studio — Crea contenido con IA';
+  document.documentElement.lang = lang;
 }
 
 function updateSetupStepLabel(step) {
   const el = document.getElementById('setupStepLabel');
-  if(el) el.textContent = 'Paso ' + step + ' de 5 · ' + (SETUP_STEPS[step-1] || '');
+  if(el) el.textContent = t('setupStep').replace('{n}', step).replace('{label}', getSetupSteps()[step-1] || '');
 }
 
 // Hook into scroll to update step label
@@ -3366,7 +4066,7 @@ function showFirstPostCelebration() {
   if(!isFirstPost) return;
   isFirstPost = false;
   setTimeout(() => {
-    showToast('🎉 ¡Tu primer post está listo! Toca Instagram, Facebook o TikTok para publicarlo — copiamos el caption y descargamos la imagen por ti.');
+    showToast(t('toastFirstPost'));
   }, 1200);
 }
 
@@ -3395,8 +4095,8 @@ function checkDeepLink() {
       const styleBtn = document.getElementById(styleMap[dlStyle]);
       if(styleBtn) setImageStyle(dlStyle, styleBtn);
     }
-    const modeLabel = dlMode === 'carousel' ? 'Carrusel' : 'Post';
-    showToast('✨ ' + modeLabel + ' pre-cargado desde tu plan — solo dale Generar');
+    const modeLabel = dlMode === 'carousel' ? t('mcCarousel') : t('mcPost');
+    showToast(t('toastPreloadedPlan').replace('{mode}', modeLabel));
     // Clean URL keeping only brandId
     const base = window.location.href.split('?')[0];
     const bId = new URLSearchParams(window.location.search).get('b');
@@ -3489,14 +4189,14 @@ async function regenImage() {
     const imgRes=await postWithTimeout({ mode:'image', imagePrompt:lastResult.imagePrompt, imageStyle, brandColors:loadBrand()?.colors });
     lastResult.imageUrl=imgRes.imageUrl;
     document.getElementById('resultImg').src=imgRes.imageUrl;
-  } catch(e){ alert('Error al regenerar imagen: '+e.message); }
+  } catch(e){ alert((detectLanguage()==='en'?'Error regenerating image: ':'Error al regenerar imagen: ')+e.message); }
   document.getElementById('regenImg').disabled=false;
 }
 async function regenText() {
   if(!lastInput) return;
   document.getElementById('regenText').disabled=true;
   const brand=loadBrand();
-  const bg=brand?.brandGuide||`Negocio: ${brand?.name}.`;
+  const bg=brand?.brandGuide||(detectLanguage()==='en'?`Business: ${brand?.name}.`:`Negocio: ${brand?.name}.`);
   try {
     let data;
     let textInput = 'Contenido del negocio';
@@ -3505,7 +4205,7 @@ async function regenText() {
     else if(lastInput.mode==='testimonial') textInput = document.getElementById('testText').value||'Testimonio de cliente';
     data = await postWithTimeout({ mode:'captions', textInput, brandGuide:bg, brandData:brand, pillar:lastInput.pillar, platform:lastInput.platform });
     fillCaptions(data);
-  } catch(e){ alert('Error al regenerar texto: '+e.message); }
+  } catch(e){ alert((detectLanguage()==='en'?'Error regenerating text: ':'Error al regenerar texto: ')+e.message); }
   document.getElementById('regenText').disabled=false;
 }
 
@@ -3528,7 +4228,7 @@ function showResult(data) {
     if(wmBadge) wmBadge.style.display = 'none';
   } else {
     if(wmWrap) wmWrap.style.display = 'none';
-    if(wmBadge) { wmBadge.style.display = 'inline'; wmBadge.textContent = 'Growth+ para quitar'; }
+    if(wmBadge) { wmBadge.style.display = 'inline'; wmBadge.textContent = t('wmLock'); }
   }
   // Image
   document.getElementById('resultImg').src=data.imageUrl||'';
@@ -3552,7 +4252,7 @@ function showResult(data) {
     data.carouselImages.forEach((url, i) => {
       const div = document.createElement('div');
       div.className = 'cs-preview' + (i===0?' active':'');
-      div.innerHTML = '<img src="'+url+'" alt="Slide '+(i+1)+'"><span class="cs-num">'+(i+1)+'</span><button class="cs-dl" onclick="event.stopPropagation();downloadCarouselSlide('+i+')" title="Descargar slide">⬇</button>';
+      div.innerHTML = '<img src="'+url+'" alt="Slide '+(i+1)+'"><span class="cs-num">'+(i+1)+'</span><button class="cs-dl" onclick="event.stopPropagation();downloadCarouselSlide('+i+')" title="'+t('histDlSlide')+'">⬇</button>';
       div.onclick = () => updateCarouselDots(i);
       preview.appendChild(div);
       // Add dot
@@ -3656,7 +4356,8 @@ function copyCaption(plat, btn) {
   const ids={ig:['igCap','igHash'],fb:['fbCap','fbHash'],tt:['ttCap','ttHash']};
   const [capId,hashId]=ids[plat];
   const text=document.getElementById(capId).textContent+'\n\n'+document.getElementById(hashId).textContent;
-  navigator.clipboard.writeText(text).then(()=>{ btn.textContent='✓ Copiado!'; btn.classList.add('ok'); setTimeout(()=>{ btn.textContent='📋 Copiar para '+(plat==='ig'?'Instagram':plat==='fb'?'Facebook':'TikTok'); btn.classList.remove('ok'); },2500); });
+  const platNames={ig:'Instagram',fb:'Facebook',tt:'TikTok'};
+  navigator.clipboard.writeText(text).then(()=>{ btn.textContent=t('toastCopied'); btn.classList.add('ok'); setTimeout(()=>{ btn.textContent=t('copyForPlatform').replace('{plat}',platNames[plat]); btn.classList.remove('ok'); },2500); });
 }
 function copyAll() {
   const ig=(document.getElementById('igCap')?.textContent||'')+'\n'+(document.getElementById('igHash')?.textContent||'');
@@ -3665,13 +4366,14 @@ function copyAll() {
   const text = '📸 INSTAGRAM:\n'+ig+'\n\n👥 FACEBOOK:\n'+fb+'\n\n🎵 TIKTOK:\n'+tt;
   navigator.clipboard.writeText(text).then(()=>{
     const btn=document.querySelector('.result-actions .btn-primary');
-    if(btn){ btn.textContent='✓ ¡Todo copiado!'; setTimeout(()=>btn.textContent='📋 Copiar todo',2500); }
-    showToast('📋 Captions de las 3 plataformas copiados');
-  }).catch(()=>{ showToast('Error al copiar — intenta de nuevo'); });
+    if(btn){ btn.textContent=t('toastAllCopied'); setTimeout(()=>btn.textContent=t('resultCopyAll'),2500); }
+    showToast(t('toastCaptionCopied'));
+  }).catch(()=>{ showToast(t('toastCopyError')); });
 }
 function copyAdBrief() {
-  const txt=`TARGETING RECOMENDADO:\nAudiencia: ${document.getElementById('abAudience').textContent}\nIntereses: ${document.getElementById('abInterests').textContent}\nObjetivo: ${document.getElementById('abObjective').textContent}\nDuración: ${document.getElementById('abDuration').textContent}\nPlacements: ${document.getElementById('abPlacements').textContent}\nPresupuesto mínimo: ${document.getElementById('abBudgetMin').textContent}\nPresupuesto óptimo: ${document.getElementById('abBudgetOpt').textContent}`;
-  navigator.clipboard.writeText(txt).then(()=>{ const btn=event.target; btn.textContent='✓ Copiado!'; setTimeout(()=>btn.textContent='📋 Copiar parámetros para Meta Ads Manager',2500); });
+  const lbl = detectLanguage()==='en' ? 'RECOMMENDED TARGETING' : 'TARGETING RECOMENDADO';
+  const txt=`${lbl}:\n${t('abAudience')}: ${document.getElementById('abAudience').textContent}\n${t('abInterests')}: ${document.getElementById('abInterests').textContent}\n${t('abObjective')}: ${document.getElementById('abObjective').textContent}\n${t('abDuration')}: ${document.getElementById('abDuration').textContent}\n${t('abPlacements')}: ${document.getElementById('abPlacements').textContent}\n${t('abBudgetMin')}: ${document.getElementById('abBudgetMin').textContent}\n${t('abBudgetOpt')}: ${document.getElementById('abBudgetOpt').textContent}`;
+  navigator.clipboard.writeText(txt).then(()=>{ const btn=event.target; btn.textContent=t('toastAdCopied'); setTimeout(()=>btn.textContent=t('abCopy'),2500); });
 }
 function toggleAdBrief() {
   const body=document.getElementById('abBody'), chev=document.getElementById('abChevron');
@@ -3705,12 +4407,17 @@ async function openInSocial(platform) {
   await downloadImg('square');
 
   // 4. Toast with next step
-  const toastMsg = {
+  const lang = detectLanguage();
+  const toastMsg = lang === 'en' ? {
+    instagram: '📸 Image downloaded · Caption copied — open Instagram and paste',
+    facebook:  '👥 Image downloaded · Caption copied — open Facebook and paste',
+    tiktok:    '🎵 Image downloaded · Caption copied — open TikTok and paste',
+  } : {
     instagram: '📸 Imagen descargada · Caption copiado — abre Instagram y pégalo',
     facebook:  '👥 Imagen descargada · Caption copiado — abre Facebook y pégalo',
     tiktok:    '🎵 Imagen descargada · Caption copiado — abre TikTok y pégalo',
   };
-  showToast(toastMsg[platform] || '✅ Listo — pega el caption en la app');
+  showToast(toastMsg[platform] || (lang==='en'?'✅ Ready — paste the caption in the app':'✅ Listo — pega el caption en la app'));
 
   // 5. Open platform (mobile auto-redirects to native app if installed)
   const urls = {
@@ -3917,18 +4624,15 @@ function darken(hex,amt) {
 // ═══════════════════════════════════════════════════════
 // LOADING
 // ═══════════════════════════════════════════════════════
-const MODE_LOADING = {
-  carousel:    { title:'Creando tu Carrusel...', time:'~35 segundos — generando slides con AI',
-    steps:['Generando contenido de los slides','Creando imagen de portada','Renderizando slides','Listo'] },
-  post:        { title:'Creando tu Post...', time:'~20 segundos',
-    steps:['Analizando tu solicitud','Generando captions para 3 plataformas','Creando imagen con AI','Preparando resultado'] },
-  enhance:     { title:'Editando tu foto profesionalmente...', time:'~35 segundos — editando tu foto real con AI',
-    steps:['Analizando tu foto','Generando captions optimizados','Aplicando mejoras profesionales a la imagen','Preparando resultado'] },
-  flyer:       { title:'Diseñando tu Flyer...', time:'~30 segundos',
-    steps:['Analizando el contenido del flyer','Generando captions para 3 plataformas','Diseñando el gráfico con AI','Preparando resultado'] },
-  testimonial: { title:'Transformando el testimonio...', time:'~25 segundos',
-    steps:['Analizando la reseña del cliente','Generando captions auténticos','Creando imagen de fondo','Preparando resultado'] }
-};
+function getModeLoading() {
+  return {
+    carousel:    { title:t('loadCarouselTitle'), time:t('loadCarouselTime'), steps:[t('loadCarouselS1'),t('loadCarouselS2'),t('loadCarouselS3'),t('loadCarouselS4')] },
+    post:        { title:t('loadPostTitle'), time:t('loadPostTime'), steps:[t('loadPostS1'),t('loadPostS2'),t('loadPostS3'),t('loadPostS4')] },
+    enhance:     { title:t('loadEnhanceTitle'), time:t('loadEnhanceTime'), steps:[t('loadEnhanceS1'),t('loadEnhanceS2'),t('loadEnhanceS3'),t('loadEnhanceS4')] },
+    flyer:       { title:t('loadFlyerTitle'), time:t('loadFlyerTime'), steps:[t('loadFlyerS1'),t('loadFlyerS2'),t('loadFlyerS3'),t('loadFlyerS4')] },
+    testimonial: { title:t('loadTestTitle'), time:t('loadTestTime'), steps:[t('loadTestS1'),t('loadTestS2'),t('loadTestS3'),t('loadTestS4')] }
+  };
+}
 function showLoading(on) {
   document.getElementById('inputCard').style.display=on?'none':'block';
   document.querySelector('.mode-cards').style.display=on?'none':'';
@@ -3938,10 +4642,10 @@ function showLoading(on) {
   document.getElementById('errWrap').classList.remove('show');
   const cancelBtn = document.getElementById('loadCancelBtn');
   if(on){
-    const cfg = MODE_LOADING[mode] || MODE_LOADING.post;
+    const ml = getModeLoading(); const cfg = ml[mode] || ml.post;
     document.getElementById('loadTitle').textContent = cfg.title;
     document.querySelector('.load-wrap p').innerHTML =
-      `⏱️ ${cfg.time} · <span style="color:var(--t3)">No cierres esta pestaña</span>`;
+      `⏱️ ${cfg.time} · <span style="color:var(--t3)">${t('noClose')}</span>`;
     cfg.steps.forEach((s,i)=>{ const el=document.getElementById('ls'+(i+1)); el.className='ls'; el.textContent=s; });
     if(cancelBtn) cancelBtn.style.display = 'none';
     if(_loadingTimeout) clearTimeout(_loadingTimeout);
@@ -3950,7 +4654,7 @@ function showLoading(on) {
       if(document.getElementById('loadWrap').classList.contains('show')) {
         showLoading(false);
         document.getElementById('errWrap').classList.add('show');
-        document.getElementById('errMsg').textContent = 'La solicitud tardó demasiado. Intenta de nuevo — si el problema persiste, prueba con un texto más corto.';
+        document.getElementById('errMsg').textContent = t('loadTimeout');
       }
     }, 90000);
   } else {
