@@ -518,15 +518,18 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
 .hist-detail-btns{display:flex;gap:8px;margin-top:12px}
 
 /* ─── PUBLISH / OPEN IN SOCIAL ────────────────────── */
-.pub-section{border-top:.5px solid var(--bor);padding-top:10px;margin-top:10px}
-.pub-label{font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:7px}
+.pub-section{border-top:1.5px solid var(--bor);padding-top:12px;margin-top:12px}
+.pub-label{font-size:12px;font-weight:800;color:var(--t1);letter-spacing:.3px;margin-bottom:8px}
 .pub-btns{display:flex;gap:7px}
-.pub-btn{flex:1;padding:8px 4px;border-radius:8px;border:1.5px solid var(--bor);background:var(--w);cursor:pointer;font-size:11px;font-weight:700;color:var(--t2);text-align:center;transition:all .18s;font-family:inherit;line-height:1.3}
-.pub-btn:hover{transform:translateY(-1px);box-shadow:0 3px 10px rgba(0,0,0,.1)}
-.pub-btn.ig:hover{border-color:#E1306C;color:#E1306C;background:#FEF0F5}
-.pub-btn.fb:hover{border-color:#1877F2;color:#1877F2;background:#EEF4FF}
-.pub-btn.tk:hover{border-color:#010101;color:#010101;background:#F5F5F5}
-.pub-hint{font-size:10px;color:var(--t3);margin-top:6px;line-height:1.4;text-align:center}
+.pub-btn{flex:1;padding:10px 4px;border-radius:10px;border:2px solid var(--bor);background:var(--w);cursor:pointer;font-size:12px;font-weight:700;color:var(--t2);text-align:center;transition:all .18s;font-family:inherit;line-height:1.3}
+.pub-btn:hover{transform:translateY(-2px);box-shadow:0 4px 14px rgba(0,0,0,.12)}
+.pub-btn.ig{border-color:#E1306C;color:#E1306C;background:#FEF0F5}
+.pub-btn.ig:hover{background:#E1306C;color:#fff}
+.pub-btn.fb{border-color:#1877F2;color:#1877F2;background:#EEF4FF}
+.pub-btn.fb:hover{background:#1877F2;color:#fff}
+.pub-btn.tk{border-color:#010101;color:#010101;background:#F5F5F5}
+.pub-btn.tk:hover{background:#010101;color:#fff}
+.pub-hint{font-size:10px;color:var(--t3);margin-top:7px;line-height:1.4;text-align:center}
 
 /* ─── CUENTA / DASHBOARD USUARIO ──────────────────── */
 .cuenta-screen{max-width:700px;margin:0 auto;padding:0 16px 80px}
@@ -1383,33 +1386,33 @@ Ej: 'Wonderik es increíble. Mi hija de 3 años ya lee palabras cortas y su desa
               </label>
             </div>
             <div class="wm-toggle-row" id="wmToggleRow">
-              <span class="wm-label">✦ Watermark Postimity <span class="wm-lock" id="wmLockBadge">Starter</span></span>
+              <span class="wm-label">✦ Watermark Postimity <span class="wm-lock" id="wmLockBadge">Growth+ para quitar</span></span>
               <label class="lt-switch" id="wmToggleWrap" style="display:none">
                 <input type="checkbox" id="wmToggle" checked>
                 <span class="lt-slider"></span>
               </label>
             </div>
-            <div class="dl-label">⬇ Descargar</div>
+            <!-- Open in social — PRIMARY ACTION -->
+            <div class="pub-section" id="pubSection">
+              <div class="pub-label">📤 Publicar en redes sociales</div>
+              <div class="pub-btns">
+                <button class="pub-btn ig" onclick="openInSocial('instagram')">
+                  📸 Instagram<br><span style="font-size:9px;font-weight:400">Copiar + Descargar + Abrir</span>
+                </button>
+                <button class="pub-btn fb" onclick="openInSocial('facebook')">
+                  👥 Facebook<br><span style="font-size:9px;font-weight:400">Copiar + Descargar + Abrir</span>
+                </button>
+                <button class="pub-btn tk" onclick="openInSocial('tiktok')">
+                  🎵 TikTok<br><span style="font-size:9px;font-weight:400">Copiar + Descargar + Abrir</span>
+                </button>
+              </div>
+              <div class="pub-hint">💡 Un toque: se copia el caption, se descarga la imagen y se abre la app — solo pega y publica</div>
+            </div>
+            <div class="dl-label">⬇ Solo descargar imagen</div>
             <div class="dl-btns">
               <button class="btn-dl" onclick="downloadImg('square')">1:1<br><span style="font-size:9px;font-weight:400">Feed</span></button>
               <button class="btn-dl" onclick="downloadImg('portrait')">4:5<br><span style="font-size:9px;font-weight:400">IG Feed</span></button>
               <button class="btn-dl" onclick="downloadImg('story')">9:16<br><span style="font-size:9px;font-weight:400">Stories</span></button>
-            </div>
-            <!-- Open in social -->
-            <div class="pub-section" id="pubSection">
-              <div class="pub-label">📤 Abrir en red social</div>
-              <div class="pub-btns">
-                <button class="pub-btn ig" onclick="openInSocial('instagram')">
-                  📸<br><span style="font-size:9px;font-weight:400">Instagram</span>
-                </button>
-                <button class="pub-btn fb" onclick="openInSocial('facebook')">
-                  👥<br><span style="font-size:9px;font-weight:400">Facebook</span>
-                </button>
-                <button class="pub-btn tk" onclick="openInSocial('tiktok')">
-                  🎵<br><span style="font-size:9px;font-weight:400">TikTok</span>
-                </button>
-              </div>
-              <div class="pub-hint">💡 Al tocar un botón: <strong>1)</strong> se copia el caption <strong>2)</strong> se descarga la imagen <strong>3)</strong> se abre la app para que solo pegues y publiques</div>
             </div>
           </div>
         </div>
@@ -1510,7 +1513,7 @@ Ej: 'Wonderik es increíble. Mi hija de 3 años ya lee palabras cortas y su desa
 // ═══════════════════════════════════════════════════════
 // CONFIG
 // ═══════════════════════════════════════════════════════
-const POSTIMITY_VERSION = '2.1.0'; // Jul 2026 — pricing update + R2 fix + email field
+const POSTIMITY_VERSION = '2.2.0'; // Jul 2026 — prompt engineering + agent routing + UX audit
 console.log('Postimity Studio v' + POSTIMITY_VERSION);
 
 // ── GLOBAL ERROR HANDLER — prevents silent failures ──
@@ -2112,16 +2115,11 @@ function applyBrand(b) {
 
 function buildPillarBtns(pillars) {
   const wrap=document.getElementById('pillarBtns'); wrap.innerHTML='';
-  // Fixed conversion pillar — always last, works for any business type
-  const FIXED_PILLAR = 'Ventas / Admisiones';
-  // Filter out any sales-related pillar from brand guide to avoid duplicates
-  const salesKeywords = ['venta','admisi','inscri','conversi','promo'];
-  const custom = (pillars||[]).filter(p => !salesKeywords.some(k=>p.toLowerCase().includes(k)));
-  const all = ['General', ...custom, FIXED_PILLAR];
+  // All pillars come from Brand Guide — no fixed conversion pillar (handled by Agent + Brand Guide)
+  const all = ['General', ...(pillars||[])];
   all.forEach(p=>{
     const btn=document.createElement('button');
-    const isFixed = p===FIXED_PILLAR;
-    btn.className='pillar-btn'+(p==='General'?' active':'')+(isFixed?' pillar-fixed':'');
+    btn.className='pillar-btn'+(p==='General'?' active':'');
     btn.dataset.pillar=p;
     btn.textContent=p;
     btn.onclick=()=>setPillar(btn);
@@ -3113,10 +3111,9 @@ function goCreatePost(idx) {
   }
   // Set image style if suggested
   if(post.suggestedStyle && ['photo','illustrated','abstract'].includes(post.suggestedStyle)) {
-    imageStyle = post.suggestedStyle;
-    document.querySelectorAll('.style-opt').forEach(el => {
-      el.classList.toggle('active', el.dataset.style === post.suggestedStyle);
-    });
+    const styleMap = { photo: 'sPhoto', illustrated: 'sIllus', abstract: 'sAbstr' };
+    const styleBtn = document.getElementById(styleMap[post.suggestedStyle]);
+    if(styleBtn) setImageStyle(post.suggestedStyle, styleBtn);
   }
   if(post.pilar) setPillarByName(post.pilar);
   if(post.platform) setPlatformByName(post.platform);
@@ -3393,10 +3390,9 @@ function checkDeepLink() {
     if(dlPillar) setPillarByName(decodeURIComponent(dlPillar));
     if(dlPlatform) setPlatformByName(dlPlatform);
     if(dlStyle && ['photo','illustrated','abstract'].includes(dlStyle)) {
-      imageStyle = dlStyle;
-      document.querySelectorAll('.style-opt').forEach(el => {
-        el.classList.toggle('active', el.dataset.style === dlStyle);
-      });
+      const styleMap = { photo: 'sPhoto', illustrated: 'sIllus', abstract: 'sAbstr' };
+      const styleBtn = document.getElementById(styleMap[dlStyle]);
+      if(styleBtn) setImageStyle(dlStyle, styleBtn);
     }
     const modeLabel = dlMode === 'carousel' ? 'Carrusel' : 'Post';
     showToast('✨ ' + modeLabel + ' pre-cargado desde tu plan — solo dale Generar');
@@ -3662,10 +3658,15 @@ function copyCaption(plat, btn) {
   navigator.clipboard.writeText(text).then(()=>{ btn.textContent='✓ Copiado!'; btn.classList.add('ok'); setTimeout(()=>{ btn.textContent='📋 Copiar para '+(plat==='ig'?'Instagram':plat==='fb'?'Facebook':'TikTok'); btn.classList.remove('ok'); },2500); });
 }
 function copyAll() {
-  const ig=document.getElementById('igCap').textContent+'\n'+document.getElementById('igHash').textContent;
-  const fb=document.getElementById('fbCap').textContent+'\n'+document.getElementById('fbHash').textContent;
-  const tt=document.getElementById('ttCap').textContent+'\n'+document.getElementById('ttHash').textContent;
-  navigator.clipboard.writeText(`📸 INSTAGRAM:\n${ig}\n\n👥 FACEBOOK:\n${fb}\n\n🎵 TIKTOK:\n${tt}`).then(()=>{ const btn=event.target; btn.textContent='✓ ¡Todo copiado!'; setTimeout(()=>btn.textContent='📋 Copiar todo',2500); });
+  const ig=(document.getElementById('igCap')?.textContent||'')+'\n'+(document.getElementById('igHash')?.textContent||'');
+  const fb=(document.getElementById('fbCap')?.textContent||'')+'\n'+(document.getElementById('fbHash')?.textContent||'');
+  const tt=(document.getElementById('ttCap')?.textContent||'')+'\n'+(document.getElementById('ttHash')?.textContent||'');
+  const text = '📸 INSTAGRAM:\n'+ig+'\n\n👥 FACEBOOK:\n'+fb+'\n\n🎵 TIKTOK:\n'+tt;
+  navigator.clipboard.writeText(text).then(()=>{
+    const btn=document.querySelector('.result-actions .btn-primary');
+    if(btn){ btn.textContent='✓ ¡Todo copiado!'; setTimeout(()=>btn.textContent='📋 Copiar todo',2500); }
+    showToast('📋 Captions de las 3 plataformas copiados');
+  }).catch(()=>{ showToast('Error al copiar — intenta de nuevo'); });
 }
 function copyAdBrief() {
   const txt=`TARGETING RECOMENDADO:\nAudiencia: ${document.getElementById('abAudience').textContent}\nIntereses: ${document.getElementById('abInterests').textContent}\nObjetivo: ${document.getElementById('abObjective').textContent}\nDuración: ${document.getElementById('abDuration').textContent}\nPlacements: ${document.getElementById('abPlacements').textContent}\nPresupuesto mínimo: ${document.getElementById('abBudgetMin').textContent}\nPresupuesto óptimo: ${document.getElementById('abBudgetOpt').textContent}`;
