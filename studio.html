@@ -3073,7 +3073,7 @@ function renderAgentPlan(plan) {
       const platLabel = post.platform === 'instagram' ? '📸 Instagram' : post.platform === 'facebook' ? '👥 Facebook' : '🎵 TikTok';
       const modeLabel = post.suggestedMode === 'carousel' ? '🎠 Carrusel' : '📌 Post';
       const modeClass = post.suggestedMode === 'carousel' ? 'carousel' : 'post';
-      const styleLabel = post.suggestedStyle === 'photo' ? '📷 Foto' : post.suggestedStyle === 'abstract' ? '🎨 Abstracto' : '🖼️ Ilustrado';
+      const styleLabel = post.suggestedStyle === 'photo' ? '📷 Fotorrealista' : post.suggestedStyle === 'abstract' ? '🎨 Abstracto' : '🖼️ Ilustrado';
       const postIdx = agentPostsCache.indexOf(post);
       card.innerHTML = '<div class="apc-meta">' +
         '<span class="apc-date">' + (post.dayName||'') + ' ' + (post.dateShort||post.date) + '</span>' +
@@ -3123,7 +3123,7 @@ function goCreatePost(idx) {
   if(agentEl) { agentEl.classList.remove('active'); agentEl.style.display = ''; }
   showScreen('creatorScreen');
   const modeLabel = targetMode === 'carousel' ? 'Carrusel' : 'Post';
-  const styleLabel = post.suggestedStyle === 'photo' ? '📷 Foto' : post.suggestedStyle === 'abstract' ? '🎨 Abstracto' : '🖼️ Ilustrado';
+  const styleLabel = post.suggestedStyle === 'photo' ? '📷 Fotorrealista' : post.suggestedStyle === 'abstract' ? '🎨 Abstracto' : '🖼️ Ilustrado';
   showToast('✨ ' + modeLabel + ' pre-cargado · ' + styleLabel + ' — solo dale Generar');
   setTimeout(() => {
     const input = targetMode === 'carousel' ? document.getElementById('carouselTopic') : document.getElementById('postText');
