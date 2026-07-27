@@ -143,6 +143,30 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
 .mode-card.active .mc-title{color:var(--b2)}
 .mc-desc{font-size:10px;color:var(--t3);line-height:1.3;position:relative;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
 .mode-card.active .mc-desc{color:var(--b)}
+/* ── FEATURE GATING: locked cards ── */
+.mode-card.locked{opacity:.55;cursor:not-allowed}
+.mode-card.locked:hover{border-color:var(--bor);transform:none;box-shadow:none}
+.mode-card.locked:hover::before{opacity:0}
+.mc-lock-badge{position:absolute;top:4px;right:4px;background:linear-gradient(135deg,#7C4DFF,#536DFE);color:#fff;font-size:8px;font-weight:800;padding:2px 6px;border-radius:6px;letter-spacing:.3px;z-index:2;text-transform:uppercase}
+.mode-card.soon{opacity:.65;cursor:default}
+.mode-card.soon:hover{border-color:var(--bor);transform:none;box-shadow:none}
+.mc-soon-badge{position:absolute;top:4px;right:4px;background:linear-gradient(135deg,#FF9800,#F57C00);color:#fff;font-size:7px;font-weight:800;padding:2px 5px;border-radius:6px;letter-spacing:.3px;z-index:2;text-transform:uppercase}
+.agent-bar.locked{opacity:.55;pointer-events:none;position:relative}
+.agent-bar.locked::after{content:'Growth';position:absolute;top:8px;right:12px;background:linear-gradient(135deg,#7C4DFF,#536DFE);color:#fff;font-size:9px;font-weight:800;padding:3px 8px;border-radius:6px;letter-spacing:.3px;z-index:3}
+/* ── UPSELL MODAL ── */
+.upsell-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:900;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s}
+.upsell-overlay.show{opacity:1;pointer-events:auto}
+.upsell-box{background:var(--w);border-radius:20px;max-width:380px;width:100%;padding:28px 24px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.2);transform:translateY(20px);transition:transform .25s}
+.upsell-overlay.show .upsell-box{transform:translateY(0)}
+.upsell-icon{font-size:40px;margin-bottom:12px}
+.upsell-title{font-size:18px;font-weight:800;color:var(--t1);margin-bottom:6px}
+.upsell-desc{font-size:13px;color:var(--t3);line-height:1.6;margin-bottom:18px}
+.upsell-features{text-align:left;margin-bottom:20px}
+.upsell-feat{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--t2);padding:5px 0;font-weight:500}
+.upsell-feat::before{content:'✓';color:var(--g);font-weight:800;font-size:14px}
+.upsell-cta{display:block;width:100%;padding:13px;border-radius:12px;background:linear-gradient(135deg,var(--b),var(--b2));color:#fff;font-size:14px;font-weight:700;border:none;cursor:pointer;font-family:inherit;margin-bottom:10px;transition:.15s}
+.upsell-cta:hover{opacity:.9;transform:translateY(-1px)}
+.upsell-close{background:none;border:none;color:var(--t3);font-size:12px;font-weight:600;cursor:pointer;padding:6px;font-family:inherit}
 /* Input card */
 
 /* ─── INPUT CARD ──────────────────────────────────── */
@@ -603,7 +627,7 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
 /* ─── RESPONSIVE ──────────────────────────────────── */
 /* Responsive */
 @media(max-width:640px){
-  .mode-cards{grid-template-columns:repeat(3,1fr);gap:6px}
+  .mode-cards{grid-template-columns:repeat(3,1fr)!important;gap:6px}
   .mc-desc{display:none}
   .mc-icon{font-size:20px}
   .result-grid{grid-template-columns:1fr}
@@ -1094,31 +1118,49 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
       <span class="agent-bar-cta">Ver plan →</span>
     </div>
 
-    <div class="mode-cards">
-      <div class="mode-card active" id="mc1" onclick="setMode('post')">
+    <div class="mode-cards" style="grid-template-columns:repeat(6,1fr)">
+      <div class="mode-card active" id="mc1" onclick="handleModeClick('post')">
         <div class="mc-icon">✍️</div>
         <div class="mc-title">Post</div>
         <div class="mc-desc">Texto → imagen AI + captions</div>
       </div>
-      <div class="mode-card" id="mc2" onclick="setMode('enhance')">
+      <div class="mode-card" id="mc2" onclick="handleModeClick('enhance')">
         <div class="mc-icon">🖼️</div>
         <div class="mc-title">Estudio Pro</div>
         <div class="mc-desc">Tu foto → versión publicitaria</div>
       </div>
-      <div class="mode-card" id="mc3" onclick="setMode('flyer')">
+      <div class="mode-card" id="mc3" onclick="handleModeClick('flyer')">
         <div class="mc-icon">📄</div>
         <div class="mc-title">Flyer</div>
         <div class="mc-desc">Gráfico promocional completo</div>
       </div>
-      <div class="mode-card" id="mc4" onclick="setMode('testimonial')">
+      <div class="mode-card" id="mc4" onclick="handleModeClick('testimonial')">
         <div class="mc-icon">⭐</div>
         <div class="mc-title">Testimonio</div>
         <div class="mc-desc">Reseña → post profesional</div>
       </div>
-      <div class="mode-card" id="mc5" onclick="setMode('carousel')">
+      <div class="mode-card" id="mc5" onclick="handleModeClick('carousel')">
         <div class="mc-icon">🎠</div>
         <div class="mc-title">Carrusel</div>
         <div class="mc-desc">Multi-slide educativo</div>
+      </div>
+      <div class="mode-card soon" id="mc6" onclick="handleModeClick('video')">
+        <span class="mc-soon-badge" id="mcVideoBadge">PRONTO</span>
+        <div class="mc-icon">🎬</div>
+        <div class="mc-title">Video AI</div>
+        <div class="mc-desc">Reels, TikTok, Shorts</div>
+      </div>
+    </div>
+
+    <!-- UPSELL MODAL -->
+    <div class="upsell-overlay" id="upsellModal" onclick="if(event.target===this)closeUpsell()">
+      <div class="upsell-box">
+        <div class="upsell-icon" id="upsellIcon">🔒</div>
+        <div class="upsell-title" id="upsellTitle"></div>
+        <div class="upsell-desc" id="upsellDesc"></div>
+        <div class="upsell-features" id="upsellFeatures"></div>
+        <button class="upsell-cta" onclick="showUpgradeInfo();closeUpsell();" id="upsellCta"></button>
+        <button class="upsell-close" onclick="closeUpsell()" id="upsellClose"></button>
       </div>
     </div>
 
@@ -1550,8 +1592,17 @@ function getPltInfo() {
 // ── WORKER CONFIG ──────────────────────────────────────────
 const WORKER = 'https://postimity-content.munir-go10.workers.dev/';
 const STORE_KEY = 'postimity_brand_v1';
-const GEN_LIMITS = { trial: 20, starter: 30, growth: 100, agency: 250 };
-const VIDEO_LIMITS = { trial: 2, starter: 0, growth: 8, agency: 20 };
+const GEN_LIMITS = { trial: 20, starter: 40, growth: 100, agency: 250 };
+const VIDEO_LIMITS = { trial: 2, starter: 2, growth: 8, agency: 20 };
+
+// ── FEATURE ACCESS MAP ──────────────────────────────────────
+// Defines which features are available per plan
+const FEATURE_ACCESS = {
+  trial:   { post:true, enhance:true, testimonial:true, flyer:true, carousel:true, agent:true, adBrief:true, video:false },
+  starter: { post:true, enhance:true, testimonial:true, flyer:false, carousel:false, agent:false, adBrief:false, video:false },
+  growth:  { post:true, enhance:true, testimonial:true, flyer:true, carousel:true, agent:true, adBrief:true, video:true },
+  agency:  { post:true, enhance:true, testimonial:true, flyer:true, carousel:true, agent:true, adBrief:true, video:true },
+};
 
 // ── BILINGUAL STRINGS ─────────────────────────────────────────────────────
 const T = {
@@ -1767,6 +1818,17 @@ const T = {
     planTrialName:'Trial Gratuito', planTrialBadge:'⭐ Trial', planTrialPrice:'Gratis 14 días',
     planTrialAllModes:'Todos los modos + 2 videos',
     planStarterUp:'🚀 Activar plan Starter — $149/mes', planGrowthUp:'⬆️ Cambiar a Growth — $349/mes', planAgencyUp:'⬆️ Cambiar a Agency — $799/mes', planAgencyMax:'✅ Plan máximo activo',
+    // ── Feature Gating ──
+    lockBadge:'GROWTH', lockSoonBadge:'PRONTO',
+    upsellTitle:'Disponible en Growth',
+    upsellDesc:'Este modo está incluido en el plan Growth. Desbloquea todo el potencial de tu contenido.',
+    upsellFeat1:'Flyers profesionales', upsellFeat2:'Carruseles multi-slide', upsellFeat3:'Marketing Agent completo', upsellFeat4:'Ad Brief con targeting', upsellFeat5:'Sin watermark',
+    upsellCta:'Ver planes →', upsellClose:'Ahora no',
+    upsellVideoTitle:'Video AI — Próximamente',
+    upsellVideoDesc:'Videos cortos para Reels, TikTok y Shorts. Estamos terminando esta función — pronto estará disponible.',
+    upsellVideoCta:'Te avisaremos cuando esté listo',
+    // ── Video mode card ──
+    mcVideoTitle:'Video AI', mcVideoDesc:'Reels, TikTok, Shorts',
     genPerMonth:'gen/mes',
     // ── Month names ──
     months:['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'],
@@ -1996,6 +2058,17 @@ const T = {
     planTrialName:'Free Trial', planTrialBadge:'⭐ Trial', planTrialPrice:'Free for 14 days',
     planTrialAllModes:'All modes + 2 videos',
     planStarterUp:'🚀 Activate Starter — $9/mo', planGrowthUp:'⬆️ Upgrade to Growth — $19/mo', planAgencyUp:'⬆️ Upgrade to Agency — $45/mo', planAgencyMax:'✅ Top plan active',
+    // ── Feature Gating ──
+    lockBadge:'GROWTH', lockSoonBadge:'SOON',
+    upsellTitle:'Available on Growth',
+    upsellDesc:'This mode is included in the Growth plan. Unlock the full potential of your content.',
+    upsellFeat1:'Professional flyers', upsellFeat2:'Multi-slide carousels', upsellFeat3:'Full Marketing Agent', upsellFeat4:'Ad Brief with targeting', upsellFeat5:'No watermark',
+    upsellCta:'View plans →', upsellClose:'Not now',
+    upsellVideoTitle:'Video AI — Coming Soon',
+    upsellVideoDesc:'Short videos for Reels, TikTok and Shorts. We\'re finishing this feature — it\'ll be available soon.',
+    upsellVideoCta:'We\'ll let you know when it\'s ready',
+    // ── Video mode card ──
+    mcVideoTitle:'Video AI', mcVideoDesc:'Reels, TikTok, Shorts',
     genPerMonth:'gen/mo',
     // ── Month names ──
     months:['January','February','March','April','May','June','July','August','September','October','November','December'],
@@ -2640,12 +2713,106 @@ async function aiUpdateBrandGuide() {
   }
 }
 // ─── MODE & UI CONTROLS ──────────────────────────────
+function getUserPlan() {
+  const brand = loadBrand();
+  const planKey = brand?.plan || 'trial';
+  // Check if trial expired
+  if(planKey === 'trial') {
+    const daysLeft = getTrialDaysLeft();
+    if(daysLeft <= 0) return 'starter'; // expired trial = starter restrictions
+  }
+  return planKey;
+}
+
+function handleModeClick(m) {
+  const plan = getUserPlan();
+  const access = FEATURE_ACCESS[plan] || FEATURE_ACCESS.trial;
+  // Video AI — always show "coming soon" modal for now
+  if(m === 'video') { showUpsellVideo(); return; }
+  // Check if mode is locked for this plan
+  if(!access[m]) { showUpsell(m); return; }
+  setMode(m);
+}
+
 function setMode(m) {
+  if(m === 'video') return; // video not functional yet
   mode=m;
   ['post','enhance','flyer','testimonial','carousel'].forEach(n=>{ document.getElementById(n+'Input').style.display=n===m?'block':'none'; });
-  ['mc1','mc2','mc3','mc4','mc5'].forEach((id,i)=>{ const el=document.getElementById(id); if(el) el.classList.toggle('active',['post','enhance','flyer','testimonial','carousel'][i]===m); });
+  const modeMap = ['post','enhance','flyer','testimonial','carousel','video'];
+  ['mc1','mc2','mc3','mc4','mc5','mc6'].forEach((id,i)=>{ const el=document.getElementById(id); if(el) el.classList.toggle('active',modeMap[i]===m); });
   updateStyleSelector();
 }
+
+function showUpsell(lockedMode) {
+  const modal = document.getElementById('upsellModal');
+  document.getElementById('upsellIcon').textContent = '🔒';
+  document.getElementById('upsellTitle').textContent = t('upsellTitle');
+  document.getElementById('upsellDesc').textContent = t('upsellDesc');
+  document.getElementById('upsellFeatures').innerHTML =
+    [t('upsellFeat1'),t('upsellFeat2'),t('upsellFeat3'),t('upsellFeat4'),t('upsellFeat5')]
+    .map(f=>'<div class="upsell-feat">'+f+'</div>').join('');
+  document.getElementById('upsellCta').textContent = t('upsellCta');
+  document.getElementById('upsellClose').textContent = t('upsellClose');
+  modal.classList.add('show');
+}
+
+function showUpsellVideo() {
+  const modal = document.getElementById('upsellModal');
+  document.getElementById('upsellIcon').textContent = '🎬';
+  document.getElementById('upsellTitle').textContent = t('upsellVideoTitle');
+  document.getElementById('upsellDesc').textContent = t('upsellVideoDesc');
+  document.getElementById('upsellFeatures').innerHTML = '';
+  document.getElementById('upsellCta').textContent = t('upsellVideoCta');
+  document.getElementById('upsellCta').onclick = function(){ closeUpsell(); };
+  document.getElementById('upsellClose').textContent = t('upsellClose');
+  modal.classList.add('show');
+}
+
+function closeUpsell() {
+  document.getElementById('upsellModal').classList.remove('show');
+}
+
+function applyFeatureGating() {
+  const plan = getUserPlan();
+  const access = FEATURE_ACCESS[plan] || FEATURE_ACCESS.trial;
+  const modeMap = {mc3:'flyer', mc4:'testimonial', mc5:'carousel'};
+  // Lock/unlock mode cards
+  Object.entries(modeMap).forEach(([id, m]) => {
+    const card = document.getElementById(id);
+    if(!card) return;
+    const isLocked = !access[m];
+    card.classList.toggle('locked', isLocked);
+    // Add or remove lock badge
+    let badge = card.querySelector('.mc-lock-badge');
+    if(isLocked && !badge) {
+      badge = document.createElement('span');
+      badge.className = 'mc-lock-badge';
+      badge.textContent = t('lockBadge');
+      card.appendChild(badge);
+    } else if(!isLocked && badge) {
+      badge.remove();
+    }
+  });
+  // Video card — always show "soon" badge
+  const mc6 = document.getElementById('mc6');
+  if(mc6) {
+    const soonBadge = mc6.querySelector('.mc-soon-badge');
+    if(soonBadge) soonBadge.textContent = t('lockSoonBadge');
+  }
+  // Lock/unlock agent bar
+  const agentBar = document.getElementById('agentBar');
+  if(agentBar) {
+    agentBar.classList.toggle('locked', !access.agent);
+    if(!access.agent) {
+      agentBar.onclick = function(e) { e.preventDefault(); e.stopPropagation(); showUpsell('agent'); };
+    } else {
+      agentBar.onclick = function() { showAgentScreen(); };
+    }
+  }
+  // Lock ad brief (hide when locked, handled in result display)
+  window._adBriefLocked = !access.adBrief;
+}
+
 function setPlatform(btn) {
   document.querySelectorAll('.plt-tab').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active'); platform=btn.dataset.plt;
@@ -3066,7 +3233,7 @@ function getPlanConfig() {
   const mxn = lang === 'es';
   return {
     trial:   { name: t('planTrialName'), badge: t('planTrialBadge'), gens: 20, videos: 2, price: t('planTrialPrice'), upgradeLabel: t('planStarterUp'), color: 'trial' },
-    starter: { name: 'Starter', badge: '💙 Starter', gens: 30, videos: 0, price: mxn?'$149 MXN/mes':'$9 USD/mo', upgradeLabel: t('planGrowthUp'), color: 'starter' },
+    starter: { name: 'Starter', badge: '💙 Starter', gens: 40, videos: 2, price: mxn?'$149 MXN/mes':'$9 USD/mo', upgradeLabel: t('planGrowthUp'), color: 'starter' },
     growth:  { name: 'Growth',  badge: '💚 Growth',  gens: 100, videos: 8, price: mxn?'$349 MXN/mes':'$19 USD/mo', upgradeLabel: t('planAgencyUp'), color: 'growth' },
     agency:  { name: 'Agency',  badge: '🏆 Agency',  gens: 250, videos: 20, price: mxn?'$799 MXN/mes':'$45 USD/mo', upgradeLabel: t('planAgencyMax'), color: 'agency' },
   };
@@ -3166,7 +3333,7 @@ function renderCuenta() {
   if(grid) {
     const mxn = detectLanguage() === 'es';
     const tiers = [
-      { key:'starter', name:'Starter', price: mxn?'$149':'$9', gens:'30 '+t('genPerMonth'), videos:null },
+      { key:'starter', name:'Starter', price: mxn?'$149':'$9', gens:'40 '+t('genPerMonth'), videos:'2 videos' },
       { key:'growth',  name:'Growth',  price: mxn?'$349':'$19', gens:'100 '+t('genPerMonth'), videos:'8 videos' },
       { key:'agency',  name:'Agency',  price: mxn?'$799':'$45', gens:'250 '+t('genPerMonth'), videos:'20 videos' },
     ];
@@ -3831,9 +3998,9 @@ function applyBilingualUI() {
   const agentBarCta = document.querySelector('.agent-bar-cta'); if(agentBarCta) agentBarCta.textContent = t('agentBarCta');
   // Mode cards
   const modeData = [
-    {id:'mc1',title:'mcPost',desc:'mcPostDesc'},{id:'mc2',title:'mcEnhance',desc:'mcEnhanceDesc'},
-    {id:'mc3',title:'mcFlyer',desc:'mcFlyerDesc'},{id:'mc4',title:'mcTestimonial',desc:'mcTestimonialDesc'},
-    {id:'mc5',title:'mcCarousel',desc:'mcCarouselDesc'}
+    {id:'mc1',title:'mcPost',desc:'mcPostDesc',mode:'post'},{id:'mc2',title:'mcEnhance',desc:'mcEnhanceDesc',mode:'enhance'},
+    {id:'mc3',title:'mcFlyer',desc:'mcFlyerDesc',mode:'flyer'},{id:'mc4',title:'mcTestimonial',desc:'mcTestimonialDesc',mode:'testimonial'},
+    {id:'mc5',title:'mcCarousel',desc:'mcCarouselDesc',mode:'carousel'},{id:'mc6',title:'mcVideoTitle',desc:'mcVideoDesc',mode:'video'}
   ];
   modeData.forEach(m => {
     const card = document.getElementById(m.id);
@@ -3841,6 +4008,8 @@ function applyBilingualUI() {
     const ti = card.querySelector('.mc-title'); if(ti) ti.textContent = t(m.title);
     const de = card.querySelector('.mc-desc'); if(de) de.textContent = t(m.desc);
   });
+  // ── Apply Feature Gating ──
+  applyFeatureGating();
   // Style selector
   const styleLbl = document.querySelector('.style-sel-label'); if(styleLbl) styleLbl.textContent = t('styleLabel');
   const styleData = [{id:'sPhoto',name:'stylePhoto',desc:'stylePhotoDesc'},{id:'sIllus',name:'styleIllus',desc:'styleIllusDesc'},{id:'sAbstr',name:'styleAbstr',desc:'styleAbstrDesc'}];
@@ -4081,7 +4250,7 @@ function checkDeepLink() {
   if(!dlPrompt && !dlPillar && !dlMode) return; // no deep-link params
 
   setTimeout(() => { // wait for brand to load
-    if(dlMode && ['post','enhance','flyer','testimonial','carousel'].includes(dlMode)) setMode(dlMode);
+    if(dlMode && ['post','enhance','flyer','testimonial','carousel'].includes(dlMode)) handleModeClick(dlMode);
     if(dlMode === 'carousel') {
       const ta = document.getElementById('carouselTopic');
       if(ta && dlPrompt) ta.value = decodeURIComponent(dlPrompt);
@@ -4277,7 +4446,7 @@ function showResult(data) {
   // Fill captions
   fillCaptions(data);
   // Ad brief
-  if(data.adBrief){ fillAdBrief(data.adBrief); } else { document.getElementById('adBriefWrap').style.display='none'; }
+  if(data.adBrief && !window._adBriefLocked){ fillAdBrief(data.adBrief); } else { document.getElementById('adBriefWrap').style.display='none'; }
   // Auto-select tab for current platform
   const tabMap={instagram:'ig',facebook:'fb',tiktok:'tt'};
   showCapTabById(tabMap[platform]);
