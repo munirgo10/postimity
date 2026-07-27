@@ -3425,8 +3425,21 @@ function showVideoResult(videoUrl, topic) {
   if(resultScreen) resultScreen.classList.add('show');
 
   const resultImg = document.getElementById('resultImg');
-  // Replace image with video player
-  const videoHtml = '<video controls autoplay playsinline loop style="width:100%;border-radius:12px;max-height:500px;background:#000" src="' + videoUrl + '"></video>';
+  // AI labeling tip per platform
+  const isES = detectLanguage() === 'es';
+  const tipText = isES
+    ? 'Al publicar, activa el label de AI en cada plataforma para maximizar alcance y evitar penalizaciones.'
+    : 'When posting, enable the AI label on each platform to maximize reach and avoid penalties.';
+  const tipDetails = isES
+    ? '<b>TikTok:</b> Activa "AI-generated" al publicar · <b>Instagram:</b> No requiere acción · <b>YouTube:</b> Marca "Contenido alterado" en Studio'
+    : '<b>TikTok:</b> Toggle "AI-generated" when posting · <b>Instagram:</b> No action needed · <b>YouTube:</b> Mark "Altered content" in Studio';
+  // Video player + tip
+  const videoHtml =
+    '<video controls autoplay playsinline loop style="width:100%;border-radius:12px;max-height:500px;background:#000" src="' + videoUrl + '"></video>' +
+    '<div style="margin-top:10px;padding:10px 14px;background:var(--b3);border-radius:10px;font-size:11px;line-height:1.6;color:var(--b2)">' +
+      '<div style="font-weight:700;margin-bottom:3px">🏷️ ' + tipText + '</div>' +
+      '<div style="opacity:.85">' + tipDetails + '</div>' +
+    '</div>';
   resultImg.style.display = 'none';
   resultImg.insertAdjacentHTML('afterend', '<div id="videoPlayerWrap">' + videoHtml + '</div>');
 
