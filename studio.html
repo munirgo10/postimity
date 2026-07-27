@@ -2167,16 +2167,15 @@ function detectLanguage() {
   // 2. URL param (for targeted ads: postimity.com?lang=en)
   const urlLang = new URLSearchParams(window.location.search).get('lang');
   if(urlLang === 'en' || urlLang === 'es') { localStorage.setItem('postimity_lang', urlLang); return urlLang; }
-  // 3. Browser language
-  const bl = navigator.language?.slice(0,2);
-  if(bl === 'es') return 'es';
-  if(bl === 'en') return 'en';
-  // 4. Timezone fallback — LATAM timezones default to ES
+  // 3. Timezone — LATAM timezones default to ES (before navigator.language to handle EN-configured browsers in LATAM)
   try {
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    const usZones = ['New_York','Chicago','Denver','Phoenix','Los_Angeles','Anchorage','Honolulu'];
+    const usZones = ['New_York','Chicago','Denver','Phoenix','Los_Angeles','Anchorage','Honolulu','Adak','Boise','Indiana','Kentucky','Menominee','Nome','North_Dakota','Sitka','Yakutat'];
     if(tz.startsWith('America/') && !usZones.some(z => tz.includes(z))) return 'es';
   } catch(e) {}
+  // 4. Browser language fallback
+  const bl = navigator.language?.slice(0,2);
+  if(bl === 'es') return 'es';
   return 'en'; // Default to EN for unknown/US
 }
 
