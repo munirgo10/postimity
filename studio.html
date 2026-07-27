@@ -1362,6 +1362,30 @@ Ej: 'Wonderik es increíble. Mi hija de 3 años ya lee palabras cortas y su desa
         <img id="testPrev" class="photo-prev" src="" alt="">
       </div>
 
+      <!-- VIDEO AI INPUT -->
+      <div id="videoInput" style="display:none">
+        <div class="ic-label" id="videoTopicLabel">Tema del video</div>
+        <textarea class="text-ta" id="videoTopic" rows="2" placeholder="Ej: Mostrar el ambiente acogedor de nuestra cafetería con clientes disfrutando un latte..." style="margin-bottom:10px"></textarea>
+        <div style="display:flex;gap:10px;margin-bottom:10px">
+          <div style="flex:1">
+            <div class="ic-label" style="margin-top:0" id="videoDurLabel">Duración</div>
+            <div style="display:flex;gap:6px">
+              <button class="style-btn active" id="vdur5" onclick="setVideoDur('5',this)" style="flex:1;padding:8px;font-size:12px"><span class="sb-name">5s</span></button>
+              <button class="style-btn" id="vdur10" onclick="setVideoDur('10',this)" style="flex:1;padding:8px;font-size:12px"><span class="sb-name">10s</span></button>
+            </div>
+          </div>
+          <div style="flex:1">
+            <div class="ic-label" style="margin-top:0" id="videoRatioLabel">Formato</div>
+            <div style="display:flex;gap:6px">
+              <button class="style-btn active" id="var916" onclick="setVideoRatio('9:16',this)" style="flex:1;padding:8px;font-size:12px"><span class="sb-name">9:16</span><span class="sb-desc" style="font-size:9px">Reels</span></button>
+              <button class="style-btn" id="var169" onclick="setVideoRatio('16:9',this)" style="flex:1;padding:8px;font-size:12px"><span class="sb-name">16:9</span><span class="sb-desc" style="font-size:9px">Feed</span></button>
+              <button class="style-btn" id="var11" onclick="setVideoRatio('1:1',this)" style="flex:1;padding:8px;font-size:12px"><span class="sb-name">1:1</span><span class="sb-desc" style="font-size:9px">Post</span></button>
+            </div>
+          </div>
+        </div>
+        <div style="font-size:11px;color:var(--t3);line-height:1.5;margin-bottom:8px" id="videoHint">💡 El video se genera con Kling 2.6 Pro. Toma ~2-5 minutos. Puedes seguir usando el Studio mientras se genera.</div>
+      </div>
+
       <button class="btn-gen" id="btnGen" onclick="generate()">✨ Generar contenido con AI</button>
     </div>
 
@@ -1598,8 +1622,8 @@ const VIDEO_LIMITS = { trial: 2, starter: 2, growth: 8, agency: 20 };
 // ── FEATURE ACCESS MAP ──────────────────────────────────────
 // Defines which features are available per plan
 const FEATURE_ACCESS = {
-  trial:   { post:true, enhance:true, testimonial:true, flyer:true, carousel:true, agent:true, adBrief:true, video:false },
-  starter: { post:true, enhance:true, testimonial:true, flyer:false, carousel:false, agent:false, adBrief:false, video:false },
+  trial:   { post:true, enhance:true, testimonial:true, flyer:true, carousel:true, agent:true, adBrief:true, video:true },
+  starter: { post:true, enhance:true, testimonial:true, flyer:false, carousel:false, agent:false, adBrief:false, video:true },
   growth:  { post:true, enhance:true, testimonial:true, flyer:true, carousel:true, agent:true, adBrief:true, video:true },
   agency:  { post:true, enhance:true, testimonial:true, flyer:true, carousel:true, agent:true, adBrief:true, video:true },
 };
@@ -1829,6 +1853,18 @@ const T = {
     upsellVideoCta:'Te avisaremos cuando esté listo',
     // ── Video mode card ──
     mcVideoTitle:'Video AI', mcVideoDesc:'Reels, TikTok, Shorts',
+    // ── Video generation ──
+    videoTopicLabel:'🎬 Tema del video', videoDurLabel:'Duración', videoRatioLabel:'Formato',
+    videoHint:'💡 El video se genera con Kling 2.6 Pro. Toma ~2-5 minutos. Puedes seguir usando el Studio mientras se genera.',
+    videoGenBtn:'Generar video con AI', genBtn:'Generar contenido con AI',
+    videoPhTopic:'Ej: Mostrar el ambiente acogedor de nuestra cafetería con clientes disfrutando...',
+    videoPolling:'Generando video... esto toma ~2-5 min',
+    videoQueue:'En cola de procesamiento...',
+    videoProcessing:'Generando video...',
+    videoReady:'¡Video listo!',
+    videoError:'Error al generar video',
+    videoDownload:'⬇️ Descargar video',
+    videoNewOne:'🎬 Generar otro video',
     genPerMonth:'gen/mes',
     // ── Month names ──
     months:['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'],
@@ -2069,6 +2105,18 @@ const T = {
     upsellVideoCta:'We\'ll let you know when it\'s ready',
     // ── Video mode card ──
     mcVideoTitle:'Video AI', mcVideoDesc:'Reels, TikTok, Shorts',
+    // ── Video generation ──
+    videoTopicLabel:'🎬 Video topic', videoDurLabel:'Duration', videoRatioLabel:'Format',
+    videoHint:'💡 Video is generated with Kling 2.6 Pro. Takes ~2-5 minutes. You can keep using Studio while it generates.',
+    videoGenBtn:'Generate video with AI', genBtn:'Generate content with AI',
+    videoPhTopic:'E.g.: Show the cozy atmosphere of our coffee shop with customers enjoying a latte...',
+    videoPolling:'Generating video... ~2-5 min',
+    videoQueue:'Queued for processing...',
+    videoProcessing:'Generating video...',
+    videoReady:'Video ready!',
+    videoError:'Error generating video',
+    videoDownload:'⬇️ Download video',
+    videoNewOne:'🎬 Generate another video',
     genPerMonth:'gen/mo',
     // ── Month names ──
     months:['January','February','March','April','May','June','July','August','September','October','November','December'],
@@ -2726,20 +2774,27 @@ function getUserPlan() {
 function handleModeClick(m) {
   const plan = getUserPlan();
   const access = FEATURE_ACCESS[plan] || FEATURE_ACCESS.trial;
-  // Video AI — always show "coming soon" modal for now
-  if(m === 'video') { showUpsellVideo(); return; }
   // Check if mode is locked for this plan
-  if(!access[m]) { showUpsell(m); return; }
+  if(!access[m]) {
+    if(m === 'video') { showUpsellVideo(); return; }
+    showUpsell(m);
+    return;
+  }
   setMode(m);
 }
 
 function setMode(m) {
-  if(m === 'video') return; // video not functional yet
   mode=m;
-  ['post','enhance','flyer','testimonial','carousel'].forEach(n=>{ document.getElementById(n+'Input').style.display=n===m?'block':'none'; });
+  ['post','enhance','flyer','testimonial','carousel','video'].forEach(n=>{ const el=document.getElementById(n+'Input'); if(el) el.style.display=n===m?'block':'none'; });
   const modeMap = ['post','enhance','flyer','testimonial','carousel','video'];
   ['mc1','mc2','mc3','mc4','mc5','mc6'].forEach((id,i)=>{ const el=document.getElementById(id); if(el) el.classList.toggle('active',modeMap[i]===m); });
   updateStyleSelector();
+  // Hide style selector for video mode
+  const styleSel = document.getElementById('styleSel');
+  if(styleSel) styleSel.style.display = m === 'video' ? 'none' : '';
+  // Update generate button text
+  const btn = document.getElementById('btnGen');
+  if(btn) btn.textContent = m === 'video' ? '🎬 ' + t('videoGenBtn') : '✨ ' + t('genBtn');
 }
 
 function showUpsell(lockedMode) {
@@ -2792,11 +2847,19 @@ function applyFeatureGating() {
       badge.remove();
     }
   });
-  // Video card — always show "soon" badge
+  // Video card — show "soon" badge only if locked, remove if accessible
   const mc6 = document.getElementById('mc6');
   if(mc6) {
     const soonBadge = mc6.querySelector('.mc-soon-badge');
-    if(soonBadge) soonBadge.textContent = t('lockSoonBadge');
+    if(access.video) {
+      // Unlocked — remove soon class and badge
+      mc6.classList.remove('soon');
+      if(soonBadge) soonBadge.style.display = 'none';
+    } else {
+      // Locked — show soon badge
+      mc6.classList.add('soon');
+      if(soonBadge) { soonBadge.style.display = ''; soonBadge.textContent = t('lockSoonBadge'); }
+    }
   }
   // Lock/unlock agent bar
   const agentBar = document.getElementById('agentBar');
@@ -3171,6 +3234,12 @@ async function generate() {
   if(mode==='testimonial'&&!document.getElementById('testText').value.trim()&&!testPhotoB64){
     alert(t('alertTestimonial')); return;
   }
+  if(mode==='video'&&!document.getElementById('videoTopic').value.trim()){
+    alert(detectLanguage()==='en'?'Please describe what you want in the video':'Describe qué quieres en el video'); return;
+  }
+
+  // Video mode has its own flow (async)
+  if(mode==='video') { generateVideo(brand); return; }
 
   showLoading(true);
   const bg=brand.brandGuide||(detectLanguage()==='en'?`Business: ${brand.name}. Differentiator: ${brand.differentiator}. Audience: ${brand.audience}.`:`Negocio: ${brand.name}. Diferenciador: ${brand.differentiator}. Audiencia: ${brand.audience}.`);
@@ -3223,6 +3292,182 @@ async function genEnhance(brand,bg) {
   setStep(3); setStep(4);
   showResult(res);
 }
+
+// ╔═══════════════════════════════════════════════════╗
+// ║  VIDEO AI — Async generation with polling         ║
+// ╚═══════════════════════════════════════════════════╝
+let videoDuration = '5';
+let videoAspectRatio = '9:16';
+let videoPollingTimer = null;
+
+function setVideoDur(d, btn) {
+  videoDuration = d;
+  document.querySelectorAll('#vdur5,#vdur10').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+function setVideoRatio(r, btn) {
+  videoAspectRatio = r;
+  document.querySelectorAll('#var916,#var169,#var11').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+async function generateVideo(brand) {
+  const topic = document.getElementById('videoTopic').value.trim();
+  if(!topic) return;
+
+  // Check video limit
+  const plan = brand?.plan || 'trial';
+  const videoLimit = VIDEO_LIMITS[plan] || 2;
+  const vMonthKey = 'postimity_videos_' + new Date().toISOString().slice(0,7);
+  const videosUsed = parseInt(localStorage.getItem(vMonthKey) || '0');
+  if(videosUsed >= videoLimit) {
+    const msg = detectLanguage()==='en'
+      ? `You've reached your limit of ${videoLimit} videos this month.`
+      : `Llegaste al límite de ${videoLimit} videos este mes.`;
+    alert(msg); return;
+  }
+
+  showLoading(true);
+  document.getElementById('loadTitle').textContent = t('videoPolling');
+
+  try {
+    // Step 1: Generate video prompt with Claude
+    setStep(1);
+    const promptResp = await fetch(WORKER, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        mode: 'video-prompt',
+        topic,
+        brandData: { name: brand.name, type: brand.type },
+        brandGuide: brand.brandGuide,
+        platform,
+      }),
+    });
+    const promptData = await promptResp.json();
+    if(!promptData.success) throw new Error(promptData.error || 'Prompt generation failed');
+
+    // Step 2: Submit to fal.ai queue
+    setStep(2);
+    const submitResp = await fetch(WORKER, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        mode: 'video-submit',
+        videoPrompt: promptData.videoPrompt,
+        duration: videoDuration,
+        aspectRatio: videoAspectRatio,
+        brandId,
+      }),
+    });
+    const submitData = await submitResp.json();
+    if(!submitData.success) throw new Error(submitData.error || 'Submit failed');
+
+    // Step 3: Start polling
+    setStep(3);
+    document.getElementById('loadTitle').textContent = t('videoProcessing');
+    startVideoPolling(submitData.requestId, submitData.endpoint, brand, topic);
+
+  } catch(err) {
+    showLoading(false);
+    document.getElementById('errWrap').classList.add('show');
+    document.getElementById('errMsg').textContent = err.message;
+  }
+}
+
+function startVideoPolling(requestId, endpoint, brand, topic) {
+  let attempts = 0;
+  const maxAttempts = 90; // 90 × 5s = 7.5 min max
+
+  videoPollingTimer = setInterval(async () => {
+    attempts++;
+    if(attempts > maxAttempts) {
+      clearInterval(videoPollingTimer);
+      showLoading(false);
+      document.getElementById('errWrap').classList.add('show');
+      document.getElementById('errMsg').textContent = 'Video generation timed out. Please try again.';
+      return;
+    }
+
+    try {
+      const resp = await fetch(WORKER, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mode: 'video-status', requestId, endpoint }),
+      });
+      const data = await resp.json();
+
+      if(data.status === 'COMPLETED' && data.videoUrl) {
+        clearInterval(videoPollingTimer);
+        // Count video usage
+        const vMonthKey = 'postimity_videos_' + new Date().toISOString().slice(0,7);
+        const used = parseInt(localStorage.getItem(vMonthKey) || '0');
+        localStorage.setItem(vMonthKey, String(used + 1));
+        // Show video result
+        showVideoResult(data.videoUrl, topic);
+      } else if(data.status === 'error') {
+        clearInterval(videoPollingTimer);
+        showLoading(false);
+        document.getElementById('errWrap').classList.add('show');
+        document.getElementById('errMsg').textContent = data.error || t('videoError');
+      }
+      // IN_QUEUE or IN_PROGRESS — keep polling
+    } catch(e) {
+      // Network error — keep trying
+    }
+  }, 5000);
+}
+
+function showVideoResult(videoUrl, topic) {
+  showLoading(false);
+  // Reuse result area but with video player
+  const resultScreen = document.getElementById('resultScreen');
+  if(resultScreen) resultScreen.classList.add('show');
+
+  const resultImg = document.getElementById('resultImg');
+  // Replace image with video player
+  const videoHtml = '<video controls autoplay playsinline loop style="width:100%;border-radius:12px;max-height:500px;background:#000" src="' + videoUrl + '"></video>';
+  resultImg.style.display = 'none';
+  resultImg.insertAdjacentHTML('afterend', '<div id="videoPlayerWrap">' + videoHtml + '</div>');
+
+  // Hide image-only controls
+  const imgControls = document.querySelector('.img-controls');
+  if(imgControls) imgControls.style.display = 'none';
+  const capPanel = document.querySelector('.cap-panel');
+  if(capPanel) capPanel.style.display = 'none';
+  const adBrief = document.getElementById('adBriefWrap');
+  if(adBrief) adBrief.style.display = 'none';
+  const carouselPrev = document.getElementById('carouselPreviewWrap');
+  if(carouselPrev) carouselPrev.style.display = 'none';
+  const photoDesc = document.getElementById('photoDescBar');
+  if(photoDesc) photoDesc.classList.remove('show');
+
+  // Update regen buttons for video
+  const regenBtns = document.querySelector('.regen-btns');
+  if(regenBtns) {
+    regenBtns.innerHTML =
+      '<a class="btn-regen" href="' + videoUrl + '" download="postimity-video.mp4">' + t('videoDownload') + '</a>' +
+      '<button class="btn-regen" onclick="resetVideoCreator()">' + t('videoNewOne') + '</button>';
+  }
+
+  showToast(t('videoReady'));
+}
+
+function resetVideoCreator() {
+  // Clean up video player
+  const vp = document.getElementById('videoPlayerWrap');
+  if(vp) vp.remove();
+  const resultImg = document.getElementById('resultImg');
+  if(resultImg) resultImg.style.display = '';
+  // Restore hidden panels
+  const imgControls = document.querySelector('.img-controls');
+  if(imgControls) imgControls.style.display = '';
+  const capPanel = document.querySelector('.cap-panel');
+  if(capPanel) capPanel.style.display = '';
+  // Go back to creator
+  resetCreator();
+}
+
 // ╔═══════════════════════════════════════════════════╗
 // ║  CUENTA / DASHBOARD USUARIO                      ║
 // ╚═══════════════════════════════════════════════════╝
@@ -4075,6 +4320,10 @@ function applyBilingualUI() {
   const testDiv = document.querySelector('.test-divider'); if(testDiv) testDiv.textContent = t('testDivider');
   const testPhT = document.querySelector('#testZone .uz-title'); if(testPhT) testPhT.textContent = t('testPhotoTitle');
   const testPhS = document.querySelector('#testZone .uz-sub'); if(testPhS) testPhS.textContent = t('testPhotoSub');
+  // Video AI
+  st('videoTopicLabel','videoTopicLabel'); sp('videoTopic','videoPhTopic');
+  st('videoDurLabel','videoDurLabel'); st('videoRatioLabel','videoRatioLabel');
+  const videoHintEl = document.getElementById('videoHint'); if(videoHintEl) videoHintEl.textContent = '💡 ' + t('videoHint').replace('💡 ','');
   // Generate button
   st('btnGen','btnGenerate');
   // Loading
