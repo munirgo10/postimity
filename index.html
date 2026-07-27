@@ -399,11 +399,11 @@ body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--bg);c
       <div class="price-period" data-es="por mes" data-en="per month">por mes</div>
       <div class="price-divider"></div>
       <ul class="price-features">
-        <li><span class="pf-check">✓</span> <span class="pf-highlight" data-es="30 generaciones/mes" data-en="30 generations/month">30 generaciones/mes</span></li>
-        <li><span class="pf-check">✓</span> <span data-es="Post, Flyer, Estudio, Carrusel" data-en="Post, Flyer, Studio, Carousel">Post, Flyer, Estudio, Carrusel</span></li>
-        <li><span class="pf-check">✓</span> <span data-es="Testimonios" data-en="Testimonials">Testimonios</span></li>
+        <li><span class="pf-check">✓</span> <span class="pf-highlight" data-es="40 generaciones/mes" data-en="40 generations/month">40 generaciones/mes</span></li>
+        <li><span class="pf-check">✓</span> <span class="pf-highlight" data-es="🎬 2 videos AI/mes" data-en="🎬 2 AI videos/month">🎬 2 videos AI/mes</span></li>
+        <li><span class="pf-check">✓</span> <span data-es="Post, Estudio Pro, Testimonios" data-en="Post, Pro Studio, Testimonials">Post, Estudio Pro, Testimonios</span></li>
         <li><span class="pf-check">✓</span> <span data-es="Descarga 3 formatos + logo" data-en="Download 3 formats + logo">Descarga 3 formatos + logo</span></li>
-        <li><span class="pf-x">—</span> <span style="color:var(--t4)" data-es="Sin Video AI" data-en="No AI Video">Sin Video AI</span></li>
+        <li><span class="pf-x">—</span> <span style="color:var(--t4)" data-es="Flyer, Carrusel, Agent → Growth" data-en="Flyer, Carousel, Agent → Growth">Flyer, Carrusel, Agent → Growth</span></li>
       </ul>
       <a href="studio.html" class="price-cta outline" data-es="Comenzar gratis" data-en="Start free">Comenzar gratis</a>
     </div>
@@ -482,7 +482,7 @@ body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--bg);c
 
 <script>
 // Language
-function detectLang(){const s=localStorage.getItem('postimity_lang');if(s==='es'||s==='en')return s;const u=new URLSearchParams(location.search).get('lang');if(u==='en'||u==='es'){localStorage.setItem('postimity_lang',u);return u}const b=navigator.language?.slice(0,2);if(b==='es')return'es';if(b==='en')return'en';try{const t=Intl.DateTimeFormat().resolvedOptions().timeZone;const us=['New_York','Chicago','Denver','Phoenix','Los_Angeles','Anchorage','Honolulu'];if(t.startsWith('America/')&&!us.some(z=>t.includes(z)))return'es'}catch(e){}return'en'}
+function detectLang(){const s=localStorage.getItem('postimity_lang');if(s==='es'||s==='en')return s;const u=new URLSearchParams(location.search).get('lang');if(u==='en'||u==='es'){localStorage.setItem('postimity_lang',u);return u}try{const t=Intl.DateTimeFormat().resolvedOptions().timeZone;const us=['New_York','Chicago','Denver','Phoenix','Los_Angeles','Anchorage','Honolulu','Adak','Boise','Indiana','Kentucky','Menominee','Nome','North_Dakota','Sitka','Yakutat'];if(t.startsWith('America/')&&!us.some(z=>t.includes(z)))return'es';if(t.startsWith('Europe/')||t.startsWith('Asia/')||t.startsWith('Africa/')||t.startsWith('Australia/'))return'en'}catch(e){}const b=navigator.language?.slice(0,2);if(b==='es')return'es';return'en'}
 function applyLang(l){localStorage.setItem('postimity_lang',l);document.documentElement.lang=l;document.getElementById('langES').classList.toggle('active',l==='es');document.getElementById('langEN').classList.toggle('active',l==='en');document.querySelectorAll('[data-es]').forEach(el=>{const t=el.getAttribute('data-'+l);if(t)el.innerHTML=t});const n=document.getElementById('navCta');if(n)n.textContent=l==='es'?'Comenzar gratis':'Start free'}
 function toggleLang(){applyLang(detectLang()==='es'?'en':'es')}
 
