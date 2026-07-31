@@ -3437,14 +3437,21 @@ function startVideoPolling(requestId, endpoint, statusUrl, responseUrl, brand, t
       });
       const data = await resp.json();
 
-      if(data.status === 'COMPLETED' && data.videoUrl) {
+      if(data.status === 'COMPLETED') {
         clearInterval(videoPollingTimer);
-        // Count video usage
-        const vMonthKey = 'postimity_videos_' + new Date().toISOString().slice(0,7);
-        const used = parseInt(localStorage.getItem(vMonthKey) || '0');
-        localStorage.setItem(vMonthKey, String(used + 1));
-        // Show video result
-        showVideoResult(data.videoUrl, topic);
+        if(data.videoUrl) {
+          // Count video usage
+          const vMonthKey = 'postimity_videos_' + new Date().toISOString().slice(0,7);
+          const used = parseInt(localStorage.getItem(vMonthKey) || '0');
+          localStorage.setItem(vMonthKey, String(used + 1));
+          // Show video result
+          showVideoResult(data.videoUrl, topic);
+        } else {
+          // Video completed but URL missing — show debug
+          showLoading(false);
+          document.getElementById('errWrap').classList.add('show');
+          document.getElementById('errMsg').textContent = 'Video generado pero URL no encontrada. Debug: ' + (data.debug || data.error || 'unknown');
+        }
       } else if(data.status === 'error') {
         clearInterval(videoPollingTimer);
         showLoading(false);
