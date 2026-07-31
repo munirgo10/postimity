@@ -636,6 +636,7 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
   .dl-btns{flex-wrap:wrap}
 }
 </style>
+<script defer data-domain="postimity.com" src="https://plausible.io/js/script.js"></script>
 </head>
 <body>
 
@@ -3467,12 +3468,14 @@ function startVideoPolling(requestId, endpoint, statusUrl, responseUrl, brand, t
 
 function showVideoResult(videoUrl, topic) {
   showLoading(false);
-  // Reuse result area but with video player
-  const resultScreen = document.getElementById('resultScreen');
-  if(resultScreen) resultScreen.classList.add('show');
+  // Show result container (ID is resultWrap)
+  const resultWrap = document.getElementById('resultWrap');
+  if(resultWrap) resultWrap.classList.add('show');
+  // Remove any previous video player
+  const oldVP = document.getElementById('videoPlayerWrap');
+  if(oldVP) oldVP.remove();
 
   const resultImg = document.getElementById('resultImg');
-  // AI labeling tip per platform
   const isES = detectLanguage() === 'es';
   const tipText = isES
     ? 'Al publicar, activa el label de AI en cada plataforma para maximizar alcance y evitar penalizaciones.'
@@ -3480,9 +3483,8 @@ function showVideoResult(videoUrl, topic) {
   const tipDetails = isES
     ? '<b>TikTok:</b> Activa "AI-generated" al publicar · <b>Instagram:</b> No requiere acción · <b>YouTube:</b> Marca "Contenido alterado" en Studio'
     : '<b>TikTok:</b> Toggle "AI-generated" when posting · <b>Instagram:</b> No action needed · <b>YouTube:</b> Mark "Altered content" in Studio';
-  // Video player + tip
   const videoHtml =
-    '<video controls autoplay playsinline loop style="width:100%;border-radius:12px;max-height:500px;background:#000" src="' + videoUrl + '"></video>' +
+    '<video controls autoplay playsinline loop muted style="width:100%;border-radius:12px;max-height:500px;background:#000" src="' + videoUrl + '"></video>' +
     '<div style="margin-top:10px;padding:10px 14px;background:var(--b3);border-radius:10px;font-size:11px;line-height:1.6;color:var(--b2)">' +
       '<div style="font-weight:700;margin-bottom:3px">🏷️ ' + tipText + '</div>' +
       '<div style="opacity:.85">' + tipDetails + '</div>' +
@@ -3490,27 +3492,47 @@ function showVideoResult(videoUrl, topic) {
   resultImg.style.display = 'none';
   resultImg.insertAdjacentHTML('afterend', '<div id="videoPlayerWrap">' + videoHtml + '</div>');
 
-  // Hide image-only controls
-  const imgControls = document.querySelector('.img-controls');
-  if(imgControls) imgControls.style.display = 'none';
-  const capPanel = document.querySelector('.cap-panel');
-  if(capPanel) capPanel.style.display = 'none';
-  const adBrief = document.getElementById('adBriefWrap');
-  if(adBrief) adBrief.style.display = 'none';
-  const carouselPrev = document.getElementById('carouselPreviewWrap');
-  if(carouselPrev) carouselPrev.style.display = 'none';
+  // Hide all image-only panels
+  ['img-controls','cap-panel'].forEach(cls => { const el=document.querySelector('.'+cls); if(el) el.style.display='none'; });
+  ['adBriefWrap','carouselPreviewWrap','keyQuoteWrap'].forEach(id => { const el=document.getElementById(id); if(el) el.style.display='none'; });
   const photoDesc = document.getElementById('photoDescBar');
   if(photoDesc) photoDesc.classList.remove('show');
 
-  // Update regen buttons for video
+  // Update buttons for video download
   const regenBtns = document.querySelector('.regen-btns');
   if(regenBtns) {
     regenBtns.innerHTML =
       '<a class="btn-regen" href="' + videoUrl + '" download="postimity-video.mp4">' + t('videoDownload') + '</a>' +
       '<button class="btn-regen" onclick="resetVideoCreator()">' + t('videoNewOne') + '</button>';
   }
-
+  // Scroll to result
+  if(resultWrap) resultWrap.scrollIntoView({ behavior:'smooth', block:'start' });
   showToast(t('videoReady'));
+  // Save video to history
+  saveVideoToHistory(videoUrl, topic);
+}
+
+async function saveVideoToHistory(videoUrl, topic) {
+  try {
+    const brand = loadBrand();
+    if(!brand?.brandId) return;
+    await fetch(WORKER, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        mode: 'save-post',
+        brandId: brand.brandId,
+        post: {
+          mode: 'video',
+          platform: platform,
+          topic: topic,
+          imageUrl: videoUrl,
+          caption: '🎬 Video AI: ' + topic,
+          createdAt: new Date().toISOString(),
+        }
+      }),
+    });
+  } catch(e) { /* silent fail */ }
 }
 
 function resetVideoCreator() {
@@ -3519,11 +3541,19 @@ function resetVideoCreator() {
   if(vp) vp.remove();
   const resultImg = document.getElementById('resultImg');
   if(resultImg) resultImg.style.display = '';
-  // Restore hidden panels
+  // Restore ALL hidden panels
   const imgControls = document.querySelector('.img-controls');
   if(imgControls) imgControls.style.display = '';
   const capPanel = document.querySelector('.cap-panel');
   if(capPanel) capPanel.style.display = '';
+  // Clear video photo
+  videoPhotoB64 = null;
+  const vPrev = document.getElementById('videoPrev');
+  if(vPrev) { vPrev.style.display = 'none'; vPrev.src = ''; }
+  const vName = document.getElementById('videoPhotoName');
+  if(vName) vName.textContent = '';
+  document.getElementById('videoTopic').value = '';
+  // Go back to creator
   // Go back to creator
   resetCreator();
 }
@@ -3731,7 +3761,7 @@ function renderHistGrid(posts) {
   grid.innerHTML = posts.map((p, i) => {
     const date = new Date(p.timestamp);
     const dateStr = date.getDate() + '/' + (date.getMonth()+1) + '/' + date.getFullYear();
-    const modeIcon = p.mode === 'flyer' ? '🎨' : p.mode === 'carousel' ? '🎠' : p.mode === 'testimonial' ? '⭐' : p.mode === 'enhance' ? '📸' : '🖊️';
+    const modeIcon = p.mode === 'video' ? '🎬' : p.mode === 'flyer' ? '🎨' : p.mode === 'carousel' ? '🎠' : p.mode === 'testimonial' ? '⭐' : p.mode === 'enhance' ? '📸' : '🖊️';
     const platClass = p.platform || 'instagram';
     const platLabel = platClass === 'instagram' ? 'IG' : platClass === 'facebook' ? 'FB' : 'TK';
     // Handle both full URLs and relative /r2/ paths
