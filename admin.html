@@ -6,20 +6,18 @@
 <title>Postimity Admin</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Crect width='32' height='32' rx='8' fill='%232979FF'/%3E%3Ctext x='8.5' y='22' font-family='sans-serif' font-size='16' font-weight='800' fill='white'%3E%E2%9C%A6%3C/text%3E%3C/svg%3E">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script defer data-domain="postimity.com" src="https://plausible.io/js/script.js"></script>
 <style>
-:root{--b:#2979FF;--b2:#1565C0;--b3:#E3F0FF;--g:#76C442;--g2:#5A9E2F;--r:#E53935;--y:#F9A825;--t1:#111827;--t2:#374151;--t3:#6B7280;--bg:#F5F5F3;--w:#fff;--bor:#E5E7EB;--radius:14px}
+:root{--b:#2979FF;--b2:#1565C0;--b3:#E3F0FF;--g:#76C442;--g2:#5A9E2F;--r:#E53935;--y:#F9A825;--t1:#111827;--t2:#374151;--t3:#6B7280;--t4:#9CA3AF;--bg:#F5F5F3;--w:#fff;--bor:#E5E7EB;--radius:14px}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--t1);min-height:100vh}
-/* Nav */
 .nav{background:rgba(255,255,255,.92);backdrop-filter:blur(16px);border-bottom:1px solid rgba(0,0,0,.06);height:56px;padding:0 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
 .nav-left{display:flex;align-items:center;gap:10px}
 .logo-sq{width:28px;height:28px;border-radius:8px;background:var(--b);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800}
 .nav-title{font-size:15px;font-weight:800;color:var(--t1)}
 .nav-badge{font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;background:#FEF3C7;color:#92400E}
 .nav-time{font-size:11px;color:var(--t3);font-weight:500}
-/* Layout */
 .wrap{max-width:1100px;margin:0 auto;padding:20px 16px 60px}
-/* Auth */
 .auth-wrap{max-width:380px;margin:80px auto;text-align:center}
 .auth-wrap h2{font-size:20px;font-weight:800;margin-bottom:6px}
 .auth-wrap p{font-size:13px;color:var(--t3);margin-bottom:20px}
@@ -28,65 +26,63 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
 .auth-btn{width:100%;padding:12px;border:none;border-radius:10px;background:var(--b);color:#fff;font-size:14px;font-weight:700;cursor:pointer;margin-top:10px;font-family:inherit}
 .auth-btn:hover{background:var(--b2)}
 .auth-error{color:var(--r);font-size:12px;margin-top:8px;display:none}
-/* Loading */
 .loading-wrap{text-align:center;padding:60px 20px}
 .loading-wrap .spinner{display:inline-block;width:32px;height:32px;border:3px solid var(--bor);border-top-color:var(--b);border-radius:50%;animation:spin .7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .loading-wrap p{margin-top:12px;font-size:13px;color:var(--t3)}
-/* KPI cards */
-.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
-.kpi{background:var(--w);border:1px solid var(--bor);border-radius:var(--radius);padding:18px 16px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
-.kpi-label{font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
-.kpi-val{font-size:28px;font-weight:800;color:var(--t1);line-height:1}
-.kpi-sub{font-size:11px;color:var(--t3);margin-top:4px;font-weight:500}
-.kpi.highlight .kpi-val{color:var(--g2)}
-/* Sections */
-.section{background:var(--w);border:1px solid var(--bor);border-radius:var(--radius);padding:18px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
-.section-title{font-size:14px;font-weight:700;color:var(--t1);margin-bottom:14px;display:flex;align-items:center;gap:8px}
-/* Plan bars */
-.plan-bars{display:flex;flex-direction:column;gap:10px}
-.plan-bar-row{display:flex;align-items:center;gap:10px}
-.plan-bar-label{width:70px;font-size:12px;font-weight:700;color:var(--t2)}
-.plan-bar-track{flex:1;height:28px;background:var(--bg);border-radius:8px;overflow:hidden;position:relative}
-.plan-bar-fill{height:100%;border-radius:8px;display:flex;align-items:center;padding:0 10px;font-size:11px;font-weight:700;color:#fff;min-width:fit-content;transition:width .6s ease}
-.plan-bar-count{font-size:12px;font-weight:700;color:var(--t2);width:40px;text-align:right}
-/* Mode pie substitute — horizontal bars */
-.mode-bars{display:flex;flex-direction:column;gap:8px}
-.mode-row{display:flex;align-items:center;gap:8px}
-.mode-icon{font-size:16px;width:24px;text-align:center}
-.mode-name{width:90px;font-size:12px;font-weight:600;color:var(--t2)}
-.mode-bar-track{flex:1;height:22px;background:var(--bg);border-radius:6px;overflow:hidden}
-.mode-bar-fill{height:100%;border-radius:6px;display:flex;align-items:center;padding:0 8px;font-size:10px;font-weight:700;color:#fff;transition:width .6s ease}
-.mode-count{width:45px;text-align:right;font-size:12px;font-weight:600;color:var(--t3)}
-/* Table */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:12px}
+.kpi{background:var(--w);border:1px solid var(--bor);border-radius:var(--radius);padding:16px 14px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.kpi-label{font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
+.kpi-val{font-size:26px;font-weight:800;color:var(--t1);line-height:1}
+.kpi-sub{font-size:11px;color:var(--t3);margin-top:3px;font-weight:500}
+.kpi.green .kpi-val{color:var(--g2)}
+.kpi.red .kpi-val{color:var(--r)}
+.kpi.blue .kpi-val{color:var(--b2)}
+.section{background:var(--w);border:1px solid var(--bor);border-radius:var(--radius);padding:16px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.section-title{font-size:13px;font-weight:700;color:var(--t1);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.plan-bars{display:flex;flex-direction:column;gap:8px}
+.plan-bar-row{display:flex;align-items:center;gap:8px}
+.plan-bar-label{width:65px;font-size:11px;font-weight:700;color:var(--t2)}
+.plan-bar-track{flex:1;height:26px;background:var(--bg);border-radius:7px;overflow:hidden;position:relative}
+.plan-bar-fill{height:100%;border-radius:7px;display:flex;align-items:center;padding:0 8px;font-size:10px;font-weight:700;color:#fff;min-width:fit-content;transition:width .6s ease}
+.plan-bar-count{font-size:11px;font-weight:700;color:var(--t2);width:35px;text-align:right}
+.mode-bars{display:flex;flex-direction:column;gap:7px}
+.mode-row{display:flex;align-items:center;gap:7px}
+.mode-icon{font-size:15px;width:22px;text-align:center}
+.mode-name{width:85px;font-size:11px;font-weight:600;color:var(--t2)}
+.mode-bar-track{flex:1;height:20px;background:var(--bg);border-radius:6px;overflow:hidden}
+.mode-bar-fill{height:100%;border-radius:6px;display:flex;align-items:center;padding:0 6px;font-size:9px;font-weight:700;color:#fff;transition:width .6s ease}
+.mode-count{width:40px;text-align:right;font-size:11px;font-weight:600;color:var(--t3)}
+.mode-cost{width:55px;text-align:right;font-size:10px;font-weight:500;color:var(--t4)}
 .admin-table{width:100%;border-collapse:collapse;font-size:12px}
-.admin-table th{text-align:left;font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.4px;padding:8px 10px;border-bottom:1.5px solid var(--bor)}
-.admin-table td{padding:8px 10px;border-bottom:1px solid var(--bor);color:var(--t2);vertical-align:middle}
+.admin-table th{text-align:left;font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.4px;padding:7px 8px;border-bottom:1.5px solid var(--bor)}
+.admin-table td{padding:7px 8px;border-bottom:1px solid var(--bor);color:var(--t2);vertical-align:middle}
 .admin-table tr:last-child td{border-bottom:none}
-.admin-table .rank{font-weight:800;color:var(--b);width:30px}
+.admin-table .rank{font-weight:800;color:var(--b);width:28px}
 .plan-tag{display:inline-block;font-size:9px;font-weight:700;padding:2px 6px;border-radius:5px;text-transform:uppercase}
 .plan-tag.trial{background:#FEF3C7;color:#92400E}
 .plan-tag.starter{background:var(--b3);color:var(--b2)}
 .plan-tag.growth{background:#E8F5E9;color:#2E7D32}
 .plan-tag.agency{background:#F3E5F5;color:#6A1B9A}
-/* Search */
-.search-row{display:flex;gap:8px;margin-bottom:14px}
-.search-input{flex:1;padding:10px 12px;border:1.5px solid var(--bor);border-radius:8px;font-size:13px;font-family:inherit;outline:none}
+.search-row{display:flex;gap:8px;margin-bottom:12px}
+.search-input{flex:1;padding:9px 12px;border:1.5px solid var(--bor);border-radius:8px;font-size:13px;font-family:inherit;outline:none}
 .search-input:focus{border-color:var(--b)}
-.filter-sel{padding:10px;border:1.5px solid var(--bor);border-radius:8px;font-size:12px;font-family:inherit;cursor:pointer;background:var(--w);outline:none}
-/* Countries grid */
-.country-grid{display:flex;flex-wrap:wrap;gap:6px}
-.country-chip{padding:5px 10px;border-radius:8px;background:var(--bg);font-size:11px;font-weight:600;color:var(--t2);border:1px solid var(--bor)}
+.filter-sel{padding:9px;border:1.5px solid var(--bor);border-radius:8px;font-size:12px;font-family:inherit;cursor:pointer;background:var(--w);outline:none}
+.country-grid{display:flex;flex-wrap:wrap;gap:5px}
+.country-chip{padding:4px 8px;border-radius:7px;background:var(--bg);font-size:10px;font-weight:600;color:var(--t2);border:1px solid var(--bor)}
 .country-chip span{font-weight:800;color:var(--b)}
-/* Responsive */
+.fin-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bor);font-size:12px}
+.fin-row:last-child{border-bottom:none}
+.fin-label{color:var(--t3);font-weight:500}
+.fin-val{font-weight:700;color:var(--t1)}
+.fin-val.green{color:var(--g2)}
+.fin-val.red{color:var(--r)}
 @media(max-width:640px){
   .kpi-grid{grid-template-columns:repeat(2,1fr)}
-  .plan-bar-label{width:55px;font-size:11px}
 }
 </style>
 </head>
 <body>
-
 <div class="nav">
   <div class="nav-left">
     <div class="logo-sq">✦</div>
@@ -95,8 +91,6 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
   </div>
   <span class="nav-time" id="navTime"></span>
 </div>
-
-<!-- AUTH SCREEN -->
 <div id="authScreen" class="wrap" style="display:block">
   <div class="auth-wrap">
     <h2>🔐 Admin Access</h2>
@@ -106,74 +100,62 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
     <div class="auth-error" id="authError">Invalid key. Try again.</div>
   </div>
 </div>
-
-<!-- LOADING -->
 <div id="loadingScreen" class="wrap" style="display:none">
-  <div class="loading-wrap">
-    <div class="spinner"></div>
-    <p>Scanning KV namespace...</p>
-  </div>
+  <div class="loading-wrap"><div class="spinner"></div><p>Scanning KV namespace...</p></div>
 </div>
-
-<!-- DASHBOARD -->
 <div id="dashboard" class="wrap" style="display:none">
-
-  <!-- KPIs -->
+  <!-- KPIs Row 1: Users & Revenue -->
   <div class="kpi-grid">
-    <div class="kpi">
-      <div class="kpi-label">Total Users</div>
-      <div class="kpi-val" id="kpiTotal">—</div>
-      <div class="kpi-sub" id="kpiActive">— active (30d)</div>
-    </div>
-    <div class="kpi highlight">
-      <div class="kpi-label">MRR (USD)</div>
-      <div class="kpi-val" id="kpiMRR">—</div>
-      <div class="kpi-sub" id="kpiMRRmxn">— MXN</div>
-    </div>
-    <div class="kpi">
-      <div class="kpi-label">Total Generations</div>
-      <div class="kpi-val" id="kpiGens">—</div>
-      <div class="kpi-sub">All time</div>
-    </div>
-    <div class="kpi">
-      <div class="kpi-label">Paying Users</div>
-      <div class="kpi-val" id="kpiPaying">—</div>
-      <div class="kpi-sub" id="kpiPayingPct">—% conversion</div>
-    </div>
+    <div class="kpi"><div class="kpi-label">Total Users</div><div class="kpi-val" id="kpiTotal">—</div><div class="kpi-sub" id="kpiActive">—</div></div>
+    <div class="kpi green"><div class="kpi-label">MRR (USD)</div><div class="kpi-val" id="kpiMRR">—</div><div class="kpi-sub" id="kpiMRRmxn">—</div></div>
+    <div class="kpi"><div class="kpi-label">Paying Users</div><div class="kpi-val" id="kpiPaying">—</div><div class="kpi-sub" id="kpiPayingPct">—</div></div>
+    <div class="kpi blue"><div class="kpi-label">Total Generations</div><div class="kpi-val" id="kpiGens">—</div><div class="kpi-sub" id="kpiVideos">—</div></div>
   </div>
-
-  <!-- Two columns -->
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
-    <!-- Plans -->
+  <!-- KPIs Row 2: Financial -->
+  <div class="kpi-grid" style="margin-bottom:16px">
+    <div class="kpi red"><div class="kpi-label">API Cost (all time)</div><div class="kpi-val" id="kpiApiCost">—</div><div class="kpi-sub" id="kpiCostPerGen">—</div></div>
+    <div class="kpi"><div class="kpi-label">Stripe Fees (est)</div><div class="kpi-val" id="kpiStripe">—</div><div class="kpi-sub">2.9% + $0.30/txn</div></div>
+    <div class="kpi green"><div class="kpi-label">Net Revenue (est)</div><div class="kpi-val" id="kpiNet">—</div><div class="kpi-sub" id="kpiNetMxn">—</div></div>
+    <div class="kpi"><div class="kpi-label">Gross Margin</div><div class="kpi-val" id="kpiMargin">—</div><div class="kpi-sub">After API + Stripe</div></div>
+  </div>
+  <!-- Charts row -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
     <div class="section">
-      <div class="section-title">📊 Users by Plan</div>
+      <div class="section-title">📊 Users by plan</div>
       <div class="plan-bars" id="planBars"></div>
     </div>
-    <!-- Modes -->
     <div class="section">
-      <div class="section-title">🎨 Generations by Mode</div>
+      <div class="section-title">🎨 Generations by mode + cost</div>
       <div class="mode-bars" id="modeBars"></div>
     </div>
   </div>
-
+  <!-- Financial breakdown -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+    <div class="section">
+      <div class="section-title">💰 Revenue by plan</div>
+      <div id="revByPlan"></div>
+    </div>
+    <div class="section">
+      <div class="section-title">🔥 API cost by mode</div>
+      <div id="costByMode"></div>
+    </div>
+  </div>
   <!-- Countries -->
   <div class="section">
     <div class="section-title">🌎 Countries</div>
     <div class="country-grid" id="countryGrid"></div>
   </div>
-
   <!-- Top Users -->
   <div class="section">
-    <div class="section-title">🏆 Top 20 Users by Generations</div>
+    <div class="section-title">🏆 Top 20 users</div>
     <table class="admin-table" id="topUsersTable">
       <thead><tr><th>#</th><th>Brand</th><th>Plan</th><th>Gens</th></tr></thead>
       <tbody></tbody>
     </table>
   </div>
-
   <!-- Brand Search -->
   <div class="section">
-    <div class="section-title">🔍 Brand Search</div>
+    <div class="section-title">🔍 Brand search</div>
     <div class="search-row">
       <input type="text" class="search-input" id="brandSearch" placeholder="Search by name, email, or country..." oninput="filterBrands()">
       <select class="filter-sel" id="planFilter" onchange="filterBrands()">
@@ -184,148 +166,109 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
         <option value="agency">Agency</option>
       </select>
     </div>
-    <div style="max-height:400px;overflow-y:auto">
+    <div style="max-height:360px;overflow-y:auto">
       <table class="admin-table" id="brandTable">
         <thead><tr><th>Brand</th><th>Type</th><th>Country</th><th>Plan</th><th>Email</th><th>Last Active</th></tr></thead>
         <tbody></tbody>
       </table>
     </div>
-    <div style="font-size:11px;color:var(--t3);margin-top:8px" id="brandCount"></div>
+    <div style="font-size:10px;color:var(--t3);margin-top:6px" id="brandCount"></div>
   </div>
-
 </div>
-
 <script>
-const WORKER = 'https://postimity-content.munir-go10.workers.dev';
-let adminData = null;
-
-async function doAuth() {
-  const key = document.getElementById('authKey').value.trim();
-  if (!key) return;
-  document.getElementById('authScreen').style.display = 'none';
-  document.getElementById('loadingScreen').style.display = 'block';
-  try {
-    const resp = await fetch(WORKER + '/admin-stats?key=' + encodeURIComponent(key));
-    if (resp.status === 401) {
-      document.getElementById('loadingScreen').style.display = 'none';
-      document.getElementById('authScreen').style.display = 'block';
-      document.getElementById('authError').style.display = 'block';
-      return;
-    }
-    adminData = await resp.json();
-    if (adminData.error) throw new Error(adminData.error);
-    // Store key for refresh
-    sessionStorage.setItem('admin_key', key);
+const WORKER='https://postimity-content.munir-go10.workers.dev';
+let adminData=null;
+async function doAuth(){
+  const key=document.getElementById('authKey').value.trim();
+  if(!key)return;
+  document.getElementById('authScreen').style.display='none';
+  document.getElementById('loadingScreen').style.display='block';
+  try{
+    const resp=await fetch(WORKER+'/admin-stats?key='+encodeURIComponent(key));
+    if(resp.status===401){document.getElementById('loadingScreen').style.display='none';document.getElementById('authScreen').style.display='block';document.getElementById('authError').style.display='block';return}
+    adminData=await resp.json();
+    if(adminData.error)throw new Error(adminData.error);
+    sessionStorage.setItem('admin_key',key);
     renderDashboard();
-  } catch(e) {
-    document.getElementById('loadingScreen').style.display = 'none';
-    document.getElementById('authScreen').style.display = 'block';
-    document.getElementById('authError').style.display = 'block';
-    document.getElementById('authError').textContent = 'Error: ' + e.message;
-  }
+  }catch(e){document.getElementById('loadingScreen').style.display='none';document.getElementById('authScreen').style.display='block';document.getElementById('authError').style.display='block';document.getElementById('authError').textContent='Error: '+e.message}
 }
-
-function renderDashboard() {
-  document.getElementById('loadingScreen').style.display = 'none';
-  document.getElementById('dashboard').style.display = 'block';
-  const d = adminData;
-
-  // Nav time
-  document.getElementById('navTime').textContent = 'Data: ' + new Date(d.generatedAt).toLocaleString();
-
-  // KPIs
-  document.getElementById('kpiTotal').textContent = d.totalUsers;
-  document.getElementById('kpiActive').textContent = d.activeUsers + ' active (30d)';
-  document.getElementById('kpiMRR').textContent = '$' + d.mrr;
-  document.getElementById('kpiMRRmxn').textContent = '$' + Math.round(d.mrr * 17.5) + ' MXN est.';
-  document.getElementById('kpiGens').textContent = d.totalGens.toLocaleString();
-  const paying = (d.planCounts.starter || 0) + (d.planCounts.growth || 0) + (d.planCounts.agency || 0);
-  document.getElementById('kpiPaying').textContent = paying;
-  const convPct = d.totalUsers > 0 ? Math.round((paying / d.totalUsers) * 100) : 0;
-  document.getElementById('kpiPayingPct').textContent = convPct + '% conversion';
-
+function renderDashboard(){
+  document.getElementById('loadingScreen').style.display='none';
+  document.getElementById('dashboard').style.display='block';
+  const d=adminData;
+  document.getElementById('navTime').textContent='Data: '+new Date(d.generatedAt).toLocaleString();
+  // KPIs Row 1
+  document.getElementById('kpiTotal').textContent=d.totalUsers;
+  document.getElementById('kpiActive').textContent=d.activeUsers+' active (30d)';
+  document.getElementById('kpiMRR').textContent='$'+d.mrr;
+  document.getElementById('kpiMRRmxn').textContent='~$'+Math.round(d.mrr*17.5)+' MXN';
+  const paying=(d.planCounts.starter||0)+(d.planCounts.growth||0)+(d.planCounts.agency||0);
+  document.getElementById('kpiPaying').textContent=paying;
+  document.getElementById('kpiPayingPct').textContent=(d.totalUsers>0?Math.round(paying/d.totalUsers*100):0)+'% conversion';
+  document.getElementById('kpiGens').textContent=d.totalGens.toLocaleString();
+  document.getElementById('kpiVideos').textContent=(d.totalVideos||0)+' videos';
+  // KPIs Row 2 — Financial
+  document.getElementById('kpiApiCost').textContent='$'+(d.totalApiCost||0).toFixed(2);
+  document.getElementById('kpiCostPerGen').textContent='$'+(d.costPerGen||0).toFixed(3)+'/gen avg';
+  document.getElementById('kpiStripe').textContent='$'+(d.stripeCommission||0).toFixed(2);
+  document.getElementById('kpiNet').textContent='$'+(d.netRevenue||0).toFixed(2);
+  document.getElementById('kpiNetMxn').textContent='~$'+Math.round((d.netRevenue||0)*17.5)+' MXN';
+  document.getElementById('kpiMargin').textContent=(d.grossMargin||0).toFixed(1)+'%';
   // Plan bars
-  const planColors = { trial:'#F9A825', starter:'#2979FF', growth:'#76C442', agency:'#7C4DFF' };
-  const planNames = { trial:'Trial', starter:'Starter', growth:'Growth', agency:'Agency' };
-  const maxPlan = Math.max(...Object.values(d.planCounts), 1);
-  const planBarsEl = document.getElementById('planBars');
-  planBarsEl.innerHTML = Object.entries(d.planCounts).map(([plan, count]) => {
-    const pct = Math.max(5, (count / maxPlan) * 100);
-    return '<div class="plan-bar-row">' +
-      '<div class="plan-bar-label">' + (planNames[plan] || plan) + '</div>' +
-      '<div class="plan-bar-track"><div class="plan-bar-fill" style="width:' + pct + '%;background:' + (planColors[plan]||'#999') + '">' + count + '</div></div>' +
-      '<div class="plan-bar-count">' + count + '</div></div>';
+  const planColors={trial:'#F9A825',starter:'#2979FF',growth:'#76C442',agency:'#7C4DFF'};
+  const planNames={trial:'Trial',starter:'Starter',growth:'Growth',agency:'Agency'};
+  const maxPlan=Math.max(...Object.values(d.planCounts),1);
+  document.getElementById('planBars').innerHTML=Object.entries(d.planCounts).map(([p,c])=>{
+    const pct=Math.max(5,(c/maxPlan)*100);
+    return '<div class="plan-bar-row"><div class="plan-bar-label">'+(planNames[p]||p)+'</div><div class="plan-bar-track"><div class="plan-bar-fill" style="width:'+pct+'%;background:'+(planColors[p]||'#999')+'">'+c+'</div></div><div class="plan-bar-count">'+c+'</div></div>';
   }).join('');
-
-  // Mode bars
-  const modeInfo = {
-    post: { icon:'✍️', name:'Post', color:'#2979FF' },
-    enhance: { icon:'🖼️', name:'Estudio Pro', color:'#7C4DFF' },
-    flyer: { icon:'📄', name:'Flyer', color:'#E91E8C' },
-    testimonial: { icon:'⭐', name:'Testimonio', color:'#F9A825' },
-    carousel: { icon:'🎠', name:'Carrusel', color:'#76C442' }
-  };
-  const maxMode = Math.max(...Object.values(d.modeCounts), 1);
-  const modeBarsEl = document.getElementById('modeBars');
-  modeBarsEl.innerHTML = Object.entries(d.modeCounts).map(([mode, count]) => {
-    const info = modeInfo[mode] || { icon:'?', name:mode, color:'#999' };
-    const pct = Math.max(3, (count / maxMode) * 100);
-    return '<div class="mode-row">' +
-      '<div class="mode-icon">' + info.icon + '</div>' +
-      '<div class="mode-name">' + info.name + '</div>' +
-      '<div class="mode-bar-track"><div class="mode-bar-fill" style="width:' + pct + '%;background:' + info.color + '">' + count + '</div></div>' +
-      '<div class="mode-count">' + count + '</div></div>';
+  // Mode bars with cost column
+  const modeInfo={post:{icon:'✍️',name:'Post',color:'#2979FF'},enhance:{icon:'🖼️',name:'Estudio Pro',color:'#7C4DFF'},flyer:{icon:'📄',name:'Flyer',color:'#E91E8C'},testimonial:{icon:'⭐',name:'Testimonio',color:'#F9A825'},carousel:{icon:'🎠',name:'Carrusel',color:'#76C442'},video:{icon:'🎬',name:'Video AI',color:'#E53935'}};
+  const apiCosts=d.apiCosts||{};
+  const maxMode=Math.max(...Object.values(d.modeCounts),1);
+  document.getElementById('modeBars').innerHTML=Object.entries(d.modeCounts).map(([m,c])=>{
+    const info=modeInfo[m]||{icon:'?',name:m,color:'#999'};
+    const pct=Math.max(3,(c/maxMode)*100);
+    const cost=((apiCosts[m]||0.05)*c).toFixed(2);
+    return '<div class="mode-row"><div class="mode-icon">'+info.icon+'</div><div class="mode-name">'+info.name+'</div><div class="mode-bar-track"><div class="mode-bar-fill" style="width:'+pct+'%;background:'+info.color+'">'+c+'</div></div><div class="mode-count">'+c+'</div><div class="mode-cost">$'+cost+'</div></div>';
   }).join('');
-
+  // Revenue by plan
+  const planPrices={trial:0,starter:9,growth:19,agency:45};
+  document.getElementById('revByPlan').innerHTML=Object.entries(d.planCounts).map(([p,c])=>{
+    const rev=(planPrices[p]||0)*c;
+    return '<div class="fin-row"><div class="fin-label">'+(planNames[p]||p)+' ('+c+' users)</div><div class="fin-val'+(rev>0?' green':'')+'">$'+rev.toFixed(2)+'/mo</div></div>';
+  }).join('')+'<div class="fin-row" style="font-weight:700;border-top:2px solid var(--bor);margin-top:4px;padding-top:8px"><div class="fin-label">Total MRR</div><div class="fin-val green">$'+d.mrr+'/mo</div></div>';
+  // Cost by mode
+  document.getElementById('costByMode').innerHTML=Object.entries(d.modeCounts).map(([m,c])=>{
+    const info=modeInfo[m]||{icon:'?',name:m};
+    const cost=((apiCosts[m]||0.05)*c);
+    const perUnit=(apiCosts[m]||0.05);
+    return '<div class="fin-row"><div class="fin-label">'+info.icon+' '+info.name+' ('+c+' × $'+perUnit.toFixed(3)+')</div><div class="fin-val red">$'+cost.toFixed(2)+'</div></div>';
+  }).join('')+'<div class="fin-row" style="font-weight:700;border-top:2px solid var(--bor);margin-top:4px;padding-top:8px"><div class="fin-label">Total API cost</div><div class="fin-val red">$'+(d.totalApiCost||0).toFixed(2)+'</div></div>';
   // Countries
-  const countryGrid = document.getElementById('countryGrid');
-  const sortedCountries = Object.entries(d.countryCounts).sort((a,b) => b[1] - a[1]);
-  countryGrid.innerHTML = sortedCountries.map(([c, n]) =>
-    '<div class="country-chip">' + c + ' <span>' + n + '</span></div>'
-  ).join('');
-
+  const sortedC=Object.entries(d.countryCounts).sort((a,b)=>b[1]-a[1]);
+  document.getElementById('countryGrid').innerHTML=sortedC.map(([c,n])=>'<div class="country-chip">'+c+' <span>'+n+'</span></div>').join('');
   // Top Users
-  const tbody = document.querySelector('#topUsersTable tbody');
-  tbody.innerHTML = d.topUsers.map((u, i) =>
-    '<tr><td class="rank">' + (i+1) + '</td><td style="font-weight:600">' + esc(u.name) + '</td>' +
-    '<td><span class="plan-tag ' + u.plan + '">' + u.plan + '</span></td>' +
-    '<td style="font-weight:700">' + u.gens + '</td></tr>'
-  ).join('');
-
-  // Brand search initial render
+  document.querySelector('#topUsersTable tbody').innerHTML=d.topUsers.map((u,i)=>'<tr><td class="rank">'+(i+1)+'</td><td style="font-weight:600">'+esc(u.name)+'</td><td><span class="plan-tag '+u.plan+'">'+u.plan+'</span></td><td style="font-weight:700">'+u.gens+'</td></tr>').join('');
   filterBrands();
 }
-
-function filterBrands() {
-  if (!adminData) return;
-  const q = (document.getElementById('brandSearch').value || '').toLowerCase();
-  const planF = document.getElementById('planFilter').value;
-  const filtered = adminData.brandList.filter(b => {
-    if (planF && (b.plan || 'trial') !== planF) return false;
-    if (q && !((b.name||'').toLowerCase().includes(q) || (b.email||'').toLowerCase().includes(q) || (b.country||'').toLowerCase().includes(q) || (b.type||'').toLowerCase().includes(q))) return false;
+function filterBrands(){
+  if(!adminData)return;
+  const q=(document.getElementById('brandSearch').value||'').toLowerCase();
+  const pf=document.getElementById('planFilter').value;
+  const filtered=adminData.brandList.filter(b=>{
+    if(pf&&(b.plan||'trial')!==pf)return false;
+    if(q&&!((b.name||'').toLowerCase().includes(q)||(b.email||'').toLowerCase().includes(q)||(b.country||'').toLowerCase().includes(q)))return false;
     return true;
   });
-  const tbody = document.querySelector('#brandTable tbody');
-  tbody.innerHTML = filtered.slice(0, 100).map(b =>
-    '<tr><td style="font-weight:600">' + esc(b.name) + '</td>' +
-    '<td>' + esc(b.type) + '</td><td>' + esc(b.country) + '</td>' +
-    '<td><span class="plan-tag ' + (b.plan||'trial') + '">' + (b.plan||'trial') + '</span></td>' +
-    '<td style="font-size:11px">' + esc(b.email) + '</td>' +
-    '<td style="font-size:11px;color:var(--t3)">' + (b.updatedAt ? new Date(b.updatedAt).toLocaleDateString() : '—') + '</td></tr>'
-  ).join('');
-  document.getElementById('brandCount').textContent = 'Showing ' + Math.min(filtered.length, 100) + ' of ' + filtered.length + ' brands';
+  document.querySelector('#brandTable tbody').innerHTML=filtered.slice(0,100).map(b=>'<tr><td style="font-weight:600">'+esc(b.name)+'</td><td>'+esc(b.type)+'</td><td>'+esc(b.country)+'</td><td><span class="plan-tag '+(b.plan||'trial')+'">'+(b.plan||'trial')+'</span></td><td style="font-size:11px">'+esc(b.email)+'</td><td style="font-size:11px;color:var(--t3)">'+(b.updatedAt?new Date(b.updatedAt).toLocaleDateString():'—')+'</td></tr>').join('');
+  document.getElementById('brandCount').textContent='Showing '+Math.min(filtered.length,100)+' of '+filtered.length+' brands';
 }
-
-function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-
-// Auto-auth from URL param
-window.addEventListener('DOMContentLoaded', () => {
-  const params = new URLSearchParams(window.location.search);
-  const key = params.get('key') || sessionStorage.getItem('admin_key');
-  if (key) {
-    document.getElementById('authKey').value = key;
-    doAuth();
-  }
+function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+window.addEventListener('DOMContentLoaded',()=>{
+  const params=new URLSearchParams(window.location.search);
+  const key=params.get('key')||sessionStorage.getItem('admin_key');
+  if(key){document.getElementById('authKey').value=key;doAuth()}
 });
 </script>
 </body>
