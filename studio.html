@@ -1144,8 +1144,8 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
         <div class="mc-title">Carrusel</div>
         <div class="mc-desc">Multi-slide educativo</div>
       </div>
-      <div class="mode-card soon" id="mc6" onclick="handleModeClick('video')">
-        <span class="mc-soon-badge" id="mcVideoBadge">PRONTO</span>
+      <div class="mode-card" id="mc6" onclick="handleModeClick('video')">
+        <span class="mc-soon-badge" id="mcVideoBadge" style="display:none">PRONTO</span>
         <div class="mc-icon">🎬</div>
         <div class="mc-title">Video AI</div>
         <div class="mc-desc">Reels, TikTok, Shorts</div>
@@ -1384,6 +1384,14 @@ Ej: 'Wonderik es increíble. Mi hija de 3 años ya lee palabras cortas y su desa
           </div>
         </div>
         <div style="font-size:11px;color:var(--t3);line-height:1.5;margin-bottom:8px" id="videoHint">💡 El video se genera con Kling 2.6 Pro. Toma ~2-5 minutos. Puedes seguir usando el Studio mientras se genera.</div>
+        <div class="upload-zone" id="videoPhotoZone" onclick="document.getElementById('videoFile').click()" style="margin-bottom:0;padding:14px">
+          <input type="file" id="videoFile" accept="image/*" style="display:none" onchange="handleVideoPhoto(this)">
+          <div class="uz-icon" style="font-size:20px">📸</div>
+          <div class="uz-title" style="font-size:12px" id="videoPhotoTitle">Foto de producto o lugar (opcional)</div>
+          <div class="uz-sub" style="font-size:10px" id="videoPhotoSub">Sube una foto y el AI la animará en video</div>
+          <div class="uz-name" id="videoPhotoName"></div>
+        </div>
+        <img id="videoPrev" class="photo-prev" src="" alt="" style="display:none">
       </div>
 
       <button class="btn-gen" id="btnGen" onclick="generate()">✨ Generar contenido con AI</button>
@@ -1865,6 +1873,8 @@ const T = {
     videoError:'Error al generar video',
     videoDownload:'⬇️ Descargar video',
     videoNewOne:'🎬 Generar otro video',
+    videoPhotoTitle:'📸 Foto de producto o lugar (opcional)',
+    videoPhotoSub:'Sube una foto y el AI la animará en video',
     genPerMonth:'gen/mes',
     // ── Month names ──
     months:['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'],
@@ -2117,6 +2127,8 @@ const T = {
     videoError:'Error generating video',
     videoDownload:'⬇️ Download video',
     videoNewOne:'🎬 Generate another video',
+    videoPhotoTitle:'📸 Product or venue photo (optional)',
+    videoPhotoSub:'Upload a photo and AI will animate it into video',
     genPerMonth:'gen/mo',
     // ── Month names ──
     months:['January','February','March','April','May','June','July','August','September','October','November','December'],
@@ -3299,6 +3311,7 @@ async function genEnhance(brand,bg) {
 let videoDuration = '5';
 let videoAspectRatio = '9:16';
 let videoPollingTimer = null;
+let videoPhotoB64 = null;
 
 function setVideoDur(d, btn) {
   videoDuration = d;
@@ -3309,6 +3322,19 @@ function setVideoRatio(r, btn) {
   videoAspectRatio = r;
   document.querySelectorAll('#var916,#var169,#var11').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
+}
+function handleVideoPhoto(input) {
+  const file = input.files[0];
+  if(!file) return;
+  if(file.size > 10*1024*1024) { alert('Max 10MB'); return; }
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    videoPhotoB64 = e.target.result;
+    document.getElementById('videoPrev').src = videoPhotoB64;
+    document.getElementById('videoPrev').style.display = 'block';
+    document.getElementById('videoPhotoName').textContent = '✓ ' + file.name;
+  };
+  reader.readAsDataURL(file);
 }
 
 async function generateVideo(brand) {
@@ -3347,8 +3373,21 @@ async function generateVideo(brand) {
     const promptData = await promptResp.json();
     if(!promptData.success) throw new Error(promptData.error || 'Prompt generation failed');
 
-    // Step 2: Submit to fal.ai queue
-    setStep(2);
+    // Step 2: Upload photo to R2 if provided (for image-to-video)
+    let imageUrl = null;
+    if(videoPhotoB64) {
+      setStep(2);
+      const uploadResp = await fetch(WORKER, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mode: 'image', action: 'upload-video-photo', imageData: videoPhotoB64, brandId }),
+      });
+      const uploadData = await uploadResp.json();
+      if(uploadData.imageUrl) imageUrl = uploadData.imageUrl;
+    }
+
+    // Step 3: Submit to fal.ai queue
+    setStep(3);
     const submitResp = await fetch(WORKER, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -3358,6 +3397,7 @@ async function generateVideo(brand) {
         duration: videoDuration,
         aspectRatio: videoAspectRatio,
         brandId,
+        imageUrl,
       }),
     });
     const submitData = await submitResp.json();
@@ -3366,7 +3406,7 @@ async function generateVideo(brand) {
     // Step 3: Start polling
     setStep(3);
     document.getElementById('loadTitle').textContent = t('videoProcessing');
-    startVideoPolling(submitData.requestId, submitData.endpoint, brand, topic);
+    startVideoPolling(submitData.requestId, submitData.endpoint, submitData.statusUrl, submitData.responseUrl, brand, topic);
 
   } catch(err) {
     showLoading(false);
@@ -3375,7 +3415,7 @@ async function generateVideo(brand) {
   }
 }
 
-function startVideoPolling(requestId, endpoint, brand, topic) {
+function startVideoPolling(requestId, endpoint, statusUrl, responseUrl, brand, topic) {
   let attempts = 0;
   const maxAttempts = 90; // 90 × 5s = 7.5 min max
 
@@ -3393,7 +3433,7 @@ function startVideoPolling(requestId, endpoint, brand, topic) {
       const resp = await fetch(WORKER, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ mode: 'video-status', requestId, endpoint }),
+        body: JSON.stringify({ mode: 'video-status', requestId, endpoint, statusUrl, responseUrl }),
       });
       const data = await resp.json();
 
