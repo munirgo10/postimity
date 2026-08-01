@@ -3358,26 +3358,31 @@ async function generateVideo(brand) {
   document.getElementById('loadTitle').textContent = t('videoPolling');
 
   try {
-    // Step 1: Generate video prompt with Claude
+    // Step 1: Generate video prompt with Claude (may take 10-20s)
     setStep(1);
-    const promptResp = await fetch(WORKER, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
+    document.getElementById('loadTitle').textContent = detectLanguage()==='es' ? '🎬 Creando dirección del video...' : '🎬 Creating video direction...';
+    let promptData;
+    try {
+      const promptResp = await postWithTimeout({
         mode: 'video-prompt',
         topic,
         brandData: { name: brand.name, type: brand.type },
         brandGuide: brand.brandGuide,
         platform,
-      }),
-    });
-    const promptData = await promptResp.json();
-    if(!promptData.success) throw new Error(promptData.error || 'Prompt generation failed');
+      }, 28000);
+      promptData = await promptResp.json();
+    } catch(promptErr) {
+      // If video-prompt times out, generate a simpler prompt locally
+      promptData = { success: true, videoPrompt: 'Professional cinematic short video: ' + topic + '. Smooth camera motion, professional lighting, high quality 4K.' };
+    }
+    if(!promptData.success && !promptData.videoPrompt) throw new Error(promptData.error || 'Prompt generation failed');
+    const videoPrompt = promptData.videoPrompt;
 
     // Step 2: Upload photo to R2 if provided (for image-to-video)
     let imageUrl = null;
     if(videoPhotoB64) {
       setStep(2);
+      document.getElementById('loadTitle').textContent = detectLanguage()==='es' ? '📸 Subiendo foto...' : '📸 Uploading photo...';
       const uploadResp = await fetch(WORKER, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -3389,12 +3394,15 @@ async function generateVideo(brand) {
 
     // Step 3: Submit to fal.ai queue
     setStep(3);
+    // Step 3: Submit to fal.ai queue
+    setStep(3);
+    document.getElementById('loadTitle').textContent = detectLanguage()==='es' ? '🚀 Enviando a generación...' : '🚀 Submitting to generate...';
     const submitResp = await fetch(WORKER, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         mode: 'video-submit',
-        videoPrompt: promptData.videoPrompt,
+        videoPrompt: videoPrompt,
         duration: videoDuration,
         aspectRatio: videoAspectRatio,
         brandId,
@@ -3404,8 +3412,8 @@ async function generateVideo(brand) {
     const submitData = await submitResp.json();
     if(!submitData.success) throw new Error(submitData.error || 'Submit failed');
 
-    // Step 3: Start polling
-    setStep(3);
+    // Step 4: Start polling
+    setStep(4);
     document.getElementById('loadTitle').textContent = t('videoProcessing');
     startVideoPolling(submitData.requestId, submitData.endpoint, submitData.statusUrl, submitData.responseUrl, brand, topic);
 
@@ -4038,19 +4046,22 @@ function renderAgentPlan(plan) {
 function goCreatePost(idx) {
   const post = agentPostsCache[idx];
   if(!post) { showToast(t('toastPostNotFound')); return; }
-  // Route to the correct mode (post or carousel)
-  const targetMode = (post.suggestedMode === 'carousel') ? 'carousel' : 'post';
+  // Route to the correct mode (post, carousel, or video)
+  const targetMode = post.suggestedMode === 'carousel' ? 'carousel' : post.suggestedMode === 'video' ? 'video' : 'post';
   setMode(targetMode);
   // Pre-fill prompt in the correct textarea
-  if(targetMode === 'carousel') {
+  if(targetMode === 'video') {
+    const ta = document.getElementById('videoTopic');
+    if(ta) ta.value = post.prompt || post.topic || '';
+  } else if(targetMode === 'carousel') {
     const ta = document.getElementById('carouselTopic');
     if(ta) ta.value = post.prompt || post.topic || '';
   } else {
     const ta = document.getElementById('postText');
     if(ta) ta.value = post.prompt || '';
   }
-  // Set image style if suggested
-  if(post.suggestedStyle && ['photo','illustrated','abstract'].includes(post.suggestedStyle)) {
+  // Set image style if suggested (not for video)
+  if(targetMode !== 'video' && post.suggestedStyle && ['photo','illustrated','abstract'].includes(post.suggestedStyle)) {
     const styleMap = { photo: 'sPhoto', illustrated: 'sIllus', abstract: 'sAbstr' };
     const styleBtn = document.getElementById(styleMap[post.suggestedStyle]);
     if(styleBtn) setImageStyle(post.suggestedStyle, styleBtn);
@@ -4061,11 +4072,11 @@ function goCreatePost(idx) {
   const agentEl = document.getElementById('agentScreen');
   if(agentEl) { agentEl.classList.remove('active'); agentEl.style.display = ''; }
   showScreen('creatorScreen');
-  const modeLabel = targetMode === 'carousel' ? t('mcCarousel') : t('mcPost');
-  const styleLabel = post.suggestedStyle === 'photo' ? t('agentStylePhoto') : post.suggestedStyle === 'abstract' ? t('agentStyleAbstract') : t('agentStyleIllus');
+  const modeLabel = targetMode === 'video' ? t('mcVideoTitle') : targetMode === 'carousel' ? t('mcCarousel') : t('mcPost');
+  const styleLabel = targetMode === 'video' ? '🎬 Video AI' : post.suggestedStyle === 'photo' ? t('agentStylePhoto') : post.suggestedStyle === 'abstract' ? t('agentStyleAbstract') : t('agentStyleIllus');
   showToast(t('toastPreloaded').replace('{mode}', modeLabel).replace('{style}', styleLabel));
   setTimeout(() => {
-    const input = targetMode === 'carousel' ? document.getElementById('carouselTopic') : document.getElementById('postText');
+    const input = targetMode === 'video' ? document.getElementById('videoTopic') : targetMode === 'carousel' ? document.getElementById('carouselTopic') : document.getElementById('postText');
     input?.focus(); input?.scrollIntoView({behavior:'smooth', block:'center'});
   }, 350);
 }
@@ -4588,7 +4599,7 @@ function checkDeepLink() {
   if(!dlPrompt && !dlPillar && !dlMode) return; // no deep-link params
 
   setTimeout(() => { // wait for brand to load
-    if(dlMode && ['post','enhance','flyer','testimonial','carousel'].includes(dlMode)) handleModeClick(dlMode);
+    if(dlMode && ['post','enhance','flyer','testimonial','carousel','video'].includes(dlMode)) handleModeClick(dlMode);
     if(dlMode === 'carousel') {
       const ta = document.getElementById('carouselTopic');
       if(ta && dlPrompt) ta.value = decodeURIComponent(dlPrompt);
