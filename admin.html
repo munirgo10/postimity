@@ -174,6 +174,18 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
     </div>
     <div style="font-size:10px;color:var(--t3);margin-top:6px" id="brandCount"></div>
   </div>
+  <!-- Feedback -->
+  <div class="section">
+    <div class="section-title">💬 User Feedback <span id="fbCount" style="font-size:11px;font-weight:600;color:var(--t3);margin-left:4px"></span></div>
+    <div style="display:flex;gap:6px;margin-bottom:10px">
+      <button class="fb-filter active" onclick="filterFb('all',this)" style="padding:4px 10px;border:1px solid var(--bor);border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;background:var(--b3);color:var(--b2);font-family:inherit">All</button>
+      <button class="fb-filter" onclick="filterFb('suggestion',this)" style="padding:4px 10px;border:1px solid var(--bor);border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;background:var(--w);color:var(--t2);font-family:inherit">💡 Suggestions</button>
+      <button class="fb-filter" onclick="filterFb('issue',this)" style="padding:4px 10px;border:1px solid var(--bor);border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;background:var(--w);color:var(--t2);font-family:inherit">🛠️ Issues</button>
+    </div>
+    <div style="max-height:400px;overflow-y:auto" id="fbListWrap">
+      <div style="text-align:center;padding:20px;color:var(--t3);font-size:12px" id="fbEmpty">No feedback yet</div>
+    </div>
+  </div>
 </div>
 <script>
 const WORKER='https://postimity-content.munir-go10.workers.dev';
@@ -190,6 +202,7 @@ async function doAuth(){
     if(adminData.error)throw new Error(adminData.error);
     sessionStorage.setItem('admin_key',key);
     renderDashboard();
+    loadFeedback();
   }catch(e){document.getElementById('loadingScreen').style.display='none';document.getElementById('authScreen').style.display='block';document.getElementById('authError').style.display='block';document.getElementById('authError').textContent='Error: '+e.message}
 }
 function renderDashboard(){
@@ -265,6 +278,50 @@ function filterBrands(){
   document.getElementById('brandCount').textContent='Showing '+Math.min(filtered.length,100)+' of '+filtered.length+' brands';
 }
 function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+
+// ── Feedback ──
+let fbData=[];
+let fbFilterType='all';
+async function loadFeedback(){
+  try{
+    const key=sessionStorage.getItem('admin_key');
+    const res=await fetch(WORKER,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mode:'get-feedback',adminKey:key})});
+    const data=await res.json();
+    if(data.success&&data.feedback){fbData=data.feedback;renderFb();}
+  }catch(e){console.warn('Feedback load failed:',e)}
+}
+function renderFb(){
+  const filtered=fbFilterType==='all'?fbData:fbData.filter(f=>f.type===fbFilterType);
+  document.getElementById('fbCount').textContent='('+fbData.length+')';
+  const wrap=document.getElementById('fbListWrap');
+  const empty=document.getElementById('fbEmpty');
+  if(filtered.length===0){empty.style.display='block';empty.textContent=fbFilterType==='all'?'No feedback yet':'No '+fbFilterType+'s yet';wrap.querySelectorAll('.fb-card').forEach(c=>c.remove());return;}
+  empty.style.display='none';
+  const typeIcon={suggestion:'💡',issue:'🛠️'};
+  const catColors={'new-feature':'#7C4DFF','mode-request':'#2979FF',improvement:'#76C442',bug:'#E53935',ux:'#F9A825',quality:'#FF6D00',billing:'#1565C0',other:'#6B7280'};
+  wrap.innerHTML=filtered.map(f=>{
+    const date=new Date(f.createdAt).toLocaleDateString()+' '+new Date(f.createdAt).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+    return '<div class="fb-card" style="border:1px solid var(--bor);border-radius:10px;padding:12px;margin-bottom:8px">'+
+      '<div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">'+
+        '<span style="font-size:14px">'+(typeIcon[f.type]||'💬')+'</span>'+
+        '<span style="font-size:12px;font-weight:700;color:var(--t1)">'+(f.brandName||'Anonymous')+'</span>'+
+        '<span style="font-size:10px;padding:2px 6px;border-radius:4px;background:'+(catColors[f.category]||'#6B7280')+'15;color:'+(catColors[f.category]||'#6B7280')+';font-weight:700">'+(f.category||'other')+'</span>'+
+        '<span style="font-size:10px;padding:2px 6px;border-radius:4px;background:#F5F5F3;color:var(--t3);font-weight:600">'+(f.plan||'trial')+'</span>'+
+        '<span style="flex:1"></span>'+
+        '<span style="font-size:10px;color:var(--t4)">'+date+'</span>'+
+      '</div>'+
+      '<div style="font-size:12px;color:var(--t2);line-height:1.6;white-space:pre-wrap">'+esc(f.message)+'</div>'+
+      (f.email?'<div style="font-size:10px;color:var(--t3);margin-top:4px">📧 '+esc(f.email)+'</div>':'')+
+    '</div>';
+  }).join('');
+}
+function filterFb(type,btn){
+  fbFilterType=type;
+  document.querySelectorAll('.fb-filter').forEach(b=>{b.style.background='var(--w)';b.style.color='var(--t2)';b.classList.remove('active')});
+  btn.style.background='var(--b3)';btn.style.color='var(--b2)';btn.classList.add('active');
+  renderFb();
+}
+
 window.addEventListener('DOMContentLoaded',()=>{
   const params=new URLSearchParams(window.location.search);
   const key=params.get('key')||sessionStorage.getItem('admin_key');
