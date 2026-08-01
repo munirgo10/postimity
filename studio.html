@@ -132,7 +132,7 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
 /* Mode cards */
 
 /* ─── MODE CARDS ──────────────────────────────────── */
-.mode-cards{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:18px}
+.mode-cards{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:18px}
 .mode-card{background:var(--w);border:1.5px solid var(--bor);border-radius:12px;padding:12px 8px 10px;cursor:pointer;transition:all .18s;text-align:center;position:relative;overflow:hidden}
 .mode-card::before{content:'';position:absolute;inset:0;background:var(--b);opacity:0;transition:opacity .18s}
 .mode-card:hover{border-color:var(--b);transform:translateY(-2px);box-shadow:0 4px 14px rgba(41,121,255,.13)}
@@ -635,6 +635,44 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
   .fg-item.span2{grid-column:span 1}
   .dl-btns{flex-wrap:wrap}
 }
+/* ─── FEEDBACK WIDGET ─────────────────────────────── */
+.fb-fab{position:fixed;bottom:20px;right:20px;z-index:300;width:48px;height:48px;border-radius:50%;background:var(--b);color:#fff;border:none;font-size:20px;cursor:pointer;box-shadow:0 4px 16px rgba(41,121,255,.35);transition:.2s;display:flex;align-items:center;justify-content:center;font-family:inherit}
+.fb-fab:hover{transform:scale(1.08);box-shadow:0 6px 24px rgba(41,121,255,.4)}
+.fb-fab.open{background:var(--t1);transform:rotate(45deg)}
+.fb-panel{position:fixed;bottom:78px;right:20px;z-index:300;width:340px;max-height:480px;background:var(--w);border:1px solid var(--bor);border-radius:var(--r2);box-shadow:0 8px 40px rgba(0,0,0,.15);display:none;flex-direction:column;overflow:hidden;animation:fbSlideUp .2s ease-out}
+.fb-panel.show{display:flex}
+@keyframes fbSlideUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.fb-header{padding:14px 16px;border-bottom:1px solid var(--bor);display:flex;align-items:center;gap:8px}
+.fb-header h3{font-size:14px;font-weight:800;color:var(--t1);flex:1}
+.fb-close{background:none;border:none;font-size:16px;color:var(--t3);cursor:pointer;padding:4px}
+.fb-body{padding:16px;overflow-y:auto;flex:1}
+.fb-type-btns{display:flex;gap:8px;margin-bottom:14px}
+.fb-type-btn{flex:1;padding:10px 8px;border:1.5px solid var(--bor);border-radius:10px;background:var(--w);cursor:pointer;text-align:center;transition:.15s;font-family:inherit}
+.fb-type-btn:hover{border-color:var(--b);background:var(--b3)}
+.fb-type-btn.active{border-color:var(--b);background:var(--b3)}
+.fb-type-btn .fb-icon{font-size:20px;display:block;margin-bottom:4px}
+.fb-type-btn .fb-label{font-size:11px;font-weight:700;color:var(--t1)}
+.fb-cats{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px}
+.fb-cat{padding:5px 10px;border-radius:16px;border:1px solid var(--bor);background:var(--w);font-size:11px;font-weight:600;color:var(--t2);cursor:pointer;transition:.15s;font-family:inherit}
+.fb-cat:hover{border-color:var(--b);color:var(--b)}
+.fb-cat.active{border-color:var(--b);background:var(--b);color:#fff}
+.fb-ta{width:100%;min-height:80px;padding:10px;border:1.5px solid var(--bor);border-radius:10px;font-size:13px;font-family:inherit;color:var(--t1);resize:vertical;outline:none;line-height:1.5}
+.fb-ta:focus{border-color:var(--b)}
+.fb-submit{width:100%;padding:10px;border:none;border-radius:10px;background:var(--b);color:#fff;font-size:13px;font-weight:700;cursor:pointer;margin-top:10px;font-family:inherit;transition:.15s}
+.fb-submit:hover{background:var(--b2)}
+.fb-submit:disabled{opacity:.5;cursor:not-allowed}
+.fb-success{text-align:center;padding:30px 16px}
+.fb-success .fb-check{font-size:40px;margin-bottom:8px}
+.fb-success p{font-size:13px;color:var(--t2);line-height:1.6}
+.fb-faq{margin-top:4px}
+.fb-faq-item{border:1px solid var(--bor);border-radius:8px;margin-bottom:6px;overflow:hidden}
+.fb-faq-q{padding:10px 12px;font-size:12px;font-weight:700;color:var(--t1);cursor:pointer;display:flex;align-items:center;justify-content:space-between;background:var(--bg)}
+.fb-faq-q:hover{background:var(--b3)}
+.fb-faq-a{padding:0 12px;font-size:12px;color:var(--t2);line-height:1.6;max-height:0;overflow:hidden;transition:max-height .2s,padding .2s}
+.fb-faq-item.open .fb-faq-a{max-height:200px;padding:8px 12px 10px}
+@media(max-width:640px){
+  .fb-panel{width:calc(100% - 32px);right:16px;bottom:74px;max-height:70vh}
+}
 </style>
 <script defer data-domain="postimity.com" src="https://plausible.io/js/script.js"></script>
 </head>
@@ -645,10 +683,16 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
     <div class="logo-sq">✦</div>
     Postimity
   </a>
-  <div class="brand-chip" id="brandChip" onclick="goToEdit()">
-    <div class="chip-logo" id="chipLogo">?</div>
-    <span id="chipName">Mi marca</span>
-    <span style="color:var(--t3)">✏️</span>
+  <div style="display:flex;align-items:center;gap:8px">
+    <div class="brand-chip" id="brandChip" onclick="goToEdit()">
+      <div class="chip-logo" id="chipLogo">?</div>
+      <span id="chipName">Mi marca</span>
+      <span style="color:var(--t3)">✏️</span>
+    </div>
+    <div class="lang-toggle" id="langToggle" onclick="toggleStudioLang()" style="background:var(--bg);border:1px solid var(--bor);border-radius:20px;padding:3px;display:flex;cursor:pointer">
+      <span class="lang-opt" id="sLangES" style="padding:3px 8px;border-radius:16px;font-size:10px;font-weight:700;transition:.15s">ES</span>
+      <span class="lang-opt" id="sLangEN" style="padding:3px 8px;border-radius:16px;font-size:10px;font-weight:700;transition:.15s">EN</span>
+    </div>
   </div>
 </nav>
 
@@ -2220,6 +2264,22 @@ async function sendRecoveryLink() {
   closeRecoveryModal();
 }
 
+// ─── LANGUAGE TOGGLE ──────────────────────────────────
+function toggleStudioLang() {
+  const current = detectLanguage();
+  const next = current === 'es' ? 'en' : 'es';
+  localStorage.setItem('postimity_lang', next);
+  applyBilingualUI();
+  updateGenCounter();
+  updateLangToggleUI(next);
+}
+function updateLangToggleUI(lang) {
+  const es = document.getElementById('sLangES');
+  const en = document.getElementById('sLangEN');
+  if(es) { es.style.background = lang==='es'?'var(--w)':'transparent'; es.style.color = lang==='es'?'var(--t1)':'var(--t3)'; es.style.boxShadow = lang==='es'?'0 1px 3px rgba(0,0,0,.08)':'none'; }
+  if(en) { en.style.background = lang==='en'?'var(--w)':'transparent'; en.style.color = lang==='en'?'var(--t1)':'var(--t3)'; en.style.boxShadow = lang==='en'?'0 1px 3px rgba(0,0,0,.08)':'none'; }
+}
+
 // ─── GENERATION COUNTER ───────────────────────────────
 function detectLanguage() {
   // 1. Saved user preference wins
@@ -2228,11 +2288,12 @@ function detectLanguage() {
   // 2. URL param (for targeted ads: postimity.com?lang=en)
   const urlLang = new URLSearchParams(window.location.search).get('lang');
   if(urlLang === 'en' || urlLang === 'es') { localStorage.setItem('postimity_lang', urlLang); return urlLang; }
-  // 3. Timezone — LATAM timezones default to ES (before navigator.language to handle EN-configured browsers in LATAM)
+  // 3. Timezone — LATAM timezones default to ES (exclude US, Canada, Brazil)
   try {
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    const usZones = ['New_York','Chicago','Denver','Phoenix','Los_Angeles','Anchorage','Honolulu','Adak','Boise','Indiana','Kentucky','Menominee','Nome','North_Dakota','Sitka','Yakutat'];
-    if(tz.startsWith('America/') && !usZones.some(z => tz.includes(z))) return 'es';
+    const enZones = ['New_York','Chicago','Denver','Phoenix','Los_Angeles','Anchorage','Honolulu','Adak','Boise','Indiana','Kentucky','Menominee','Nome','North_Dakota','Sitka','Yakutat','Toronto','Vancouver','Edmonton','Winnipeg','Halifax','St_Johns','Regina','Whitehorse','Yellowknife','Iqaluit','Moncton','Goose_Bay','Glace_Bay','Rankin_Inlet','Resolute','Atikokan','Nipigon','Thunder_Bay','Pangnirtung','Cambridge_Bay','Inuvik','Dawson','Dawson_Creek','Creston','Fort_Nelson','Swift_Current','Rainy_River','Blanc-Sablon'];
+    const brZones = ['Sao_Paulo','Bahia','Belem','Fortaleza','Recife','Manaus','Porto_Velho','Boa_Vista','Campo_Grande','Cuiaba','Maceio','Araguaina','Santarem','Rio_Branco','Noronha','Eirunepe'];
+    if(tz.startsWith('America/') && !enZones.some(z => tz.includes(z)) && !brZones.some(z => tz.includes(z))) return 'es';
   } catch(e) {}
   // 4. Browser language fallback
   const bl = navigator.language?.slice(0,2);
@@ -2247,9 +2308,15 @@ function updateGenCounter() {
   const monthKey = 'postimity_gens_' + new Date().toISOString().slice(0,7);
   const used = parseInt(localStorage.getItem(monthKey) || '0');
   const remaining = Math.max(0, limit - used);
+  // Video counter
+  const vMonthKey = 'postimity_videos_' + new Date().toISOString().slice(0,7);
+  const videosUsed = parseInt(localStorage.getItem(vMonthKey) || '0');
+  const videoLimit = VIDEO_LIMITS[plan] || 2;
+  const videosRemaining = Math.max(0, videoLimit - videosUsed);
   const el = document.getElementById('genCounterBadge');
   if (el) {
-    el.textContent = remaining + ' gen restantes';
+    const isES = detectLanguage() === 'es';
+    el.textContent = remaining + ' gen · ' + videosRemaining + (isES ? ' videos restantes' : ' videos left');
     el.style.background = remaining <= 3 ? '#FDECEA' : remaining <= 8 ? '#FDF0DC' : '#EAF3DE';
     el.style.color = remaining <= 3 ? '#C0392B' : remaining <= 8 ? '#854F0B' : '#3B6D11';
   }
@@ -2383,6 +2450,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   }
   applyBilingualUI();
   updateGenCounter();
+  updateLangToggleUI(detectLanguage());
   checkDeepLink();
   initSetupScrollTracking();
 });
@@ -3233,8 +3301,8 @@ async function generate() {
   const usedThisMonth = parseInt(localStorage.getItem(monthKey) || '0');
   if (usedThisMonth >= limit) {
     const msg = detectLanguage()==='en'
-      ? `You've reached the limit of ${limit} generations this month. Email us at postimity@gmail.com to upgrade.`
-      : `Llegaste al límite de ${limit} generaciones este mes. Escríbenos a postimity@gmail.com para hacer upgrade.`;
+      ? `You've reached the limit of ${limit} generations this month. Email us at support@postimity.com to upgrade.`
+      : `Llegaste al límite de ${limit} generaciones este mes. Escríbenos a support@postimity.com para hacer upgrade.`;
     alert(msg);
     return;
   }
@@ -3394,8 +3462,6 @@ async function generateVideo(brand) {
 
     // Step 3: Submit to fal.ai queue
     setStep(3);
-    // Step 3: Submit to fal.ai queue
-    setStep(3);
     document.getElementById('loadTitle').textContent = detectLanguage()==='es' ? '🚀 Enviando a generación...' : '🚀 Submitting to generate...';
     const submitResp = await fetch(WORKER, {
       method: 'POST',
@@ -3412,10 +3478,18 @@ async function generateVideo(brand) {
     const submitData = await submitResp.json();
     if(!submitData.success) throw new Error(submitData.error || 'Submit failed');
 
-    // Step 4: Start polling
+    // Step 4: Generate captions in parallel while video renders
+    let videoCaptions = null;
+    fetch(WORKER, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mode: 'captions', topic, brandGuide: brand.brandGuide, platform, imageStyle: 'video' }),
+    }).then(r => r.json()).then(d => { if(d.captions) videoCaptions = d.captions; }).catch(() => {});
+
+    // Step 5: Start polling
     setStep(4);
     document.getElementById('loadTitle').textContent = t('videoProcessing');
-    startVideoPolling(submitData.requestId, submitData.endpoint, submitData.statusUrl, submitData.responseUrl, brand, topic);
+    startVideoPolling(submitData.requestId, submitData.endpoint, submitData.statusUrl, submitData.responseUrl, brand, topic, videoCaptions);
 
   } catch(err) {
     showLoading(false);
@@ -3424,7 +3498,7 @@ async function generateVideo(brand) {
   }
 }
 
-function startVideoPolling(requestId, endpoint, statusUrl, responseUrl, brand, topic) {
+function startVideoPolling(requestId, endpoint, statusUrl, responseUrl, brand, topic, captionsRef) {
   let attempts = 0;
   const maxAttempts = 90; // 90 × 5s = 7.5 min max
 
@@ -3454,7 +3528,7 @@ function startVideoPolling(requestId, endpoint, statusUrl, responseUrl, brand, t
           const used = parseInt(localStorage.getItem(vMonthKey) || '0');
           localStorage.setItem(vMonthKey, String(used + 1));
           // Show video result
-          showVideoResult(data.videoUrl, topic);
+          showVideoResult(data.videoUrl, topic, captionsRef);
         } else {
           // Video completed but URL missing — show debug
           showLoading(false);
@@ -3474,50 +3548,71 @@ function startVideoPolling(requestId, endpoint, statusUrl, responseUrl, brand, t
   }, 5000);
 }
 
-function showVideoResult(videoUrl, topic) {
+function showVideoResult(videoUrl, topic, captionsData) {
   showLoading(false);
-  // Show result container (ID is resultWrap)
   const resultWrap = document.getElementById('resultWrap');
   if(resultWrap) resultWrap.classList.add('show');
-  // Remove any previous video player
   const oldVP = document.getElementById('videoPlayerWrap');
   if(oldVP) oldVP.remove();
-
   const resultImg = document.getElementById('resultImg');
   const isES = detectLanguage() === 'es';
   const tipText = isES
-    ? 'Al publicar, activa el label de AI en cada plataforma para maximizar alcance y evitar penalizaciones.'
-    : 'When posting, enable the AI label on each platform to maximize reach and avoid penalties.';
+    ? 'Al publicar, activa el label de AI en cada plataforma para maximizar alcance.'
+    : 'When posting, enable the AI label on each platform to maximize reach.';
   const tipDetails = isES
-    ? '<b>TikTok:</b> Activa "AI-generated" al publicar · <b>Instagram:</b> No requiere acción · <b>YouTube:</b> Marca "Contenido alterado" en Studio'
-    : '<b>TikTok:</b> Toggle "AI-generated" when posting · <b>Instagram:</b> No action needed · <b>YouTube:</b> Mark "Altered content" in Studio';
+    ? '<b>TikTok:</b> Activa "AI-generated" \u00b7 <b>Instagram:</b> No requiere acci\u00f3n \u00b7 <b>YouTube:</b> Marca "Contenido alterado"'
+    : '<b>TikTok:</b> Toggle "AI-generated" \u00b7 <b>Instagram:</b> No action needed \u00b7 <b>YouTube:</b> Mark "Altered content"';
+  // Build captions HTML if available
+  let captionsHtml = '';
+  if(captionsData) {
+    const igCap = captionsData.instagram || captionsData.caption || '';
+    const fbCap = captionsData.facebook || '';
+    const tkCap = captionsData.tiktok || '';
+    captionsHtml =
+      '<div style="margin-top:12px;background:var(--w);border:1px solid var(--bor);border-radius:12px;overflow:hidden">' +
+        '<div style="display:flex;border-bottom:1px solid var(--bor)">' +
+          '<button class="vcap-tab active" onclick="switchVideoCap(\'ig\',this)" style="flex:1;padding:8px;font-size:11px;font-weight:700;border:none;background:var(--b3);color:var(--b2);cursor:pointer">\ud83d\udcf8 Instagram</button>' +
+          '<button class="vcap-tab" onclick="switchVideoCap(\'fb\',this)" style="flex:1;padding:8px;font-size:11px;font-weight:700;border:none;background:transparent;color:var(--t3);cursor:pointer">\ud83d\udc65 Facebook</button>' +
+          '<button class="vcap-tab" onclick="switchVideoCap(\'tk\',this)" style="flex:1;padding:8px;font-size:11px;font-weight:700;border:none;background:transparent;color:var(--t3);cursor:pointer">\ud83c\udfb5 TikTok</button>' +
+        '</div>' +
+        '<div id="vcap-ig" class="vcap-content" style="padding:10px;font-size:12px;line-height:1.6;white-space:pre-wrap">' + (igCap||'').replace(/</g,'&lt;') + '</div>' +
+        '<div id="vcap-fb" class="vcap-content" style="padding:10px;font-size:12px;line-height:1.6;white-space:pre-wrap;display:none">' + (fbCap||'').replace(/</g,'&lt;') + '</div>' +
+        '<div id="vcap-tk" class="vcap-content" style="padding:10px;font-size:12px;line-height:1.6;white-space:pre-wrap;display:none">' + (tkCap||'').replace(/</g,'&lt;') + '</div>' +
+        '<button onclick="copyVideoCaption()" style="width:100%;padding:8px;border:none;border-top:1px solid var(--bor);background:var(--bg);font-size:11px;font-weight:600;color:var(--b);cursor:pointer;font-family:inherit">\ud83d\udccb ' + (isES?'Copiar caption':'Copy caption') + '</button>' +
+      '</div>';
+  }
   const videoHtml =
     '<video controls autoplay playsinline loop muted style="width:100%;border-radius:12px;max-height:500px;background:#000" src="' + videoUrl + '"></video>' +
     '<div style="margin-top:10px;padding:10px 14px;background:var(--b3);border-radius:10px;font-size:11px;line-height:1.6;color:var(--b2)">' +
-      '<div style="font-weight:700;margin-bottom:3px">🏷️ ' + tipText + '</div>' +
+      '<div style="font-weight:700;margin-bottom:3px">\ud83c\udff7\ufe0f ' + tipText + '</div>' +
       '<div style="opacity:.85">' + tipDetails + '</div>' +
-    '</div>';
+    '</div>' + captionsHtml;
   resultImg.style.display = 'none';
   resultImg.insertAdjacentHTML('afterend', '<div id="videoPlayerWrap">' + videoHtml + '</div>');
-
-  // Hide all image-only panels
   ['img-controls','cap-panel'].forEach(cls => { const el=document.querySelector('.'+cls); if(el) el.style.display='none'; });
   ['adBriefWrap','carouselPreviewWrap','keyQuoteWrap'].forEach(id => { const el=document.getElementById(id); if(el) el.style.display='none'; });
   const photoDesc = document.getElementById('photoDescBar');
   if(photoDesc) photoDesc.classList.remove('show');
-
-  // Update buttons for video download
   const regenBtns = document.querySelector('.regen-btns');
   if(regenBtns) {
     regenBtns.innerHTML =
       '<a class="btn-regen" href="' + videoUrl + '" download="postimity-video.mp4">' + t('videoDownload') + '</a>' +
       '<button class="btn-regen" onclick="resetVideoCreator()">' + t('videoNewOne') + '</button>';
   }
-  // Scroll to result
   if(resultWrap) resultWrap.scrollIntoView({ behavior:'smooth', block:'start' });
   showToast(t('videoReady'));
-  // Save video to history
   saveVideoToHistory(videoUrl, topic);
+}
+function switchVideoCap(tab, btn) {
+  document.querySelectorAll('.vcap-content').forEach(el => el.style.display = 'none');
+  document.querySelectorAll('.vcap-tab').forEach(el => { el.classList.remove('active'); el.style.background='transparent'; el.style.color='var(--t3)'; });
+  const target = document.getElementById('vcap-' + tab);
+  if(target) target.style.display = 'block';
+  btn.classList.add('active'); btn.style.background='var(--b3)'; btn.style.color='var(--b2)';
+}
+function copyVideoCaption() {
+  const visible = document.querySelector('.vcap-content[style*="block"]') || document.getElementById('vcap-ig');
+  if(visible) navigator.clipboard.writeText(visible.textContent).then(() => showToast(detectLanguage()==='es'?'Caption copiado \u2713':'Caption copied \u2713'));
 }
 
 async function saveVideoToHistory(videoUrl, topic) {
@@ -5222,6 +5317,185 @@ function resetCreator() {
 
 // Cap tab default
 showCapTabById('ig');
+
+// ═══════════════════════════════════════════════════════
+// FEEDBACK WIDGET
+// ═══════════════════════════════════════════════════════
+let fbType = null; // 'suggestion' | 'issue'
+let fbCategory = null;
+
+function toggleFeedback() {
+  const panel = document.getElementById('fbPanel');
+  const fab = document.getElementById('fbFab');
+  const isOpen = panel.classList.contains('show');
+  panel.classList.toggle('show', !isOpen);
+  fab.classList.toggle('open', !isOpen);
+  if(!isOpen) resetFeedbackForm();
+}
+
+function setFbType(type) {
+  fbType = type;
+  document.querySelectorAll('.fb-type-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(type === 'suggestion' ? 'fbTypeSug' : 'fbTypeIssue').classList.add('active');
+  // Show appropriate categories
+  const isES = detectLanguage() === 'es';
+  const sugCats = isES
+    ? [['new-feature','✨ Nueva función'],['mode-request','🎨 Nuevo modo'],['improvement','📈 Mejora'],['other','💬 Otro']]
+    : [['new-feature','✨ New feature'],['mode-request','🎨 New mode'],['improvement','📈 Improvement'],['other','💬 Other']];
+  const issueCats = isES
+    ? [['bug','🐛 Error/Bug'],['ux','🖥️ Usabilidad'],['quality','📊 Calidad AI'],['billing','💳 Pagos'],['other','💬 Otro']]
+    : [['bug','🐛 Bug'],['ux','🖥️ Usability'],['quality','📊 AI Quality'],['billing','💳 Billing'],['other','💬 Other']];
+  const cats = type === 'suggestion' ? sugCats : issueCats;
+  const catsWrap = document.getElementById('fbCatsWrap');
+  catsWrap.innerHTML = cats.map(([val, label]) =>
+    '<button class="fb-cat" data-cat="' + val + '" onclick="setFbCat(\'' + val + '\',this)">' + label + '</button>'
+  ).join('');
+  catsWrap.style.display = 'flex';
+  fbCategory = null;
+  // Show form section
+  document.getElementById('fbFormSection').style.display = 'block';
+  document.getElementById('fbFaqSection').style.display = type === 'issue' ? 'block' : 'none';
+}
+
+function setFbCat(cat, btn) {
+  fbCategory = cat;
+  document.querySelectorAll('.fb-cat').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+async function submitFeedback() {
+  const msg = document.getElementById('fbMessage').value.trim();
+  if(!msg) return;
+  if(!fbType) return;
+  const brand = loadBrand();
+  const btn = document.getElementById('fbSubmitBtn');
+  btn.disabled = true;
+  btn.textContent = detectLanguage() === 'es' ? 'Enviando...' : 'Sending...';
+  try {
+    await fetch(WORKER, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        mode: 'submit-feedback',
+        type: fbType,
+        category: fbCategory || 'other',
+        message: msg,
+        brandId: brandId || null,
+        brandName: brand?.name || null,
+        email: brand?.email || null,
+        plan: brand?.plan || 'trial',
+      }),
+    });
+    // Show success
+    document.getElementById('fbFormView').style.display = 'none';
+    document.getElementById('fbSuccessView').style.display = 'block';
+  } catch(e) {
+    btn.disabled = false;
+    btn.textContent = detectLanguage() === 'es' ? 'Enviar' : 'Send';
+    showToast(detectLanguage() === 'es' ? '❌ Error al enviar, intenta de nuevo' : '❌ Send error, try again');
+  }
+}
+
+function resetFeedbackForm() {
+  fbType = null;
+  fbCategory = null;
+  document.querySelectorAll('.fb-type-btn').forEach(b => b.classList.remove('active'));
+  const catsWrap = document.getElementById('fbCatsWrap');
+  if(catsWrap) { catsWrap.innerHTML = ''; catsWrap.style.display = 'none'; }
+  const msg = document.getElementById('fbMessage');
+  if(msg) msg.value = '';
+  const formSection = document.getElementById('fbFormSection');
+  if(formSection) formSection.style.display = 'none';
+  const faqSection = document.getElementById('fbFaqSection');
+  if(faqSection) faqSection.style.display = 'none';
+  document.getElementById('fbFormView').style.display = 'block';
+  document.getElementById('fbSuccessView').style.display = 'none';
+  const btn = document.getElementById('fbSubmitBtn');
+  if(btn) { btn.disabled = false; btn.textContent = detectLanguage() === 'es' ? 'Enviar' : 'Send'; }
+}
+
+function initFeedbackWidget() {
+  const isES = detectLanguage() === 'es';
+  const el = id => document.getElementById(id);
+  if(el('fbTitle')) el('fbTitle').textContent = isES ? '¿Cómo podemos mejorar?' : 'How can we improve?';
+  if(el('fbTypeSugLabel')) el('fbTypeSugLabel').textContent = isES ? 'Sugerencia' : 'Suggestion';
+  if(el('fbTypeIssueLabel')) el('fbTypeIssueLabel').textContent = isES ? 'Reportar problema' : 'Report issue';
+  if(el('fbMessage')) el('fbMessage').placeholder = isES ? 'Cuéntanos tu idea o describe el problema...' : 'Tell us your idea or describe the issue...';
+  if(el('fbSubmitBtn')) el('fbSubmitBtn').textContent = isES ? 'Enviar' : 'Send';
+  if(el('fbSuccessTitle')) el('fbSuccessTitle').textContent = isES ? '¡Gracias!' : 'Thank you!';
+  if(el('fbSuccessMsg')) el('fbSuccessMsg').textContent = isES ? 'Tu mensaje ha sido recibido. Lo revisaremos pronto.' : 'Your message has been received. We\'ll review it soon.';
+  if(el('fbSuccessClose')) el('fbSuccessClose').textContent = isES ? 'Cerrar' : 'Close';
+  // FAQ items
+  const faqData = isES
+    ? [['¿Cómo publico en Instagram/Facebook/TikTok?','Genera un post, toca el botón de la plataforma. Postimity copia el caption y descarga la imagen — solo pega y publica.'],
+       ['¿Los videos cuentan como generaciones?','No. Videos y generaciones tienen contadores separados. Ambos se reinician cada mes.'],
+       ['¿Cómo cambio mi plan?','Ve a "Mi cuenta" en la barra superior. Ahí puedes ver tu plan actual y opciones de upgrade.'],
+       ['¿Puedo editar mi Brand Guide?','Sí. Toca el chip de tu marca en la esquina superior y edita cualquier campo.'],
+       ['¿Necesito más ayuda?','Escríbenos a support@postimity.com y te respondemos en menos de 24 horas.']]
+    : [['How do I publish to Instagram/Facebook/TikTok?','Generate a post, tap the platform button. Postimity copies the caption and downloads the image — just paste and publish.'],
+       ['Do videos count as generations?','No. Videos and generations have separate counters. Both reset monthly.'],
+       ['How do I change my plan?','Go to "My Account" in the top bar. You can see your current plan and upgrade options.'],
+       ['Can I edit my Brand Guide?','Yes. Tap your brand chip in the top corner and edit any field.'],
+       ['Need more help?','Email us at support@postimity.com and we\'ll respond within 24 hours.']];
+  const faqWrap = el('fbFaqList');
+  if(faqWrap) {
+    faqWrap.innerHTML = faqData.map(([q,a]) =>
+      '<div class="fb-faq-item" onclick="this.classList.toggle(\'open\')"><div class="fb-faq-q"><span>' + q + '</span><span style="font-size:10px">▼</span></div><div class="fb-faq-a">' + a + '</div></div>'
+    ).join('');
+  }
+}
+
+// Initialize when bilingual UI applies
+const origApplyBilingualUI = applyBilingualUI;
+applyBilingualUI = function() {
+  origApplyBilingualUI();
+  initFeedbackWidget();
+};
+// Also init on load
+if(document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initFeedbackWidget);
+} else {
+  initFeedbackWidget();
+}
 </script>
+
+<!-- Feedback Widget -->
+<button class="fb-fab" id="fbFab" onclick="toggleFeedback()" title="Feedback">💬</button>
+<div class="fb-panel" id="fbPanel">
+  <div class="fb-header">
+    <h3 id="fbTitle">¿Cómo podemos mejorar?</h3>
+    <button class="fb-close" onclick="toggleFeedback()">✕</button>
+  </div>
+  <div class="fb-body">
+    <div id="fbFormView">
+      <div class="fb-type-btns">
+        <button class="fb-type-btn" id="fbTypeSug" onclick="setFbType('suggestion')">
+          <span class="fb-icon">💡</span>
+          <span class="fb-label" id="fbTypeSugLabel">Sugerencia</span>
+        </button>
+        <button class="fb-type-btn" id="fbTypeIssue" onclick="setFbType('issue')">
+          <span class="fb-icon">🛠️</span>
+          <span class="fb-label" id="fbTypeIssueLabel">Reportar problema</span>
+        </button>
+      </div>
+      <div class="fb-cats" id="fbCatsWrap" style="display:none"></div>
+      <div id="fbFormSection" style="display:none">
+        <textarea class="fb-ta" id="fbMessage" placeholder="Cuéntanos tu idea o describe el problema..." rows="3"></textarea>
+        <button class="fb-submit" id="fbSubmitBtn" onclick="submitFeedback()">Enviar</button>
+      </div>
+      <div id="fbFaqSection" style="display:none;margin-top:14px">
+        <div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px">FAQ</div>
+        <div class="fb-faq" id="fbFaqList"></div>
+      </div>
+    </div>
+    <div class="fb-success" id="fbSuccessView" style="display:none">
+      <div class="fb-check">✅</div>
+      <h3 id="fbSuccessTitle" style="font-size:16px;font-weight:800;margin-bottom:6px">¡Gracias!</h3>
+      <p id="fbSuccessMsg">Tu mensaje ha sido recibido. Lo revisaremos pronto.</p>
+      <button class="fb-submit" id="fbSuccessClose" onclick="toggleFeedback()" style="margin-top:14px">Cerrar</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
