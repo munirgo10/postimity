@@ -458,6 +458,7 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
 .apc-mode{font-size:10px;padding:2px 8px;border-radius:20px;font-weight:700}
 .apc-mode.post{background:#E6F1FB;color:#185FA5}
 .apc-mode.carousel{background:#FDF0DC;color:#B5750B}
+.apc-mode.video{background:#F3E5F5;color:#7B1FA2}
 .apc-style{font-size:10px;padding:2px 8px;border-radius:20px;background:#F3F0FF;color:#6B46C1;font-weight:600}
 .apc-fest{font-size:10px;padding:2px 7px;border-radius:20px;background:var(--g2);color:var(--g3);font-weight:700}
 .apc-topic{font-size:13px;font-weight:700;color:var(--t1);margin-bottom:5px;line-height:1.3}
@@ -636,10 +637,10 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
   .dl-btns{flex-wrap:wrap}
 }
 /* ─── FEEDBACK WIDGET ─────────────────────────────── */
-.fb-fab{position:fixed;bottom:20px;right:20px;z-index:300;width:48px;height:48px;border-radius:50%;background:var(--b);color:#fff;border:none;font-size:20px;cursor:pointer;box-shadow:0 4px 16px rgba(41,121,255,.35);transition:.2s;display:flex;align-items:center;justify-content:center;font-family:inherit}
-.fb-fab:hover{transform:scale(1.08);box-shadow:0 6px 24px rgba(41,121,255,.4)}
+.fb-fab{position:fixed;bottom:20px;right:20px;z-index:300;width:56px;height:56px;border-radius:50%;background:var(--b);color:#fff;border:none;font-size:24px;cursor:pointer;box-shadow:0 4px 20px rgba(41,121,255,.4);transition:.2s;display:flex;align-items:center;justify-content:center;font-family:inherit}
+.fb-fab:hover{transform:scale(1.1);box-shadow:0 6px 28px rgba(41,121,255,.45)}
 .fb-fab.open{background:var(--t1);transform:rotate(45deg)}
-.fb-panel{position:fixed;bottom:78px;right:20px;z-index:300;width:340px;max-height:480px;background:var(--w);border:1px solid var(--bor);border-radius:var(--r2);box-shadow:0 8px 40px rgba(0,0,0,.15);display:none;flex-direction:column;overflow:hidden;animation:fbSlideUp .2s ease-out}
+.fb-panel{position:fixed;bottom:86px;right:20px;z-index:300;width:340px;max-height:480px;background:var(--w);border:1px solid var(--bor);border-radius:var(--r2);box-shadow:0 8px 40px rgba(0,0,0,.15);display:none;flex-direction:column;overflow:hidden;animation:fbSlideUp .2s ease-out}
 .fb-panel.show{display:flex}
 @keyframes fbSlideUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 .fb-header{padding:14px 16px;border-bottom:1px solid var(--bor);display:flex;align-items:center;gap:8px}
@@ -786,9 +787,11 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
       <div class="hist-filters">
         <button class="hist-filter active" data-filter="all" onclick="filterHist(this)">Todos</button>
         <button class="hist-filter" data-filter="post" onclick="filterHist(this)">Posts</button>
+        <button class="hist-filter" data-filter="enhance" onclick="filterHist(this)">Estudio Pro</button>
         <button class="hist-filter" data-filter="flyer" onclick="filterHist(this)">Flyers</button>
         <button class="hist-filter" data-filter="carousel" onclick="filterHist(this)">Carruseles</button>
         <button class="hist-filter" data-filter="testimonial" onclick="filterHist(this)">Testimonios</button>
+        <button class="hist-filter" data-filter="video" onclick="filterHist(this)">🎬 Videos</button>
       </div>
       <div class="hist-grid" id="histGrid">
         <div class="hist-empty" style="grid-column:span 3">
@@ -1819,7 +1822,7 @@ const T = {
     dashNoVideo:'Sin video',
     // ── History ──
     histTitle:'📚 Mi historial', histBack:'← Volver',
-    histAll:'Todos', histPosts:'Posts', histFlyers:'Flyers', histCarousels:'Carruseles', histTestimonials:'Testimonios',
+    histAll:'Todos', histPosts:'Posts', histEnhance:'Estudio Pro', histFlyers:'Flyers', histCarousels:'Carruseles', histTestimonials:'Testimonios', histVideos:'🎬 Videos',
     histEmpty:'📭', histEmptyTitle:'Aún no hay posts guardados', histEmptySub:'Genera tu primer post y aparecerá aquí automáticamente',
     histEmptyFilter:'No hay posts en este filtro', histEmptyFilterSub:'Genera contenido y aparecerá aquí',
     histReuse:'↺ Reutilizar prompt', histCopyCaption:'📋 Copiar caption', histNoCaption:'Sin caption guardado',
@@ -1835,9 +1838,9 @@ const T = {
     agentGenerating:'⏳ Generando plan...',
     agentPlannedSub:'{n} posts planificados para {month}',
     agentWeekLabel:'Semana {n} · {range}',
-    agentCreatePost:'→ Crear post', agentCreateCarousel:'→ Crear carrusel', agentCopyPrompt:'📋 Copiar prompt',
+    agentCreatePost:'→ Crear post', agentCreateCarousel:'→ Crear carrusel', agentCreateVideo:'→ Crear video', agentCopyPrompt:'📋 Copiar prompt',
     // ── Agent labels ──
-    agentModePost:'📌 Post', agentModeCarousel:'🎠 Carrusel',
+    agentModePost:'📌 Post', agentModeCarousel:'🎠 Carrusel', agentModeVideo:'🎬 Video',
     agentStylePhoto:'📷 Fotorrealista', agentStyleIllus:'🖼️ Ilustrado', agentStyleAbstract:'🎨 Abstracto',
     // ── Reminders ──
     remTitle:'Recordatorios automáticos', remSub:'Aviso cálido cada mañana antes de tu post del día',
@@ -2073,7 +2076,7 @@ const T = {
     dashNoVideo:'No video',
     // ── History ──
     histTitle:'📚 My history', histBack:'← Back',
-    histAll:'All', histPosts:'Posts', histFlyers:'Flyers', histCarousels:'Carousels', histTestimonials:'Testimonials',
+    histAll:'All', histPosts:'Posts', histEnhance:'Studio Pro', histFlyers:'Flyers', histCarousels:'Carousels', histTestimonials:'Testimonials', histVideos:'🎬 Videos',
     histEmpty:'📭', histEmptyTitle:'No saved posts yet', histEmptySub:'Generate your first post and it will appear here',
     histEmptyFilter:'No posts in this filter', histEmptyFilterSub:'Generate content and it will appear here',
     histReuse:'↺ Reuse prompt', histCopyCaption:'📋 Copy caption', histNoCaption:'No saved caption',
@@ -2089,9 +2092,9 @@ const T = {
     agentGenerating:'⏳ Generating plan...',
     agentPlannedSub:'{n} posts planned for {month}',
     agentWeekLabel:'Week {n} · {range}',
-    agentCreatePost:'→ Create post', agentCreateCarousel:'→ Create carousel', agentCopyPrompt:'📋 Copy prompt',
+    agentCreatePost:'→ Create post', agentCreateCarousel:'→ Create carousel', agentCreateVideo:'→ Create video', agentCopyPrompt:'📋 Copy prompt',
     // ── Agent labels ──
-    agentModePost:'📌 Post', agentModeCarousel:'🎠 Carousel',
+    agentModePost:'📌 Post', agentModeCarousel:'🎠 Carousel', agentModeVideo:'🎬 Video',
     agentStylePhoto:'📷 Photorealistic', agentStyleIllus:'🖼️ Illustrated', agentStyleAbstract:'🎨 Abstract',
     // ── Reminders ──
     remTitle:'Auto reminders', remSub:'A warm nudge every morning before your daily post',
@@ -3422,63 +3425,81 @@ async function generateVideo(brand) {
     alert(msg); return;
   }
 
-  showLoading(true);
+  // Show loading WITHOUT calling showLoading() — avoids the global 90s timeout entirely
+  const loadWrap = document.getElementById('loadWrap');
+  const inputCard = document.getElementById('inputCard');
+  const modeCards = document.querySelector('.mode-cards');
+  if(inputCard) inputCard.style.display = 'none';
+  if(modeCards) modeCards.style.display = 'none';
+  if(loadWrap) loadWrap.classList.add('show');
   document.getElementById('loadTitle').textContent = t('videoPolling');
+  const cancelBtn = document.getElementById('loadCancelBtn');
+  if(cancelBtn) cancelBtn.style.display = 'inline-flex';
+  // Kill any stale global timeout
+  if(_loadingTimeout) { clearTimeout(_loadingTimeout); _loadingTimeout = null; }
+
+  const isES = detectLanguage() === 'es';
 
   try {
-    // Step 1: Generate video prompt with Claude (may take 10-20s)
+    // Step 1: Generate video prompt with Claude
     setStep(1);
-    document.getElementById('loadTitle').textContent = detectLanguage()==='es' ? '🎬 Creando dirección del video...' : '🎬 Creating video direction...';
-    let promptData;
+    document.getElementById('loadTitle').textContent = isES ? '🎬 Creando dirección del video...' : '🎬 Creating video direction...';
+    let videoPrompt;
     try {
-      const promptResp = await postWithTimeout({
+      const promptData = await postWithTimeout({
         mode: 'video-prompt',
         topic,
         brandData: { name: brand.name, type: brand.type },
         brandGuide: brand.brandGuide,
         platform,
-      }, 28000);
-      promptData = await promptResp.json();
+      }, 25000);
+      videoPrompt = promptData.videoPrompt;
     } catch(promptErr) {
-      // If video-prompt times out, generate a simpler prompt locally
-      promptData = { success: true, videoPrompt: 'Professional cinematic short video: ' + topic + '. Smooth camera motion, professional lighting, high quality 4K.' };
+      videoPrompt = 'Professional cinematic short video: ' + topic + '. Smooth camera motion, professional lighting, high quality 4K.';
     }
-    if(!promptData.success && !promptData.videoPrompt) throw new Error(promptData.error || 'Prompt generation failed');
-    const videoPrompt = promptData.videoPrompt;
+    if(!videoPrompt) videoPrompt = 'Professional cinematic short video: ' + topic + '. Smooth camera, warm lighting, 4K.';
 
-    // Step 2: Upload photo to R2 if provided (for image-to-video)
+    // Step 2: Upload photo to R2 if provided
     let imageUrl = null;
     if(videoPhotoB64) {
       setStep(2);
-      document.getElementById('loadTitle').textContent = detectLanguage()==='es' ? '📸 Subiendo foto...' : '📸 Uploading photo...';
-      const uploadResp = await fetch(WORKER, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ mode: 'image', action: 'upload-video-photo', imageData: videoPhotoB64, brandId }),
-      });
-      const uploadData = await uploadResp.json();
-      if(uploadData.imageUrl) imageUrl = uploadData.imageUrl;
+      document.getElementById('loadTitle').textContent = isES ? '📸 Subiendo foto...' : '📸 Uploading photo...';
+      try {
+        const uploadData = await postWithTimeout({ mode: 'image', action: 'upload-video-photo', imageData: videoPhotoB64, brandId }, 30000);
+        if(uploadData.imageUrl) imageUrl = uploadData.imageUrl;
+      } catch(upErr) { /* continue without photo */ }
     }
 
     // Step 3: Submit to fal.ai queue
     setStep(3);
-    document.getElementById('loadTitle').textContent = detectLanguage()==='es' ? '🚀 Enviando a generación...' : '🚀 Submitting to generate...';
-    const submitResp = await fetch(WORKER, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
+    document.getElementById('loadTitle').textContent = isES ? '🚀 Enviando a generación...' : '🚀 Submitting to generate...';
+    let submitData;
+    try {
+      submitData = await postWithTimeout({
         mode: 'video-submit',
-        videoPrompt: videoPrompt,
+        videoPrompt,
         duration: videoDuration,
         aspectRatio: videoAspectRatio,
         brandId,
         imageUrl,
-      }),
-    });
-    const submitData = await submitResp.json();
-    if(!submitData.success) throw new Error(submitData.error || 'Submit failed');
+      }, 30000);
+    } catch(submitErr) {
+      throw new Error(isES
+        ? '❌ Error al enviar video: ' + (submitErr.message || 'intenta de nuevo')
+        : '❌ Video submit error: ' + (submitErr.message || 'try again'));
+    }
+    if(!submitData || !submitData.success) {
+      const errDetail = submitData?.error || '';
+      if(errDetail.includes('402') || errDetail.toLowerCase().includes('payment') || errDetail.toLowerCase().includes('credit')) {
+        throw new Error(isES ? '❌ Sin créditos en fal.ai — agrega créditos en fal.ai/dashboard/billing' : '❌ No fal.ai credits — add credits at fal.ai/dashboard/billing');
+      }
+      if(errDetail.includes('401') || errDetail.toLowerCase().includes('unauthorized') || errDetail.toLowerCase().includes('invalid')) {
+        throw new Error(isES ? '❌ FAL_KEY inválida — verifica en Cloudflare Workers secrets' : '❌ Invalid FAL_KEY — check Cloudflare Workers secrets');
+      }
+      throw new Error(isES ? '❌ Error fal.ai: ' + (errDetail || 'respuesta vacía') : '❌ fal.ai error: ' + (errDetail || 'empty response'));
+    }
 
-    // Step 4: Generate captions in parallel while video renders
+    // Step 4: Captions in parallel
     let videoCaptions = null;
     fetch(WORKER, {
       method: 'POST',
@@ -3489,14 +3510,23 @@ async function generateVideo(brand) {
     // Step 5: Start polling
     setStep(4);
     document.getElementById('loadTitle').textContent = t('videoProcessing');
+    const loadHint = document.querySelector('.load-wrap p');
+    if(loadHint) loadHint.innerHTML = isES
+      ? '⏱️ ~2-5 minutos · <span style="color:var(--t3)">Puedes seguir usando el Studio mientras se genera</span>'
+      : '⏱️ ~2-5 minutes · <span style="color:var(--t3)">You can keep using Studio while it generates</span>';
     startVideoPolling(submitData.requestId, submitData.endpoint, submitData.statusUrl, submitData.responseUrl, brand, topic, videoCaptions);
 
   } catch(err) {
-    showLoading(false);
+    // Reset UI manually (not via showLoading since we didn't use it)
+    if(loadWrap) loadWrap.classList.remove('show');
+    if(inputCard) inputCard.style.display = 'block';
+    if(modeCards) modeCards.style.display = '';
+    if(cancelBtn) cancelBtn.style.display = 'none';
     document.getElementById('errWrap').classList.add('show');
     document.getElementById('errMsg').textContent = err.message;
   }
 }
+
 
 function startVideoPolling(requestId, endpoint, statusUrl, responseUrl, brand, topic, captionsRef) {
   let attempts = 0;
@@ -3595,9 +3625,17 @@ function showVideoResult(videoUrl, topic, captionsData) {
   if(photoDesc) photoDesc.classList.remove('show');
   const regenBtns = document.querySelector('.regen-btns');
   if(regenBtns) {
+    const dlLabel = isES ? '⬇️ Descargar video' : '⬇️ Download video';
+    const newLabel = isES ? '🎬 Nuevo video' : '🎬 New video';
+    const shareIG = isES ? '📸 Abrir en Instagram' : '📸 Open in Instagram';
+    const shareFB = isES ? '👥 Abrir en Facebook' : '👥 Open in Facebook';
+    const shareTK = isES ? '🎵 Abrir en TikTok' : '🎵 Open in TikTok';
     regenBtns.innerHTML =
-      '<a class="btn-regen" href="' + videoUrl + '" download="postimity-video.mp4">' + t('videoDownload') + '</a>' +
-      '<button class="btn-regen" onclick="resetVideoCreator()">' + t('videoNewOne') + '</button>';
+      '<a class="btn-regen" href="' + videoUrl + '" download="postimity-video.mp4">' + dlLabel + '</a>' +
+      '<button class="btn-regen" onclick="shareVideoToSocial(\'instagram\')" style="background:linear-gradient(135deg,#833AB4,#E1306C,#F77737);color:#fff;border-color:transparent">' + shareIG + '</button>' +
+      '<button class="btn-regen" onclick="shareVideoToSocial(\'facebook\')" style="background:#1877F2;color:#fff;border-color:transparent">' + shareFB + '</button>' +
+      '<button class="btn-regen" onclick="shareVideoToSocial(\'tiktok\')" style="background:#010101;color:#fff;border-color:transparent">' + shareTK + '</button>' +
+      '<button class="btn-regen" onclick="resetVideoCreator()">' + newLabel + '</button>';
   }
   if(resultWrap) resultWrap.scrollIntoView({ behavior:'smooth', block:'start' });
   showToast(t('videoReady'));
@@ -3613,6 +3651,40 @@ function switchVideoCap(tab, btn) {
 function copyVideoCaption() {
   const visible = document.querySelector('.vcap-content[style*="block"]') || document.getElementById('vcap-ig');
   if(visible) navigator.clipboard.writeText(visible.textContent).then(() => showToast(detectLanguage()==='es'?'Caption copiado \u2713':'Caption copied \u2713'));
+}
+
+async function shareVideoToSocial(platform) {
+  const isES = detectLanguage() === 'es';
+  // 1. Copy caption for this platform
+  const capMap = { instagram: 'vcap-ig', facebook: 'vcap-fb', tiktok: 'vcap-tk' };
+  const capEl = document.getElementById(capMap[platform]) || document.getElementById('vcap-ig');
+  const caption = capEl ? capEl.textContent.trim() : '';
+  if(caption) {
+    try { await navigator.clipboard.writeText(caption); } catch(e) {
+      const ta = document.createElement('textarea');
+      ta.value = caption; document.body.appendChild(ta); ta.select();
+      document.execCommand('copy'); document.body.removeChild(ta);
+    }
+  }
+  // 2. Download video
+  const videoEl = document.querySelector('#videoPlayerWrap video');
+  if(videoEl && videoEl.src) {
+    const a = document.createElement('a');
+    a.href = videoEl.src;
+    a.download = 'postimity-video.mp4';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  }
+  // 3. Toast
+  const msgs = isES ? {
+    instagram: '📸 Video descargado · Caption copiado — abre Instagram y pégalo',
+    facebook: '👥 Video descargado · Caption copiado — abre Facebook y pégalo',
+    tiktok: '🎵 Video descargado · Caption copiado — abre TikTok y pégalo',
+  } : {
+    instagram: '📸 Video downloaded · Caption copied — open Instagram and paste',
+    facebook: '👥 Video downloaded · Caption copied — open Facebook and paste',
+    tiktok: '🎵 Video downloaded · Caption copied — open TikTok and paste',
+  };
+  showToast(msgs[platform] || (isES?'✅ Listo':'✅ Ready'));
 }
 
 async function saveVideoToHistory(videoUrl, topic) {
@@ -3871,8 +3943,10 @@ function renderHistGrid(posts) {
     let imgSrc = p.imageUrl || '';
     if(imgSrc && imgSrc.startsWith('/r2/')) imgSrc = WORKER.replace('/api','') + imgSrc;
     const thumb = imgSrc
-      ? '<img class="hist-thumb" src="' + imgSrc + '" alt="post" onload="this.style.opacity=1" onerror="histImgError(this)">' +
-        '<div class="hist-thumb-placeholder" id="htp-' + i + '" style="display:none">' + modeIcon + '</div>'
+      ? (p.mode === 'video'
+        ? '<div class="hist-thumb-placeholder" style="display:flex;background:linear-gradient(135deg,#1a1a2e,#16213e)"><span style="font-size:28px">▶️</span></div>'
+        : '<img class="hist-thumb" src="' + imgSrc + '" alt="post" onload="this.style.opacity=1" onerror="histImgError(this)">' +
+          '<div class="hist-thumb-placeholder" id="htp-' + i + '" style="display:none">' + modeIcon + '</div>')
       : '<div class="hist-thumb-placeholder">' + modeIcon + '</div>';
     return '<div class="hist-card" onclick="openHistDetail(' + i + ')">' +
       thumb +
@@ -3897,15 +3971,35 @@ function openHistDetail(idx) {
   const pilar = document.getElementById('histDetailPilar');
   const cap = document.getElementById('histDetailCaption');
 
-  if(histCurrentPost.imageUrl) {
+  // Remove any previous video player
+  const oldVideo = document.getElementById('histDetailVideo');
+  if(oldVideo) oldVideo.remove();
+
+  const isVideo = histCurrentPost.mode === 'video';
+
+  if(isVideo && histCurrentPost.imageUrl) {
+    // Show video player instead of image
+    img.style.display = 'none';
+    const videoEl = document.createElement('video');
+    videoEl.id = 'histDetailVideo';
+    videoEl.src = histCurrentPost.imageUrl;
+    videoEl.controls = true;
+    videoEl.autoplay = true;
+    videoEl.loop = true;
+    videoEl.muted = true;
+    videoEl.playsInline = true;
+    videoEl.style.cssText = 'width:100%;border-radius:12px;max-height:400px;background:#000;margin-bottom:10px';
+    img.insertAdjacentElement('afterend', videoEl);
+  } else if(histCurrentPost.imageUrl) {
     img.src = histCurrentPost.imageUrl;
     img.style.display = 'block';
   } else {
     img.style.display = 'none';
   }
   const date = new Date(histCurrentPost.timestamp);
+  const modeLabels = { post:'✍️ Post', enhance:'📸 Estudio Pro', flyer:'🎨 Flyer', carousel:'🎠 Carrusel', testimonial:'⭐ Testimonio', video:'🎬 Video AI' };
   const platLabel = histCurrentPost.platform === 'instagram' ? '📸 Instagram' : histCurrentPost.platform === 'facebook' ? '👥 Facebook' : '🎵 TikTok';
-  meta.textContent = date.toLocaleDateString(detectLanguage()==='en'?'en-US':'es-MX', {day:'numeric',month:'long',year:'numeric'}) + ' · ' + platLabel;
+  meta.textContent = (modeLabels[histCurrentPost.mode] || '✍️ Post') + ' · ' + date.toLocaleDateString(detectLanguage()==='en'?'en-US':'es-MX', {day:'numeric',month:'long',year:'numeric'}) + ' · ' + platLabel;
   pilar.textContent = histCurrentPost.pillar || 'General';
   cap.textContent = histCurrentPost.caption || histCurrentPost.captionSnippet || t('histNoCaption');
   if(modal) modal.style.display = 'flex';
@@ -3913,6 +4007,9 @@ function openHistDetail(idx) {
 
 function closeHistDetail(event) {
   const modal = document.getElementById('histDetailModal');
+  // Clean up video player on close
+  const videoEl = document.getElementById('histDetailVideo');
+  if(videoEl) { videoEl.pause(); videoEl.remove(); }
   if(modal) modal.style.display = 'none';
 }
 
@@ -4113,9 +4210,9 @@ function renderAgentPlan(plan) {
       card.className = 'agent-post-card' + (post.festivity ? ' festivity' : '');
       const platClass = post.platform || 'instagram';
       const platLabel = post.platform === 'instagram' ? '📸 Instagram' : post.platform === 'facebook' ? '👥 Facebook' : '🎵 TikTok';
-      const modeLabel = post.suggestedMode === 'carousel' ? t('agentModeCarousel') : t('agentModePost');
-      const modeClass = post.suggestedMode === 'carousel' ? 'carousel' : 'post';
-      const styleLabel = post.suggestedStyle === 'photo' ? t('agentStylePhoto') : post.suggestedStyle === 'abstract' ? t('agentStyleAbstract') : t('agentStyleIllus');
+      const modeLabel = post.suggestedMode === 'video' ? t('agentModeVideo') : post.suggestedMode === 'carousel' ? t('agentModeCarousel') : t('agentModePost');
+      const modeClass = post.suggestedMode === 'video' ? 'video' : post.suggestedMode === 'carousel' ? 'carousel' : 'post';
+      const styleLabel = post.suggestedMode === 'video' ? '🎬 Video AI' : post.suggestedStyle === 'photo' ? t('agentStylePhoto') : post.suggestedStyle === 'abstract' ? t('agentStyleAbstract') : t('agentStyleIllus');
       const postIdx = agentPostsCache.indexOf(post);
       card.innerHTML = '<div class="apc-meta">' +
         '<span class="apc-date">' + (post.dayName||'') + ' ' + (post.dateShort||post.date) + '</span>' +
@@ -4128,7 +4225,7 @@ function renderAgentPlan(plan) {
         '<div class="apc-topic">' + (post.topic||'') + '</div>' +
         '<div class="apc-prompt">' + (post.prompt||'') + '</div>' +
         '<div class="apc-btns">' +
-        '<button class="apc-btn create" onclick="goCreatePost(' + postIdx + ')">' + (post.suggestedMode === 'carousel' ? t('agentCreateCarousel') : t('agentCreatePost')) + '</button>' +
+        '<button class="apc-btn create" onclick="goCreatePost(' + postIdx + ')">' + (post.suggestedMode === 'video' ? t('agentCreateVideo') : post.suggestedMode === 'carousel' ? t('agentCreateCarousel') : t('agentCreatePost')) + '</button>' +
         '<button class="apc-btn copy" onclick="copyPrompt(' + postIdx + ')">' + t('agentCopyPrompt') + '</button>' +
 
         '</div>';
@@ -4615,7 +4712,7 @@ function applyBilingualUI() {
   const histTitleEl = document.querySelector('.hist-title'); if(histTitleEl) histTitleEl.textContent = t('histTitle');
   const histBackEl = document.querySelector('.hist-back'); if(histBackEl) histBackEl.textContent = t('histBack');
   const histFilters = document.querySelectorAll('.hist-filter');
-  const hfKeys = ['histAll','histPosts','histFlyers','histCarousels','histTestimonials'];
+  const hfKeys = ['histAll','histPosts','histEnhance','histFlyers','histCarousels','histTestimonials','histVideos'];
   histFilters.forEach((f, i) => { if(hfKeys[i]) f.textContent = t(hfKeys[i]); });
   // History empty state
   const histEmptyT = document.querySelector('.hist-empty-t'); if(histEmptyT) histEmptyT.textContent = t('histEmptyTitle');
