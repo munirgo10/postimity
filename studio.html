@@ -614,9 +614,9 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
 .gallery-item .gi-tag{font-size:9px;font-weight:700;color:#fff;background:rgba(255,255,255,.2);border-radius:4px;padding:1px 5px;backdrop-filter:blur(4px)}
 .gallery-item .gi-del{position:absolute;top:4px;right:4px;background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:50%;width:22px;height:22px;font-size:12px;cursor:pointer;display:none;align-items:center;justify-content:center}
 .gallery-item:hover .gi-del{display:flex}
-.gallery-upload-zone{border:2px dashed var(--bor);border-radius:12px;padding:20px;text-align:center;cursor:pointer;transition:.2s;background:var(--bg);position:relative}
+.gallery-upload-zone{border:2px dashed var(--bor);border-radius:12px;padding:20px;text-align:center;cursor:pointer;transition:.2s;background:var(--bg);position:relative;overflow:hidden}
 .gallery-upload-zone:hover{border-color:var(--b);background:var(--b3)}
-.gallery-upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer}
+.gallery-upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;z-index:2}
 .gallery-tag-bar{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
 .gallery-tag-btn{font-size:11px;font-weight:700;padding:5px 12px;border-radius:8px;border:1.5px solid var(--bor);background:var(--w);color:var(--t2);cursor:pointer;transition:.15s}
 .gallery-tag-btn:hover{border-color:var(--b);color:var(--b)}
@@ -822,8 +822,8 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
           <span class="gallery-count" id="galleryCount"></span>
         </div>
         <!-- Upload zone -->
-        <div class="gallery-upload-zone" id="galleryUploadZone">
-          <input type="file" id="galleryFileInput" accept="image/*" multiple>
+        <div class="gallery-upload-zone" id="galleryUploadZone" onclick="document.getElementById('galleryFileInput').click()">
+          <input type="file" id="galleryFileInput" accept="image/*" multiple onchange="handleGalleryFiles(this)" onclick="event.stopPropagation()">
           <div style="font-size:24px;margin-bottom:6px">📷</div>
           <div style="font-size:13px;font-weight:600;color:var(--t2)" id="galleryUploadTitle">Arrastra fotos o haz click</div>
           <div style="font-size:11px;color:var(--t3)" id="galleryUploadSub">JPG, PNG o WebP · Máximo 10MB cada una</div>
@@ -4162,42 +4162,54 @@ function renderGalleryGrid() {
 }
 
 function initGalleryUpload() {
-  const input = document.getElementById('galleryFileInput');
-  if (!input) return;
-  input.addEventListener('change', function(e) {
-    const files = Array.from(e.target.files).filter(f => f.type.startsWith('image/'));
-    if (files.length === 0) return;
-
-    // Poka-yoke: check remaining capacity
-    const remaining = galleryLimit - galleryData.length;
-    if (remaining <= 0) {
-      const isES = detectLanguage() === 'es';
-      showToast(isES ? 'Tu galería está llena. Elimina fotos o mejora tu plan.' : 'Your gallery is full. Delete photos or upgrade your plan.');
-      input.value = '';
-      return;
-    }
-
-    if (files.length > remaining) {
-      const isES = detectLanguage() === 'es';
-      showToast(isES ? 'Solo puedes subir ' + remaining + ' foto(s) más' : 'You can only upload ' + remaining + ' more photo(s)');
-    }
-
-    // Poka-yoke: validate size (10MB max)
-    const validFiles = files.slice(0, remaining).filter(f => {
-      if (f.size > 10 * 1024 * 1024) {
-        showToast((detectLanguage() === 'es' ? 'Foto muy grande: ' : 'Photo too large: ') + f.name);
-        return false;
-      }
-      return true;
-    });
-
-    if (validFiles.length === 0) { input.value = ''; return; }
-
-    galleryPendingFiles = validFiles;
-    galleryPendingTags = [];
-    showGalleryTagSelector();
-    input.value = '';
+  // Drag and drop support
+  const zone = document.getElementById('galleryUploadZone');
+  if (!zone) return;
+  zone.addEventListener('dragover', function(e) { e.preventDefault(); zone.classList.add('drag'); });
+  zone.addEventListener('dragleave', function() { zone.classList.remove('drag'); });
+  zone.addEventListener('drop', function(e) {
+    e.preventDefault();
+    zone.classList.remove('drag');
+    const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
+    if (files.length > 0) processGalleryFiles(files);
   });
+}
+
+function handleGalleryFiles(input) {
+  const files = Array.from(input.files).filter(f => f.type.startsWith('image/'));
+  if (files.length > 0) processGalleryFiles(files);
+  input.value = '';
+}
+
+function processGalleryFiles(files) {
+  if (files.length === 0) return;
+
+  // Poka-yoke: check remaining capacity
+  const remaining = galleryLimit - galleryData.length;
+  if (remaining <= 0) {
+    showToast(t('galleryFullToast'));
+    return;
+  }
+
+  if (files.length > remaining) {
+    const isES = detectLanguage() === 'es';
+    showToast(isES ? 'Solo puedes subir ' + remaining + ' foto(s) más' : 'You can only upload ' + remaining + ' more photo(s)');
+  }
+
+  // Poka-yoke: validate size (10MB max)
+  const validFiles = files.slice(0, remaining).filter(f => {
+    if (f.size > 10 * 1024 * 1024) {
+      showToast((detectLanguage() === 'es' ? 'Foto muy grande: ' : 'Photo too large: ') + f.name);
+      return false;
+    }
+    return true;
+  });
+
+  if (validFiles.length === 0) return;
+
+  galleryPendingFiles = validFiles;
+  galleryPendingTags = [];
+  showGalleryTagSelector();
 }
 
 function showGalleryTagSelector() {
