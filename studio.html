@@ -836,7 +836,7 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
             <button id="galleryUploadBtn" style="flex:1;padding:9px;border-radius:9px;background:var(--b);color:#fff;border:none;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;opacity:.5;pointer-events:none" onclick="confirmGalleryUpload()">Guardar en galería</button>
             <button style="padding:9px 14px;border-radius:9px;background:var(--bg);border:1px solid var(--bor);font-size:12px;font-weight:600;color:var(--t3);cursor:pointer;font-family:inherit" onclick="cancelGalleryUpload()">Cancelar</button>
           </div>
-          <img id="galleryUploadPreview" style="width:100%;max-height:140px;border-radius:8px;object-fit:cover;margin-top:8px;display:none" src="" alt="">
+          <img id="galleryUploadPreview" style="width:100%;max-height:220px;border-radius:10px;object-fit:contain;margin-top:10px;display:none;background:var(--bg)" src="" alt="">
         </div>
         <!-- Photo grid -->
         <div class="gallery-grid" id="galleryGrid"></div>
@@ -4207,38 +4207,62 @@ function processGalleryFiles(files) {
 
   if (validFiles.length === 0) return;
 
+  // Queue all files, start with first
   galleryPendingFiles = validFiles;
-  galleryPendingTags = [];
-  showGalleryTagSelector();
+  galleryCurrentFileIdx = 0;
+  showGalleryTagForCurrentFile();
 }
 
-function showGalleryTagSelector() {
+let galleryCurrentFileIdx = 0;
+
+function showGalleryTagForCurrentFile() {
   const wrap = document.getElementById('galleryTagUploadWrap');
   const preview = document.getElementById('galleryUploadPreview');
   const tagBar = document.getElementById('galleryTagBar');
   if (!wrap || !tagBar) return;
 
+  const file = galleryPendingFiles[galleryCurrentFileIdx];
+  if (!file) { cancelGalleryUpload(); return; }
+
   const isES = detectLanguage() === 'es';
   const labels = GALLERY_TAG_LABELS[isES ? 'es' : 'en'];
+  const total = galleryPendingFiles.length;
+  const current = galleryCurrentFileIdx + 1;
 
-  // Show preview of first file
-  if (preview && galleryPendingFiles[0]) {
+  // Show preview of current file
+  if (preview) {
     const reader = new FileReader();
     reader.onload = e => { preview.src = e.target.result; preview.style.display = 'block'; };
-    reader.readAsDataURL(galleryPendingFiles[0]);
+    reader.readAsDataURL(file);
   }
 
-  // Label
+  // Label — show progress if multiple files
   const labelEl = document.getElementById('galleryTagLabel');
-  if (labelEl) labelEl.textContent = isES
-    ? 'Etiqueta obligatoria — ¿qué muestra esta foto?' + (galleryPendingFiles.length > 1 ? ' (' + galleryPendingFiles.length + ' fotos)' : '')
-    : 'Required tag — what does this photo show?' + (galleryPendingFiles.length > 1 ? ' (' + galleryPendingFiles.length + ' photos)' : '');
+  if (labelEl) {
+    const progressStr = total > 1 ? ' (' + current + '/' + total + ')' : '';
+    labelEl.textContent = (isES
+      ? '¿Qué muestra esta foto?' + progressStr + ' — ' + file.name
+      : 'What does this photo show?' + progressStr + ' — ' + file.name);
+  }
 
-  // Render tag buttons
+  // Reset tag buttons — each photo gets fresh tags
   galleryPendingTags = [];
   tagBar.innerHTML = VALID_GALLERY_TAGS.map(tag =>
     '<button class="gallery-tag-btn" data-tag="' + tag + '" onclick="toggleGalleryTag(\'' + tag + '\',this)">' + (labels[tag] || tag) + '</button>'
   ).join('');
+
+  // Update button label
+  const btn = document.getElementById('galleryUploadBtn');
+  if (btn) {
+    const remaining = total - current;
+    btn.textContent = isES
+      ? (remaining > 0 ? 'Guardar y siguiente →' : 'Guardar en galería')
+      : (remaining > 0 ? 'Save & next →' : 'Save to gallery');
+  }
+
+  // Hide upload zone while tagging
+  const uploadZone = document.getElementById('galleryUploadZone');
+  if (uploadZone) uploadZone.style.display = 'none';
 
   wrap.style.display = 'block';
   updateGalleryUploadBtn();
@@ -4272,50 +4296,59 @@ function updateGalleryUploadBtn() {
 function cancelGalleryUpload() {
   galleryPendingFiles = [];
   galleryPendingTags = [];
+  galleryCurrentFileIdx = 0;
   const wrap = document.getElementById('galleryTagUploadWrap');
   const preview = document.getElementById('galleryUploadPreview');
   if (wrap) wrap.style.display = 'none';
   if (preview) { preview.style.display = 'none'; preview.src = ''; }
+  // Restore upload zone
+  const uploadZone = document.getElementById('galleryUploadZone');
+  if (uploadZone && galleryData.length < galleryLimit) uploadZone.style.display = '';
 }
 
 async function confirmGalleryUpload() {
-  if (galleryPendingTags.length === 0 || galleryPendingFiles.length === 0) return;
+  if (galleryPendingTags.length === 0) return;
+  const file = galleryPendingFiles[galleryCurrentFileIdx];
+  if (!file) return;
 
   const btn = document.getElementById('galleryUploadBtn');
   const isES = detectLanguage() === 'es';
   if (btn) { btn.textContent = isES ? 'Subiendo...' : 'Uploading...'; btn.style.pointerEvents = 'none'; }
 
-  let uploaded = 0;
-  for (const file of galleryPendingFiles) {
-    try {
-      const b64 = await fileToBase64(file);
-      const data = await postJSON({
-        mode: 'gallery-upload',
-        brandId,
-        imageData: b64,
-        tags: galleryPendingTags,
-        fileName: file.name,
-      });
-      if (data.success) {
-        galleryData.push(data.photo);
-        uploaded++;
-      } else if (data.code === 'GALLERY_FULL') {
-        showToast(isES ? 'Galería llena' : 'Gallery full');
-        break;
-      }
-    } catch(e) {
-      console.error('Gallery upload error:', e);
+  try {
+    const b64 = await fileToBase64(file);
+    const data = await postJSON({
+      mode: 'gallery-upload',
+      brandId,
+      imageData: b64,
+      tags: galleryPendingTags,
+      fileName: file.name,
+    });
+    if (data.success) {
+      galleryData.push(data.photo);
+      renderGalleryGrid();
+      updateGalleryToggle();
+    } else if (data.code === 'GALLERY_FULL') {
+      showToast(t('galleryFullToast'));
+      cancelGalleryUpload();
+      return;
     }
+  } catch(e) {
+    console.error('Gallery upload error:', e);
+    showToast(isES ? 'Error al subir foto' : 'Upload failed');
   }
 
-  if (uploaded > 0) {
-    showToast((isES ? '✅ ' + uploaded + ' foto(s) guardada(s)' : '✅ ' + uploaded + ' photo(s) saved'));
-    renderGalleryGrid();
-    updateGalleryToggle();
+  // Move to next file or finish
+  galleryCurrentFileIdx++;
+  if (galleryCurrentFileIdx < galleryPendingFiles.length) {
+    // Show next photo for tagging
+    showGalleryTagForCurrentFile();
+  } else {
+    // All done
+    const total = galleryPendingFiles.length;
+    showToast(isES ? '✅ ' + total + ' foto(s) guardada(s)' : '✅ ' + total + ' photo(s) saved');
+    cancelGalleryUpload();
   }
-
-  cancelGalleryUpload();
-  if (btn) { btn.textContent = isES ? 'Guardar en galería' : 'Save to gallery'; btn.style.pointerEvents = 'auto'; }
 }
 
 function fileToBase64(file) {
