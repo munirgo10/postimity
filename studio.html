@@ -605,6 +605,47 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
 .pt-gens{font-size:10px;color:var(--t3)}
 .pt-current{font-size:10px;font-weight:700;color:var(--b);margin-top:4px}
 
+/* ─── PHOTO GALLERY ──────────────────────────────── */
+.gallery-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px;margin-top:12px}
+.gallery-item{position:relative;border-radius:10px;overflow:hidden;aspect-ratio:1;border:1.5px solid var(--bor);cursor:pointer;transition:.15s}
+.gallery-item:hover{border-color:var(--b);transform:scale(1.02)}
+.gallery-item img{width:100%;height:100%;object-fit:cover}
+.gallery-item .gi-tags{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.7));padding:4px 6px;display:flex;flex-wrap:wrap;gap:2px}
+.gallery-item .gi-tag{font-size:9px;font-weight:700;color:#fff;background:rgba(255,255,255,.2);border-radius:4px;padding:1px 5px;backdrop-filter:blur(4px)}
+.gallery-item .gi-del{position:absolute;top:4px;right:4px;background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:50%;width:22px;height:22px;font-size:12px;cursor:pointer;display:none;align-items:center;justify-content:center}
+.gallery-item:hover .gi-del{display:flex}
+.gallery-upload-zone{border:2px dashed var(--bor);border-radius:12px;padding:20px;text-align:center;cursor:pointer;transition:.2s;background:var(--bg);position:relative}
+.gallery-upload-zone:hover{border-color:var(--b);background:var(--b3)}
+.gallery-upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer}
+.gallery-tag-bar{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
+.gallery-tag-btn{font-size:11px;font-weight:700;padding:5px 12px;border-radius:8px;border:1.5px solid var(--bor);background:var(--w);color:var(--t2);cursor:pointer;transition:.15s}
+.gallery-tag-btn:hover{border-color:var(--b);color:var(--b)}
+.gallery-tag-btn.active{background:var(--b);border-color:var(--b);color:#fff}
+.gallery-count{font-size:11px;color:var(--t3);margin-top:8px}
+.gallery-count .gc-warn{color:#F57C00}
+.gallery-count .gc-full{color:#E53935;font-weight:700}
+.gallery-empty{text-align:center;padding:24px;color:var(--t3);font-size:13px}
+/* Gallery toggle in generation flow */
+.gallery-toggle-wrap{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bg);border-radius:10px;margin-bottom:10px;border:1px solid var(--bor)}
+.gallery-toggle-wrap.disabled{opacity:.5;pointer-events:none}
+.gt-switch{position:relative;width:36px;height:20px;flex-shrink:0}
+.gt-switch input{opacity:0;width:100%;height:100%;position:absolute;cursor:pointer;margin:0;z-index:1}
+.gt-track{position:absolute;inset:0;background:var(--bor);border-radius:10px;transition:.2s}
+.gt-switch input:checked + .gt-track{background:var(--b)}
+.gt-knob{position:absolute;top:2px;left:2px;width:16px;height:16px;background:#fff;border-radius:50%;transition:.2s;pointer-events:none}
+.gt-switch input:checked ~ .gt-knob{left:18px}
+.gt-label{font-size:12px;font-weight:600;color:var(--t2);flex:1}
+.gt-hint{font-size:10px;color:var(--t3)}
+/* Gallery photo selector in generation */
+.gallery-selector{background:var(--bg);border-radius:10px;padding:12px;margin-bottom:10px;border:1px solid var(--bor);display:none}
+.gallery-selector.show{display:block}
+.gs-title{font-size:11px;font-weight:700;color:var(--t2);margin-bottom:8px}
+.gs-photos{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px}
+.gs-photo{width:72px;height:72px;border-radius:8px;overflow:hidden;border:2px solid transparent;cursor:pointer;flex-shrink:0;transition:.15s}
+.gs-photo:hover{border-color:var(--b)}
+.gs-photo.selected{border-color:var(--b);box-shadow:0 0 0 2px var(--b3)}
+.gs-photo img{width:100%;height:100%;object-fit:cover}
+
 /* ─── WELCOME / ONBOARDING ────────────────────────── */
 .welcome-wrap{max-width:480px;margin:0 auto;padding:40px 20px 60px;text-align:center;display:flex;flex-direction:column;align-items:center;min-height:100vh;justify-content:center}
 .welcome-logo-pill{background:var(--b);color:#fff;font-size:28px;font-weight:900;width:64px;height:64px;border-radius:18px;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;box-shadow:0 8px 24px rgba(41,121,255,.3)}
@@ -773,6 +814,36 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
           <button class="brand-edit-btn" onclick="goEditBrand()">✏️ Editar Brand Guide</button>
         </div>
         <div id="cuentaBrandInfo"></div>
+      </div>
+      <!-- Photo Gallery -->
+      <div class="brand-card" id="galleryCard">
+        <div class="brand-card-header">
+          <span class="brand-card-title" id="galleryTitle">📸 Mis fotos</span>
+          <span class="gallery-count" id="galleryCount"></span>
+        </div>
+        <!-- Upload zone -->
+        <div class="gallery-upload-zone" id="galleryUploadZone">
+          <input type="file" id="galleryFileInput" accept="image/*" multiple>
+          <div style="font-size:24px;margin-bottom:6px">📷</div>
+          <div style="font-size:13px;font-weight:600;color:var(--t2)" id="galleryUploadTitle">Arrastra fotos o haz click</div>
+          <div style="font-size:11px;color:var(--t3)" id="galleryUploadSub">JPG, PNG o WebP · Máximo 10MB cada una</div>
+        </div>
+        <!-- Tag selector for upload (hidden until photo selected) -->
+        <div id="galleryTagUploadWrap" style="display:none;margin-top:10px">
+          <div style="font-size:11px;font-weight:700;color:var(--t2);margin-bottom:6px" id="galleryTagLabel">Etiqueta obligatoria — ¿qué muestra esta foto?</div>
+          <div class="gallery-tag-bar" id="galleryTagBar"></div>
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <button id="galleryUploadBtn" style="flex:1;padding:9px;border-radius:9px;background:var(--b);color:#fff;border:none;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;opacity:.5;pointer-events:none" onclick="confirmGalleryUpload()">Guardar en galería</button>
+            <button style="padding:9px 14px;border-radius:9px;background:var(--bg);border:1px solid var(--bor);font-size:12px;font-weight:600;color:var(--t3);cursor:pointer;font-family:inherit" onclick="cancelGalleryUpload()">Cancelar</button>
+          </div>
+          <img id="galleryUploadPreview" style="width:100%;max-height:140px;border-radius:8px;object-fit:cover;margin-top:8px;display:none" src="" alt="">
+        </div>
+        <!-- Photo grid -->
+        <div class="gallery-grid" id="galleryGrid"></div>
+        <div class="gallery-empty" id="galleryEmpty" style="display:none">
+          <div style="font-size:28px;margin-bottom:8px">📷</div>
+          <div id="galleryEmptyText">Sube fotos de tu negocio para usarlas en tus publicaciones</div>
+        </div>
       </div>
       <!-- Planes -->
       <div class="brand-card">
@@ -1453,6 +1524,23 @@ Ej: 'Wonderik es increíble. Mi hija de 3 años ya lee palabras cortas y su desa
         <img id="videoPrev" class="photo-prev" src="" alt="" style="display:none">
       </div>
 
+      <!-- Gallery toggle + photo selector -->
+      <div class="gallery-toggle-wrap disabled" id="galleryToggleWrap" style="display:none">
+        <div class="gt-switch">
+          <input type="checkbox" id="galleryToggle" onchange="onGalleryToggleChange(this.checked)">
+          <div class="gt-track"></div>
+          <div class="gt-knob"></div>
+        </div>
+        <div>
+          <div class="gt-label" id="gtLabel">Usar mis fotos</div>
+          <div class="gt-hint" id="gtHint">Sube fotos en Mi Cuenta para activar</div>
+        </div>
+      </div>
+      <div class="gallery-selector" id="gallerySelector">
+        <div class="gs-title" id="gsTitle">📷 Foto sugerida — toca para cambiar</div>
+        <div class="gs-photos" id="gsPhotos"></div>
+      </div>
+
       <button class="btn-gen" id="btnGen" onclick="generate()">✨ Generar contenido con AI</button>
     </div>
 
@@ -1935,6 +2023,18 @@ const T = {
     videoPhotoTitle:'📸 Foto de producto o lugar (opcional)',
     videoPhotoSub:'Sube una foto y el AI la animará en video',
     genPerMonth:'gen/mes',
+    // ── Photo Gallery ──
+    galleryTitle:'📸 Mis fotos', galleryUploadTitle:'Arrastra fotos o haz click',
+    galleryUploadSub:'JPG, PNG o WebP · Máximo 10MB cada una',
+    galleryTagLabel:'Etiqueta obligatoria — ¿qué muestra esta foto?',
+    galleryUploadBtn:'Guardar en galería', galleryCancelBtn:'Cancelar',
+    galleryEmptyText:'Sube fotos de tu negocio para usarlas en tus publicaciones',
+    galleryDelConfirm:'¿Eliminar esta foto de tu galería?',
+    galleryFullToast:'Tu galería está llena. Elimina fotos o mejora tu plan.',
+    gtLabel:'Usar mis fotos', gtHintEmpty:'Sube fotos en Mi Cuenta para activar',
+    gtHintAvailable:'{n} foto(s) disponible(s)',
+    gsTitle:'📷 Foto sugerida — toca para cambiar',
+    galleryPhotoLabel:'📷 Tu foto real',
     // ── Month names ──
     months:['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'],
     monthsLower:['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'],
@@ -2189,6 +2289,18 @@ const T = {
     videoPhotoTitle:'📸 Product or venue photo (optional)',
     videoPhotoSub:'Upload a photo and AI will animate it into video',
     genPerMonth:'gen/mo',
+    // ── Photo Gallery ──
+    galleryTitle:'📸 My photos', galleryUploadTitle:'Drag photos or click',
+    galleryUploadSub:'JPG, PNG or WebP · Max 10MB each',
+    galleryTagLabel:'Required tag — what does this photo show?',
+    galleryUploadBtn:'Save to gallery', galleryCancelBtn:'Cancel',
+    galleryEmptyText:'Upload photos of your business to use in your posts',
+    galleryDelConfirm:'Delete this photo from your gallery?',
+    galleryFullToast:'Your gallery is full. Delete photos or upgrade your plan.',
+    gtLabel:'Use my photos', gtHintEmpty:'Upload photos in My Account to enable',
+    gtHintAvailable:'{n} photo(s) available',
+    gsTitle:'📷 Suggested photo — tap to change',
+    galleryPhotoLabel:'📷 Your real photo',
     // ── Month names ──
     months:['January','February','March','April','May','June','July','August','September','October','November','December'],
     monthsLower:['january','february','march','april','may','june','july','august','september','october','november','december'],
@@ -2467,6 +2579,9 @@ window.addEventListener('DOMContentLoaded', async () => {
   updateLangToggleUI(detectLanguage());
   checkDeepLink();
   initSetupScrollTracking();
+  initGalleryUpload();
+  // Pre-load gallery data for toggle state
+  if (brandId) loadGallery();
 });
 
 function showScreen(id) {
@@ -2890,6 +3005,14 @@ function setMode(m) {
   // Update generate button text
   const btn = document.getElementById('btnGen');
   if(btn) btn.textContent = m === 'video' ? '🎬 ' + t('videoGenBtn') : '✨ ' + t('genBtn');
+  // Update gallery toggle visibility per mode
+  updateGalleryToggle();
+  // Reset gallery selector when switching modes
+  const gSel = document.getElementById('gallerySelector');
+  if(gSel) gSel.classList.remove('show');
+  gallerySelectedPhoto = null;
+  const gToggle = document.getElementById('galleryToggle');
+  if(gToggle) gToggle.checked = false;
 }
 
 function showUpsell(lockedMode) {
@@ -3360,6 +3483,16 @@ async function genPost(brand,bg) {
   const capRes=await post({ mode:'captions', textInput:document.getElementById('postText').value.trim(), brandGuide:bg, brandData:brand, pillar, platform, imageStyle });
   setStep(2);
   setStep(3);
+
+  // Gallery integration: if toggle ON and photo selected, use gallery photo
+  const galleryToggle = document.getElementById('galleryToggle');
+  if (galleryToggle && galleryToggle.checked && gallerySelectedPhoto) {
+    // Use gallery photo directly (strategy: gallery) or enhance it (strategy: gallery+enhance)
+    setStep(4);
+    showResult({ ...capRes, imageUrl: gallerySelectedPhoto.url, photoDescription: detectLanguage() === 'es' ? '📷 Tu foto real' : '📷 Your real photo' });
+    return;
+  }
+
   const imgRes=await post({ mode:'image', imagePrompt:capRes.imagePrompt, imageStyle, brandColors:brand.colors });
   setStep(4);
   showResult({ ...capRes, imageUrl:imgRes.imageUrl });
@@ -3839,6 +3972,7 @@ function showCuentaScreen() {
   if(el) { el.classList.add('active'); el.style.display = 'block'; }
   window.scrollTo(0, 0);
   renderCuenta();
+  loadGallery();
 }
 
 function showCreatorFromCuenta() {
@@ -3950,6 +4084,357 @@ function renderCuenta() {
       '</div>';
     }).join('');
   }
+}
+
+// ═══════════════════════════════════════════════════════
+// PHOTO GALLERY
+// ═══════════════════════════════════════════════════════
+const VALID_GALLERY_TAGS = ['producto','local','equipo','cliente','proceso','resultado','evento','ambiente'];
+const GALLERY_TAG_LABELS = {
+  es: { producto:'Producto', local:'Local/Tienda', equipo:'Equipo', cliente:'Cliente', proceso:'Proceso', resultado:'Resultado', evento:'Evento', ambiente:'Ambiente' },
+  en: { producto:'Product', local:'Venue/Store', equipo:'Team', cliente:'Customer', proceso:'Process', resultado:'Result', evento:'Event', ambiente:'Atmosphere' }
+};
+let galleryData = [];
+let galleryLimit = 5;
+let galleryTagSummary = {};
+let galleryPendingFiles = [];
+let galleryPendingTags = [];
+let gallerySelectedPhoto = null; // photo selected for current generation
+
+async function loadGallery() {
+  if (!brandId) return;
+  try {
+    const data = await postJSON({ mode: 'gallery-list', brandId });
+    if (data.success) {
+      galleryData = data.gallery || [];
+      galleryLimit = data.limit || 5;
+      galleryTagSummary = data.tagSummary || {};
+      renderGalleryGrid();
+      updateGalleryToggle();
+    }
+  } catch(e) { console.warn('Gallery load failed:', e); }
+}
+
+function renderGalleryGrid() {
+  const grid = document.getElementById('galleryGrid');
+  const empty = document.getElementById('galleryEmpty');
+  const countEl = document.getElementById('galleryCount');
+  if (!grid) return;
+
+  const isES = detectLanguage() === 'es';
+  const labels = GALLERY_TAG_LABELS[isES ? 'es' : 'en'];
+
+  // Count display with poka-yoke colors
+  if (countEl) {
+    const pct = galleryData.length / galleryLimit;
+    const cls = pct >= 1 ? 'gc-full' : pct >= 0.8 ? 'gc-warn' : '';
+    countEl.innerHTML = '<span class="' + cls + '">' + galleryData.length + '/' + galleryLimit + '</span> ' + (isES ? 'fotos' : 'photos');
+  }
+
+  if (galleryData.length === 0) {
+    grid.innerHTML = '';
+    if (empty) { empty.style.display = 'block'; empty.querySelector('#galleryEmptyText').textContent = isES ? 'Sube fotos de tu negocio para usarlas en tus publicaciones' : 'Upload photos of your business to use in your posts'; }
+    // Poka-yoke: hide upload zone if at limit
+    const uploadZone = document.getElementById('galleryUploadZone');
+    if (uploadZone) uploadZone.style.display = '';
+    return;
+  }
+
+  if (empty) empty.style.display = 'none';
+
+  grid.innerHTML = galleryData.map(photo =>
+    '<div class="gallery-item" onclick="showGalleryPhotoDetail(\'' + photo.id + '\')">' +
+      '<img src="' + photo.url + '" alt="" loading="lazy">' +
+      '<div class="gi-tags">' + photo.tags.map(t => '<span class="gi-tag">' + (labels[t] || t) + '</span>').join('') + '</div>' +
+      '<button class="gi-del" onclick="event.stopPropagation();deleteGalleryPhoto(\'' + photo.id + '\')" title="' + (isES ? 'Eliminar' : 'Delete') + '">✕</button>' +
+    '</div>'
+  ).join('');
+
+  // Poka-yoke: hide upload zone if at limit
+  const uploadZone = document.getElementById('galleryUploadZone');
+  if (uploadZone) {
+    if (galleryData.length >= galleryLimit) {
+      uploadZone.style.display = 'none';
+    } else {
+      uploadZone.style.display = '';
+    }
+  }
+}
+
+function initGalleryUpload() {
+  const input = document.getElementById('galleryFileInput');
+  if (!input) return;
+  input.addEventListener('change', function(e) {
+    const files = Array.from(e.target.files).filter(f => f.type.startsWith('image/'));
+    if (files.length === 0) return;
+
+    // Poka-yoke: check remaining capacity
+    const remaining = galleryLimit - galleryData.length;
+    if (remaining <= 0) {
+      const isES = detectLanguage() === 'es';
+      showToast(isES ? 'Tu galería está llena. Elimina fotos o mejora tu plan.' : 'Your gallery is full. Delete photos or upgrade your plan.');
+      input.value = '';
+      return;
+    }
+
+    if (files.length > remaining) {
+      const isES = detectLanguage() === 'es';
+      showToast(isES ? 'Solo puedes subir ' + remaining + ' foto(s) más' : 'You can only upload ' + remaining + ' more photo(s)');
+    }
+
+    // Poka-yoke: validate size (10MB max)
+    const validFiles = files.slice(0, remaining).filter(f => {
+      if (f.size > 10 * 1024 * 1024) {
+        showToast((detectLanguage() === 'es' ? 'Foto muy grande: ' : 'Photo too large: ') + f.name);
+        return false;
+      }
+      return true;
+    });
+
+    if (validFiles.length === 0) { input.value = ''; return; }
+
+    galleryPendingFiles = validFiles;
+    galleryPendingTags = [];
+    showGalleryTagSelector();
+    input.value = '';
+  });
+}
+
+function showGalleryTagSelector() {
+  const wrap = document.getElementById('galleryTagUploadWrap');
+  const preview = document.getElementById('galleryUploadPreview');
+  const tagBar = document.getElementById('galleryTagBar');
+  if (!wrap || !tagBar) return;
+
+  const isES = detectLanguage() === 'es';
+  const labels = GALLERY_TAG_LABELS[isES ? 'es' : 'en'];
+
+  // Show preview of first file
+  if (preview && galleryPendingFiles[0]) {
+    const reader = new FileReader();
+    reader.onload = e => { preview.src = e.target.result; preview.style.display = 'block'; };
+    reader.readAsDataURL(galleryPendingFiles[0]);
+  }
+
+  // Label
+  const labelEl = document.getElementById('galleryTagLabel');
+  if (labelEl) labelEl.textContent = isES
+    ? 'Etiqueta obligatoria — ¿qué muestra esta foto?' + (galleryPendingFiles.length > 1 ? ' (' + galleryPendingFiles.length + ' fotos)' : '')
+    : 'Required tag — what does this photo show?' + (galleryPendingFiles.length > 1 ? ' (' + galleryPendingFiles.length + ' photos)' : '');
+
+  // Render tag buttons
+  galleryPendingTags = [];
+  tagBar.innerHTML = VALID_GALLERY_TAGS.map(tag =>
+    '<button class="gallery-tag-btn" data-tag="' + tag + '" onclick="toggleGalleryTag(\'' + tag + '\',this)">' + (labels[tag] || tag) + '</button>'
+  ).join('');
+
+  wrap.style.display = 'block';
+  updateGalleryUploadBtn();
+}
+
+function toggleGalleryTag(tag, btn) {
+  const idx = galleryPendingTags.indexOf(tag);
+  if (idx >= 0) {
+    galleryPendingTags.splice(idx, 1);
+    btn.classList.remove('active');
+  } else {
+    galleryPendingTags.push(tag);
+    btn.classList.add('active');
+  }
+  updateGalleryUploadBtn();
+}
+
+function updateGalleryUploadBtn() {
+  // Poka-yoke: button only active when at least 1 tag selected
+  const btn = document.getElementById('galleryUploadBtn');
+  if (!btn) return;
+  if (galleryPendingTags.length > 0) {
+    btn.style.opacity = '1';
+    btn.style.pointerEvents = 'auto';
+  } else {
+    btn.style.opacity = '.5';
+    btn.style.pointerEvents = 'none';
+  }
+}
+
+function cancelGalleryUpload() {
+  galleryPendingFiles = [];
+  galleryPendingTags = [];
+  const wrap = document.getElementById('galleryTagUploadWrap');
+  const preview = document.getElementById('galleryUploadPreview');
+  if (wrap) wrap.style.display = 'none';
+  if (preview) { preview.style.display = 'none'; preview.src = ''; }
+}
+
+async function confirmGalleryUpload() {
+  if (galleryPendingTags.length === 0 || galleryPendingFiles.length === 0) return;
+
+  const btn = document.getElementById('galleryUploadBtn');
+  const isES = detectLanguage() === 'es';
+  if (btn) { btn.textContent = isES ? 'Subiendo...' : 'Uploading...'; btn.style.pointerEvents = 'none'; }
+
+  let uploaded = 0;
+  for (const file of galleryPendingFiles) {
+    try {
+      const b64 = await fileToBase64(file);
+      const data = await postJSON({
+        mode: 'gallery-upload',
+        brandId,
+        imageData: b64,
+        tags: galleryPendingTags,
+        fileName: file.name,
+      });
+      if (data.success) {
+        galleryData.push(data.photo);
+        uploaded++;
+      } else if (data.code === 'GALLERY_FULL') {
+        showToast(isES ? 'Galería llena' : 'Gallery full');
+        break;
+      }
+    } catch(e) {
+      console.error('Gallery upload error:', e);
+    }
+  }
+
+  if (uploaded > 0) {
+    showToast((isES ? '✅ ' + uploaded + ' foto(s) guardada(s)' : '✅ ' + uploaded + ' photo(s) saved'));
+    renderGalleryGrid();
+    updateGalleryToggle();
+  }
+
+  cancelGalleryUpload();
+  if (btn) { btn.textContent = isES ? 'Guardar en galería' : 'Save to gallery'; btn.style.pointerEvents = 'auto'; }
+}
+
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(r.result);
+    r.onerror = () => reject(new Error('Read failed'));
+    r.readAsDataURL(file);
+  });
+}
+
+async function deleteGalleryPhoto(photoId) {
+  const isES = detectLanguage() === 'es';
+  if (!confirm(isES ? '¿Eliminar esta foto de tu galería?' : 'Delete this photo from your gallery?')) return;
+  try {
+    const data = await postJSON({ mode: 'gallery-delete', brandId, photoId });
+    if (data.success) {
+      galleryData = galleryData.filter(p => p.id !== photoId);
+      renderGalleryGrid();
+      updateGalleryToggle();
+      showToast(isES ? '🗑️ Foto eliminada' : '🗑️ Photo deleted');
+    }
+  } catch(e) { showToast(isES ? 'Error al eliminar' : 'Delete failed'); }
+}
+
+function showGalleryPhotoDetail(photoId) {
+  const photo = galleryData.find(p => p.id === photoId);
+  if (!photo) return;
+  const isES = detectLanguage() === 'es';
+  const labels = GALLERY_TAG_LABELS[isES ? 'es' : 'en'];
+  const tagStr = photo.tags.map(t => labels[t] || t).join(', ');
+  // Simple detail view via alert for MVP — can upgrade to modal later
+  const msg = (isES ? 'Tags: ' : 'Tags: ') + tagStr + '\n' +
+    (isES ? 'Subida: ' : 'Uploaded: ') + new Date(photo.uploadedAt).toLocaleDateString();
+  alert(msg);
+}
+
+// ── Gallery toggle in generation flow ─────────────────
+function updateGalleryToggle() {
+  const wrap = document.getElementById('galleryToggleWrap');
+  if (!wrap) return;
+  const hasPhotos = galleryData.length > 0;
+  const isES = detectLanguage() === 'es';
+
+  // Show toggle for post, flyer, testimonial, video modes (not carousel or enhance — those have their own photo flows)
+  const showForModes = ['post', 'flyer', 'testimonial', 'video'];
+  if (!showForModes.includes(mode)) {
+    wrap.style.display = 'none';
+    return;
+  }
+
+  wrap.style.display = 'flex';
+
+  if (hasPhotos) {
+    wrap.classList.remove('disabled');
+    document.getElementById('gtHint').textContent = isES
+      ? galleryData.length + ' foto(s) disponible(s)'
+      : galleryData.length + ' photo(s) available';
+  } else {
+    wrap.classList.add('disabled');
+    document.getElementById('galleryToggle').checked = false;
+    document.getElementById('gtHint').textContent = isES
+      ? 'Sube fotos en Mi Cuenta para activar'
+      : 'Upload photos in My Account to enable';
+  }
+  document.getElementById('gtLabel').textContent = isES ? 'Usar mis fotos' : 'Use my photos';
+}
+
+function onGalleryToggleChange(checked) {
+  const selector = document.getElementById('gallerySelector');
+  if (!selector) return;
+
+  if (checked && galleryData.length > 0) {
+    // Show photo selector with available photos
+    showGalleryPhotoSelector();
+  } else {
+    selector.classList.remove('show');
+    gallerySelectedPhoto = null;
+  }
+}
+
+function showGalleryPhotoSelector(filterTag) {
+  const selector = document.getElementById('gallerySelector');
+  const photosWrap = document.getElementById('gsPhotos');
+  if (!selector || !photosWrap) return;
+
+  let photos = galleryData;
+  if (filterTag) {
+    photos = galleryData.filter(p => p.tags.includes(filterTag));
+  }
+
+  // Fallback: if no photos match the filter, show all
+  if (photos.length === 0) photos = galleryData;
+
+  if (photos.length === 0) {
+    selector.classList.remove('show');
+    return;
+  }
+
+  const isES = detectLanguage() === 'es';
+  document.getElementById('gsTitle').textContent = isES
+    ? '📷 Foto sugerida — toca para cambiar'
+    : '📷 Suggested photo — tap to change';
+
+  photosWrap.innerHTML = photos.map((photo, i) =>
+    '<div class="gs-photo' + (i === 0 ? ' selected' : '') + '" onclick="selectGalleryPhoto(\'' + photo.id + '\',this)">' +
+      '<img src="' + photo.url + '" alt="" loading="lazy">' +
+    '</div>'
+  ).join('');
+
+  gallerySelectedPhoto = photos[0];
+  selector.classList.add('show');
+}
+
+function selectGalleryPhoto(photoId, el) {
+  const photo = galleryData.find(p => p.id === photoId);
+  if (!photo) return;
+  gallerySelectedPhoto = photo;
+  // Update selection visual
+  document.querySelectorAll('#gsPhotos .gs-photo').forEach(p => p.classList.remove('selected'));
+  if (el) el.classList.add('selected');
+}
+
+// ── Helper: postJSON wrapper ─────────────────────────
+async function postJSON(body) {
+  const res = await fetch(WORKER, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  return await res.json();
 }
 
 function showUpgradeInfo() {
@@ -4253,13 +4738,17 @@ async function generateAgentPlan() {
   try {
     const month = getCurrentMonth();
     const lang = detectLanguage();
+    // Check if gallery has photos and toggle is meaningful
+    const galleryActive = galleryData.length > 0;
     const res = await fetch(WORKER, { method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({
         mode: 'marketing-agent',
         brandGuide: bg,
         brandData: { ...brand, brandId: brandId || '' },
         month, postsPerWeek: agentFreq,
-        platforms: agentPlats, language: lang
+        platforms: agentPlats, language: lang,
+        useGallery: galleryActive,
+        galleryTagSummary: galleryActive ? galleryTagSummary : null,
       })
     });
     const data = await res.json();
@@ -4345,6 +4834,7 @@ function renderAgentPlan(plan) {
         '<span class="apc-pilar">' + (post.pilar||'') + '</span>' +
         '<span class="apc-mode ' + modeClass + '">' + modeLabel + '</span>' +
         '<span class="apc-style">' + styleLabel + '</span>' +
+        (post.photoStrategy && post.photoStrategy !== 'ai-generated' ? '<span class="apc-style" style="background:#E8F5E9;color:#2E7D32">📷 ' + (post.photoStrategy === 'gallery' ? (detectLanguage()==='es'?'Tu foto':'Your photo') : post.photoStrategy === 'gallery+enhance' ? (detectLanguage()==='es'?'Foto mejorada':'Enhanced photo') : (detectLanguage()==='es'?'Foto→Video':'Photo→Video')) + '</span>' : '') +
         (post.festivity ? '<span class="apc-fest">🎉 ' + post.festivity + '</span>' : '') +
         '</div>' +
         '<div class="apc-topic">' + (post.topic||'') + '</div>' +
@@ -4385,6 +4875,15 @@ function goCreatePost(idx) {
   }
   if(post.pilar) setPillarByName(post.pilar);
   if(post.platform) setPlatformByName(post.platform);
+  // Gallery integration: if agent assigned a photoStrategy with gallery photo, activate toggle and pre-select
+  if (post.photoStrategy && post.photoStrategy !== 'ai-generated' && galleryData.length > 0) {
+    const gToggle = document.getElementById('galleryToggle');
+    if (gToggle) {
+      gToggle.checked = true;
+      // Pre-select photo matching the tag
+      showGalleryPhotoSelector(post.photoTag || null);
+    }
+  }
   // Go back to creator
   const agentEl = document.getElementById('agentScreen');
   if(agentEl) { agentEl.classList.remove('active'); agentEl.style.display = ''; }
