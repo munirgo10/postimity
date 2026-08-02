@@ -3593,10 +3593,13 @@ function showVideoResult(videoUrl, topic, captionsData) {
   // Hide loading
   const loadWrap = document.getElementById('loadWrap');
   if(loadWrap) loadWrap.classList.remove('show');
+  // Restore mode cards, style selector & input card (same as showLoading(false) does for other modes)
   const inputCard = document.getElementById('inputCard');
-  if(inputCard) inputCard.style.display = 'none';
+  if(inputCard) inputCard.style.display = 'block';
   const modeCardsEl = document.querySelector('.mode-cards');
-  if(modeCardsEl) modeCardsEl.style.display = 'none';
+  if(modeCardsEl) modeCardsEl.style.display = '';
+  const styleSel = document.getElementById('styleSel');
+  if(styleSel) styleSel.style.display = '';
 
   const isES = detectLanguage() === 'es';
   const resultImg = document.getElementById('resultImg');
