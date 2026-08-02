@@ -3792,42 +3792,10 @@ async function saveVideoToHistory(videoUrl, topic) {
 }
 
 function resetVideoCreator() {
-  // Clean up video player
-  const vp = document.getElementById('videoPlayerWrap');
-  if(vp) vp.remove();
-  // Remove video download button
-  const videoDlBtn = document.getElementById('videoDlBtn');
-  if(videoDlBtn) videoDlBtn.remove();
-  const resultImg = document.getElementById('resultImg');
-  if(resultImg) resultImg.style.display = '';
-  // Restore ALL hidden image-specific controls
-  const imgControls = document.querySelector('.img-controls');
-  if(imgControls) imgControls.style.display = '';
-  const capPanel = document.querySelector('.cap-panel');
-  if(capPanel) capPanel.style.display = '';
-  const logoToggle = document.querySelector('.logo-toggle');
-  if(logoToggle) logoToggle.style.display = '';
-  const wmRow = document.getElementById('wmToggleRow');
-  if(wmRow) wmRow.style.display = '';
-  const dlLabel = document.querySelector('.dl-label');
-  if(dlLabel) dlLabel.style.display = '';
-  const dlBtns = document.querySelector('.dl-btns');
-  if(dlBtns) dlBtns.style.display = '';
-  // Restore publish button original onclick handlers
-  const pubBtns = document.querySelectorAll('.pub-btn');
-  pubBtns.forEach(btn => {
-    const plat = btn.classList.contains('ig') ? 'instagram' : btn.classList.contains('fb') ? 'facebook' : 'tiktok';
-    btn.onclick = function(){ openInSocial(plat); };
-  });
-  // Clear video photo
-  videoPhotoB64 = null;
-  const vPrev = document.getElementById('videoPrev');
-  if(vPrev) { vPrev.style.display = 'none'; vPrev.src = ''; }
-  const vName = document.getElementById('videoPhotoName');
-  if(vName) vName.textContent = '';
-  document.getElementById('videoTopic').value = '';
-  // Go back to creator
+  // resetCreator now handles all video cleanup too
   resetCreator();
+  // Switch mode back to video for "Nuevo video"
+  handleModeClick('video');
 }
 
 // ╔═══════════════════════════════════════════════════╗
@@ -4836,7 +4804,7 @@ function applyBilingualUI() {
   // ── Creator bar ──
   const barLink = document.querySelector('[style*="color:#5A9E2F"]'); if(barLink) barLink.textContent = t('barUniqueLink');
   const genBadge = document.getElementById('genCounterBadge');
-  if(genBadge) { const num = genBadge.textContent.match(/\d+/); if(num) genBadge.textContent = t('barGenRemaining').replace('{n}', num[0]); }
+  if(genBadge) updateGenCounter(); // Let updateGenCounter handle the full gen+video text
   const acctBtn = document.querySelectorAll('.cb-hist');
   if(acctBtn[0]) acctBtn[0].textContent = t('barMyAccount');
   if(acctBtn[1]) acctBtn[1].textContent = t('barHistory');
@@ -5541,6 +5509,41 @@ function setStep(n) {
 // ═══════════════════════════════════════════════════════
 function resetCreator() {
   showLoading(false);
+  // Clean up any video remnants
+  const vp = document.getElementById('videoPlayerWrap');
+  if(vp) vp.remove();
+  const videoDlBtn = document.getElementById('videoDlBtn');
+  if(videoDlBtn) videoDlBtn.remove();
+  const resultImg = document.getElementById('resultImg');
+  if(resultImg) resultImg.style.display = '';
+  // Restore image-specific controls that video may have hidden
+  const logoToggle = document.querySelector('.logo-toggle');
+  if(logoToggle) logoToggle.style.display = '';
+  const wmRow = document.getElementById('wmToggleRow');
+  if(wmRow) wmRow.style.display = '';
+  const dlLabel = document.querySelector('.dl-label');
+  if(dlLabel) dlLabel.style.display = '';
+  const dlBtnsEl = document.querySelector('.dl-btns');
+  if(dlBtnsEl) dlBtnsEl.style.display = '';
+  const imgControls = document.querySelector('.img-controls');
+  if(imgControls) imgControls.style.display = '';
+  const capPanel = document.querySelector('.cap-panel');
+  if(capPanel) capPanel.style.display = '';
+  // Restore publish button original onclick handlers
+  const pubBtns = document.querySelectorAll('.pub-btn');
+  pubBtns.forEach(btn => {
+    const plat = btn.classList.contains('ig') ? 'instagram' : btn.classList.contains('fb') ? 'facebook' : 'tiktok';
+    btn.onclick = function(){ openInSocial(plat); };
+  });
+  // Clear video photo
+  videoPhotoB64 = null;
+  const vPrev = document.getElementById('videoPrev');
+  if(vPrev) { vPrev.style.display = 'none'; vPrev.src = ''; }
+  const vName = document.getElementById('videoPhotoName');
+  if(vName) vName.textContent = '';
+  const videoTopicEl = document.getElementById('videoTopic');
+  if(videoTopicEl) videoTopicEl.value = '';
+  // Standard reset
   document.getElementById('resultWrap').classList.remove('show');
   document.getElementById('errWrap').classList.remove('show');
   document.getElementById('inputCard').style.display='block';
