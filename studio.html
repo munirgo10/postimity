@@ -753,6 +753,17 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
         <div class="gen-bar-wrap">
           <div class="gen-bar" id="cuentaGenBar" style="width:0%;background:var(--b)"></div>
         </div>
+        <!-- Video counter -->
+        <div class="gen-header" style="margin-top:12px">
+          <span class="gen-title">🎬 Videos este mes</span>
+          <div style="text-align:right">
+            <div class="gen-count"><span id="cuentaVideosUsed">0</span>/<span id="cuentaVideosLimit">2</span></div>
+            <div class="gen-label">usados / disponibles</div>
+          </div>
+        </div>
+        <div class="gen-bar-wrap">
+          <div class="gen-bar" id="cuentaVideoBar" style="width:0%;background:#7C4DFF"></div>
+        </div>
         <div class="gen-renewal" id="cuentaRenewal">Se renuevan el 1 del próximo mes</div>
       </div>
       <!-- Mi marca -->
@@ -767,7 +778,7 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
       <div class="brand-card">
         <div class="brand-card-title" style="margin-bottom:12px">💳 Planes disponibles</div>
         <div class="pricing-grid" id="cuentaPricingGrid"></div>
-        <div style="font-size:11px;color:var(--t3);text-align:center;margin-top:6px">
+        <div style="font-size:11px;color:var(--t3);text-align:center;margin-top:6px" data-es="Los pagos se activarán próximamente con Stripe" data-en="Payments will be activated soon with Stripe">
           Los pagos se activarán próximamente con Stripe
         </div>
       </div>
@@ -3499,13 +3510,13 @@ async function generateVideo(brand) {
       throw new Error(isES ? '❌ Error fal.ai: ' + (errDetail || 'respuesta vacía') : '❌ fal.ai error: ' + (errDetail || 'empty response'));
     }
 
-    // Step 4: Captions in parallel
-    let videoCaptions = null;
+    // Step 4: Captions in parallel — use object wrapper so reference stays live
+    const captionsBox = { data: null };
     fetch(WORKER, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ mode: 'captions', topic, brandGuide: brand.brandGuide, platform, imageStyle: 'video' }),
-    }).then(r => r.json()).then(d => { if(d.captions) videoCaptions = d.captions; }).catch(() => {});
+      body: JSON.stringify({ mode: 'captions', textInput: topic, brandGuide: brand.brandGuide, brandData: { name: brand.name, type: brand.type, whatsapp: brand.whatsapp }, platform, imageStyle: 'video', pillar }),
+    }).then(r => r.json()).then(d => { if(d && d.success !== false) captionsBox.data = d; }).catch(() => {});
 
     // Step 5: Start polling
     setStep(4);
@@ -3514,7 +3525,7 @@ async function generateVideo(brand) {
     if(loadHint) loadHint.innerHTML = isES
       ? '⏱️ ~2-5 minutos · <span style="color:var(--t3)">Puedes seguir usando el Studio mientras se genera</span>'
       : '⏱️ ~2-5 minutes · <span style="color:var(--t3)">You can keep using Studio while it generates</span>';
-    startVideoPolling(submitData.requestId, submitData.endpoint, submitData.statusUrl, submitData.responseUrl, brand, topic, videoCaptions);
+    startVideoPolling(submitData.requestId, submitData.endpoint, submitData.statusUrl, submitData.responseUrl, brand, topic, captionsBox);
 
   } catch(err) {
     // Reset UI manually (not via showLoading since we didn't use it)
@@ -3528,7 +3539,7 @@ async function generateVideo(brand) {
 }
 
 
-function startVideoPolling(requestId, endpoint, statusUrl, responseUrl, brand, topic, captionsRef) {
+function startVideoPolling(requestId, endpoint, statusUrl, responseUrl, brand, topic, captionsBox) {
   let attempts = 0;
   const maxAttempts = 90; // 90 × 5s = 7.5 min max
 
@@ -3557,8 +3568,8 @@ function startVideoPolling(requestId, endpoint, statusUrl, responseUrl, brand, t
           const vMonthKey = 'postimity_videos_' + new Date().toISOString().slice(0,7);
           const used = parseInt(localStorage.getItem(vMonthKey) || '0');
           localStorage.setItem(vMonthKey, String(used + 1));
-          // Show video result
-          showVideoResult(data.videoUrl, topic, captionsRef);
+          // Show video result — unwrap captionsBox (by now the fetch should have completed)
+          showVideoResult(data.videoUrl, topic, captionsBox.data);
         } else {
           // Video completed but URL missing — show debug
           showLoading(false);
@@ -3678,25 +3689,15 @@ function showVideoResult(videoUrl, topic, captionsData) {
         : captionsData.tiktok || {},
     };
     fillCaptions(capData);
+    // Use ad brief from same response (no second fetch needed)
+    if(captionsData.adBrief && !window._adBriefLocked) {
+      fillAdBrief(captionsData.adBrief);
+    }
   }
 
   // Show adjust bar (for caption adjustments — video itself doesn't regenerate)
   const adjWrap = document.getElementById('adjustWrap');
   if(adjWrap) adjWrap.style.display = 'block';
-
-  // Show ad brief if available and not locked
-  // Request ad brief for video content
-  if(!window._adBriefLocked) {
-    const brand = loadBrand();
-    const bg = brand?.brandGuide || '';
-    fetch(WORKER, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ mode: 'captions', topic, brandGuide: bg, platform, imageStyle: 'video', includeAdBrief: true }),
-    }).then(r => r.json()).then(d => {
-      if(d.adBrief) fillAdBrief(d.adBrief);
-    }).catch(() => {});
-  }
 
   // Set regen buttons for video
   const regenBtns = document.querySelector('.regen-btns');
@@ -3913,6 +3914,19 @@ function renderCuenta() {
   if(barEl) { barEl.style.width = pct + '%'; barEl.style.background = barColor; }
   if(renewEl) renewEl.textContent = t('dashRenewal').replace('{date}', getNextRenewalDate());
 
+  // Video counter
+  const videoLimit = VIDEO_LIMITS[planKey] || 2;
+  const vMonthKey = 'postimity_videos_' + new Date().toISOString().slice(0,7);
+  const videosUsed = parseInt(localStorage.getItem(vMonthKey) || '0');
+  const videoPct = Math.min(100, Math.round((videosUsed / videoLimit) * 100));
+  const videoBarColor = videoPct >= 90 ? '#C0392B' : videoPct >= 70 ? '#E8961A' : '#7C4DFF';
+  const vUsedEl = document.getElementById('cuentaVideosUsed');
+  const vLimitEl = document.getElementById('cuentaVideosLimit');
+  const vBarEl = document.getElementById('cuentaVideoBar');
+  if(vUsedEl) vUsedEl.textContent = videosUsed;
+  if(vLimitEl) vLimitEl.textContent = videoLimit;
+  if(vBarEl) { vBarEl.style.width = videoPct + '%'; vBarEl.style.background = videoBarColor; }
+
   // Brand info
   const brandInfo = document.getElementById('cuentaBrandInfo');
   if(brandInfo && brand) {
@@ -3937,25 +3951,69 @@ function renderCuenta() {
   const grid = document.getElementById('cuentaPricingGrid');
   if(grid) {
     const mxn = detectLanguage() === 'es';
+    const isES = detectLanguage() === 'es';
     const tiers = [
-      { key:'starter', name:'Starter', price: mxn?'$149':'$9', gens:'40 '+t('genPerMonth'), videos:'2 videos' },
-      { key:'growth',  name:'Growth',  price: mxn?'$349':'$19', gens:'100 '+t('genPerMonth'), videos:'8 videos' },
-      { key:'agency',  name:'Agency',  price: mxn?'$799':'$45', gens:'250 '+t('genPerMonth'), videos:'20 videos' },
+      { key:'starter', name:'Starter', price: mxn?'$149':'$9', period: mxn?'MXN/mes':'USD/mo', gens:'40 '+t('genPerMonth'), videos:'2 videos', features: isES ? 'Post, Estudio Pro, Testimonios' : 'Post, Studio Pro, Testimonials' },
+      { key:'growth',  name:'Growth',  price: mxn?'$349':'$19', period: mxn?'MXN/mes':'USD/mo', gens:'100 '+t('genPerMonth'), videos:'8 videos', features: isES ? 'Todos los modos + Video AI' : 'All modes + AI Video', popular: true },
+      { key:'agency',  name:'Agency',  price: mxn?'$799':'$45', period: mxn?'MXN/mes':'USD/mo', gens:'250 '+t('genPerMonth'), videos:'20 videos', features: isES ? 'Todo + máxima capacidad' : 'Everything + max capacity' },
     ];
-    grid.innerHTML = tiers.map(tr =>
-      '<div class="pricing-tile' + (tr.key === planKey ? ' current' : '') + '">' +
+    const activateLabel = isES ? 'Activar' : 'Activate';
+    const currentLabel = isES ? '✅ Plan actual' : '✅ Current plan';
+    const popularLabel = isES ? '⭐ Más popular' : '⭐ Most popular';
+    grid.innerHTML = tiers.map(tr => {
+      const isCurrent = tr.key === planKey;
+      const isDowngrade = (planKey === 'growth' && tr.key === 'starter') || (planKey === 'agency' && (tr.key === 'starter' || tr.key === 'growth'));
+      return '<div class="pricing-tile' + (isCurrent ? ' current' : '') + (tr.popular && !isCurrent ? ' popular' : '') + '" style="' + (tr.popular && !isCurrent ? 'border:2px solid var(--b);position:relative' : '') + '">' +
+        (tr.popular && !isCurrent ? '<div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:var(--b);color:#fff;font-size:9px;font-weight:800;padding:2px 10px;border-radius:10px;white-space:nowrap">' + popularLabel + '</div>' : '') +
         '<div class="pt-name">' + tr.name + '</div>' +
-        '<div class="pt-price">' + tr.price + '<span style="font-size:10px;font-weight:400;color:var(--t3)"> ' + (mxn?'MXN':'USD') + '</span></div>' +
+        '<div class="pt-price">' + tr.price + '<span style="font-size:10px;font-weight:400;color:var(--t3)"> ' + tr.period + '</span></div>' +
         '<div class="pt-gens">' + tr.gens + '</div>' +
-        (tr.videos ? '<div style="font-size:11px;color:var(--b);font-weight:600;margin-top:2px">🎬 ' + tr.videos + '/' + (detectLanguage()==='en'?'mo':'mes') + '</div>' : '<div style="font-size:11px;color:var(--t3);margin-top:2px">' + t('dashNoVideo') + '</div>') +
-        (tr.key === planKey ? '<div class="pt-current">' + t('dashCurrentPlan') + '</div>' : '') +
-      '</div>'
-    ).join('');
+        '<div style="font-size:11px;color:var(--b);font-weight:600;margin-top:2px">🎬 ' + tr.videos + '/' + (isES?'mes':'mo') + '</div>' +
+        '<div style="font-size:10px;color:var(--t3);margin-top:4px">' + tr.features + '</div>' +
+        (isCurrent
+          ? '<div class="pt-current">' + currentLabel + '</div>'
+          : isDowngrade
+            ? ''
+            : '<button class="plan-upgrade-btn" style="margin-top:8px;font-size:12px;padding:9px" onclick="activatePlan(\'' + tr.key + '\')">' + activateLabel + ' ' + tr.name + '</button>'
+        ) +
+      '</div>';
+    }).join('');
   }
 }
 
 function showUpgradeInfo() {
   showToast(t('dashUpgradeToast'));
+}
+
+function activatePlan(planKey) {
+  const isES = detectLanguage() === 'es';
+  const planNames = { starter: 'Starter', growth: 'Growth', agency: 'Agency' };
+  const prices = isES
+    ? { starter: '$149 MXN/mes', growth: '$349 MXN/mes', agency: '$799 MXN/mes' }
+    : { starter: '$9 USD/mo', growth: '$19 USD/mo', agency: '$45 USD/mo' };
+  // Pre-Stripe: show confirmation with plan details
+  const msg = isES
+    ? `🚀 Plan ${planNames[planKey]} — ${prices[planKey]}\n\nPagos con Stripe estarán disponibles muy pronto.\n¿Quieres que te notifiquemos cuando esté listo?`
+    : `🚀 ${planNames[planKey]} Plan — ${prices[planKey]}\n\nStripe payments will be available very soon.\nWant us to notify you when it's ready?`;
+  if(confirm(msg)) {
+    // Save interest for follow-up
+    const brand = loadBrand();
+    fetch(WORKER, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        mode: 'submit-feedback',
+        type: 'suggestion',
+        category: 'billing',
+        message: 'Interested in activating plan: ' + planKey + ' (' + prices[planKey] + ')',
+        brandId: brandId || null,
+        brandName: brand?.name || null,
+        email: brand?.email || null,
+        plan: brand?.plan || 'trial',
+      }),
+    }).catch(() => {});
+    showToast(isES ? '✅ Te notificaremos cuando los pagos estén activos' : '✅ We\'ll notify you when payments are active');
+  }
 }
 
 // ╔═══════════════════════════════════════════════════╗
