@@ -3579,67 +3579,147 @@ function startVideoPolling(requestId, endpoint, statusUrl, responseUrl, brand, t
 }
 
 function showVideoResult(videoUrl, topic, captionsData) {
-  showLoading(false);
-  const resultWrap = document.getElementById('resultWrap');
-  if(resultWrap) resultWrap.classList.add('show');
+  // Hide loading
+  const loadWrap = document.getElementById('loadWrap');
+  if(loadWrap) loadWrap.classList.remove('show');
+  const inputCard = document.getElementById('inputCard');
+  if(inputCard) inputCard.style.display = 'none';
+  const modeCardsEl = document.querySelector('.mode-cards');
+  if(modeCardsEl) modeCardsEl.style.display = 'none';
+
+  const isES = detectLanguage() === 'es';
+  const resultImg = document.getElementById('resultImg');
+
+  // Remove any old video player
   const oldVP = document.getElementById('videoPlayerWrap');
   if(oldVP) oldVP.remove();
-  const resultImg = document.getElementById('resultImg');
-  const isES = detectLanguage() === 'es';
+
+  // Insert video player in place of result image
+  resultImg.style.display = 'none';
   const tipText = isES
-    ? 'Al publicar, activa el label de AI en cada plataforma para maximizar alcance.'
-    : 'When posting, enable the AI label on each platform to maximize reach.';
+    ? '🏷️ Al publicar, activa el label de AI en cada plataforma para maximizar alcance.'
+    : '🏷️ When posting, enable the AI label on each platform to maximize reach.';
   const tipDetails = isES
-    ? '<b>TikTok:</b> Activa "AI-generated" \u00b7 <b>Instagram:</b> No requiere acci\u00f3n \u00b7 <b>YouTube:</b> Marca "Contenido alterado"'
-    : '<b>TikTok:</b> Toggle "AI-generated" \u00b7 <b>Instagram:</b> No action needed \u00b7 <b>YouTube:</b> Mark "Altered content"';
-  // Build captions HTML if available
-  let captionsHtml = '';
-  if(captionsData) {
-    const igCap = captionsData.instagram || captionsData.caption || '';
-    const fbCap = captionsData.facebook || '';
-    const tkCap = captionsData.tiktok || '';
-    captionsHtml =
-      '<div style="margin-top:12px;background:var(--w);border:1px solid var(--bor);border-radius:12px;overflow:hidden">' +
-        '<div style="display:flex;border-bottom:1px solid var(--bor)">' +
-          '<button class="vcap-tab active" onclick="switchVideoCap(\'ig\',this)" style="flex:1;padding:8px;font-size:11px;font-weight:700;border:none;background:var(--b3);color:var(--b2);cursor:pointer">\ud83d\udcf8 Instagram</button>' +
-          '<button class="vcap-tab" onclick="switchVideoCap(\'fb\',this)" style="flex:1;padding:8px;font-size:11px;font-weight:700;border:none;background:transparent;color:var(--t3);cursor:pointer">\ud83d\udc65 Facebook</button>' +
-          '<button class="vcap-tab" onclick="switchVideoCap(\'tk\',this)" style="flex:1;padding:8px;font-size:11px;font-weight:700;border:none;background:transparent;color:var(--t3);cursor:pointer">\ud83c\udfb5 TikTok</button>' +
-        '</div>' +
-        '<div id="vcap-ig" class="vcap-content" style="padding:10px;font-size:12px;line-height:1.6;white-space:pre-wrap">' + (igCap||'').replace(/</g,'&lt;') + '</div>' +
-        '<div id="vcap-fb" class="vcap-content" style="padding:10px;font-size:12px;line-height:1.6;white-space:pre-wrap;display:none">' + (fbCap||'').replace(/</g,'&lt;') + '</div>' +
-        '<div id="vcap-tk" class="vcap-content" style="padding:10px;font-size:12px;line-height:1.6;white-space:pre-wrap;display:none">' + (tkCap||'').replace(/</g,'&lt;') + '</div>' +
-        '<button onclick="copyVideoCaption()" style="width:100%;padding:8px;border:none;border-top:1px solid var(--bor);background:var(--bg);font-size:11px;font-weight:600;color:var(--b);cursor:pointer;font-family:inherit">\ud83d\udccb ' + (isES?'Copiar caption':'Copy caption') + '</button>' +
-      '</div>';
-  }
+    ? '<b>TikTok:</b> Activa "AI-generated" · <b>Instagram:</b> No requiere acción · <b>YouTube:</b> Marca "Contenido alterado"'
+    : '<b>TikTok:</b> Toggle "AI-generated" · <b>Instagram:</b> No action needed · <b>YouTube:</b> Mark "Altered content"';
   const videoHtml =
     '<video controls autoplay playsinline loop muted style="width:100%;border-radius:12px;max-height:500px;background:#000" src="' + videoUrl + '"></video>' +
     '<div style="margin-top:10px;padding:10px 14px;background:var(--b3);border-radius:10px;font-size:11px;line-height:1.6;color:var(--b2)">' +
-      '<div style="font-weight:700;margin-bottom:3px">\ud83c\udff7\ufe0f ' + tipText + '</div>' +
+      '<div style="font-weight:700;margin-bottom:3px">' + tipText + '</div>' +
       '<div style="opacity:.85">' + tipDetails + '</div>' +
-    '</div>' + captionsHtml;
-  resultImg.style.display = 'none';
+    '</div>';
   resultImg.insertAdjacentHTML('afterend', '<div id="videoPlayerWrap">' + videoHtml + '</div>');
-  ['img-controls','cap-panel'].forEach(cls => { const el=document.querySelector('.'+cls); if(el) el.style.display='none'; });
-  ['adBriefWrap','carouselPreviewWrap','keyQuoteWrap'].forEach(id => { const el=document.getElementById(id); if(el) el.style.display='none'; });
+
+  // Hide image-specific controls (logo toggle, watermark, download format buttons)
+  const logoToggle = document.querySelector('.logo-toggle');
+  if(logoToggle) logoToggle.style.display = 'none';
+  const wmRow = document.getElementById('wmToggleRow');
+  if(wmRow) wmRow.style.display = 'none';
+  const dlLabel = document.querySelector('.dl-label');
+  if(dlLabel) dlLabel.style.display = 'none';
+  const dlBtns = document.querySelector('.dl-btns');
+  if(dlBtns) dlBtns.style.display = 'none';
+
+  // Show img-controls panel (for social publish buttons)
+  const imgControls = document.querySelector('.img-controls');
+  if(imgControls) imgControls.style.display = 'block';
+
+  // Replace publish section with video-specific version
+  const pubSection = document.getElementById('pubSection');
+  if(pubSection) {
+    pubSection.style.display = 'block';
+    const pubLabel = pubSection.querySelector('.pub-label');
+    if(pubLabel) pubLabel.textContent = isES ? '📤 Publicar video en redes sociales' : '📤 Publish video to social media';
+    const pubHint = pubSection.querySelector('.pub-hint');
+    if(pubHint) pubHint.textContent = isES
+      ? '💡 Un toque: se copia el caption, se descarga el video y puedes subirlo a la app'
+      : '💡 One tap: copies the caption, downloads the video so you can upload it to the app';
+    // Replace button onclick to use video share
+    const pubBtns = pubSection.querySelectorAll('.pub-btn');
+    pubBtns.forEach(btn => {
+      const plat = btn.classList.contains('ig') ? 'instagram' : btn.classList.contains('fb') ? 'facebook' : 'tiktok';
+      btn.onclick = function(){ shareVideoToSocial(plat); };
+    });
+  }
+
+  // Add download video button above publish section
+  let videoDlBtn = document.getElementById('videoDlBtn');
+  if(!videoDlBtn && imgControls) {
+    videoDlBtn = document.createElement('a');
+    videoDlBtn.id = 'videoDlBtn';
+    videoDlBtn.href = videoUrl;
+    videoDlBtn.download = 'postimity-video.mp4';
+    videoDlBtn.className = 'btn btn-primary btn-full';
+    videoDlBtn.style.cssText = 'margin-bottom:10px;text-decoration:none;text-align:center';
+    videoDlBtn.textContent = isES ? '⬇️ Descargar video (.mp4)' : '⬇️ Download video (.mp4)';
+    imgControls.insertBefore(videoDlBtn, imgControls.firstChild);
+  }
+
+  // Hide carousel preview and key quote
+  ['carouselPreviewWrap','keyQuoteWrap'].forEach(id => { const el=document.getElementById(id); if(el) el.style.display='none'; });
   const photoDesc = document.getElementById('photoDescBar');
   if(photoDesc) photoDesc.classList.remove('show');
+
+  // SHOW caption panel (reuse existing IG/FB/TK tabs)
+  const capPanel = document.querySelector('.cap-panel');
+  if(capPanel) capPanel.style.display = 'flex';
+
+  // Fill captions using existing fillCaptions() if captionsData is available
+  if(captionsData) {
+    const capData = {
+      instagram: typeof captionsData.instagram === 'string'
+        ? { caption: captionsData.instagram, hashtags: '', cta: '' }
+        : captionsData.instagram || { caption: captionsData.caption || '', hashtags: '', cta: '' },
+      facebook: typeof captionsData.facebook === 'string'
+        ? { caption: captionsData.facebook, hashtags: '', cta: '' }
+        : captionsData.facebook || {},
+      tiktok: typeof captionsData.tiktok === 'string'
+        ? { caption: captionsData.tiktok, hashtags: '', cta: '' }
+        : captionsData.tiktok || {},
+    };
+    fillCaptions(capData);
+  }
+
+  // Show adjust bar (for caption adjustments — video itself doesn't regenerate)
+  const adjWrap = document.getElementById('adjustWrap');
+  if(adjWrap) adjWrap.style.display = 'block';
+
+  // Show ad brief if available and not locked
+  // Request ad brief for video content
+  if(!window._adBriefLocked) {
+    const brand = loadBrand();
+    const bg = brand?.brandGuide || '';
+    fetch(WORKER, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mode: 'captions', topic, brandGuide: bg, platform, imageStyle: 'video', includeAdBrief: true }),
+    }).then(r => r.json()).then(d => {
+      if(d.adBrief) fillAdBrief(d.adBrief);
+    }).catch(() => {});
+  }
+
+  // Set regen buttons for video
   const regenBtns = document.querySelector('.regen-btns');
   if(regenBtns) {
-    const dlLabel = isES ? '⬇️ Descargar video' : '⬇️ Download video';
-    const newLabel = isES ? '🎬 Nuevo video' : '🎬 New video';
-    const shareIG = isES ? '📸 Abrir en Instagram' : '📸 Open in Instagram';
-    const shareFB = isES ? '👥 Abrir en Facebook' : '👥 Open in Facebook';
-    const shareTK = isES ? '🎵 Abrir en TikTok' : '🎵 Open in TikTok';
     regenBtns.innerHTML =
-      '<a class="btn-regen" href="' + videoUrl + '" download="postimity-video.mp4">' + dlLabel + '</a>' +
-      '<button class="btn-regen" onclick="shareVideoToSocial(\'instagram\')" style="background:linear-gradient(135deg,#833AB4,#E1306C,#F77737);color:#fff;border-color:transparent">' + shareIG + '</button>' +
-      '<button class="btn-regen" onclick="shareVideoToSocial(\'facebook\')" style="background:#1877F2;color:#fff;border-color:transparent">' + shareFB + '</button>' +
-      '<button class="btn-regen" onclick="shareVideoToSocial(\'tiktok\')" style="background:#010101;color:#fff;border-color:transparent">' + shareTK + '</button>' +
-      '<button class="btn-regen" onclick="resetVideoCreator()">' + newLabel + '</button>';
+      '<button class="btn-regen" onclick="resetVideoCreator()">🎬 ' + (isES ? 'Nuevo video' : 'New video') + '</button>' +
+      '<button class="btn-regen" onclick="resetCreator()">← ' + (isES ? 'Crear otro' : 'Create another') + '</button>';
   }
-  if(resultWrap) resultWrap.scrollIntoView({ behavior:'smooth', block:'start' });
+
+  // Auto-select tab for current platform
+  const tabMap = {instagram:'ig', facebook:'fb', tiktok:'tt'};
+  showCapTabById(tabMap[platform]);
+
+  // Store for adjust functionality
+  lastResult = { imageUrl: videoUrl, videoUrl, topic };
+  lastInput = { mode: 'video', platform, pillar, brand: loadBrand() };
+
+  // Show results
+  const resultWrap = document.getElementById('resultWrap');
+  if(resultWrap) { resultWrap.classList.add('show'); resultWrap.scrollIntoView({ behavior:'smooth', block:'start' }); }
   showToast(t('videoReady'));
   saveVideoToHistory(videoUrl, topic);
+  updateGenCounter();
 }
 function switchVideoCap(tab, btn) {
   document.querySelectorAll('.vcap-content').forEach(el => el.style.display = 'none');
@@ -3714,13 +3794,30 @@ function resetVideoCreator() {
   // Clean up video player
   const vp = document.getElementById('videoPlayerWrap');
   if(vp) vp.remove();
+  // Remove video download button
+  const videoDlBtn = document.getElementById('videoDlBtn');
+  if(videoDlBtn) videoDlBtn.remove();
   const resultImg = document.getElementById('resultImg');
   if(resultImg) resultImg.style.display = '';
-  // Restore ALL hidden panels
+  // Restore ALL hidden image-specific controls
   const imgControls = document.querySelector('.img-controls');
   if(imgControls) imgControls.style.display = '';
   const capPanel = document.querySelector('.cap-panel');
   if(capPanel) capPanel.style.display = '';
+  const logoToggle = document.querySelector('.logo-toggle');
+  if(logoToggle) logoToggle.style.display = '';
+  const wmRow = document.getElementById('wmToggleRow');
+  if(wmRow) wmRow.style.display = '';
+  const dlLabel = document.querySelector('.dl-label');
+  if(dlLabel) dlLabel.style.display = '';
+  const dlBtns = document.querySelector('.dl-btns');
+  if(dlBtns) dlBtns.style.display = '';
+  // Restore publish button original onclick handlers
+  const pubBtns = document.querySelectorAll('.pub-btn');
+  pubBtns.forEach(btn => {
+    const plat = btn.classList.contains('ig') ? 'instagram' : btn.classList.contains('fb') ? 'facebook' : 'tiktok';
+    btn.onclick = function(){ openInSocial(plat); };
+  });
   // Clear video photo
   videoPhotoB64 = null;
   const vPrev = document.getElementById('videoPrev');
@@ -3728,7 +3825,6 @@ function resetVideoCreator() {
   const vName = document.getElementById('videoPhotoName');
   if(vName) vName.textContent = '';
   document.getElementById('videoTopic').value = '';
-  // Go back to creator
   // Go back to creator
   resetCreator();
 }
