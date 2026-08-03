@@ -847,7 +847,7 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
       </div>
       <!-- Planes -->
       <div class="brand-card">
-        <div class="brand-card-title" style="margin-bottom:12px">💳 Planes disponibles</div>
+        <div class="brand-card-title" style="margin-bottom:12px">⬆️ Mejora tu plan</div>
         <div class="pricing-grid" id="cuentaPricingGrid"></div>
         <div style="font-size:11px;color:var(--t3);text-align:center;margin-top:6px" data-es="Los pagos se activarán próximamente con Stripe" data-en="Payments will be activated soon with Stripe">
           Los pagos se activarán próximamente con Stripe
@@ -1731,84 +1731,10 @@ Ej: 'Wonderik es increíble. Mi hija de 3 años ya lee palabras cortas y su desa
 </div>
 
 <script>
-// ═══════════════════════════════════════════════════════════════════════════
-// POSTIMITY STUDIO — SECTION MAP (updated Aug 2026 — Session 12+)
-// ═══════════════════════════════════════════════════════════════════════════
-// Use this map to locate code sections. Update line ranges when adding code.
-// Editing protocol: grep -n → view → str_replace with unique anchors → verify
-//
-// ─── HTML STRUCTURE (lines 1–1732) ───────────────────────────────────────
-//   10–718    CSS styles (setup, mode cards, upsell, flyer, result, adjust,
-//              carousel, agent, history, publish, dashboard, gallery, welcome,
-//              feedback widget)
-//   719       Plausible Analytics script
-//   720–774   Cloud bar, creator header, mode cards (6), input card
-//   775–860   Mi Cuenta / Dashboard screen
-//   860–905   Historial screen
-//   906–963   Marketing Agent screen
-//   964–1006  Welcome / Onboarding screen
-//   1007–1198 Setup screen (5 steps, brand form, brand guide)
-//   1199–1732 Creator screen (mode inputs, result area, loading, modals,
-//              feedback widget HTML)
-//
-// ─── JAVASCRIPT (lines 1733–6355) ───────────────────────────────────────
-//   1737–1770  Config, version, error handler, cancelGeneration, getPltInfo
-//   1772–1784  Constants: WORKER URL, GEN_LIMITS, VIDEO_LIMITS, FEATURE_ACCESS
-//   1787–2321  Bilingual strings (T.es ~lines 1788–2053, T.en ~lines 2055–2320)
-//              t() helper at 2321
-//   2324–2335  State variables (mode, platform, pillar, brandId, etc.)
-//   2336–2458  Phase 2 — Brand ID, cloud sync, language toggle, gen counter,
-//              toast utility
-//   2459–2537  KV cloud sync (syncBrandToCloud, autoSavePost, loadBrandFromCloud)
-//              convertToPNG helper
-//   2539–2585  INIT — DOMContentLoaded (boot sequence, brand load, screen routing)
-//   2587–2592  showScreen()
-//   2593–2657  Seasonal alerts, country/state selectors, getLocation
-//   2659–2711  File upload system (setupUploads, setupDropzone, handleDrop)
-//   2712–2929  Brand setup (generateBrandGuide, saveBrand, loadBrand, applyBrand,
-//              buildPillarBtns, goToEdit)
-//   2930–2970  Image style selector, brand guide toggle/AI update
-//   2972–3133  Mode & UI controls (getUserPlan, handleModeClick, setMode, upsell,
-//              feature gating, setPlatform, setPillar, enhance mode)
-//   3135–3358  Carousel functions (scroll, dots, gen, render slides, canvas utils)
-//   3360–3427  Adjust result, download all slides, setFlyerMode
-//   3428–3478  MAIN GENERATE (dispatches to genPost/genEnhance/genFlyer/etc.)
-//   3480–3535  genPost() — with gallery→enhance integration
-//   3536–3565  genEnhance() — Estudio Pro
-//   3566–3600  Video controls (setVideoDur, setVideoRatio, handleVideoPhoto)
-//   3592–3723  generateVideo() — full async flow with gallery support
-//   3727–3775  startVideoPolling() — 5s interval, 90 attempts max
-//   3777–3960  showVideoResult(), video caption tabs, copy, share, save to history
-//   3982–4003  resetVideoCreator()
-//   4004–4140  Mi Cuenta (trial days, renewal date, showCuentaScreen, renderCuenta)
-//   4141–4525  Photo Gallery (loadGallery, renderGrid, upload wizard, tag toggle,
-//              confirm upload, delete, detail, toggle in gen flow, photo selector)
-//   4527–4570  postJSON helper, showUpgradeInfo, activatePlan (pre-Stripe)
-//   4572–4738  Historial (show screen, load, filter, render grid, detail modal,
-//              reuse, copy caption)
-//   4740–5140  Marketing Agent (month helpers, show screen, config, generate plan,
-//              render plan cards, goCreatePost, setPillarByName, setPlatformByName,
-//              reminders, copyPrompt)
-//   5142–5536  Onboarding & bilingual UI (getSetupSteps, startOnboarding,
-//              applyBilingualUI — massive DOM updater, deep-link pre-fill)
-//   5538–5600  Flyer generation (genFlyerAI, genFlyerPhoto, genTestimonial,
-//              getFlyerData, post/postWithTimeout wrappers)
-//   5605–5643  Regenerate (regenImage, regenText)
-//   5646–5756  Result display (showResult, fillCaptions, fillAdBrief)
-//   5759–5812  Caption tabs, TikTok counter, copy functions, ad brief toggle
-//   5814–5936  Publish (openInSocial) & Download (downloadImg with canvas/logo/
-//              watermark), composeFlyerCanvas
-//   6034–6055  Image utils (hexToRgba, loadImg, darken)
-//   6058–6108  Loading system (getModeLoading, showLoading, setStep)
-//   6108–6170  resetCreator() — full cleanup including video remnants
-//   6174–6340  Feedback widget (toggle, setType, setCat, submit, reset, init, FAQ)
-//   6341–6355  Feedback widget HTML (closing tags), </body>, </html>
-// ═══════════════════════════════════════════════════════════════════════════
-
 // ═══════════════════════════════════════════════════════
 // CONFIG
 // ═══════════════════════════════════════════════════════
-const POSTIMITY_VERSION = '2.5.1'; // Aug 2026 — Photo Gallery MVP + QA fixes
+const POSTIMITY_VERSION = '2.6.0'; // Aug 2026 — Carousel gallery + UX copy improvements
 console.log('Postimity Studio v' + POSTIMITY_VERSION);
 
 // ── GLOBAL ERROR HANDLER — prevents silent failures ──
@@ -1989,7 +1915,7 @@ const T = {
     dashBrandTitle:'🏢 Mi marca', dashEditBG:'✏️ Editar Brand Guide',
     dashBrandBusiness:'Negocio', dashBrandTypeLocation:'Tipo y ubicación', dashBrandWA:'WhatsApp', dashBrandID:'Brand ID',
     dashNoBrand:'No hay marca configurada',
-    dashPlansTitle:'💳 Planes disponibles', dashStripeNote:'Los pagos se activarán próximamente con Stripe',
+    dashPlansTitle:'⬆️ Mejora tu plan', dashStripeNote:'Los pagos se activarán próximamente con Stripe',
     dashUpgradeToast:'💳 Pagos con Stripe — disponibles muy pronto. ¡Gracias por tu paciencia!',
     dashTrialDays:'⏳ Quedan <strong>{n} días</strong> de trial', dashMaxPlan:'✅ Estás en el plan máximo', dashCurrentPlan:'Plan actual',
     dashNoVideo:'Sin video',
@@ -2255,7 +2181,7 @@ const T = {
     dashBrandTitle:'🏢 My brand', dashEditBG:'✏️ Edit Brand Guide',
     dashBrandBusiness:'Business', dashBrandTypeLocation:'Type & location', dashBrandWA:'WhatsApp', dashBrandID:'Brand ID',
     dashNoBrand:'No brand configured',
-    dashPlansTitle:'💳 Available plans', dashStripeNote:'Payments will be enabled soon with Stripe',
+    dashPlansTitle:'⬆️ Upgrade your plan', dashStripeNote:'Payments will be enabled soon with Stripe',
     dashUpgradeToast:'💳 Stripe payments — coming very soon. Thanks for your patience!',
     dashTrialDays:'⏳ <strong>{n} days</strong> of trial remaining', dashMaxPlan:'✅ You are on the top plan', dashCurrentPlan:'Current plan',
     dashNoVideo:'No video',
@@ -3246,11 +3172,33 @@ function setCarouselStyle(btn) {
 async function genCarousel(brand, bg) {
   const topic = document.getElementById('carouselTopic')?.value.trim();
   if(!topic) { alert(t('alertCarouselTopic')); return; }
-  if(carouselCoverMode==='photo' && !carouselCoverB64) { alert(t('alertCarouselPhoto')); return; }
+
+  const galleryToggle = document.getElementById('galleryToggle');
+  const usingGalleryPhoto = galleryToggle && galleryToggle.checked && gallerySelectedPhoto;
+
+  if(!usingGalleryPhoto && carouselCoverMode==='photo' && !carouselCoverB64) { alert(t('alertCarouselPhoto')); return; }
   setStep(1);
-  // If photo mode, convert to PNG first
+
+  // Determine cover photo source: gallery > manual upload > AI
   let coverPhoto = null, coverMime = null;
-  if(carouselCoverMode==='photo' && carouselCoverB64) {
+  if (usingGalleryPhoto) {
+    // Fetch gallery photo and convert to base64 for cover
+    try {
+      const photoResp = await fetch(gallerySelectedPhoto.url);
+      const photoBlob = await photoResp.blob();
+      const photoB64 = await new Promise((resolve, reject) => {
+        const r = new FileReader();
+        r.onload = () => resolve(r.result);
+        r.onerror = () => reject(new Error('Read failed'));
+        r.readAsDataURL(photoBlob);
+      });
+      const raw = photoB64.split(',')[1];
+      const conv = await convertToPNG(raw, 'image/png', 1024);
+      coverPhoto = conv.b64; coverMime = 'image/png';
+    } catch(e) {
+      console.warn('Gallery photo fetch failed, falling back to AI cover:', e);
+    }
+  } else if(carouselCoverMode==='photo' && carouselCoverB64) {
     const conv = await convertToPNG(carouselCoverB64, carouselCoverMime, 1024);
     coverPhoto = conv.b64; coverMime = 'image/png';
   }
@@ -4250,11 +4198,15 @@ function renderGalleryGrid() {
   const isES = detectLanguage() === 'es';
   const labels = GALLERY_TAG_LABELS[isES ? 'es' : 'en'];
 
-  // Count display with poka-yoke colors
+  // Count display with poka-yoke colors + plan context
   if (countEl) {
     const pct = galleryData.length / galleryLimit;
     const cls = pct >= 1 ? 'gc-full' : pct >= 0.8 ? 'gc-warn' : '';
-    countEl.innerHTML = '<span class="' + cls + '">' + galleryData.length + '/' + galleryLimit + '</span> ' + (isES ? 'fotos' : 'photos');
+    const brand = loadBrand();
+    const planKey = brand?.plan || 'trial';
+    const planNames = { trial: 'Trial', starter: 'Starter', growth: 'Growth', agency: 'Agency' };
+    const planName = planNames[planKey] || 'Trial';
+    countEl.innerHTML = '<span class="' + cls + '">' + galleryData.length + '/' + galleryLimit + '</span> ' + (isES ? 'fotos · Plan ' + planName : 'photos · ' + planName + ' plan');
   }
 
   if (galleryData.length === 0) {
@@ -4519,8 +4471,8 @@ function updateGalleryToggle() {
   const hasPhotos = galleryData.length > 0;
   const isES = detectLanguage() === 'es';
 
-  // Show toggle for post, flyer, testimonial, video modes (not carousel or enhance — those have their own photo flows)
-  const showForModes = ['post', 'flyer', 'testimonial', 'video'];
+  // Show toggle for post, flyer, testimonial, video, carousel modes (not enhance — has its own photo flow)
+  const showForModes = ['post', 'flyer', 'testimonial', 'video', 'carousel'];
   if (!showForModes.includes(mode)) {
     wrap.style.display = 'none';
     return;
@@ -4550,9 +4502,22 @@ function onGalleryToggleChange(checked) {
   if (checked && galleryData.length > 0) {
     // Show photo selector with available photos
     showGalleryPhotoSelector();
+    // In carousel mode, hide manual cover photo controls when using gallery
+    if (mode === 'carousel') {
+      const coverWrap = document.getElementById('carouselPhotoWrap');
+      const coverBtns = document.getElementById('cvrAI')?.parentElement;
+      if (coverWrap) coverWrap.style.display = 'none';
+      if (coverBtns) coverBtns.style.display = 'none';
+    }
   } else {
     selector.classList.remove('show');
     gallerySelectedPhoto = null;
+    // In carousel mode, restore cover photo controls
+    if (mode === 'carousel') {
+      const coverBtns = document.getElementById('cvrAI')?.parentElement;
+      if (coverBtns) coverBtns.style.display = '';
+      setCarouselCoverMode(carouselCoverMode, document.getElementById(carouselCoverMode === 'photo' ? 'cvrPhoto' : 'cvrAI'));
+    }
   }
 }
 
