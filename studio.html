@@ -3548,7 +3548,7 @@ async function generate() {
 
   showLoading(true);
   const bg=brand.brandGuide||(detectLanguage()==='en'?`Business: ${brand.name}. Differentiator: ${brand.differentiator}. Audience: ${brand.audience}.`:`Negocio: ${brand.name}. Diferenciador: ${brand.differentiator}. Audiencia: ${brand.audience}.`);
-  lastInput={mode,platform,pillar,bg,brand};
+  lastInput={mode,platform,pillar,bg,brand,flyerMode};
 
   try {
     if(mode==='post') await genPost(brand,bg);
@@ -4011,10 +4011,13 @@ function copyVideoCaption() {
 
 async function shareVideoToSocial(platform) {
   const isES = detectLanguage() === 'es';
-  // 1. Copy caption for this platform
-  const capMap = { instagram: 'vcap-ig', facebook: 'vcap-fb', tiktok: 'vcap-tk' };
-  const capEl = document.getElementById(capMap[platform]) || document.getElementById('vcap-ig');
-  const caption = capEl ? capEl.textContent.trim() : '';
+  // 1. Copy caption for this platform (uses standard caption elements filled by fillCaptions)
+  const capMap = {
+    instagram: () => (document.getElementById('igCap')?.textContent||'') + '\n' + (document.getElementById('igHash')?.textContent||''),
+    facebook:  () => (document.getElementById('fbCap')?.textContent||'') + '\n' + (document.getElementById('fbHash')?.textContent||''),
+    tiktok:    () => (document.getElementById('ttCap')?.textContent||'') + '\n' + (document.getElementById('ttHash')?.textContent||''),
+  };
+  const caption = (capMap[platform] || capMap.instagram)().trim();
   if(caption) {
     try { await navigator.clipboard.writeText(caption); } catch(e) {
       const ta = document.createElement('textarea');
@@ -5712,9 +5715,13 @@ async function postWithTimeout(body, timeoutMs=55000) {
 // REGEN
 // ═══════════════════════════════════════════════════════
 async function regenImage() {
-  // Enhance and testimonial use real/AI-edited photos — regenerating would lose context
+  // Enhance and flyer-photo use real/AI-edited photos — regenerating would lose context
   if(lastInput?.mode==='enhance') {
-    alert('En Estudio Pro la imagen es tu foto editada. Para una versión diferente, sube la foto nuevamente.');
+    alert(detectLanguage()==='en' ? 'In Studio Pro the image is your edited photo. Upload the photo again for a different version.' : 'En Estudio Pro la imagen es tu foto editada. Para una versión diferente, sube la foto nuevamente.');
+    return;
+  }
+  if(lastInput?.mode==='flyer' && lastInput?.flyerMode==='photo') {
+    alert(detectLanguage()==='en' ? 'This flyer uses your photo. Upload a different photo to change the image.' : 'Este flyer usa tu foto. Sube una foto diferente para cambiar la imagen.');
     return;
   }
   // Carousel: use coverImagePrompt to regenerate cover, then re-render slides
@@ -5766,8 +5773,13 @@ async function regenText() {
     let data;
     let textInput = 'Contenido del negocio';
     if(lastInput.mode==='post') textInput = document.getElementById('postText').value||'Post para el negocio';
-    else if(lastResult?.photoDescription) textInput = lastResult.photoDescription; // Use actual photo description
+    else if(lastInput.mode==='carousel') textInput = document.getElementById('carouselTopic')?.value||'Carrusel educativo';
+    else if(lastInput.mode==='flyer') {
+      const fd = getFlyerData();
+      textInput = [fd.type, fd.title, fd.subtitle, fd.dates, fd.price].filter(Boolean).join(' · ') || 'Flyer del negocio';
+    }
     else if(lastInput.mode==='testimonial') textInput = document.getElementById('testText').value||'Testimonio de cliente';
+    else if(lastResult?.photoDescription) textInput = lastResult.photoDescription; // Enhance — use photo description
     data = await postWithTimeout({ mode:'captions', textInput, brandGuide:bg, brandData:brand, pillar:lastInput.pillar, platform:lastInput.platform });
     fillCaptions(data);
     showToast(detectLanguage()==='en' ? '✅ Text updated' : '✅ Texto actualizado');
@@ -6336,6 +6348,9 @@ function resetCreator() {
   ['enhanceZone','flyerZone','testZone'].forEach(id=>{ const z=document.getElementById(id); if(z)z.classList.remove('has-file'); });
   ['enhancePrev','flyerPrev','testPrev'].forEach(id=>{ const p=document.getElementById(id); if(p)p.classList.remove('show'); });
   document.getElementById('photoDescBar').classList.remove('show');
+  // Hide carousel and testimonial-specific elements
+  const cpw = document.getElementById('carouselPreviewWrap'); if(cpw) cpw.style.display='none';
+  const kqw = document.getElementById('keyQuoteWrap'); if(kqw) kqw.style.display='none';
   document.getElementById('abBody').classList.remove('open');
   document.getElementById('abChevron').textContent='▼';
   lastResult=null;
