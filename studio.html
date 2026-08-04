@@ -1154,6 +1154,9 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
           <button type="button" class="palette-btn" onclick="applyPalette('#2E7D32','#8BC34A','#795548')" title="Salud / Bienestar">🌿 <span class="pal-dots" style="display:inline-flex;gap:2px"><span style="width:10px;height:10px;border-radius:50%;background:#2E7D32;display:inline-block"></span><span style="width:10px;height:10px;border-radius:50%;background:#8BC34A;display:inline-block"></span><span style="width:10px;height:10px;border-radius:50%;background:#795548;display:inline-block"></span></span></button>
           <button type="button" class="palette-btn" onclick="applyPalette('#1A237E','#42A5F5','#FFC107')" title="Educación / Colegio">🎓 <span class="pal-dots" style="display:inline-flex;gap:2px"><span style="width:10px;height:10px;border-radius:50%;background:#1A237E;display:inline-block"></span><span style="width:10px;height:10px;border-radius:50%;background:#42A5F5;display:inline-block"></span><span style="width:10px;height:10px;border-radius:50%;background:#FFC107;display:inline-block"></span></span></button>
           <button type="button" class="palette-btn" onclick="applyPalette('#263238','#607D8B','#FF5722')" title="Servicios profesionales">🏢 <span class="pal-dots" style="display:inline-flex;gap:2px"><span style="width:10px;height:10px;border-radius:50%;background:#263238;display:inline-block"></span><span style="width:10px;height:10px;border-radius:50%;background:#607D8B;display:inline-block"></span><span style="width:10px;height:10px;border-radius:50%;background:#FF5722;display:inline-block"></span></span></button>
+          <button type="button" class="palette-btn" onclick="applyPalette('#0D47A1','#1E88E5','#FFC107')" title="Inmobiliaria / Bienes raíces">🏠 <span class="pal-dots" style="display:inline-flex;gap:2px"><span style="width:10px;height:10px;border-radius:50%;background:#0D47A1;display:inline-block"></span><span style="width:10px;height:10px;border-radius:50%;background:#1E88E5;display:inline-block"></span><span style="width:10px;height:10px;border-radius:50%;background:#FFC107;display:inline-block"></span></span></button>
+          <button type="button" class="palette-btn" onclick="applyPalette('#FF6F00','#F9A825','#4E342E')" title="Mascotas / Veterinaria">🐾 <span class="pal-dots" style="display:inline-flex;gap:2px"><span style="width:10px;height:10px;border-radius:50%;background:#FF6F00;display:inline-block"></span><span style="width:10px;height:10px;border-radius:50%;background:#F9A825;display:inline-block"></span><span style="width:10px;height:10px;border-radius:50%;background:#4E342E;display:inline-block"></span></span></button>
+          <button type="button" class="palette-btn" onclick="applyPalette('#6200EA','#00BFA5','#FF4081')" title="Tech / E-commerce">💻 <span class="pal-dots" style="display:inline-flex;gap:2px"><span style="width:10px;height:10px;border-radius:50%;background:#6200EA;display:inline-block"></span><span style="width:10px;height:10px;border-radius:50%;background:#00BFA5;display:inline-block"></span><span style="width:10px;height:10px;border-radius:50%;background:#FF4081;display:inline-block"></span></span></button>
         </div>
       </div>
     </div>
@@ -1748,7 +1751,7 @@ Ej: 'Wonderik es increíble. Mi hija de 3 años ya lee palabras cortas y su desa
 // ═══════════════════════════════════════════════════════
 // CONFIG
 // ═══════════════════════════════════════════════════════
-const POSTIMITY_VERSION = '2.6.0'; // Aug 2026 — Carousel gallery + UX copy improvements
+const POSTIMITY_VERSION = '2.7.0'; // Aug 2026 — Carousel consistency + image quality + UX loading + color pokayokes
 console.log('Postimity Studio v' + POSTIMITY_VERSION);
 
 // ── GLOBAL ERROR HANDLER — prevents silent failures ──
@@ -5735,7 +5738,7 @@ async function regenImage() {
   const regenImgOrig = regenImgBtn.textContent;
   regenImgBtn.textContent = detectLanguage()==='en' ? '⏳ Generating...' : '⏳ Generando...';
   try {
-    const imgRes=await postWithTimeout({ mode:'image', imagePrompt:prompt, imageStyle, brandColors:loadBrand()?.colors });
+    const imgRes=await postWithTimeout({ mode:'image', imagePrompt:prompt, imageStyle, brandColors:loadBrand()?.colors, quality:'low' });
     if(mode === 'carousel' && lastResult?.slides && lastResult.slides.length) {
       // Re-render all carousel slides with new cover image
       lastResult.coverImage = imgRes.imageUrl;
