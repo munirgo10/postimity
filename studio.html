@@ -71,6 +71,8 @@ select{cursor:pointer}
 .color-row{display:flex;gap:8px}
 .color-pick{flex:1;display:flex;align-items:center;gap:8px;padding:8px 10px;border:1.5px solid var(--bor);border-radius:8px;background:var(--w)}
 .color-pick label{font-size:11px;font-weight:600;color:var(--t2);cursor:pointer}
+.palette-btn{display:inline-flex;align-items:center;gap:4px;padding:5px 8px;border:1.5px solid var(--bor);border-radius:8px;background:var(--w);cursor:pointer;font-size:13px;font-family:inherit;transition:border-color .2s}
+.palette-btn:hover{border-color:var(--b)}
 input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:pointer;padding:0;background:none}
 /* Brand Guide */
 .bg-section{display:none;margin-top:14px}
@@ -1127,19 +1129,31 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
 
     <!-- Card 4: Colores -->
     <div class="scard">
-      <div class="scard-title">🎨 Colores de marca</div>
+      <div class="scard-title" id="colorCardTitle">🎨 Colores de marca</div>
       <div class="color-row">
         <div class="color-pick">
-          <input type="color" id="bC1" value="#2979FF">
-          <label for="bC1">Primario</label>
+          <input type="color" id="bC1" value="#2979FF" onchange="checkColorContrast()">
+          <label for="bC1" id="lblC1">Primario</label>
         </div>
         <div class="color-pick">
-          <input type="color" id="bC2" value="#76C442">
-          <label for="bC2">Secundario</label>
+          <input type="color" id="bC2" value="#76C442" onchange="checkColorContrast()">
+          <label for="bC2" id="lblC2">Secundario</label>
         </div>
         <div class="color-pick">
-          <input type="color" id="bC3" value="#E91E8C">
-          <label for="bC3">Acento</label>
+          <input type="color" id="bC3" value="#E91E8C" onchange="checkColorContrast()">
+          <label for="bC3" id="lblC3">Acento</label>
+        </div>
+      </div>
+      <div id="colorWarning" style="display:none;margin-top:8px;padding:8px 12px;background:#FFF3E0;border-radius:8px;font-size:11px;color:#E65100;line-height:1.5"></div>
+      <div style="margin-top:10px">
+        <div style="font-size:11px;font-weight:700;color:var(--t2);margin-bottom:6px" id="paletteSuggestLabel">💡 Paletas sugeridas por giro:</div>
+        <div class="palette-suggestions" style="display:flex;flex-wrap:wrap;gap:6px">
+          <button type="button" class="palette-btn" onclick="applyPalette('#D32F2F','#FF8F00','#FDD835')" title="Restaurante / Comida">🍽️ <span class="pal-dots" style="display:inline-flex;gap:2px"><span style="width:10px;height:10px;border-radius:50%;background:#D32F2F;display:inline-block"></span><span style="width:10px;height:10px;border-radius:50%;background:#FF8F00;display:inline-block"></span><span style="width:10px;height:10px;border-radius:50%;background:#FDD835;display:inline-block"></span></span></button>
+          <button type="button" class="palette-btn" onclick="applyPalette('#E91E63','#9C27B0','#F8BBD0')" title="Belleza / Estética">💅 <span class="pal-dots" style="display:inline-flex;gap:2px"><span style="width:10px;height:10px;border-radius:50%;background:#E91E63;display:inline-block"></span><span style="width:10px;height:10px;border-radius:50%;background:#9C27B0;display:inline-block"></span><span style="width:10px;height:10px;border-radius:50%;background:#F8BBD0;display:inline-block"></span></span></button>
+          <button type="button" class="palette-btn" onclick="applyPalette('#1565C0','#00ACC1','#FF6F00')" title="Fitness / Gym">💪 <span class="pal-dots" style="display:inline-flex;gap:2px"><span style="width:10px;height:10px;border-radius:50%;background:#1565C0;display:inline-block"></span><span style="width:10px;height:10px;border-radius:50%;background:#00ACC1;display:inline-block"></span><span style="width:10px;height:10px;border-radius:50%;background:#FF6F00;display:inline-block"></span></span></button>
+          <button type="button" class="palette-btn" onclick="applyPalette('#2E7D32','#8BC34A','#795548')" title="Salud / Bienestar">🌿 <span class="pal-dots" style="display:inline-flex;gap:2px"><span style="width:10px;height:10px;border-radius:50%;background:#2E7D32;display:inline-block"></span><span style="width:10px;height:10px;border-radius:50%;background:#8BC34A;display:inline-block"></span><span style="width:10px;height:10px;border-radius:50%;background:#795548;display:inline-block"></span></span></button>
+          <button type="button" class="palette-btn" onclick="applyPalette('#1A237E','#42A5F5','#FFC107')" title="Educación / Colegio">🎓 <span class="pal-dots" style="display:inline-flex;gap:2px"><span style="width:10px;height:10px;border-radius:50%;background:#1A237E;display:inline-block"></span><span style="width:10px;height:10px;border-radius:50%;background:#42A5F5;display:inline-block"></span><span style="width:10px;height:10px;border-radius:50%;background:#FFC107;display:inline-block"></span></span></button>
+          <button type="button" class="palette-btn" onclick="applyPalette('#263238','#607D8B','#FF5722')" title="Servicios profesionales">🏢 <span class="pal-dots" style="display:inline-flex;gap:2px"><span style="width:10px;height:10px;border-radius:50%;background:#263238;display:inline-block"></span><span style="width:10px;height:10px;border-radius:50%;background:#607D8B;display:inline-block"></span><span style="width:10px;height:10px;border-radius:50%;background:#FF5722;display:inline-block"></span></span></button>
         </div>
       </div>
     </div>
@@ -1817,6 +1831,7 @@ const T = {
     toneWarm:'Cálido y moderno', tonePro:'Profesional y confiable', toneFun:'Divertido y energético', toneInsp:'Inspiracional y motivador', toneEdu:'Informativo y educativo',
     toneWarmVal:'Cálido, moderno y cercano', toneProVal:'Profesional y confiable', toneFunVal:'Divertido y energético', toneInspVal:'Inspiracional y motivador', toneEduVal:'Informativo y educativo',
     colorPrimary:'Primario', colorSecondary:'Secundario', colorAccent:'Acento',
+    colorCardTitle:'🎨 Colores de marca', paletteSuggestLabel:'💡 Paletas sugeridas por giro:',
     bgCardDesc:'La AI analizará tu negocio y generará la estrategia de contenido completa: pilares, voz de marca, estrategia por plataforma y hashtags. Puedes editarlo antes de guardar.',
     bgGenBtn:'✨ Generar Brand Guide con AI', bgGenerating:'Generando tu Brand Guide...', bgGenerated:'✅ Brand Guide generado',
     bgLabel:'📋 Brand Guide generado — puedes editarlo', bgHint:'Este texto guía a la AI en cada post. Edita cualquier cosa que quieras ajustar.',
@@ -2083,6 +2098,7 @@ const T = {
     toneWarm:'Warm & modern', tonePro:'Professional & reliable', toneFun:'Fun & energetic', toneInsp:'Inspirational & motivating', toneEdu:'Informative & educational',
     toneWarmVal:'Warm, modern and friendly', toneProVal:'Professional and reliable', toneFunVal:'Fun and energetic', toneInspVal:'Inspirational and motivating', toneEduVal:'Informative and educational',
     colorPrimary:'Primary', colorSecondary:'Secondary', colorAccent:'Accent',
+    colorCardTitle:'🎨 Brand Colors', paletteSuggestLabel:'💡 Suggested palettes by industry:',
     bgCardDesc:'The AI will analyze your business and generate the complete content strategy: pillars, brand voice, platform strategy and hashtags. You can edit before saving.',
     bgGenBtn:'✨ Generate Brand Guide with AI', bgGenerating:'Generating your Brand Guide...', bgGenerated:'✅ Brand Guide generated',
     bgLabel:'📋 Brand Guide generated — you can edit it', bgHint:'This text guides the AI in every post. Edit anything you want to adjust.',
@@ -2946,6 +2962,53 @@ function updateStyleSelector() {
   else if (mode === 'enhance') { /* no style selector for real photo */ }
   else if (!visible && imageStyle === 'abstract') { imageStyle = 'illustrated'; } // reset if switching away
 }
+// ─── COLOR POKAYOKE ──────────────────────────────────
+function applyPalette(p, s, a) {
+  document.getElementById('bC1').value = p;
+  document.getElementById('bC2').value = s;
+  document.getElementById('bC3').value = a;
+  checkColorContrast();
+}
+
+function hexToRgb(hex) {
+  hex = hex.replace('#','');
+  return { r: parseInt(hex.slice(0,2),16), g: parseInt(hex.slice(2,4),16), b: parseInt(hex.slice(4,6),16) };
+}
+
+function colorDistance(hex1, hex2) {
+  const a = hexToRgb(hex1), b = hexToRgb(hex2);
+  return Math.sqrt(Math.pow(a.r-b.r,2) + Math.pow(a.g-b.g,2) + Math.pow(a.b-b.b,2));
+}
+
+function relativeLuminance(hex) {
+  const c = hexToRgb(hex);
+  const [rs, gs, bs] = [c.r/255, c.g/255, c.b/255].map(v => v <= 0.03928 ? v/12.92 : Math.pow((v+0.055)/1.055, 2.4));
+  return 0.2126*rs + 0.7152*gs + 0.0722*bs;
+}
+
+function checkColorContrast() {
+  const c1 = document.getElementById('bC1').value;
+  const c2 = document.getElementById('bC2').value;
+  const c3 = document.getElementById('bC3').value;
+  const warn = document.getElementById('colorWarning');
+  const isES = detectLanguage() === 'es';
+  const warnings = [];
+  // Check if colors are too similar
+  if (colorDistance(c1, c2) < 60) warnings.push(isES ? 'Primario y Secundario son muy similares' : 'Primary and Secondary are very similar');
+  if (colorDistance(c1, c3) < 60) warnings.push(isES ? 'Primario y Acento son muy similares' : 'Primary and Accent are very similar');
+  if (colorDistance(c2, c3) < 60) warnings.push(isES ? 'Secundario y Acento son muy similares' : 'Secondary and Accent are very similar');
+  // Check if all colors are too dark or too light
+  const lums = [relativeLuminance(c1), relativeLuminance(c2), relativeLuminance(c3)];
+  if (lums.every(l => l < 0.05)) warnings.push(isES ? 'Todos los colores son muy oscuros — las imágenes se verán apagadas' : 'All colors are very dark — images will look dull');
+  if (lums.every(l => l > 0.7)) warnings.push(isES ? 'Todos los colores son muy claros — falta contraste' : 'All colors are very light — needs more contrast');
+  if (warnings.length) {
+    warn.innerHTML = '⚠️ ' + warnings.join('. ') + '. ' + (isES ? 'Prueba una paleta sugerida ↑' : 'Try a suggested palette ↑');
+    warn.style.display = 'block';
+  } else {
+    warn.style.display = 'none';
+  }
+}
+
 function toggleBGGuide() {
   const body = document.getElementById('begBody'), chev = document.getElementById('begChevron');
   body.classList.toggle('open'); chev.textContent = body.classList.contains('open') ? '▲' : '▼';
@@ -2956,13 +3019,14 @@ async function aiUpdateBrandGuide() {
   const currentBG = document.getElementById('bgText').value;
   if(!currentBG) { alert(t('alertBGFirst')); return; }
   const btn = document.getElementById('btnAIUpdate');
-  btn.textContent = '...'; btn.disabled = true;
+  btn.textContent = detectLanguage()==='en' ? '⏳ Updating...' : '⏳ Actualizando...'; btn.disabled = true;
   try {
     const res = await postWithTimeout({ mode:'brand-guide-update', currentBrandGuide:currentBG, instruction:instr });
     document.getElementById('bgText').value = res.brandGuide;
     if(res.pillars && res.pillars.length) window._pillars = res.pillars;
     document.getElementById('bgUpdateInstr').value = '';
     btn.textContent = '✅';
+    showToast(detectLanguage()==='en' ? '✅ Brand guide updated' : '✅ Brand guide actualizado');
     setTimeout(() => { btn.textContent = t('bgAIBtn'); btn.disabled = false; }, 2000);
   } catch(e) {
     alert('Error: ' + e.message);
@@ -3395,7 +3459,8 @@ async function adjustResult() {
   if(!bg || !lastGeneratedData) { showToast(t('toastGenFirst')); return; }
 
   const btn = document.getElementById('adjustBtn');
-  if(btn) { btn.disabled = true; btn.textContent = '...'; }
+  const btnOrig = btn ? btn.textContent : '';
+  if(btn) { btn.disabled = true; btn.textContent = detectLanguage()==='en' ? '⏳ Adjusting...' : '⏳ Ajustando...'; }
 
   try {
     const currentIG = document.getElementById('igCap')?.textContent || '';
@@ -5259,6 +5324,8 @@ function applyBilingualUI() {
   const colorLabels = document.querySelectorAll('.color-pick label');
   const colorKeys = ['colorPrimary','colorSecondary','colorAccent'];
   colorLabels.forEach((el, i) => { if(colorKeys[i]) el.textContent = t(colorKeys[i]); });
+  const colorCardTitleEl = document.getElementById('colorCardTitle'); if(colorCardTitleEl) colorCardTitleEl.textContent = t('colorCardTitle');
+  const paletteLblEl = document.getElementById('paletteSuggestLabel'); if(paletteLblEl) paletteLblEl.textContent = t('paletteSuggestLabel');
   // Card 5: Brand Guide
   const bgDesc = document.querySelector('.scard:nth-child(5) > p'); if(bgDesc) bgDesc.textContent = t('bgCardDesc');
   st('btnGenBG','bgGenBtn');
@@ -5650,21 +5717,49 @@ async function regenImage() {
     alert('En Estudio Pro la imagen es tu foto editada. Para una versión diferente, sube la foto nuevamente.');
     return;
   }
-  if(!lastResult?.imagePrompt) {
-    alert('No hay prompt de imagen disponible para regenerar.');
+  // Carousel: use coverImagePrompt to regenerate cover, then re-render slides
+  const prompt = lastResult?.imagePrompt || lastResult?.coverImagePrompt;
+  if(!prompt) {
+    alert(detectLanguage()==='en' ? 'No image prompt available to regenerate.' : 'No hay prompt de imagen disponible para regenerar.');
     return;
   }
   document.getElementById('regenImg').disabled=true;
+  const regenImgBtn = document.getElementById('regenImg');
+  const regenImgOrig = regenImgBtn.textContent;
+  regenImgBtn.textContent = detectLanguage()==='en' ? '⏳ Generating...' : '⏳ Generando...';
   try {
-    const imgRes=await postWithTimeout({ mode:'image', imagePrompt:lastResult.imagePrompt, imageStyle, brandColors:loadBrand()?.colors });
-    lastResult.imageUrl=imgRes.imageUrl;
-    document.getElementById('resultImg').src=imgRes.imageUrl;
+    const imgRes=await postWithTimeout({ mode:'image', imagePrompt:prompt, imageStyle, brandColors:loadBrand()?.colors });
+    if(mode === 'carousel' && lastResult?.slides && lastResult.slides.length) {
+      // Re-render all carousel slides with new cover image
+      lastResult.coverImage = imgRes.imageUrl;
+      carouselResults = [];
+      for (let i = 0; i < lastResult.slides.length; i++) {
+        const dataUrl = await renderCarouselSlide(lastResult.slides[i], loadBrand(), imgRes.imageUrl, lastResult.slides.length);
+        carouselResults.push(dataUrl);
+      }
+      // Update preview
+      const preview = document.getElementById('carouselSlidesPreview');
+      if(preview) {
+        const items = preview.querySelectorAll('.cs-preview img');
+        carouselResults.forEach((url, i) => { if(items[i]) items[i].src = url; });
+      }
+      document.getElementById('resultImg').src = carouselResults[0];
+      lastResult.carouselImages = carouselResults;
+    } else {
+      lastResult.imageUrl=imgRes.imageUrl;
+      document.getElementById('resultImg').src=imgRes.imageUrl;
+    }
+    showToast(detectLanguage()==='en' ? '✅ Image updated' : '✅ Imagen actualizada');
   } catch(e){ alert((detectLanguage()==='en'?'Error regenerating image: ':'Error al regenerar imagen: ')+e.message); }
+  regenImgBtn.textContent = regenImgOrig;
   document.getElementById('regenImg').disabled=false;
 }
 async function regenText() {
   if(!lastInput) return;
-  document.getElementById('regenText').disabled=true;
+  const regenTextBtn = document.getElementById('regenText');
+  regenTextBtn.disabled=true;
+  const regenTextOrig = regenTextBtn.textContent;
+  regenTextBtn.textContent = detectLanguage()==='en' ? '⏳ Generating...' : '⏳ Generando...';
   const brand=loadBrand();
   const bg=brand?.brandGuide||(detectLanguage()==='en'?`Business: ${brand?.name}.`:`Negocio: ${brand?.name}.`);
   try {
@@ -5675,8 +5770,10 @@ async function regenText() {
     else if(lastInput.mode==='testimonial') textInput = document.getElementById('testText').value||'Testimonio de cliente';
     data = await postWithTimeout({ mode:'captions', textInput, brandGuide:bg, brandData:brand, pillar:lastInput.pillar, platform:lastInput.platform });
     fillCaptions(data);
+    showToast(detectLanguage()==='en' ? '✅ Text updated' : '✅ Texto actualizado');
   } catch(e){ alert((detectLanguage()==='en'?'Error regenerating text: ':'Error al regenerar texto: ')+e.message); }
-  document.getElementById('regenText').disabled=false;
+  regenTextBtn.textContent = regenTextOrig;
+  regenTextBtn.disabled=false;
 }
 
 // ═══════════════════════════════════════════════════════
@@ -5704,11 +5801,31 @@ function showResult(data) {
   document.getElementById('resultImg').src=data.imageUrl||'';
   const pd=document.getElementById('photoDescBar');
   if(data.photoDescription){ pd.textContent='📷 '+data.photoDescription; pd.classList.add('show'); } else pd.classList.remove('show');
-  // Show/hide adjust + publish sections (hidden for carousel)
+  // Show adjust + publish for ALL modes (including carousel)
   const adjWrap = document.getElementById('adjustWrap');
-  if(adjWrap) adjWrap.style.display = (mode === 'carousel') ? 'none' : 'block';
+  if(adjWrap) adjWrap.style.display = 'block';
   const pubSec = document.getElementById('pubSection');
-  if(pubSec) pubSec.style.display = (mode === 'carousel') ? 'none' : 'block';
+  if(pubSec) pubSec.style.display = 'block';
+  // Carousel: hide single-image controls (logo, watermark, download format buttons)
+  const isCarousel = (mode === 'carousel');
+  const logoToggle = document.querySelector('.logo-toggle');
+  if(logoToggle) logoToggle.style.display = isCarousel ? 'none' : '';
+  const wmRow = document.getElementById('wmToggleRow');
+  if(wmRow) wmRow.style.display = isCarousel ? 'none' : '';
+  const dlLabel = document.querySelector('.dl-label');
+  if(dlLabel) dlLabel.style.display = isCarousel ? 'none' : '';
+  const dlBtnsEl = document.querySelector('.dl-btns');
+  if(dlBtnsEl) dlBtnsEl.style.display = isCarousel ? 'none' : '';
+  // Carousel: update pub label and hint
+  if(isCarousel && pubSec) {
+    const isES = detectLanguage() === 'es';
+    const pubLabel = pubSec.querySelector('.pub-label');
+    if(pubLabel) pubLabel.textContent = isES ? '📤 Publicar carrusel en redes sociales' : '📤 Publish carousel to social media';
+    const pubHint = pubSec.querySelector('.pub-hint');
+    if(pubHint) pubHint.textContent = isES
+      ? '💡 Un toque: se copia el caption, se descargan todos los slides y se abre la app — súbelos como carrusel'
+      : '💡 One tap: copies the caption, downloads all slides and opens the app — upload as carousel';
+  }
   // First post celebration
   showFirstPostCelebration();
   // Show carousel slides preview
@@ -5873,19 +5990,25 @@ async function openInSocial(platform) {
     document.execCommand('copy'); document.body.removeChild(ta);
   }
 
-  // 3. Download image (1:1 square — best for all platforms)
-  await downloadImg('square');
+  // 3. Download image(s)
+  if(mode === 'carousel' && carouselResults && carouselResults.length) {
+    // Download all slides for carousel
+    downloadAllSlides();
+  } else {
+    await downloadImg('square');
+  }
 
   // 4. Toast with next step
   const lang = detectLanguage();
+  const isCarouselMode = (mode === 'carousel');
   const toastMsg = lang === 'en' ? {
-    instagram: '📸 Image downloaded · Caption copied — open Instagram and paste',
-    facebook:  '👥 Image downloaded · Caption copied — open Facebook and paste',
-    tiktok:    '🎵 Image downloaded · Caption copied — open TikTok and paste',
+    instagram: isCarouselMode ? '📸 All slides downloaded · Caption copied — upload as carousel on Instagram' : '📸 Image downloaded · Caption copied — open Instagram and paste',
+    facebook:  isCarouselMode ? '👥 All slides downloaded · Caption copied — upload as album on Facebook' : '👥 Image downloaded · Caption copied — open Facebook and paste',
+    tiktok:    isCarouselMode ? '🎵 All slides downloaded · Caption copied — upload as carousel on TikTok' : '🎵 Image downloaded · Caption copied — open TikTok and paste',
   } : {
-    instagram: '📸 Imagen descargada · Caption copiado — abre Instagram y pégalo',
-    facebook:  '👥 Imagen descargada · Caption copiado — abre Facebook y pégalo',
-    tiktok:    '🎵 Imagen descargada · Caption copiado — abre TikTok y pégalo',
+    instagram: isCarouselMode ? '📸 Slides descargados · Caption copiado — súbelos como carrusel en Instagram' : '📸 Imagen descargada · Caption copiado — abre Instagram y pégalo',
+    facebook:  isCarouselMode ? '👥 Slides descargados · Caption copiado — súbelos como álbum en Facebook' : '👥 Imagen descargada · Caption copiado — abre Facebook y pégalo',
+    tiktok:    isCarouselMode ? '🎵 Slides descargados · Caption copiado — súbelos como carrusel en TikTok' : '🎵 Imagen descargada · Caption copiado — abre TikTok y pégalo',
   };
   showToast(toastMsg[platform] || (lang==='en'?'✅ Ready — paste the caption in the app':'✅ Listo — pega el caption en la app'));
 
@@ -6147,6 +6270,14 @@ function setStep(n) {
 // ═══════════════════════════════════════════════════════
 function resetCreator() {
   showLoading(false);
+  // Restore regen buttons (video mode replaces them via innerHTML)
+  const regenBtns = document.querySelector('.regen-btns');
+  if(regenBtns) {
+    regenBtns.innerHTML =
+      '<button class="btn-regen" id="regenImg" onclick="regenImage()">' + t('regenImg') + '</button>' +
+      '<button class="btn-regen" id="regenText" onclick="regenText()">' + t('regenText') + '</button>' +
+      '<button class="btn-regen" onclick="resetCreator()">' + t('regenBack') + '</button>';
+  }
   // Clean up any video remnants
   const vp = document.getElementById('videoPlayerWrap');
   if(vp) vp.remove();
@@ -6167,12 +6298,16 @@ function resetCreator() {
   if(imgControls) imgControls.style.display = '';
   const capPanel = document.querySelector('.cap-panel');
   if(capPanel) capPanel.style.display = '';
-  // Restore publish button original onclick handlers
+  // Restore publish button original onclick handlers + pub label/hint text
   const pubBtns = document.querySelectorAll('.pub-btn');
   pubBtns.forEach(btn => {
     const plat = btn.classList.contains('ig') ? 'instagram' : btn.classList.contains('fb') ? 'facebook' : 'tiktok';
     btn.onclick = function(){ openInSocial(plat); };
   });
+  const pubLabel = document.querySelector('.pub-label');
+  if(pubLabel) pubLabel.textContent = t('pubLabel');
+  const pubHintEl = document.querySelector('.pub-hint');
+  if(pubHintEl) pubHintEl.textContent = t('pubHint');
   // Clear video photo
   videoPhotoB64 = null;
   const vPrev = document.getElementById('videoPrev');
