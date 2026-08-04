@@ -109,14 +109,19 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
     <div class="kpi"><div class="kpi-label">Total Users</div><div class="kpi-val" id="kpiTotal">—</div><div class="kpi-sub" id="kpiActive">—</div></div>
     <div class="kpi green"><div class="kpi-label">MRR (USD)</div><div class="kpi-val" id="kpiMRR">—</div><div class="kpi-sub" id="kpiMRRmxn">—</div></div>
     <div class="kpi"><div class="kpi-label">Paying Users</div><div class="kpi-val" id="kpiPaying">—</div><div class="kpi-sub" id="kpiPayingPct">—</div></div>
-    <div class="kpi blue"><div class="kpi-label">Total Generations</div><div class="kpi-val" id="kpiGens">—</div><div class="kpi-sub" id="kpiVideos">—</div></div>
+    <div class="kpi blue"><div class="kpi-label">Text Generations</div><div class="kpi-val" id="kpiGens">—</div><div class="kpi-sub" id="kpiGensDetail">—</div></div>
   </div>
-  <!-- KPIs Row 2: Financial -->
-  <div class="kpi-grid" style="margin-bottom:16px">
+  <!-- KPIs Row 2: Video + Financial -->
+  <div class="kpi-grid">
+    <div class="kpi" style="border-left:3px solid #E53935"><div class="kpi-label">🎬 Videos Generated</div><div class="kpi-val" id="kpiVideos">—</div><div class="kpi-sub" id="kpiVideoCost">—</div></div>
     <div class="kpi red"><div class="kpi-label">API Cost (all time)</div><div class="kpi-val" id="kpiApiCost">—</div><div class="kpi-sub" id="kpiCostPerGen">—</div></div>
-    <div class="kpi"><div class="kpi-label">Stripe Fees (est)</div><div class="kpi-val" id="kpiStripe">—</div><div class="kpi-sub">2.9% + $0.30/txn</div></div>
     <div class="kpi green"><div class="kpi-label">Net Revenue (est)</div><div class="kpi-val" id="kpiNet">—</div><div class="kpi-sub" id="kpiNetMxn">—</div></div>
-    <div class="kpi"><div class="kpi-label">Gross Margin</div><div class="kpi-val" id="kpiMargin">—</div><div class="kpi-sub">After API + Stripe</div></div>
+    <div class="kpi"><div class="kpi-label">Gross Margin</div><div class="kpi-val" id="kpiMargin">—</div><div class="kpi-sub" id="kpiMarginDetail">—</div></div>
+  </div>
+  <!-- KPIs Row 3: Stripe -->
+  <div class="kpi-grid" style="margin-bottom:16px;grid-template-columns:repeat(2,1fr)">
+    <div class="kpi"><div class="kpi-label">Stripe Fees (est)</div><div class="kpi-val" id="kpiStripe">—</div><div class="kpi-sub">2.9% + $0.30/txn</div></div>
+    <div class="kpi"><div class="kpi-label">Cost Breakdown</div><div class="kpi-val" id="kpiCostSplit">—</div><div class="kpi-sub" id="kpiCostSplitDetail">—</div></div>
   </div>
   <!-- Charts row -->
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
@@ -218,15 +223,24 @@ function renderDashboard(){
   const paying=(d.planCounts.starter||0)+(d.planCounts.growth||0)+(d.planCounts.agency||0);
   document.getElementById('kpiPaying').textContent=paying;
   document.getElementById('kpiPayingPct').textContent=(d.totalUsers>0?Math.round(paying/d.totalUsers*100):0)+'% conversion';
-  document.getElementById('kpiGens').textContent=d.totalGens.toLocaleString();
-  document.getElementById('kpiVideos').textContent=(d.totalVideos||0)+' videos';
-  // KPIs Row 2 — Financial
+  var textGens=d.totalGens-(d.totalVideos||0);
+  document.getElementById('kpiGens').textContent=textGens.toLocaleString();
+  document.getElementById('kpiGensDetail').textContent=d.totalGens+' total (incl. '+( d.totalVideos||0)+' videos)';
+  // Video KPI
+  document.getElementById('kpiVideos').textContent=(d.totalVideos||0);
+  document.getElementById('kpiVideoCost').textContent='$'+(d.videoApiCost||0).toFixed(2)+' API cost ($0.71/video)';
+  // Financial KPIs
   document.getElementById('kpiApiCost').textContent='$'+(d.totalApiCost||0).toFixed(2);
   document.getElementById('kpiCostPerGen').textContent='$'+(d.costPerGen||0).toFixed(3)+'/gen avg';
   document.getElementById('kpiStripe').textContent='$'+(d.stripeCommission||0).toFixed(2);
   document.getElementById('kpiNet').textContent='$'+(d.netRevenue||0).toFixed(2);
   document.getElementById('kpiNetMxn').textContent='~$'+Math.round((d.netRevenue||0)*17.5)+' MXN';
   document.getElementById('kpiMargin').textContent=(d.grossMargin||0).toFixed(1)+'%';
+  var textCost=(d.totalApiCost||0)-(d.videoApiCost||0);
+  document.getElementById('kpiMarginDetail').textContent='Text $'+textCost.toFixed(2)+' + Video $'+(d.videoApiCost||0).toFixed(2);
+  document.getElementById('kpiCostSplit').textContent='Text: $'+textCost.toFixed(2);
+  var videoPct=d.totalApiCost>0?((d.videoApiCost||0)/d.totalApiCost*100):0;
+  document.getElementById('kpiCostSplitDetail').textContent='Video: $'+(d.videoApiCost||0).toFixed(2)+' ('+videoPct.toFixed(0)+'% of API cost)';
   // Plan bars
   const planColors={trial:'#F9A825',starter:'#2979FF',growth:'#76C442',agency:'#7C4DFF'};
   const planNames={trial:'Trial',starter:'Starter',growth:'Growth',agency:'Agency'};
