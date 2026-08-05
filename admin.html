@@ -79,6 +79,8 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
 .fin-val.red{color:var(--r)}
 .btn-plan{padding:3px 7px;border:1px solid var(--bor);border-radius:5px;font-size:10px;font-weight:700;cursor:pointer;background:var(--w);color:var(--b);font-family:inherit;white-space:nowrap}
 .btn-plan:hover{background:var(--b3);border-color:var(--b)}
+.btn-del{padding:3px 7px;border:1px solid var(--bor);border-radius:5px;font-size:10px;font-weight:700;cursor:pointer;background:var(--w);color:var(--r);font-family:inherit;white-space:nowrap}
+.btn-del:hover{background:#FFEBEE;border-color:var(--r)}
 .plan-modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.35);z-index:500;align-items:center;justify-content:center}
 .plan-modal-overlay.show{display:flex}
 .plan-modal{background:var(--w);border-radius:16px;padding:24px;max-width:380px;width:90%;box-shadow:0 8px 32px rgba(0,0,0,.18)}
@@ -176,7 +178,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
   <div class="section">
     <div class="section-title">🏆 Top 20 users</div>
     <table class="admin-table" id="topUsersTable">
-      <thead><tr><th>#</th><th>Brand</th><th>Plan</th><th>Gens</th></tr></thead>
+      <thead><tr><th>#</th><th>Brand</th><th>Plan</th><th>Gens</th><th>🎬</th><th>Cost</th></tr></thead>
       <tbody></tbody>
     </table>
   </div>
@@ -195,7 +197,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
     </div>
     <div style="max-height:360px;overflow-y:auto">
       <table class="admin-table" id="brandTable">
-        <thead><tr><th>Brand</th><th>Type</th><th>Country</th><th>Plan</th><th>Email</th><th>Last Active</th><th>Action</th></tr></thead>
+        <thead><tr><th>Brand</th><th>Plan</th><th>Country</th><th>Gens</th><th>Cost</th><th>Last Gen</th><th>Actions</th></tr></thead>
         <tbody></tbody>
       </table>
     </div>
@@ -312,7 +314,7 @@ function renderDashboard(){
   const sortedC=Object.entries(d.countryCounts).sort((a,b)=>b[1]-a[1]);
   document.getElementById('countryGrid').innerHTML=sortedC.map(([c,n])=>'<div class="country-chip">'+c+' <span>'+n+'</span></div>').join('');
   // Top Users
-  document.querySelector('#topUsersTable tbody').innerHTML=d.topUsers.map((u,i)=>'<tr><td class="rank">'+(i+1)+'</td><td style="font-weight:600">'+esc(u.name)+'</td><td><span class="plan-tag '+u.plan+'">'+u.plan+'</span></td><td style="font-weight:700">'+u.gens+'</td></tr>').join('');
+  document.querySelector('#topUsersTable tbody').innerHTML=d.topUsers.map((u,i)=>'<tr><td class="rank">'+(i+1)+'</td><td style="font-weight:600">'+esc(u.name)+'</td><td><span class="plan-tag '+u.plan+'">'+u.plan+'</span></td><td style="font-weight:700">'+u.gens+'</td><td style="font-size:11px;color:#E53935">'+(u.videos||0)+'</td><td style="font-size:11px;color:var(--r)">$'+(u.cost||0).toFixed(2)+'</td></tr>').join('');
   filterBrands();
 }
 function filterBrands(){
@@ -324,7 +326,12 @@ function filterBrands(){
     if(q&&!((b.name||'').toLowerCase().includes(q)||(b.email||'').toLowerCase().includes(q)||(b.country||'').toLowerCase().includes(q)))return false;
     return true;
   });
-  document.querySelector('#brandTable tbody').innerHTML=filtered.slice(0,100).map(b=>'<tr><td style="font-weight:600">'+esc(b.name)+'</td><td>'+esc(b.type)+'</td><td>'+esc(b.country)+'</td><td><span class="plan-tag '+(b.plan||'trial')+'">'+(b.plan||'trial')+'</span></td><td style="font-size:11px">'+esc(b.email)+'</td><td style="font-size:11px;color:var(--t3)">'+(b.updatedAt?new Date(b.updatedAt).toLocaleDateString():'—')+'</td><td><button class="btn-plan" data-bid="'+esc(b.brandId)+'" data-bname="'+esc(b.name)+'" data-plan="'+(b.plan||'trial')+'" onclick="openPlanModal(this.dataset.bid,this.dataset.bname,this.dataset.plan)">Change</button></td></tr>').join('');
+  document.querySelector('#brandTable tbody').innerHTML=filtered.slice(0,100).map(b=>{
+    const lastGen=b.lastGen?new Date(b.lastGen).toLocaleDateString():'—';
+    const costStr=b.cost>0?'$'+b.cost.toFixed(2):'—';
+    const genStr=b.gens>0?b.gens+(b.videos>0?' <span style="color:#E53935;font-size:9px">('+b.videos+'🎬)</span>':''):'0';
+    return '<tr><td style="font-weight:600">'+esc(b.name)+'<div style="font-size:9px;color:var(--t4)">'+esc(b.email||b.type)+'</div></td><td><span class="plan-tag '+(b.plan||'trial')+'">'+(b.plan||'trial')+'</span></td><td style="font-size:11px">'+esc(b.country)+'</td><td style="font-size:11px;font-weight:600">'+genStr+'</td><td style="font-size:11px;color:var(--r)">'+costStr+'</td><td style="font-size:10px;color:var(--t3)">'+lastGen+'</td><td style="white-space:nowrap"><button class="btn-plan" data-bid="'+esc(b.brandId)+'" data-bname="'+esc(b.name)+'" data-plan="'+(b.plan||'trial')+'" onclick="openPlanModal(this.dataset.bid,this.dataset.bname,this.dataset.plan)">Plan</button> <button class="btn-del" data-bid="'+esc(b.brandId)+'" data-bname="'+esc(b.name)+'" onclick="deleteBrand(this.dataset.bid,this.dataset.bname)">🗑</button></td></tr>';
+  }).join('');
   document.getElementById('brandCount').textContent='Showing '+Math.min(filtered.length,100)+' of '+filtered.length+' brands';
 }
 function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
@@ -388,6 +395,24 @@ async function confirmPlanChange(){
     status.style.color='var(--r)';
     btn.textContent='Apply'; btn.disabled=false;
   }
+}
+
+// ── Delete Brand ──
+async function deleteBrand(brandId,brandName){
+  const msg='⚠️ DELETE permanently:\n\n"'+brandName+'"\n\nThis removes: brand data, history, gallery, agent plans, reminders.\n\nType DELETE to confirm:';
+  const confirm=prompt(msg);
+  if(confirm!=='DELETE')return;
+  try{
+    const key=sessionStorage.getItem('admin_key');
+    const res=await fetch(WORKER,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mode:'admin-delete-brand',adminKey:key,brandId})});
+    const data=await res.json();
+    if(data.success){
+      alert('✅ '+data.message);
+      doAuth(); // Refresh
+    }else{
+      alert('❌ '+(data.error||'Delete failed'));
+    }
+  }catch(e){alert('❌ Error: '+e.message)}
 }
 
 // ── Feedback ──
