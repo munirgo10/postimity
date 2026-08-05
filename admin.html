@@ -77,6 +77,28 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
 .fin-val{font-weight:700;color:var(--t1)}
 .fin-val.green{color:var(--g2)}
 .fin-val.red{color:var(--r)}
+.btn-plan{padding:3px 7px;border:1px solid var(--bor);border-radius:5px;font-size:10px;font-weight:700;cursor:pointer;background:var(--w);color:var(--b);font-family:inherit;white-space:nowrap}
+.btn-plan:hover{background:var(--b3);border-color:var(--b)}
+.plan-modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.35);z-index:500;align-items:center;justify-content:center}
+.plan-modal-overlay.show{display:flex}
+.plan-modal{background:var(--w);border-radius:16px;padding:24px;max-width:380px;width:90%;box-shadow:0 8px 32px rgba(0,0,0,.18)}
+.plan-modal h3{font-size:16px;font-weight:800;margin-bottom:4px}
+.plan-modal .pm-sub{font-size:12px;color:var(--t3);margin-bottom:16px}
+.plan-modal .pm-brand{font-size:13px;font-weight:700;color:var(--b);margin-bottom:12px}
+.pm-options{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+.pm-opt{padding:10px;border:2px solid var(--bor);border-radius:10px;text-align:center;cursor:pointer;transition:.15s}
+.pm-opt:hover{border-color:var(--b);background:var(--b3)}
+.pm-opt.active{border-color:var(--b);background:var(--b3)}
+.pm-opt.current{border-color:var(--g);background:#E8F5E9}
+.pm-opt-name{font-size:13px;font-weight:700}
+.pm-opt-price{font-size:10px;color:var(--t3)}
+.pm-btns{display:flex;gap:8px}
+.pm-btns button{flex:1;padding:10px;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit}
+.pm-cancel{background:var(--bg);color:var(--t2)}
+.pm-confirm{background:var(--b);color:#fff}
+.pm-confirm:hover{background:var(--b2)}
+.pm-confirm:disabled{opacity:.5;cursor:not-allowed}
+.pm-status{font-size:11px;color:var(--t3);text-align:center;margin-top:8px;min-height:16px}
 @media(max-width:640px){
   .kpi-grid{grid-template-columns:repeat(2,1fr)}
 }
@@ -173,7 +195,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
     </div>
     <div style="max-height:360px;overflow-y:auto">
       <table class="admin-table" id="brandTable">
-        <thead><tr><th>Brand</th><th>Type</th><th>Country</th><th>Plan</th><th>Email</th><th>Last Active</th></tr></thead>
+        <thead><tr><th>Brand</th><th>Type</th><th>Country</th><th>Plan</th><th>Email</th><th>Last Active</th><th>Action</th></tr></thead>
         <tbody></tbody>
       </table>
     </div>
@@ -190,6 +212,20 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
     <div style="max-height:400px;overflow-y:auto" id="fbListWrap">
       <div style="text-align:center;padding:20px;color:var(--t3);font-size:12px" id="fbEmpty">No feedback yet</div>
     </div>
+  </div>
+</div>
+<!-- Plan Change Modal -->
+<div class="plan-modal-overlay" id="planModal">
+  <div class="plan-modal">
+    <h3>⚙️ Change Plan</h3>
+    <div class="pm-sub">Admin override — no payment required</div>
+    <div class="pm-brand" id="pmBrand">—</div>
+    <div class="pm-options" id="pmOptions"></div>
+    <div class="pm-btns">
+      <button class="pm-cancel" onclick="closePlanModal()">Cancel</button>
+      <button class="pm-confirm" id="pmConfirm" onclick="confirmPlanChange()" disabled>Apply</button>
+    </div>
+    <div class="pm-status" id="pmStatus"></div>
   </div>
 </div>
 <script>
@@ -288,10 +324,71 @@ function filterBrands(){
     if(q&&!((b.name||'').toLowerCase().includes(q)||(b.email||'').toLowerCase().includes(q)||(b.country||'').toLowerCase().includes(q)))return false;
     return true;
   });
-  document.querySelector('#brandTable tbody').innerHTML=filtered.slice(0,100).map(b=>'<tr><td style="font-weight:600">'+esc(b.name)+'</td><td>'+esc(b.type)+'</td><td>'+esc(b.country)+'</td><td><span class="plan-tag '+(b.plan||'trial')+'">'+(b.plan||'trial')+'</span></td><td style="font-size:11px">'+esc(b.email)+'</td><td style="font-size:11px;color:var(--t3)">'+(b.updatedAt?new Date(b.updatedAt).toLocaleDateString():'—')+'</td></tr>').join('');
+  document.querySelector('#brandTable tbody').innerHTML=filtered.slice(0,100).map(b=>'<tr><td style="font-weight:600">'+esc(b.name)+'</td><td>'+esc(b.type)+'</td><td>'+esc(b.country)+'</td><td><span class="plan-tag '+(b.plan||'trial')+'">'+(b.plan||'trial')+'</span></td><td style="font-size:11px">'+esc(b.email)+'</td><td style="font-size:11px;color:var(--t3)">'+(b.updatedAt?new Date(b.updatedAt).toLocaleDateString():'—')+'</td><td><button class="btn-plan" data-bid="'+esc(b.brandId)+'" data-bname="'+esc(b.name)+'" data-plan="'+(b.plan||'trial')+'" onclick="openPlanModal(this.dataset.bid,this.dataset.bname,this.dataset.plan)">Change</button></td></tr>').join('');
   document.getElementById('brandCount').textContent='Showing '+Math.min(filtered.length,100)+' of '+filtered.length+' brands';
 }
-function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+
+// ── Plan Change Modal ──
+let pmBrandId=null, pmCurrentPlan=null, pmSelectedPlan=null;
+function openPlanModal(brandId,brandName,currentPlan){
+  pmBrandId=brandId; pmCurrentPlan=currentPlan; pmSelectedPlan=null;
+  document.getElementById('pmBrand').textContent=brandName+' ('+brandId.slice(0,8)+'…)';
+  document.getElementById('pmStatus').textContent='';
+  document.getElementById('pmConfirm').disabled=true;
+  const plans=[
+    {key:'trial',name:'Trial',price:'Free'},
+    {key:'starter',name:'Starter',price:'$149 MXN'},
+    {key:'growth',name:'Growth',price:'$349 MXN'},
+    {key:'agency',name:'Agency',price:'$799 MXN'}
+  ];
+  document.getElementById('pmOptions').innerHTML=plans.map(p=>{
+    const isCurrent=p.key===currentPlan;
+    return '<div class="pm-opt'+(isCurrent?' current':'')+'" onclick="selectPlan(\''+p.key+'\',this)" data-plan="'+p.key+'">'+
+      '<div class="pm-opt-name">'+p.name+(isCurrent?' ✓':'')+'</div>'+
+      '<div class="pm-opt-price">'+p.price+'</div></div>';
+  }).join('');
+  document.getElementById('planModal').classList.add('show');
+}
+function closePlanModal(){
+  document.getElementById('planModal').classList.remove('show');
+  pmBrandId=null; pmSelectedPlan=null;
+}
+function selectPlan(plan,el){
+  if(plan===pmCurrentPlan)return;
+  pmSelectedPlan=plan;
+  document.querySelectorAll('.pm-opt').forEach(o=>{
+    o.classList.toggle('active',o.dataset.plan===plan);
+  });
+  document.getElementById('pmConfirm').disabled=false;
+}
+async function confirmPlanChange(){
+  if(!pmBrandId||!pmSelectedPlan)return;
+  const btn=document.getElementById('pmConfirm');
+  const status=document.getElementById('pmStatus');
+  btn.disabled=true; btn.textContent='Applying...';
+  status.textContent='';
+  try{
+    const key=sessionStorage.getItem('admin_key');
+    const res=await fetch(WORKER,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mode:'admin-set-plan',adminKey:key,brandId:pmBrandId,plan:pmSelectedPlan})});
+    const data=await res.json();
+    if(data.success){
+      status.textContent='✅ '+data.message;
+      status.style.color='var(--g2)';
+      btn.textContent='Done';
+      // Refresh dashboard after a beat
+      setTimeout(async()=>{closePlanModal();doAuth();},1200);
+    }else{
+      status.textContent='❌ '+(data.error||'Failed');
+      status.style.color='var(--r)';
+      btn.textContent='Apply'; btn.disabled=false;
+    }
+  }catch(e){
+    status.textContent='❌ '+e.message;
+    status.style.color='var(--r)';
+    btn.textContent='Apply'; btn.disabled=false;
+  }
+}
 
 // ── Feedback ──
 let fbData=[];
