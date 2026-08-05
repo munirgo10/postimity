@@ -719,6 +719,17 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
 }
 </style>
 <script defer data-domain="postimity.com" src="https://plausible.io/js/script.js"></script>
+<!-- Meta Pixel -->
+<script>
+!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+document,'script','https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', '2023730118261258');
+fbq('track', 'PageView');
+</script>
+<noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=2023730118261258&ev=PageView&noscript=1"/></noscript>
 </head>
 <body>
 
@@ -2870,6 +2881,8 @@ function saveBrand() {
   if(!localStorage.getItem(firstBrandKey)) {
     localStorage.setItem(firstBrandKey, '1');
     setTimeout(() => showToast(t('toastBGReady')), 600);
+    // Meta Pixel: Lead event on first brand creation
+    if(typeof fbq==='function') fbq('track', 'Lead', { content_name: brand.name, content_category: brand.type });
   }
 }
 
@@ -5611,6 +5624,8 @@ function showFirstPostCelebration() {
   setTimeout(() => {
     showToast(t('toastFirstPost'));
   }, 1200);
+  // Meta Pixel: StartTrial on first generation
+  if(typeof fbq==='function') fbq('track', 'StartTrial', { content_name: 'First Generation' });
 }
 
 // ── Deep-link pre-fill from URL params ────────────────────────────────────
