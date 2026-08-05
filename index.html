@@ -238,6 +238,17 @@ body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--bg);c
 }
 </style>
 <script defer data-domain="postimity.com" src="https://plausible.io/js/script.js"></script>
+<!-- Meta Pixel -->
+<script>
+!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+document,'script','https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', '2023730118261258');
+fbq('track', 'PageView');
+</script>
+<noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=2023730118261258&ev=PageView&noscript=1"/></noscript>
 </head>
 <body>
 
@@ -499,7 +510,13 @@ function toggleLang(){applyLang(detectLang()==='es'?'en':'es')}
 const obs=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible')})},{threshold:.15});
 document.querySelectorAll('.fade-up').forEach(el=>obs.observe(el));
 
-document.addEventListener('DOMContentLoaded',()=>applyLang(detectLang()));
+document.addEventListener('DOMContentLoaded',()=>{
+  applyLang(detectLang());
+  // Meta Pixel: track CTA clicks to studio
+  document.querySelectorAll('a[href="studio.html"]').forEach(a=>{
+    a.addEventListener('click',()=>{ if(typeof fbq==='function') fbq('track','InitiateCheckout',{content_name:'CTA to Studio'}); });
+  });
+});
 </script>
 </body>
 </html>
