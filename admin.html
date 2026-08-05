@@ -257,10 +257,11 @@ function renderDashboard(){
   document.getElementById('kpiTotal').textContent=d.totalUsers;
   document.getElementById('kpiActive').textContent=d.activeUsers+' active (30d)';
   document.getElementById('kpiMRR').textContent='$'+d.mrr;
-  document.getElementById('kpiMRRmxn').textContent='~$'+Math.round(d.mrr*17.5)+' MXN'+(d.totalAdminOverrides>0?' · '+d.totalAdminOverrides+' admin':'');
-  const paying=(d.planCounts.starter||0)+(d.planCounts.growth||0)+(d.planCounts.agency||0);
+  document.getElementById('kpiMRRmxn').textContent='~$'+Math.round(d.mrr*17.5)+' MXN'+(d.totalAdminOverrides>0?' · '+d.totalAdminOverrides+' admin excl.':'');
+  const ao=d.adminOverrides||{};
+  const paying=((d.planCounts.starter||0)-(ao.starter||0))+((d.planCounts.growth||0)-(ao.growth||0))+((d.planCounts.agency||0)-(ao.agency||0));
   document.getElementById('kpiPaying').textContent=paying;
-  document.getElementById('kpiPayingPct').textContent=(d.totalUsers>0?Math.round(paying/d.totalUsers*100):0)+'% conversion';
+  document.getElementById('kpiPayingPct').textContent=(d.totalUsers>0?Math.round(paying/d.totalUsers*100):0)+'% conversion'+(d.totalAdminOverrides>0?' · '+d.totalAdminOverrides+' admin':'');
   var textGens=d.totalGens-(d.totalVideos||0);
   document.getElementById('kpiGens').textContent=textGens.toLocaleString();
   document.getElementById('kpiGensDetail').textContent=d.totalGens+' total (incl. '+( d.totalVideos||0)+' videos)';
@@ -285,7 +286,9 @@ function renderDashboard(){
   const maxPlan=Math.max(...Object.values(d.planCounts),1);
   document.getElementById('planBars').innerHTML=Object.entries(d.planCounts).map(([p,c])=>{
     const pct=Math.max(5,(c/maxPlan)*100);
-    return '<div class="plan-bar-row"><div class="plan-bar-label">'+(planNames[p]||p)+'</div><div class="plan-bar-track"><div class="plan-bar-fill" style="width:'+pct+'%;background:'+(planColors[p]||'#999')+'">'+c+'</div></div><div class="plan-bar-count">'+c+'</div></div>';
+    const adminCount=(ao[p]||0);
+    const adminLabel=adminCount>0?' <span style="font-size:9px;opacity:.7">('+adminCount+' admin)</span>':'';
+    return '<div class="plan-bar-row"><div class="plan-bar-label">'+(planNames[p]||p)+'</div><div class="plan-bar-track"><div class="plan-bar-fill" style="width:'+pct+'%;background:'+(planColors[p]||'#999')+'">'+c+'</div></div><div class="plan-bar-count">'+c+adminLabel+'</div></div>';
   }).join('');
   // Mode bars with cost column
   const modeInfo={post:{icon:'✍️',name:'Post',color:'#2979FF'},enhance:{icon:'🖼️',name:'Estudio Pro',color:'#7C4DFF'},flyer:{icon:'📄',name:'Flyer',color:'#E91E8C'},testimonial:{icon:'⭐',name:'Testimonio',color:'#F9A825'},carousel:{icon:'🎠',name:'Carrusel',color:'#76C442'},video:{icon:'🎬',name:'Video AI',color:'#E53935'}};
@@ -297,11 +300,14 @@ function renderDashboard(){
     const cost=((apiCosts[m]||0.05)*c).toFixed(2);
     return '<div class="mode-row"><div class="mode-icon">'+info.icon+'</div><div class="mode-name">'+info.name+'</div><div class="mode-bar-track"><div class="mode-bar-fill" style="width:'+pct+'%;background:'+info.color+'">'+c+'</div></div><div class="mode-count">'+c+'</div><div class="mode-cost">$'+cost+'</div></div>';
   }).join('');
-  // Revenue by plan
+  // Revenue by plan (exclude admin overrides)
   const planPrices={trial:0,starter:9,growth:19,agency:45};
   document.getElementById('revByPlan').innerHTML=Object.entries(d.planCounts).map(([p,c])=>{
-    const rev=(planPrices[p]||0)*c;
-    return '<div class="fin-row"><div class="fin-label">'+(planNames[p]||p)+' ('+c+' users)</div><div class="fin-val'+(rev>0?' green':'')+'">$'+rev.toFixed(2)+'/mo</div></div>';
+    const adminCount=(ao[p]||0);
+    const paidCount=c-adminCount;
+    const rev=(planPrices[p]||0)*paidCount;
+    const adminNote=adminCount>0?' <span style="font-size:9px;color:var(--t4)">('+adminCount+' admin excl.)</span>':'';
+    return '<div class="fin-row"><div class="fin-label">'+(planNames[p]||p)+' ('+paidCount+' paid / '+c+' total)'+adminNote+'</div><div class="fin-val'+(rev>0?' green':'')+'">$'+rev.toFixed(2)+'/mo</div></div>';
   }).join('')+'<div class="fin-row" style="font-weight:700;border-top:2px solid var(--bor);margin-top:4px;padding-top:8px"><div class="fin-label">Total MRR</div><div class="fin-val green">$'+d.mrr+'/mo</div></div>';
   // Cost by mode
   document.getElementById('costByMode').innerHTML=Object.entries(d.modeCounts).map(([m,c])=>{
