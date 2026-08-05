@@ -399,9 +399,9 @@ async function confirmPlanChange(){
 
 // ── Delete Brand ──
 async function deleteBrand(brandId,brandName){
-  const msg='⚠️ DELETE permanently:\n\n"'+brandName+'"\n\nThis removes: brand data, history, gallery, agent plans, reminders.\n\nType DELETE to confirm:';
-  const confirm=prompt(msg);
-  if(confirm!=='DELETE')return;
+  const msg='⚠️ ELIMINAR permanentemente:\n\n"'+brandName+'"\n\nSe borra: datos, historial, galería, planes, recordatorios.\n\nEscribe BORRAR para confirmar:';
+  const inp=prompt(msg);
+  if(!inp||inp.trim().toUpperCase()!=='BORRAR')return;
   try{
     const key=sessionStorage.getItem('admin_key');
     const res=await fetch(WORKER,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mode:'admin-delete-brand',adminKey:key,brandId})});
