@@ -4072,7 +4072,7 @@ async function saveVideoToHistory(videoUrl, topic) {
       body: JSON.stringify({
         mode: 'save-post',
         brandId: brand.brandId,
-        post: {
+        postData: {
           mode: 'video',
           platform: platform,
           topic: topic,
