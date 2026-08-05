@@ -257,7 +257,7 @@ function renderDashboard(){
   document.getElementById('kpiTotal').textContent=d.totalUsers;
   document.getElementById('kpiActive').textContent=d.activeUsers+' active (30d)';
   document.getElementById('kpiMRR').textContent='$'+d.mrr;
-  document.getElementById('kpiMRRmxn').textContent='~$'+Math.round(d.mrr*17.5)+' MXN';
+  document.getElementById('kpiMRRmxn').textContent='~$'+Math.round(d.mrr*17.5)+' MXN'+(d.totalAdminOverrides>0?' · '+d.totalAdminOverrides+' admin':'');
   const paying=(d.planCounts.starter||0)+(d.planCounts.growth||0)+(d.planCounts.agency||0);
   document.getElementById('kpiPaying').textContent=paying;
   document.getElementById('kpiPayingPct').textContent=(d.totalUsers>0?Math.round(paying/d.totalUsers*100):0)+'% conversion';
@@ -330,7 +330,8 @@ function filterBrands(){
     const lastGen=b.lastGen?new Date(b.lastGen).toLocaleDateString():'—';
     const costStr=b.cost>0?'$'+b.cost.toFixed(2):'—';
     const genStr=b.gens>0?b.gens+(b.videos>0?' <span style="color:#E53935;font-size:9px">('+b.videos+'🎬)</span>':''):'0';
-    return '<tr><td style="font-weight:600">'+esc(b.name)+'<div style="font-size:9px;color:var(--t4)">'+esc(b.email||b.type)+'</div></td><td><span class="plan-tag '+(b.plan||'trial')+'">'+(b.plan||'trial')+'</span></td><td style="font-size:11px">'+esc(b.country)+'</td><td style="font-size:11px;font-weight:600">'+genStr+'</td><td style="font-size:11px;color:var(--r)">'+costStr+'</td><td style="font-size:10px;color:var(--t3)">'+lastGen+'</td><td style="white-space:nowrap"><button class="btn-plan" data-bid="'+esc(b.brandId)+'" data-bname="'+esc(b.name)+'" data-plan="'+(b.plan||'trial')+'" onclick="openPlanModal(this.dataset.bid,this.dataset.bname,this.dataset.plan)">Plan</button> <button class="btn-del" data-bid="'+esc(b.brandId)+'" data-bname="'+esc(b.name)+'" onclick="deleteBrand(this.dataset.bid,this.dataset.bname)">🗑</button></td></tr>';
+    const adminBadge=b.adminOverride?' <span style="font-size:8px;padding:1px 4px;border-radius:3px;background:#FEF3C7;color:#92400E;font-weight:700">ADMIN</span>':'';
+    return '<tr><td style="font-weight:600">'+esc(b.name)+'<div style="font-size:9px;color:var(--t4)">'+esc(b.email||b.type)+'</div></td><td><span class="plan-tag '+(b.plan||'trial')+'">'+(b.plan||'trial')+'</span>'+adminBadge+'</td><td style="font-size:11px">'+esc(b.country)+'</td><td style="font-size:11px;font-weight:600">'+genStr+'</td><td style="font-size:11px;color:var(--r)">'+costStr+'</td><td style="font-size:10px;color:var(--t3)">'+lastGen+'</td><td style="white-space:nowrap"><button class="btn-plan" data-bid="'+esc(b.brandId)+'" data-bname="'+esc(b.name)+'" data-plan="'+(b.plan||'trial')+'" onclick="openPlanModal(this.dataset.bid,this.dataset.bname,this.dataset.plan)">Plan</button> <button class="btn-del" data-bid="'+esc(b.brandId)+'" data-bname="'+esc(b.name)+'" onclick="deleteBrand(this.dataset.bid,this.dataset.bname)">🗑</button></td></tr>';
   }).join('');
   document.getElementById('brandCount').textContent='Showing '+Math.min(filtered.length,100)+' of '+filtered.length+' brands';
 }
