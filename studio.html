@@ -2517,8 +2517,14 @@ async function autoSavePost(resultData) {
         instagram: { caption: resultData.instagram?.caption||'', hashtags: resultData.instagram?.hashtags||'' },
         facebook:  { caption: resultData.facebook?.caption||'',  hashtags: resultData.facebook?.hashtags||'' },
         tiktok:    { caption: resultData.tiktok?.caption||'',    hashtags: resultData.tiktok?.hashtags||'' },
-      }
+      },
+      createdAt: new Date().toISOString(),
     };
+    // Include carousel slide URLs if available
+    if (resultData.carouselImages && resultData.carouselImages.length) {
+      postData.carouselImages = resultData.carouselImages.filter(u => u && u.startsWith('http')).slice(0, 10);
+      postData.slideCount = resultData.carouselImages.length;
+    }
     await fetch(WORKER, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ mode: 'save-post', brandId, postData })
@@ -3453,9 +3459,11 @@ function darkenHex(hex, amount) {
 }
 
 function downloadCarouselSlide(idx) {
+  const brand = loadBrand();
+  const slug = (brand?.name || 'postimity').toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 20);
   const a = document.createElement('a');
   a.href = carouselResults[idx];
-  a.download = 'slide-' + (idx+1) + '.jpg';
+  a.download = slug + '-slide-' + (idx+1) + '-' + Date.now() + '.jpg';
   a.click();
 }
 
@@ -3511,11 +3519,20 @@ async function adjustResult() {
 }
 
 function downloadAllSlides() {
+  const brand = loadBrand();
+  const slug = (brand?.name || 'postimity').toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 20);
+  const ts = Date.now();
+  const total = carouselResults.length;
+  const isES = detectLanguage() === 'es';
+  showToast(isES ? '📦 Descargando ' + total + ' slides...' : '📦 Downloading ' + total + ' slides...');
   carouselResults.forEach((url, i) => {
     setTimeout(() => {
       const a = document.createElement('a');
-      a.href = url; a.download = 'slide-' + (i+1) + '.jpg';
+      a.href = url; a.download = slug + '-slide-' + (i+1) + '-' + ts + '.jpg';
       a.click();
+      if (i === total - 1) {
+        setTimeout(() => showToast(isES ? '✅ ' + total + ' slides descargados' : '✅ ' + total + ' slides downloaded'), 500);
+      }
     }, i * 400);
   });
 }
@@ -3950,7 +3967,7 @@ function showVideoResult(videoUrl, topic, captionsData) {
     videoDlBtn = document.createElement('a');
     videoDlBtn.id = 'videoDlBtn';
     videoDlBtn.href = videoUrl;
-    videoDlBtn.download = 'postimity-video.mp4';
+    videoDlBtn.download = ((brand?.name||'postimity').toLowerCase().replace(/[^a-z0-9]+/g,'-').slice(0,20)) + '-video-' + Date.now() + '.mp4';
     videoDlBtn.className = 'btn btn-primary btn-full';
     videoDlBtn.style.cssText = 'margin-bottom:10px;text-decoration:none;text-align:center';
     videoDlBtn.textContent = isES ? '⬇️ Descargar video (.mp4)' : '⬇️ Download video (.mp4)';
@@ -4027,45 +4044,59 @@ function copyVideoCaption() {
 
 async function shareVideoToSocial(platform) {
   const isES = detectLanguage() === 'es';
-  // 1. Copy caption for this platform (uses standard caption elements filled by fillCaptions)
-  const capMap = {
-    instagram: () => (document.getElementById('igCap')?.textContent||'') + '\n' + (document.getElementById('igHash')?.textContent||''),
-    facebook:  () => (document.getElementById('fbCap')?.textContent||'') + '\n' + (document.getElementById('fbHash')?.textContent||''),
-    tiktok:    () => (document.getElementById('ttCap')?.textContent||'') + '\n' + (document.getElementById('ttHash')?.textContent||''),
-  };
-  const caption = (capMap[platform] || capMap.instagram)().trim();
-  if(caption) {
-    try { await navigator.clipboard.writeText(caption); } catch(e) {
-      const ta = document.createElement('textarea');
-      ta.value = caption; document.body.appendChild(ta); ta.select();
-      document.execCommand('copy'); document.body.removeChild(ta);
+  const caption = getCaptionForPlatform(platform);
+
+  // 1. Copy caption
+  await copyToClipboard(caption);
+
+  // 2. Try Web Share API (mobile — share video directly to app)
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const videoEl = document.querySelector('#videoPlayerWrap video');
+  if (isMobile && navigator.share && navigator.canShare && videoEl && videoEl.src) {
+    try {
+      const resp = await fetch(videoEl.src);
+      const blob = await resp.blob();
+      const file = new File([blob], ((loadBrand()?.name||'postimity').toLowerCase().replace(/[^a-z0-9]+/g,'-').slice(0,20)) + '-video-' + Date.now() + '.mp4', { type: 'video/mp4' });
+      const shareData = { files: [file] };
+      if (navigator.canShare(shareData)) {
+        await navigator.share(shareData);
+        showToast(isES
+          ? '✅ ¡Listo! Pega el caption (ya está copiado)'
+          : '✅ Done! Paste the caption (already copied)');
+        return;
+      }
+    } catch (e) {
+      if (e.name === 'AbortError') return;
+      console.warn('Web Share video failed, using fallback:', e);
     }
   }
-  // 2. Download video
-  const videoEl = document.querySelector('#videoPlayerWrap video');
-  if(videoEl && videoEl.src) {
+
+  // 3. Fallback: Download video + open platform
+  if (videoEl && videoEl.src) {
     const a = document.createElement('a');
-    a.href = videoEl.src;
-    a.download = 'postimity-video.mp4';
+    a.href = videoEl.src; a.download = ((loadBrand()?.name||'postimity').toLowerCase().replace(/[^a-z0-9]+/g,'-').slice(0,20)) + '-video-' + Date.now() + '.mp4';
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
   }
-  // 3. Toast
-  const msgs = isES ? {
-    instagram: '📸 Video descargado · Caption copiado — abre Instagram y pégalo',
-    facebook: '👥 Video descargado · Caption copiado — abre Facebook y pégalo',
-    tiktok: '🎵 Video descargado · Caption copiado — abre TikTok y pégalo',
-  } : {
-    instagram: '📸 Video downloaded · Caption copied — open Instagram and paste',
-    facebook: '👥 Video downloaded · Caption copied — open Facebook and paste',
-    tiktok: '🎵 Video downloaded · Caption copied — open TikTok and paste',
-  };
-  showToast(msgs[platform] || (isES?'✅ Listo':'✅ Ready'));
+
+  showToast(isES
+    ? '🎬 Video descargado · Caption copiado — abre la app y pégalo'
+    : '🎬 Video downloaded · Caption copied — open the app and paste');
+
+  const urls = { instagram: 'https://www.instagram.com/', facebook: 'https://www.facebook.com/', tiktok: 'https://www.tiktok.com/' };
+  setTimeout(() => { window.open(urls[platform] || 'https://www.instagram.com/', '_blank'); }, 900);
 }
 
 async function saveVideoToHistory(videoUrl, topic) {
   try {
     const brand = loadBrand();
     if(!brand?.brandId) return;
+    // Capture full captions from the UI (same as autoSavePost)
+    const igCap = document.getElementById('igCap')?.textContent || '';
+    const igHash = document.getElementById('igHash')?.textContent || '';
+    const fbCap = document.getElementById('fbCap')?.textContent || '';
+    const fbHash = document.getElementById('fbHash')?.textContent || '';
+    const ttCap = document.getElementById('ttCap')?.textContent || '';
+    const ttHash = document.getElementById('ttHash')?.textContent || '';
     await fetch(WORKER, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -4075,9 +4106,17 @@ async function saveVideoToHistory(videoUrl, topic) {
         postData: {
           mode: 'video',
           platform: platform,
+          pillar: pillar,
           topic: topic,
           imageUrl: videoUrl,
-          caption: '🎬 Video AI: ' + topic,
+          caption: igCap || fbCap || ('🎬 Video AI: ' + topic),
+          captionSnippet: (igCap || fbCap || topic).slice(0, 120),
+          hashtags: igHash || fbHash || '',
+          captions: {
+            instagram: { caption: igCap, hashtags: igHash },
+            facebook:  { caption: fbCap, hashtags: fbHash },
+            tiktok:    { caption: ttCap, hashtags: ttHash },
+          },
           createdAt: new Date().toISOString(),
         }
       }),
@@ -6001,48 +6040,153 @@ function toggleAdBrief() {
 // CANVAS — DOWNLOAD + LOGO OVERLAY
 // ═══════════════════════════════════════════════════════
 // ─── OPEN IN SOCIAL ───────────────────────────────────
-async function openInSocial(platform) {
-  // 1. Get caption for this platform
-  const capMap = {
-    instagram: () => (document.getElementById('igCap')?.textContent||'') + '\n' + (document.getElementById('igHash')?.textContent||''),
-    facebook:  () => (document.getElementById('fbCap')?.textContent||'') + '\n' + (document.getElementById('fbHash')?.textContent||''),
-    tiktok:    () => (document.getElementById('ttCap')?.textContent||'') + '\n' + (document.getElementById('ttHash')?.textContent||''),
-  };
-  const caption = (capMap[platform] || capMap.instagram)().trim();
+// ─── HELPER: Get image as Blob (for Web Share API) ──────────────
+async function getCanvasBlob(format) {
+  const imgEl = document.getElementById('resultImg');
+  if (!imgEl.src || imgEl.src === window.location.href) return null;
+  const brand = loadBrand();
+  const primary = brand?.colors?.primary || '#2979FF';
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  const img = await loadImg(imgEl.src);
+  const showLogo = document.getElementById('logoToggle')?.checked;
+  const logoSrc = logoB64 || brand?.logo;
 
-  // 2. Copy caption to clipboard
-  try {
-    await navigator.clipboard.writeText(caption);
-  } catch(e) {
-    // Fallback copy
-    const ta = document.createElement('textarea');
-    ta.value = caption; document.body.appendChild(ta); ta.select();
-    document.execCommand('copy'); document.body.removeChild(ta);
+  if (format === 'square') { canvas.width = canvas.height = 1080; ctx.drawImage(img, 0, 0, 1080, 1080); }
+  else if (format === 'portrait') {
+    canvas.width = 1080; canvas.height = 1350;
+    ctx.fillStyle = primary; ctx.fillRect(0, 0, 1080, 1350);
+    ctx.drawImage(img, 0, 135, 1080, 1080);
+  } else {
+    canvas.width = 1080; canvas.height = 1920;
+    const grad = ctx.createLinearGradient(0, 0, 0, 1920);
+    grad.addColorStop(0, primary); grad.addColorStop(1, darken(primary, 50));
+    ctx.fillStyle = grad; ctx.fillRect(0, 0, 1080, 1920);
+    ctx.drawImage(img, 0, 420, 1080, 1080);
+    if (brand?.name) { ctx.fillStyle = 'rgba(255,255,255,.85)'; ctx.font = 'bold 32px Plus Jakarta Sans,sans-serif'; ctx.textAlign = 'center'; ctx.fillText(brand.name, 540, 1680); }
   }
 
-  // 3. Download image(s)
-  if(mode === 'carousel' && carouselResults && carouselResults.length) {
-    // Download all slides for carousel
+  if (showLogo && logoSrc) {
+    try {
+      const logo = await loadImg(logoSrc);
+      if (logo) {
+        const sz = Math.round(canvas.width * 0.13);
+        const x = canvas.width - sz - 20, y = canvas.height - sz - 20;
+        ctx.save();
+        ctx.beginPath(); ctx.arc(x + sz / 2, y + sz / 2, sz / 2 + 6, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255,255,255,0.92)'; ctx.fill();
+        ctx.beginPath(); ctx.arc(x + sz / 2, y + sz / 2, sz / 2, 0, Math.PI * 2); ctx.clip();
+        ctx.drawImage(logo, x, y, sz, sz); ctx.restore();
+      }
+    } catch (e) { /* silent */ }
+  }
+
+  // Watermark
+  const wmPlan = brand?.plan || 'trial';
+  const wmToggleEl = document.getElementById('wmToggle');
+  const wmOff = wmToggleEl && !wmToggleEl.checked;
+  const showWm = !(['growth', 'agency'].includes(wmPlan) && wmOff);
+  if (showWm) {
+    const wmText = '✦ postimity.com';
+    const wfs = Math.round(canvas.width * 0.021);
+    ctx.font = '600 ' + wfs + 'px -apple-system,sans-serif';
+    const wtw = ctx.measureText(wmText).width;
+    const wpw = wtw + 20, wph = wfs + 12;
+    const wpx = canvas.width - wpw - 16, wpy = canvas.height - wph - 16;
+    ctx.save();
+    ctx.fillStyle = 'rgba(0,0,0,0.42)'; ctx.beginPath();
+    if (ctx.roundRect) ctx.roundRect(wpx, wpy, wpw, wph, 6); else ctx.rect(wpx, wpy, wpw, wph);
+    ctx.fill(); ctx.fillStyle = 'rgba(255,255,255,0.88)'; ctx.textBaseline = 'middle';
+    ctx.fillText(wmText, wpx + 10, wpy + wph / 2); ctx.restore();
+  }
+
+  return new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.93));
+}
+
+// ─── HELPER: Get caption for platform ───────────────────────────
+function getCaptionForPlatform(platform) {
+  const capMap = {
+    instagram: () => (document.getElementById('igCap')?.textContent || '') + '\n' + (document.getElementById('igHash')?.textContent || ''),
+    facebook:  () => (document.getElementById('fbCap')?.textContent || '') + '\n' + (document.getElementById('fbHash')?.textContent || ''),
+    tiktok:    () => (document.getElementById('ttCap')?.textContent || '') + '\n' + (document.getElementById('ttHash')?.textContent || ''),
+  };
+  return (capMap[platform] || capMap.instagram)().trim();
+}
+
+// ─── HELPER: Copy to clipboard ──────────────────────────────────
+async function copyToClipboard(text) {
+  try { await navigator.clipboard.writeText(text); } catch (e) {
+    const ta = document.createElement('textarea');
+    ta.value = text; document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta);
+  }
+}
+
+// ─── OPEN IN SOCIAL (with Web Share API) ────────────────────────
+async function openInSocial(platform) {
+  const isES = detectLanguage() === 'es';
+  const caption = getCaptionForPlatform(platform);
+  const isCarouselMode = (mode === 'carousel' && carouselResults && carouselResults.length);
+
+  // 1. Always copy caption to clipboard first
+  await copyToClipboard(caption);
+
+  // 2. Try Web Share API (works on mobile — opens native share sheet)
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  if (isMobile && navigator.share && navigator.canShare) {
+    try {
+      let files = [];
+      if (isCarouselMode) {
+        // Fetch all carousel slides as File objects
+        showToast(isES ? '📦 Preparando slides...' : '📦 Preparing slides...');
+        const wsSlug = (loadBrand()?.name || 'postimity').toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 20);
+        const wsTs = Date.now();
+        for (let i = 0; i < carouselResults.length; i++) {
+          const resp = await fetch(carouselResults[i]);
+          const blob = await resp.blob();
+          files.push(new File([blob], wsSlug + '-slide-' + (i + 1) + '-' + wsTs + '.jpg', { type: 'image/jpeg' }));
+        }
+      } else {
+        // Single image from canvas (includes logo + watermark)
+        const blob = await getCanvasBlob('square');
+        if (blob) { const pSlug = (loadBrand()?.name || 'postimity').toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 20); files.push(new File([blob], pSlug + '-post-' + Date.now() + '.jpg', { type: 'image/jpeg' })); }
+      }
+
+      if (files.length) {
+        const shareData = { files: files };
+        if (navigator.canShare(shareData)) {
+          await navigator.share(shareData);
+          showToast(isES
+            ? '✅ ¡Listo! Pega el caption (ya está copiado)'
+            : '✅ Done! Paste the caption (already copied)');
+          return;
+        }
+      }
+    } catch (e) {
+      if (e.name === 'AbortError') return; // User cancelled — don't fall through
+      console.warn('Web Share failed, using fallback:', e);
+    }
+  }
+
+  // 3. Fallback: Download + Open URL (desktop or Web Share not supported)
+  if (isCarouselMode) {
     downloadAllSlides();
   } else {
     await downloadImg('square');
   }
 
-  // 4. Toast with next step
-  const lang = detectLanguage();
-  const isCarouselMode = (mode === 'carousel');
-  const toastMsg = lang === 'en' ? {
-    instagram: isCarouselMode ? '📸 All slides downloaded · Caption copied — upload as carousel on Instagram' : '📸 Image downloaded · Caption copied — open Instagram and paste',
-    facebook:  isCarouselMode ? '👥 All slides downloaded · Caption copied — upload as album on Facebook' : '👥 Image downloaded · Caption copied — open Facebook and paste',
-    tiktok:    isCarouselMode ? '🎵 All slides downloaded · Caption copied — upload as carousel on TikTok' : '🎵 Image downloaded · Caption copied — open TikTok and paste',
-  } : {
-    instagram: isCarouselMode ? '📸 Slides descargados · Caption copiado — súbelos como carrusel en Instagram' : '📸 Imagen descargada · Caption copiado — abre Instagram y pégalo',
-    facebook:  isCarouselMode ? '👥 Slides descargados · Caption copiado — súbelos como álbum en Facebook' : '👥 Imagen descargada · Caption copiado — abre Facebook y pégalo',
-    tiktok:    isCarouselMode ? '🎵 Slides descargados · Caption copiado — súbelos como carrusel en TikTok' : '🎵 Imagen descargada · Caption copiado — abre TikTok y pégalo',
-  };
-  showToast(toastMsg[platform] || (lang==='en'?'✅ Ready — paste the caption in the app':'✅ Listo — pega el caption en la app'));
+  // 4. Toast with step-by-step instructions
+  if (isCarouselMode) {
+    showToast(isES
+      ? '📸 Slides descargados · Caption copiado\n→ Abre ' + platform.charAt(0).toUpperCase() + platform.slice(1) + ' · Toca + · Selecciona múltiples fotos · Pega el caption'
+      : '📸 Slides downloaded · Caption copied\n→ Open ' + platform.charAt(0).toUpperCase() + platform.slice(1) + ' · Tap + · Select multiple photos · Paste caption');
+  } else {
+    showToast(isES
+      ? '📸 Imagen descargada · Caption copiado — abre la app y pégalo'
+      : '📸 Image downloaded · Caption copied — open the app and paste');
+  }
 
-  // 5. Open platform (mobile auto-redirects to native app if installed)
+  // 5. Open platform
   const urls = {
     instagram: 'https://www.instagram.com/',
     facebook:  'https://www.facebook.com/',
@@ -6050,7 +6194,7 @@ async function openInSocial(platform) {
   };
   setTimeout(() => {
     window.open(urls[platform] || 'https://www.instagram.com/', '_blank');
-  }, 900); // Small delay so download starts first
+  }, 900);
 }
 
 // ─── DOWNLOAD ─────────────────────────────────────────
@@ -6122,7 +6266,7 @@ async function downloadImg(format) {
     ctx.restore();
   }
 
-  canvas.toBlob(blob=>{ const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='post-'+format+'-'+Date.now()+'.jpg'; a.click(); setTimeout(()=>URL.revokeObjectURL(url),1000); },'image/jpeg',.93);
+  canvas.toBlob(blob=>{ const brd=loadBrand(); const sl=(brd?.name||'postimity').toLowerCase().replace(/[^a-z0-9]+/g,'-').slice(0,20); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=sl+'-'+format+'-'+Date.now()+'.jpg'; a.click(); setTimeout(()=>URL.revokeObjectURL(url),1000); },'image/jpeg',.93);
 }
 
 async function redrawCanvas() { /* visual refresh only — logo toggle affects download */ }
