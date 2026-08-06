@@ -3,7 +3,25 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Postimity Studio</title>
+<title>Postimity Studio — Tu estudio de contenido con AI</title>
+<meta name="description" content="Crea posts, flyers, carruseles y videos profesionales con AI. Describe tu negocio una vez y genera contenido listo para publicar en 20 segundos.">
+<meta name="robots" content="index, follow">
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://postimity.com/studio.html">
+<meta property="og:title" content="Postimity Studio — Tu estudio de contenido con AI">
+<meta property="og:description" content="Posts, flyers, carruseles y videos profesionales en 20 segundos. Gratis por 14 días.">
+<meta property="og:image" content="https://postimity.com/og_image_pro.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="es_MX">
+<meta property="og:site_name" content="Postimity">
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Postimity Studio — Tu estudio de contenido con AI">
+<meta name="twitter:description" content="Posts, flyers, carruseles y videos profesionales en 20 segundos. Gratis por 14 días.">
+<meta name="twitter:image" content="https://postimity.com/og_image_pro.jpg">
+<meta name="twitter:site" content="@postimity">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232979FF'/%3E%3Cg transform='translate(16,16)' fill='%23fff'%3E%3Ccircle r='1.8'/%3E%3Ccircle cx='2.8' cy='1' r='1.5'/%3E%3Ccircle cx='-2.2' cy='2' r='1.4'/%3E%3Ccircle cx='1' cy='-3' r='1.4'/%3E%3Ccircle cx='-3' cy='-1.2' r='1.3'/%3E%3Ccircle cx='2' cy='3' r='1.2'/%3E%3Ccircle cx='-1.2' cy='-3.2' r='1.1'/%3E%3Ccircle cx='3.5' cy='-1.5' r='1.1'/%3E%3Ccircle cx='-3.5' cy='1' r='1'/%3E%3Ccircle cx='5.5' cy='2' r='1.1'/%3E%3Ccircle cx='-1.5' cy='6' r='1'/%3E%3Ccircle cx='4' cy='-4.5' r='1'/%3E%3Ccircle cx='-5.5' cy='-3' r='1'/%3E%3Ccircle cx='-4.8' cy='4' r='.9'/%3E%3Ccircle cx='2.5' cy='-6' r='.9'/%3E%3Ccircle cx='6' cy='-1' r='.9'/%3E%3Ccircle cx='-6' cy='2' r='.8'/%3E%3Ccircle cx='1' cy='6.2' r='.9'/%3E%3Ccircle cx='5.5' cy='4.5' r='.8'/%3E%3Ccircle cx='-4' cy='-5.5' r='.8'/%3E%3Ccircle cx='4.8' cy='-4' r='.7'/%3E%3Ccircle cx='-5' cy='5' r='.7'/%3E%3Ccircle cx='8' cy='1.5' r='.8'/%3E%3Ccircle cx='-2.5' cy='8.5' r='.7'/%3E%3Ccircle cx='6' cy='-7' r='.7'/%3E%3Ccircle cx='-8' cy='-3.5' r='.7'/%3E%3Ccircle cx='-7' cy='5.5' r='.6'/%3E%3Ccircle cx='3.5' cy='-8.5' r='.6'/%3E%3Ccircle cx='8.5' cy='-3' r='.6'/%3E%3Ccircle cx='-8.5' cy='3' r='.5'/%3E%3Ccircle cx='2' cy='8.5' r='.6'/%3E%3Ccircle cx='7' cy='6' r='.5'/%3E%3Ccircle cx='-6' cy='-7.5' r='.5'/%3E%3Ccircle cx='-3' cy='-8.5' r='.5'/%3E%3Ccircle cx='8' cy='4' r='.5'/%3E%3Ccircle cx='-8' cy='6' r='.5'/%3E%3Ccircle cx='5' cy='8' r='.4'/%3E%3Ccircle cx='-7.5' cy='-6' r='.4'/%3E%3Ccircle cx='10' cy='2.5' r='.5'/%3E%3Ccircle cx='-3' cy='10.5' r='.4'/%3E%3Ccircle cx='7.5' cy='-9' r='.4'/%3E%3Ccircle cx='-10' cy='-4' r='.4'/%3E%3Ccircle cx='-9' cy='7' r='.4'/%3E%3Ccircle cx='4.5' cy='-10.5' r='.4'/%3E%3Ccircle cx='10.5' cy='-3.5' r='.4'/%3E%3Ccircle cx='2.5' cy='10' r='.4'/%3E%3Ccircle cx='9' cy='-6' r='.3'/%3E%3Ccircle cx='-10' cy='3' r='.3'/%3E%3Ccircle cx='6' cy='10' r='.3'/%3E%3Ccircle cx='-9' cy='-8' r='.3'/%3E%3C/g%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -386,6 +404,9 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
 /* Post saved toast */
 .toast{position:fixed;bottom:24px;right:24px;background:var(--t1);color:#fff;padding:10px 16px;border-radius:10px;font-size:13px;font-weight:600;z-index:999;transform:translateY(80px);transition:transform .3s;display:flex;align-items:center;gap:8px;box-shadow:var(--s2)}
 .toast.show{transform:translateY(0)}
+/* Offline banner */
+.offline-banner{position:fixed;top:0;left:0;right:0;background:#E74C3C;color:#fff;text-align:center;padding:10px 16px;font-size:13px;font-weight:700;z-index:10000;transform:translateY(-100%);transition:transform .3s}
+.offline-banner.show{transform:translateY(0)}
 
 
 /* Carousel */
@@ -719,6 +740,7 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
 }
 </style>
 <script defer data-domain="postimity.com" src="https://plausible.io/js/script.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <!-- Meta Pixel -->
 <script>
 !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
@@ -971,6 +993,8 @@ fbq('track', 'PageView');
        ╚═══════════════════════════════════════════╝ -->
   <!-- Post saved toast -->
 <div class="toast" id="toast">✅ Post guardado en historial</div>
+<!-- Offline banner -->
+<div class="offline-banner" id="offlineBanner">⚠️ Sin conexión a internet — reconectando...</div>
 
 
   <!-- ╔═══════════════════════════════════════════╗
@@ -2363,6 +2387,16 @@ let flyerPhotoB64 = null, flyerPhotoMime = 'image/jpeg';
 let testPhotoB64 = null, testPhotoMime = 'image/jpeg';
 let lastResult = null, lastInput = null;
 
+// ── Per-brand gen counter keys (Fix #9) ──────────────────
+function genMonthKey() {
+  const id = brandId || 'global';
+  return 'postimity_gens_' + id + '_' + new Date().toISOString().slice(0,7);
+}
+function videoMonthKey() {
+  const id = brandId || 'global';
+  return 'postimity_videos_' + id + '_' + new Date().toISOString().slice(0,7);
+}
+
 // ═══════════════════════════════════════════════════════
 // PHASE 2 — BRAND ID + CLOUD SYNC
 // ═══════════════════════════════════════════════════════
@@ -2450,7 +2484,7 @@ function detectLanguage() {
     const enZones = ['New_York','Chicago','Denver','Phoenix','Los_Angeles','Anchorage','Honolulu','Adak','Boise','Indiana','Kentucky','Menominee','Nome','North_Dakota','Sitka','Yakutat','Toronto','Vancouver','Edmonton','Winnipeg','Halifax','St_Johns','Regina','Whitehorse','Yellowknife','Iqaluit','Moncton','Goose_Bay','Glace_Bay','Rankin_Inlet','Resolute','Atikokan','Nipigon','Thunder_Bay','Pangnirtung','Cambridge_Bay','Inuvik','Dawson','Dawson_Creek','Creston','Fort_Nelson','Swift_Current','Rainy_River','Blanc-Sablon'];
     const brZones = ['Sao_Paulo','Bahia','Belem','Fortaleza','Recife','Manaus','Porto_Velho','Boa_Vista','Campo_Grande','Cuiaba','Maceio','Araguaina','Santarem','Rio_Branco','Noronha','Eirunepe'];
     if(tz.startsWith('America/') && !enZones.some(z => tz.includes(z)) && !brZones.some(z => tz.includes(z))) return 'es';
-  } catch(e) {}
+  } catch(e) { console.warn('Timezone detection failed:', e.message); }
   // 4. Browser language fallback
   const bl = navigator.language?.slice(0,2);
   if(bl === 'es') return 'es';
@@ -2461,12 +2495,10 @@ function updateGenCounter() {
   const brand = loadBrand();
   const plan = brand?.plan || 'trial';
   const limit = GEN_LIMITS[plan] || GEN_LIMITS['trial'];
-  const monthKey = 'postimity_gens_' + new Date().toISOString().slice(0,7);
-  const used = parseInt(localStorage.getItem(monthKey) || '0');
+  const used = parseInt(localStorage.getItem(genMonthKey()) || '0');
   const remaining = Math.max(0, limit - used);
   // Video counter
-  const vMonthKey = 'postimity_videos_' + new Date().toISOString().slice(0,7);
-  const videosUsed = parseInt(localStorage.getItem(vMonthKey) || '0');
+  const videosUsed = parseInt(localStorage.getItem(videoMonthKey()) || '0');
   const videoLimit = VIDEO_LIMITS[plan] || 2;
   const videosRemaining = Math.max(0, videoLimit - videosUsed);
   const el = document.getElementById('genCounterBadge');
@@ -2543,8 +2575,23 @@ async function loadBrandFromCloud(id) {
       body: JSON.stringify({ mode: 'get-brand', brandId: id })
     });
     const data = await res.json();
-    if (data.found && data.brand) return data.brand;
-  } catch(e) {}
+    if (data.found && data.brand) {
+      // Sync server-side gen counts to localStorage (server is source of truth)
+      if (typeof data.genCount === 'number') {
+        const mk = genMonthKey();
+        const localCount = parseInt(localStorage.getItem(mk) || '0');
+        // Use the higher of server vs local (prevents rollback exploits)
+        localStorage.setItem(mk, String(Math.max(data.genCount, localCount)));
+        genCount = Math.max(data.genCount, localCount);
+      }
+      if (typeof data.videoCount === 'number') {
+        const vk = videoMonthKey();
+        const localVC = parseInt(localStorage.getItem(vk) || '0');
+        localStorage.setItem(vk, String(Math.max(data.videoCount, localVC)));
+      }
+      return data.brand;
+    }
+  } catch(e) { console.warn('loadBrandFromCloud failed:', e.message); }
   return null;
 }
 
@@ -2604,7 +2651,11 @@ window.addEventListener('DOMContentLoaded', async () => {
     if (!brandId && brand.brandId) brandId = brand.brandId;
     if (brandId) updateUrl(brandId);
     applyBrand(brand);
-    if (brandId) showCloudBar(brand.name);
+    if (brandId) {
+      showCloudBar(brand.name);
+      // Sync gen counts from server (non-blocking)
+      loadBrandFromCloud(brandId).catch(() => {});
+    }
     showScreen('creatorScreen');
   } else {
     // New user — go directly to setup (landing page already did the convincing)
@@ -2618,6 +2669,15 @@ window.addEventListener('DOMContentLoaded', async () => {
   initGalleryUpload();
   // Pre-load gallery data for toggle state
   if (brandId) loadGallery();
+
+  // Offline/online detection (Fix #6)
+  const offBanner = document.getElementById('offlineBanner');
+  window.addEventListener('offline', () => offBanner.classList.add('show'));
+  window.addEventListener('online', () => {
+    offBanner.classList.remove('show');
+    showToast(detectLanguage() === 'es' ? '✅ Conexión restaurada' : '✅ Connection restored');
+  });
+  if (!navigator.onLine) offBanner.classList.add('show');
 });
 
 function showScreen(id) {
@@ -3415,7 +3475,27 @@ async function renderCarouselSlide(slide, brand, coverImageUrl, totalSlides) {
         ctx.drawImage(logo, lx, ly, sz, sz);
         ctx.restore();
       }
-    } catch(e) {}
+    } catch(e) { console.warn('Carousel logo render failed:', e.message); }
+  }
+
+  // Watermark (same logic as single-image posts — trial/starter always show)
+  const wmPlan = brand?.plan || 'trial';
+  const wmToggleEl = document.getElementById('wmToggle');
+  const wmOff = wmToggleEl && !wmToggleEl.checked;
+  const showWm = !(['growth', 'agency'].includes(wmPlan) && wmOff);
+  if (showWm) {
+    const wmText = '✦ postimity.com';
+    const wfs = Math.round(W * 0.021);
+    ctx.font = '600 ' + wfs + 'px -apple-system,sans-serif';
+    ctx.textAlign = 'left';
+    const wtw = ctx.measureText(wmText).width;
+    const wpw = wtw + 20, wph = wfs + 12;
+    const wpx = W - wpw - 16, wpy = H - wph - 16;
+    ctx.save();
+    ctx.fillStyle = 'rgba(0,0,0,0.42)'; ctx.beginPath();
+    if (ctx.roundRect) ctx.roundRect(wpx, wpy, wpw, wph, 6); else ctx.rect(wpx, wpy, wpw, wph);
+    ctx.fill(); ctx.fillStyle = 'rgba(255,255,255,0.88)'; ctx.textBaseline = 'middle';
+    ctx.fillText(wmText, wpx + 10, wpy + wph / 2); ctx.restore();
   }
 
   return new Promise(res => canvas.toBlob(b => {
@@ -3518,23 +3598,39 @@ async function adjustResult() {
   }
 }
 
-function downloadAllSlides() {
+async function downloadAllSlides() {
   const brand = loadBrand();
   const slug = (brand?.name || 'postimity').toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 20);
   const ts = Date.now();
   const total = carouselResults.length;
   const isES = detectLanguage() === 'es';
-  showToast(isES ? '📦 Descargando ' + total + ' slides...' : '📦 Downloading ' + total + ' slides...');
-  carouselResults.forEach((url, i) => {
-    setTimeout(() => {
-      const a = document.createElement('a');
-      a.href = url; a.download = slug + '-slide-' + (i+1) + '-' + ts + '.jpg';
-      a.click();
-      if (i === total - 1) {
-        setTimeout(() => showToast(isES ? '✅ ' + total + ' slides descargados' : '✅ ' + total + ' slides downloaded'), 500);
-      }
-    }, i * 400);
-  });
+  showToast(isES ? '📦 Empaquetando ' + total + ' slides...' : '📦 Packaging ' + total + ' slides...');
+  try {
+    if (typeof JSZip === 'undefined') throw new Error('JSZip not loaded');
+    const zip = new JSZip();
+    for (let i = 0; i < total; i++) {
+      const blob = dataUrlToBlob(carouselResults[i]);
+      zip.file(slug + '-slide-' + (i + 1) + '.jpg', blob);
+    }
+    const zipBlob = await zip.generateAsync({ type: 'blob' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(zipBlob);
+    a.download = slug + '-carousel-' + ts + '.zip';
+    a.click();
+    URL.revokeObjectURL(a.href);
+    showToast(isES ? '✅ ZIP con ' + total + ' slides descargado' : '✅ ZIP with ' + total + ' slides downloaded');
+  } catch(e) {
+    // Fallback: sequential download if JSZip fails
+    console.warn('JSZip failed, using fallback:', e);
+    carouselResults.forEach((url, i) => {
+      setTimeout(() => {
+        const a = document.createElement('a');
+        a.href = url; a.download = slug + '-slide-' + (i + 1) + '-' + ts + '.jpg';
+        a.click();
+      }, i * 400);
+    });
+    showToast(isES ? '✅ ' + total + ' slides descargados' : '✅ ' + total + ' slides downloaded');
+  }
 }
 
 function setFlyerMode(m) {
@@ -3549,13 +3645,17 @@ function setFlyerMode(m) {
 // GENERATE
 // ═══════════════════════════════════════════════════════
 async function generate() {
+  // Offline check (Fix #6)
+  if (!navigator.onLine) {
+    alert(detectLanguage() === 'es' ? 'Sin conexión a internet. Verifica tu conexión e intenta de nuevo.' : 'No internet connection. Check your connection and try again.');
+    return;
+  }
   const brand=loadBrand();
   if(!brand){ alert(t('alertNoBrand')); return; }
   // ── Generation limit check (Phase 2 model) ────────────────────────────
   const plan = brand?.plan || 'trial';
   const limit = GEN_LIMITS[plan] || GEN_LIMITS['trial'];
-  const monthKey = 'postimity_gens_' + new Date().toISOString().slice(0,7);
-  const usedThisMonth = parseInt(localStorage.getItem(monthKey) || '0');
+  const usedThisMonth = parseInt(localStorage.getItem(genMonthKey()) || '0');
   if (usedThisMonth >= limit) {
     const msg = detectLanguage()==='en'
       ? `You've reached the limit of ${limit} generations this month. Email us at support@postimity.com to upgrade.`
@@ -3716,8 +3816,7 @@ async function generateVideo(brand) {
   // Check video limit
   const plan = brand?.plan || 'trial';
   const videoLimit = VIDEO_LIMITS[plan] || 2;
-  const vMonthKey = 'postimity_videos_' + new Date().toISOString().slice(0,7);
-  const videosUsed = parseInt(localStorage.getItem(vMonthKey) || '0');
+  const videosUsed = parseInt(localStorage.getItem(videoMonthKey()) || '0');
   if(videosUsed >= videoLimit) {
     const msg = detectLanguage()==='en'
       ? `You've reached your limit of ${videoLimit} videos this month.`
@@ -3870,9 +3969,8 @@ function startVideoPolling(requestId, endpoint, statusUrl, responseUrl, brand, t
         clearInterval(videoPollingTimer);
         if(data.videoUrl) {
           // Count video usage
-          const vMonthKey = 'postimity_videos_' + new Date().toISOString().slice(0,7);
-          const used = parseInt(localStorage.getItem(vMonthKey) || '0');
-          localStorage.setItem(vMonthKey, String(used + 1));
+          const vkUsed = parseInt(localStorage.getItem(videoMonthKey()) || '0');
+          localStorage.setItem(videoMonthKey(), String(vkUsed + 1));
           // Show video result — unwrap captionsBox (by now the fetch should have completed)
           showVideoResult(data.videoUrl, topic, captionsBox.data);
         } else {
@@ -4188,8 +4286,7 @@ function renderCuenta() {
   const planKey = brand?.plan || 'trial';
   const pc = getPlanConfig(); const plan = pc[planKey] || pc.trial;
   const limit = GEN_LIMITS[planKey] || 20;
-  const monthKey = 'postimity_gens_' + new Date().toISOString().slice(0,7);
-  const used = parseInt(localStorage.getItem(monthKey) || '0');
+  const used = parseInt(localStorage.getItem(genMonthKey()) || '0');
   const pct = Math.min(100, Math.round((used / limit) * 100));
   const barColor = pct >= 90 ? '#C0392B' : pct >= 70 ? '#E8961A' : '#2979FF';
 
@@ -4218,8 +4315,7 @@ function renderCuenta() {
 
   // Video counter
   const videoLimit = VIDEO_LIMITS[planKey] || 2;
-  const vMonthKey = 'postimity_videos_' + new Date().toISOString().slice(0,7);
-  const videosUsed = parseInt(localStorage.getItem(vMonthKey) || '0');
+  const videosUsed = parseInt(localStorage.getItem(videoMonthKey()) || '0');
   const videoPct = Math.min(100, Math.round((videosUsed / videoLimit) * 100));
   const videoBarColor = videoPct >= 90 ? '#C0392B' : videoPct >= 70 ? '#E8961A' : '#7C4DFF';
   const vUsedEl = document.getElementById('cuentaVideosUsed');
@@ -5748,6 +5844,8 @@ async function post(body) {
   return postWithTimeout(body);
 }
 async function postWithTimeout(body, timeoutMs=55000) {
+  // Always inject brandId for server-side validation (Fix #1, #2)
+  if (brandId && !body.brandId) body.brandId = brandId;
   const controller = new AbortController();
   const timer = setTimeout(()=>controller.abort(), timeoutMs);
   try {
@@ -5759,6 +5857,10 @@ async function postWithTimeout(body, timeoutMs=55000) {
     });
     clearTimeout(timer);
     const data = await res.json();
+    // Handle server-side validation errors (plan/limit/trial)
+    if (data.code === 'TRIAL_EXPIRED' || data.code === 'GEN_LIMIT' || data.code === 'VIDEO_LIMIT') {
+      throw new Error(data.error);
+    }
     if(!res.ok||!data.success) throw new Error(data.error||'Error del servidor');
     return data;
   } catch(e) {
@@ -5941,9 +6043,9 @@ function showResult(data) {
   document.getElementById('resultWrap').classList.add('show');
   document.getElementById('resultWrap').scrollIntoView({ behavior:'smooth', block:'start' });
   // Increment generation counter
-  const mk = 'postimity_gens_' + new Date().toISOString().slice(0,7);
-  localStorage.setItem(mk, String(parseInt(localStorage.getItem(mk)||'0') + 1));
-  genCount = parseInt(localStorage.getItem(mk));
+  const gmk = genMonthKey();
+  localStorage.setItem(gmk, String(parseInt(localStorage.getItem(gmk)||'0') + 1));
+  genCount = parseInt(localStorage.getItem(gmk));
   // Auto-save to cloud history (non-blocking)
   autoSavePost(data);
   // Show gen count in cloud bar
@@ -6103,6 +6205,16 @@ async function getCanvasBlob(format) {
   return new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.93));
 }
 
+// ─── HELPER: Convert data URL to Blob (Safari-safe, no fetch needed) ──
+function dataUrlToBlob(dataUrl) {
+  const parts = dataUrl.split(',');
+  const mime = parts[0].match(/:(.*?);/)[1];
+  const raw = atob(parts[1]);
+  const arr = new Uint8Array(raw.length);
+  for (let i = 0; i < raw.length; i++) arr[i] = raw.charCodeAt(i);
+  return new Blob([arr], { type: mime });
+}
+
 // ─── HELPER: Get caption for platform ───────────────────────────
 function getCaptionForPlatform(platform) {
   const capMap = {
@@ -6137,13 +6249,12 @@ async function openInSocial(platform) {
     try {
       let files = [];
       if (isCarouselMode) {
-        // Fetch all carousel slides as File objects
+        // Convert carousel data URLs to File objects (Safari-safe — no fetch(data:URL))
         showToast(isES ? '📦 Preparando slides...' : '📦 Preparing slides...');
         const wsSlug = (loadBrand()?.name || 'postimity').toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 20);
         const wsTs = Date.now();
         for (let i = 0; i < carouselResults.length; i++) {
-          const resp = await fetch(carouselResults[i]);
-          const blob = await resp.blob();
+          const blob = dataUrlToBlob(carouselResults[i]);
           files.push(new File([blob], wsSlug + '-slide-' + (i + 1) + '-' + wsTs + '.jpg', { type: 'image/jpeg' }));
         }
       } else {
@@ -6357,7 +6468,7 @@ async function composeFlyerCanvas(photoB64, photoMime, fd, brand) {
       ctx.beginPath(); ctx.arc(lx+sz/2,ly+sz/2,sz/2,0,Math.PI*2); ctx.clip();
       ctx.drawImage(logo,lx,ly,sz,sz);
       ctx.restore();
-    }catch(e){}
+    }catch(e){ console.warn('Logo render failed:', e.message); }
   }
 
   return new Promise(res=>canvas.toBlob(blob=>{
@@ -6373,13 +6484,14 @@ function hexToRgba(hex,alpha){
 }
 
 // ─── IMAGE UTILS ─────────────────────────────────────
-function loadImg(src) {
-  return new Promise((res,rej)=>{
+function loadImg(src, timeoutMs=10000) {
+  return new Promise((res)=>{
     const i=new Image();
     // Only set crossOrigin for external URLs, not data URLs (avoids CORS taint issues)
     if (!src.startsWith('data:')) i.crossOrigin='anonymous';
-    i.onload=()=>res(i);
-    i.onerror=()=>res(null); // Resolve null instead of rejecting so flow continues
+    const timer = setTimeout(()=>{ i.src=''; res(null); }, timeoutMs);
+    i.onload=()=>{ clearTimeout(timer); res(i); };
+    i.onerror=()=>{ clearTimeout(timer); res(null); }; // Resolve null so flow continues
     i.src=src;
   });
 }
