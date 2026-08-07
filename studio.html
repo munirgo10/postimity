@@ -888,6 +888,18 @@ fbq('track', 'PageView');
           Los pagos se activarán próximamente con Stripe
         </div>
       </div>
+      <!-- Delete account (Fix #21 — R08) -->
+      <div class="brand-card" style="text-align:center;border:1px solid #fee2e2">
+        <div class="brand-card-title" style="margin-bottom:8px;color:#C0392B">⚠️ <span data-es="Zona de peligro" data-en="Danger zone">Zona de peligro</span></div>
+        <div style="font-size:12px;color:var(--t3);margin-bottom:12px" data-es="Eliminar tu cuenta borrará toda tu información permanentemente: marca, historial, fotos y plan." data-en="Deleting your account will permanently erase all your data: brand, history, photos, and plan.">Eliminar tu cuenta borrará toda tu información permanentemente: marca, historial, fotos y plan.</div>
+        <button onclick="handleDeleteAccount()" style="padding:10px 24px;border-radius:10px;background:#fff;border:1.5px solid #C0392B;color:#C0392B;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit" data-es="Eliminar mi cuenta" data-en="Delete my account">Eliminar mi cuenta</button>
+      </div>
+      <!-- Support section (Fix #19 — R17) -->
+      <div class="brand-card" style="text-align:center">
+        <div class="brand-card-title" style="margin-bottom:10px">💬 <span data-es="¿Necesitas ayuda?" data-en="Need help?">¿Necesitas ayuda?</span></div>
+        <div style="font-size:13px;color:var(--t2);margin-bottom:14px" data-es="Responderemos en menos de 24 horas" data-en="We'll respond within 24 hours">Responderemos en menos de 24 horas</div>
+        <a href="mailto:support@postimity.com" style="display:inline-flex;align-items:center;gap:6px;padding:10px 24px;border-radius:10px;background:var(--b);color:#fff;font-size:13px;font-weight:700;text-decoration:none;font-family:inherit">📧 support@postimity.com</a>
+      </div>
     </div>
   </div>
 
@@ -2523,11 +2535,24 @@ function showToast(msg) {
 // ─── KV / CLOUD SYNC ──────────────────────────────────
 async function syncBrandToCloud(brand, id) {
   try {
-    await fetch(WORKER, {
+    const res = await fetch(WORKER, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ mode: 'save-brand', brandId: id, brandData: brand })
     });
+    const data = await res.json();
+    // Fix #20 — Trial abuse: if email already has an account, redirect to it
+    if (data.error === 'EMAIL_EXISTS' && data.existingBrandId) {
+      const lang = detectLanguage();
+      const msg = lang === 'en'
+        ? 'An account with this email already exists. We\'ll load your existing studio now.'
+        : 'Ya existe una cuenta con este email. Vamos a cargar tu estudio existente.';
+      alert(msg);
+      // Clear the new brandId data and redirect to existing account
+      localStorage.removeItem(STORE_KEY);
+      window.location.href = window.location.pathname + '?b=' + data.existingBrandId;
+      return;
+    }
   } catch(e) {
     console.warn('Cloud sync failed (non-critical):', e.message);
   }
@@ -4281,6 +4306,46 @@ function showCreatorFromCuenta() {
 function goEditBrand() {
   showCreatorFromCuenta();
   setTimeout(() => showScreen('setupScreen'), 100);
+}
+
+// Fix #21 — Self-delete account (R08)
+async function handleDeleteAccount() {
+  const lang = detectLanguage();
+  const confirmMsg = lang === 'en'
+    ? 'Are you sure you want to delete your account? This will permanently erase ALL your data (brand, history, photos, plan). This cannot be undone.'
+    : '¿Estás seguro de que quieres eliminar tu cuenta? Esto borrará TODOS tus datos permanentemente (marca, historial, fotos, plan). No se puede deshacer.';
+  if (!confirm(confirmMsg)) return;
+  // Double confirmation
+  const confirmMsg2 = lang === 'en'
+    ? 'Type DELETE to confirm:'
+    : 'Escribe ELIMINAR para confirmar:';
+  const typed = prompt(confirmMsg2);
+  if (typed !== 'DELETE' && typed !== 'ELIMINAR') {
+    alert(lang === 'en' ? 'Deletion cancelled.' : 'Eliminación cancelada.');
+    return;
+  }
+  try {
+    const res = await fetch(WORKER, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mode: 'delete-my-account', brandId })
+    });
+    const data = await res.json();
+    if (data.success) {
+      // Clear all local data
+      localStorage.clear();
+      const msg = lang === 'en'
+        ? 'Your account has been deleted. Thank you for using Postimity.'
+        : 'Tu cuenta ha sido eliminada. Gracias por usar Postimity.';
+      alert(msg);
+      window.location.href = 'https://postimity.com';
+    } else {
+      alert(data.error || 'Error deleting account');
+    }
+  } catch(e) {
+    console.error('Self-delete failed:', e);
+    alert(lang === 'en' ? 'Error connecting to server. Please try again.' : 'Error de conexión. Intenta de nuevo.');
+  }
 }
 
 function renderCuenta() {
