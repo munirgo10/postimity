@@ -475,9 +475,11 @@ function filterFb(type,btn){
 // ── Backup (R06) ──
 async function runBackup(){
   const st=document.getElementById('backupStatus');
+  const adminKey=sessionStorage.getItem('admin_key');
+  if(!adminKey){st.textContent='❌ Not authenticated';st.style.color='var(--r)';return;}
   st.textContent='⏳ Running backup...';st.style.color='var(--b2)';
   try{
-    const res=await fetch(WORKER,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mode:'admin-backup',adminKey:key})});
+    const res=await fetch(WORKER,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mode:'admin-backup',adminKey})});
     const data=await res.json();
     if(data.success){
       const stats=Object.entries(data.stats).map(([k,v])=>k+': '+v).join(', ');
