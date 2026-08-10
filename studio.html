@@ -3619,7 +3619,7 @@ async function genCarousel(brand, bg) {
     topic, slideCount: carouselSlides, style: carouselStyle,
     brandGuide: bg, brandData: brand, imageStyle,
     coverPhotoB64: coverPhoto, coverPhotoType: coverMime
-  }, 70000);
+  }, 90000);
   setStep(2);
   // Render all slides using Canvas
   carouselResults = [];
@@ -6121,7 +6121,7 @@ async function genFlyerAI(brand,bg) {
   const fd=getFlyerData();
   setStep(1);
   setStep(2);
-  const res=await postWithTimeout({ mode:'flyer', flyerData:fd, brandGuide:bg, brandData:brand, imageStyle }, 55000);
+  const res=await postWithTimeout({ mode:'flyer', flyerData:fd, brandGuide:bg, brandData:brand, imageStyle }, 90000);
   setStep(3); setStep(4);
   showResult(res);
 }
@@ -6129,7 +6129,7 @@ async function genFlyerPhoto(brand,bg) {
   const fd=getFlyerData();
   // CALL 1: Captions only — fast, no timeout risk
   setStep(1);
-  const capRes=await postWithTimeout({ mode:'flyer-captions', flyerData:fd, brandGuide:bg, brandData:brand }, 30000);
+  const capRes=await postWithTimeout({ mode:'flyer-captions', flyerData:fd, brandGuide:bg, brandData:brand }, 65000);
   setStep(2);
   // Compose flyer image client-side with Canvas — instant, no API needed
   setStep(3);
@@ -6162,7 +6162,7 @@ function getFlyerData() {
 async function post(body) {
   return postWithTimeout(body);
 }
-async function postWithTimeout(body, timeoutMs=55000) {
+async function postWithTimeout(body, timeoutMs=65000) {
   // Always inject brandId for server-side validation (Fix #1, #2)
   if (brandId && !body.brandId) body.brandId = brandId;
   const controller = new AbortController();
