@@ -2153,9 +2153,9 @@ const T = {
     upsellDesc:'Este modo está incluido en el plan Growth. Desbloquea todo el potencial de tu contenido.',
     upsellFeat1:'Flyers profesionales', upsellFeat2:'Carruseles multi-slide', upsellFeat3:'Marketing Agent completo', upsellFeat4:'Ad Brief con targeting', upsellFeat5:'Sin watermark',
     upsellCta:'Ver planes →', upsellClose:'Ahora no',
-    upsellVideoTitle:'Video AI — Próximamente',
-    upsellVideoDesc:'Videos cortos para Reels, TikTok y Shorts. Estamos terminando esta función — pronto estará disponible.',
-    upsellVideoCta:'Te avisaremos cuando esté listo',
+    upsellVideoTitle:'Video AI — Disponible en Growth',
+    upsellVideoDesc:'Crea videos cortos para Reels, TikTok y Shorts con inteligencia artificial. Incluido desde el plan Growth.',
+    upsellVideoCta:'Ver planes →',
     // ── Video mode card ──
     mcVideoTitle:'Video AI', mcVideoDesc:'Reels, TikTok, Shorts',
     // ── Video generation ──
@@ -2420,9 +2420,9 @@ const T = {
     upsellDesc:'This mode is included in the Growth plan. Unlock the full potential of your content.',
     upsellFeat1:'Professional flyers', upsellFeat2:'Multi-slide carousels', upsellFeat3:'Full Marketing Agent', upsellFeat4:'Ad Brief with targeting', upsellFeat5:'No watermark',
     upsellCta:'View plans →', upsellClose:'Not now',
-    upsellVideoTitle:'Video AI — Coming Soon',
-    upsellVideoDesc:'Short videos for Reels, TikTok and Shorts. We\'re finishing this feature — it\'ll be available soon.',
-    upsellVideoCta:'We\'ll let you know when it\'s ready',
+    upsellVideoTitle:'Video AI — Available on Growth',
+    upsellVideoDesc:'Create short videos for Reels, TikTok and Shorts with AI. Included from the Growth plan.',
+    upsellVideoCta:'View plans →',
     // ── Video mode card ──
     mcVideoTitle:'Video AI', mcVideoDesc:'Reels, TikTok, Shorts',
     // ── Video generation ──
@@ -3444,9 +3444,10 @@ function showUpsellVideo() {
   document.getElementById('upsellIcon').textContent = '🎬';
   document.getElementById('upsellTitle').textContent = t('upsellVideoTitle');
   document.getElementById('upsellDesc').textContent = t('upsellVideoDesc');
-  document.getElementById('upsellFeatures').innerHTML = '';
+  document.getElementById('upsellFeatures').innerHTML =
+    [t('upsellFeat1'),t('upsellFeat2'),t('upsellFeat3')].map(f=>'<div class="upsell-feat">'+f+'</div>').join('');
   document.getElementById('upsellCta').textContent = t('upsellVideoCta');
-  document.getElementById('upsellCta').onclick = function(){ closeUpsell(); };
+  document.getElementById('upsellCta').onclick = function(){ showUpgradeInfo(); closeUpsell(); };
   document.getElementById('upsellClose').textContent = t('upsellClose');
   modal.classList.add('show');
 }
@@ -4661,8 +4662,8 @@ function renderCuenta() {
     const mxn = detectLanguage() === 'es';
     const isES = detectLanguage() === 'es';
     const tiers = [
-      { key:'starter', name:'Starter', price: mxn?'$149':'$9', period: mxn?'MXN/mes':'USD/mo', gens:'40 '+t('genPerMonth'), videos:'2 videos', features: isES ? 'Post, Estudio Pro, Testimonios' : 'Post, Studio Pro, Testimonials' },
-      { key:'growth',  name:'Growth',  price: mxn?'$349':'$19', period: mxn?'MXN/mes':'USD/mo', gens:'100 '+t('genPerMonth'), videos:'8 videos', features: isES ? 'Todos los modos + Video AI' : 'All modes + AI Video', popular: true },
+      { key:'starter', name:'Starter', price: mxn?'$149':'$9', period: mxn?'MXN/mes':'USD/mo', gens:'40 '+t('genPerMonth'), videos:'2 videos', features: isES ? 'Post, Estudio Pro, Testimonios, Video AI' : 'Post, Studio Pro, Testimonials, Video AI' },
+      { key:'growth',  name:'Growth',  price: mxn?'$349':'$19', period: mxn?'MXN/mes':'USD/mo', gens:'100 '+t('genPerMonth'), videos:'8 videos', features: isES ? 'Todo + Flyers, Carruseles, Marketing Agent' : 'All + Flyers, Carousels, Marketing Agent', popular: true },
       { key:'agency',  name:'Agency',  price: mxn?'$799':'$45', period: mxn?'MXN/mes':'USD/mo', gens:'250 '+t('genPerMonth'), videos:'20 videos', features: isES ? 'Todo + máxima capacidad' : 'Everything + max capacity' },
     ];
     const activateLabel = isES ? 'Activar' : 'Activate';
