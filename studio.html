@@ -6185,7 +6185,10 @@ async function postWithTimeout(body, timeoutMs=65000) {
     if (data.code === 'TRIAL_EXPIRED' || data.code === 'GEN_LIMIT' || data.code === 'VIDEO_LIMIT' || data.code === 'FEATURE_LOCKED') {
       throw new Error(data.error);
     }
-    if(!res.ok||!data.success) throw new Error(data.error||'Error del servidor');
+    if(!res.ok||!data.success) {
+      if (data.rawDebug) console.error('AI raw response:', data.rawDebug);
+      throw new Error(data.error||'Error del servidor');
+    }
     return data;
   } catch(e) {
     clearTimeout(timer);
