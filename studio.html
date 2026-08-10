@@ -3959,7 +3959,11 @@ async function generate() {
   } catch(err) {
     showLoading(false);
     document.getElementById('errWrap').classList.add('show');
-    document.getElementById('errMsg').textContent=err.message;
+    // Show step context for debugging
+    const stepInfo = document.querySelector('.step-item.active')?.textContent || '';
+    const debugHint = stepInfo ? ` [${mode}→${stepInfo.trim()}]` : ` [${mode}]`;
+    document.getElementById('errMsg').textContent = err.message + debugHint;
+    console.warn('Generation error:', mode, err);
   }
 }
 
@@ -4508,7 +4512,7 @@ function getPlanConfig() {
   return {
     trial:   { name: t('planTrialName'), badge: t('planTrialBadge'), gens: 20, videos: 2, price: t('planTrialPrice'), upgradeLabel: t('planStarterUp'), color: 'trial' },
     starter: { name: 'Starter', badge: '💙 Starter', gens: 40, videos: 2, price: mxn?'$149 MXN/mes':'$9 USD/mo', upgradeLabel: t('planGrowthUp'), color: 'starter' },
-    growth:  { name: 'Growth',  badge: '💚 Growth',  gens: 100, videos: 8, price: mxn?'$349 MXN/mes':'$19 USD/mo', upgradeLabel: t('planAgencyUp'), color: 'growth' },
+    growth:  { name: 'Growth',  badge: '💚 Growth',  gens: 100, videos: 8, price: mxn?'$349 MXN/mes':'$19 USD/mo', upgradeLabel: isES ? '✅ Plan máximo disponible' : '✅ Top available plan', color: 'growth', maxAvailable: true },
     agency:  { name: 'Agency',  badge: '🏆 Agency',  gens: 250, videos: 20, price: mxn?'$799 MXN/mes':'$45 USD/mo', upgradeLabel: t('planAgencyMax'), color: 'agency' },
   };
 }
@@ -4610,7 +4614,7 @@ function renderCuenta() {
       '<div class="plan-name">' + plan.name + '</div>' +
       '<div class="plan-desc">' + plan.price + (planKey === 'trial' ? ' · ' + t('planTrialAllModes') : ' · ' + limit + ' ' + t('genPerMonth') + (plan.videos > 0 ? ' + ' + plan.videos + ' videos' : '')) + '</div>' +
       (daysLeft !== null ? '<div class="plan-days">' + t('dashTrialDays').replace('{n}', daysLeft) + '</div>' : '') +
-      (planKey !== 'agency' ? '<button class="plan-upgrade-btn" onclick="showUpgradeInfo()">' + plan.upgradeLabel + '</button>' : '<div style="font-size:12px;font-weight:700;color:var(--g3);text-align:center;padding:8px">' + t('dashMaxPlan') + '</div>') +
+      (planKey === 'agency' || plan.maxAvailable ? '<div style="font-size:12px;font-weight:700;color:var(--g3);text-align:center;padding:8px">' + plan.upgradeLabel + '</div>' : '<button class="plan-upgrade-btn" onclick="showUpgradeInfo()">' + plan.upgradeLabel + '</button>') +
     '</div>';
   }
 
@@ -4683,7 +4687,9 @@ function renderCuenta() {
           ? '<div class="pt-current">' + currentLabel + '</div>'
           : isDowngrade
             ? ''
-            : '<button class="plan-upgrade-btn" style="margin-top:8px;font-size:12px;padding:9px" onclick="activatePlan(\'' + tr.key + '\')">' + activateLabel + ' ' + tr.name + '</button>'
+            : tr.key === 'agency'
+              ? '<div style="margin-top:8px;font-size:11px;color:var(--t3);text-align:center;padding:9px;opacity:.6">' + (isES ? 'Próximamente' : 'Coming soon') + '</div>'
+              : '<button class="plan-upgrade-btn" style="margin-top:8px;font-size:12px;padding:9px" onclick="activatePlan(\'' + tr.key + '\')">' + activateLabel + ' ' + tr.name + '</button>'
         ) +
       '</div>';
     }).join('');
