@@ -3298,11 +3298,14 @@ function setImageStyle(style, btn) {
 }
 function updateStyleSelector() {
   const sel = document.getElementById('styleSel');
+  if(!sel) return;
   // Show for post, flyer-ai, carousel-AI only
-  // Hide when using real photos (enhance, flyer-photo, carousel-photo)
+  // Hide for: video, enhance, testimonial, flyer-photo, carousel-photo
   const visible = mode === 'post' ||
     (mode === 'flyer' && flyerMode === 'ai') ||
     (mode === 'carousel' && carouselCoverMode === 'ai');
+  // Clear any inline display override so CSS class controls visibility
+  sel.style.display = '';
   sel.classList.toggle('show', visible);
   // For testimonials: force abstract (hidden from user)
   if (mode === 'testimonial') { imageStyle = 'abstract'; }
@@ -3410,9 +3413,6 @@ function setMode(m) {
   const modeMap = ['post','enhance','flyer','testimonial','carousel','video'];
   ['mc1','mc2','mc3','mc4','mc5','mc6'].forEach((id,i)=>{ const el=document.getElementById(id); if(el) el.classList.toggle('active',modeMap[i]===m); });
   updateStyleSelector();
-  // Hide style selector for video mode
-  const styleSel = document.getElementById('styleSel');
-  if(styleSel) styleSel.style.display = m === 'video' ? 'none' : '';
   // Update generate button text
   const btn = document.getElementById('btnGen');
   if(btn) btn.textContent = m === 'video' ? '🎬 ' + t('videoGenBtn') : '✨ ' + t('genBtn');
@@ -3624,6 +3624,11 @@ async function genCarousel(brand, bg) {
   // Render all slides using Canvas
   carouselResults = [];
   const slides = res.slides || [];
+  if(!slides.length) {
+    throw new Error(detectLanguage()==='es'
+      ? 'El carrusel no se generó correctamente. Intenta con un tema más específico.'
+      : 'Carousel did not generate correctly. Try a more specific topic.');
+  }
   for (let i = 0; i < slides.length; i++) {
     const dataUrl = await renderCarouselSlide(slides[i], brand, res.coverImage, slides.length);
     carouselResults.push(dataUrl);
@@ -3643,15 +3648,15 @@ async function renderCarouselSlide(slide, brand, coverImageUrl, totalSlides) {
 
   if (slide.type === 'cover') {
     // Cover: AI image + dark overlay + title
+    // Always fill background first in case image fails
+    ctx.fillStyle = primary; ctx.fillRect(0,0,W,H);
     try {
-      const img = await loadImg(coverImageUrl);
+      const img = coverImageUrl ? await loadImg(coverImageUrl) : null;
       if(img) {
         const ps = Math.min(img.width, img.height);
         ctx.drawImage(img, (img.width-ps)/2, (img.height-ps)/2, ps, ps, 0, 0, W, H);
       }
-    } catch(e) {
-      ctx.fillStyle = primary; ctx.fillRect(0,0,W,H);
-    }
+    } catch(e) { /* fallback already drawn */ }
     const grad = ctx.createLinearGradient(0, H*0.3, 0, H);
     grad.addColorStop(0,'rgba(0,0,0,0.1)');
     grad.addColorStop(1,'rgba(0,0,0,0.78)');
@@ -3806,7 +3811,7 @@ function darkenHex(hex, amount) {
 
 function downloadCarouselSlide(idx) {
   const brand = loadBrand();
-  const slug = (brand?.name || 'postimity').toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 20);
+  const slug = brandSlug(brand);
   const a = document.createElement('a');
   a.href = carouselResults[idx];
   a.download = slug + '-slide-' + (idx+1) + '-' + Date.now() + '.jpg';
@@ -3866,7 +3871,7 @@ async function adjustResult() {
 
 async function downloadAllSlides() {
   const brand = loadBrand();
-  const slug = (brand?.name || 'postimity').toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 20);
+  const slug = brandSlug(brand);
   const ts = Date.now();
   const total = carouselResults.length;
   const isES = detectLanguage() === 'es';
@@ -4272,9 +4277,8 @@ function showVideoResult(videoUrl, topic, captionsData) {
   const inputCard = document.getElementById('inputCard');
   if(inputCard) inputCard.style.display = 'block';
   const modeCardsEl = document.querySelector('.mode-cards');
-  if(modeCardsEl) modeCardsEl.style.display = '';
-  const styleSel = document.getElementById('styleSel');
-  if(styleSel) styleSel.style.display = '';
+  if(modeCardsEl) modeCardsEl.style.display = 'grid';
+  updateStyleSelector();
 
   const isES = detectLanguage() === 'es';
   const resultImg = document.getElementById('resultImg');
@@ -4337,7 +4341,7 @@ function showVideoResult(videoUrl, topic, captionsData) {
     videoDlBtn = document.createElement('a');
     videoDlBtn.id = 'videoDlBtn';
     videoDlBtn.href = videoUrl;
-    videoDlBtn.download = ((brand?.name||'postimity').toLowerCase().replace(/[^a-z0-9]+/g,'-').slice(0,20)) + '-video-' + Date.now() + '.mp4';
+    videoDlBtn.download = brandSlug(brand) + '-video-' + Date.now() + '.mp4';
     videoDlBtn.className = 'btn btn-primary btn-full';
     videoDlBtn.style.cssText = 'margin-bottom:10px;text-decoration:none;text-align:center';
     videoDlBtn.textContent = isES ? '⬇️ Descargar video (.mp4)' : '⬇️ Download video (.mp4)';
@@ -4426,7 +4430,7 @@ async function shareVideoToSocial(platform) {
     try {
       const resp = await fetch(videoEl.src);
       const blob = await resp.blob();
-      const file = new File([blob], ((loadBrand()?.name||'postimity').toLowerCase().replace(/[^a-z0-9]+/g,'-').slice(0,20)) + '-video-' + Date.now() + '.mp4', { type: 'video/mp4' });
+      const file = new File([blob], brandSlug() + '-video-' + Date.now() + '.mp4', { type: 'video/mp4' });
       const shareData = { files: [file] };
       if (navigator.canShare(shareData)) {
         await navigator.share(shareData);
@@ -4444,7 +4448,7 @@ async function shareVideoToSocial(platform) {
   // 3. Fallback: Download video + open platform
   if (videoEl && videoEl.src) {
     const a = document.createElement('a');
-    a.href = videoEl.src; a.download = ((loadBrand()?.name||'postimity').toLowerCase().replace(/[^a-z0-9]+/g,'-').slice(0,20)) + '-video-' + Date.now() + '.mp4';
+    a.href = videoEl.src; a.download = brandSlug() + '-video-' + Date.now() + '.mp4';
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
   }
 
@@ -6295,8 +6299,14 @@ function showResult(data) {
     if(wmWrap) wmWrap.style.display = 'none';
     if(wmBadge) { wmBadge.style.display = 'inline'; wmBadge.textContent = t('wmLock'); }
   }
-  // Image
-  document.getElementById('resultImg').src=data.imageUrl||'';
+  // Image — ensure resultImg is visible (video mode hides it) and clean up stale video player
+  const resultImg = document.getElementById('resultImg');
+  resultImg.style.display = '';
+  const staleVP = document.getElementById('videoPlayerWrap');
+  if(staleVP) staleVP.remove();
+  const staleVDL = document.getElementById('videoDlBtn');
+  if(staleVDL) staleVDL.remove();
+  resultImg.src=data.imageUrl||'';
   const pd=document.getElementById('photoDescBar');
   if(data.photoDescription){ pd.textContent='📷 '+data.photoDescription; pd.classList.add('show'); } else pd.classList.remove('show');
   // Show adjust + publish for ALL modes (including carousel)
@@ -6314,7 +6324,19 @@ function showResult(data) {
   if(dlLabel) dlLabel.style.display = isCarousel ? 'none' : '';
   const dlBtnsEl = document.querySelector('.dl-btns');
   if(dlBtnsEl) dlBtnsEl.style.display = isCarousel ? 'none' : '';
-  // Carousel: update pub label and hint
+  // Always reset pub label/hint/handlers to default (may be stale from carousel or video)
+  if(pubSec) {
+    const pubLabel = pubSec.querySelector('.pub-label');
+    if(pubLabel) pubLabel.textContent = t('pubLabel');
+    const pubHint = pubSec.querySelector('.pub-hint');
+    if(pubHint) pubHint.textContent = t('pubHint');
+    // Restore standard social handlers (video mode replaces them)
+    pubSec.querySelectorAll('.pub-btn').forEach(btn => {
+      const plat = btn.classList.contains('ig') ? 'instagram' : btn.classList.contains('fb') ? 'facebook' : 'tiktok';
+      btn.onclick = function(){ openInSocial(plat); };
+    });
+  }
+  // Carousel: override pub label and hint
   if(isCarousel && pubSec) {
     const isES = detectLanguage() === 'es';
     const pubLabel = pubSec.querySelector('.pub-label');
@@ -6478,6 +6500,7 @@ async function getCanvasBlob(format) {
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
   const img = await loadImg(imgEl.src);
+  if(!img) return null;
   const showLogo = document.getElementById('logoToggle')?.checked;
   const logoSrc = logoB64 || brand?.logo;
 
@@ -6532,6 +6555,11 @@ async function getCanvasBlob(format) {
   return new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.93));
 }
 
+// ─── HELPER: Brand slug for filenames (used in downloads, share, etc) ──
+function brandSlug(brand) {
+  return ((brand || loadBrand())?.name || 'postimity').toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 20);
+}
+
 // ─── HELPER: Convert data URL to Blob (Safari-safe, no fetch needed) ──
 function dataUrlToBlob(dataUrl) {
   const parts = dataUrl.split(',');
@@ -6578,7 +6606,7 @@ async function openInSocial(platform) {
       if (isCarouselMode) {
         // Convert carousel data URLs to File objects (Safari-safe — no fetch(data:URL))
         showToast(isES ? '📦 Preparando slides...' : '📦 Preparing slides...');
-        const wsSlug = (loadBrand()?.name || 'postimity').toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 20);
+        const wsSlug = brandSlug();
         const wsTs = Date.now();
         for (let i = 0; i < carouselResults.length; i++) {
           const blob = dataUrlToBlob(carouselResults[i]);
@@ -6587,7 +6615,7 @@ async function openInSocial(platform) {
       } else {
         // Single image from canvas (includes logo + watermark)
         const blob = await getCanvasBlob('square');
-        if (blob) { const pSlug = (loadBrand()?.name || 'postimity').toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 20); files.push(new File([blob], pSlug + '-post-' + Date.now() + '.jpg', { type: 'image/jpeg' })); }
+        if (blob) { files.push(new File([blob], brandSlug() + '-post-' + Date.now() + '.jpg', { type: 'image/jpeg' })); }
       }
 
       if (files.length) {
@@ -6644,6 +6672,7 @@ async function downloadImg(format) {
   const canvas=document.createElement('canvas');
   const ctx=canvas.getContext('2d');
   const img=await loadImg(imgEl.src);
+  if(!img) { showToast(detectLanguage()==='es'?'Error cargando imagen':'Error loading image'); return; }
   const showLogo = document.getElementById('logoToggle').checked;
   const logoSrc = logoB64 || brand?.logo; // Use session upload or stored brand logo
 
@@ -6704,7 +6733,7 @@ async function downloadImg(format) {
     ctx.restore();
   }
 
-  canvas.toBlob(blob=>{ const brd=loadBrand(); const sl=(brd?.name||'postimity').toLowerCase().replace(/[^a-z0-9]+/g,'-').slice(0,20); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=sl+'-'+format+'-'+Date.now()+'.jpg'; a.click(); setTimeout(()=>URL.revokeObjectURL(url),1000); },'image/jpeg',.93);
+  canvas.toBlob(blob=>{ const sl=brandSlug(); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=sl+'-'+format+'-'+Date.now()+'.jpg'; a.click(); setTimeout(()=>URL.revokeObjectURL(url),1000); },'image/jpeg',.93);
 }
 
 async function redrawCanvas() { /* visual refresh only — logo toggle affects download */ }
@@ -6720,9 +6749,8 @@ async function composeFlyerCanvas(photoB64, photoMime, fd, brand) {
 
   // 1. Draw real photo filling the entire canvas (center crop to square)
   const photo=await loadImg('data:'+photoMime+';base64,'+photoB64);
-  const ps=Math.min(photo.width,photo.height);
-  const psx=(photo.width-ps)/2, psy=(photo.height-ps)/2;
-  ctx.drawImage(photo,psx,psy,ps,ps,0,0,W,H);
+  if(!photo) { ctx.fillStyle=primary; ctx.fillRect(0,0,W,H); }
+  else { const ps=Math.min(photo.width,photo.height); const psx=(photo.width-ps)/2, psy=(photo.height-ps)/2; ctx.drawImage(photo,psx,psy,ps,ps,0,0,W,H); }
 
   // 2. Gradient overlay — dark at bottom for text readability
   const grad=ctx.createLinearGradient(0,250,0,H);
@@ -6822,10 +6850,7 @@ function loadImg(src, timeoutMs=10000) {
     i.src=src;
   });
 }
-function darken(hex,amt) {
-  const n=parseInt(hex.replace('#',''),16);
-  return '#'+[Math.max(0,(n>>16)-amt),Math.max(0,((n>>8)&0xff)-amt),Math.max(0,(n&0xff)-amt)].map(v=>v.toString(16).padStart(2,'0')).join('');
-}
+function darken(hex,amt) { return darkenHex(hex, amt/255); }
 
 // ═══════════════════════════════════════════════════════
 // LOADING
@@ -6841,8 +6866,9 @@ function getModeLoading() {
 }
 function showLoading(on) {
   document.getElementById('inputCard').style.display=on?'none':'block';
-  document.querySelector('.mode-cards').style.display=on?'none':'';
-  const ss=document.getElementById('styleSel'); if(ss) ss.style.display=on?'none':'';
+  document.querySelector('.mode-cards').style.display=on?'none':'grid';
+  if(on) { const ss=document.getElementById('styleSel'); if(ss) ss.style.display='none'; }
+  else { updateStyleSelector(); }
   document.getElementById('loadWrap').classList.toggle('show',on);
   document.getElementById('resultWrap').classList.remove('show');
   document.getElementById('errWrap').classList.remove('show');
@@ -6934,6 +6960,12 @@ function resetCreator() {
   document.getElementById('errWrap').classList.remove('show');
   document.getElementById('inputCard').style.display='block';
   document.querySelector('.mode-cards').style.display='grid';
+  updateStyleSelector();
+  // Reset pub section and adjust wrap (hidden until next generation)
+  const pubSec = document.getElementById('pubSection');
+  if(pubSec) pubSec.style.display = '';
+  const adjWrap = document.getElementById('adjustWrap');
+  if(adjWrap) adjWrap.style.display = '';
   document.getElementById('postText').value='';
   // Reset enhance mode
   enhanceMode='auto';
