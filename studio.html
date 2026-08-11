@@ -1883,7 +1883,7 @@ Ej: 'Wonderik es increíble. Mi hija de 3 años ya lee palabras cortas y su desa
 // ═══════════════════════════════════════════════════════
 // CONFIG
 // ═══════════════════════════════════════════════════════
-const POSTIMITY_VERSION = '2.9.1'; // Aug 10 2026 — Session 16: security fixes + timeouts + Agency coming soon
+const POSTIMITY_VERSION = '2.10.0'; // Aug 11 2026 — Session 17: integral consistency + carousel hardening
 console.log('Postimity Studio v' + POSTIMITY_VERSION);
 
 // ── GLOBAL ERROR HANDLER — prevents silent failures ──
@@ -2913,6 +2913,7 @@ window.addEventListener('DOMContentLoaded', async () => {
       applyBrand(merged);
       showCloudBar(merged.name);
       showScreen('creatorScreen');
+      setMode('post'); // Initialize mode UI + style selector visibility
     } else {
       // Brand was deleted or not found — go to setup
       showScreen('setupScreen');
@@ -3811,7 +3812,7 @@ function darkenHex(hex, amount) {
 
 function downloadCarouselSlide(idx) {
   const brand = loadBrand();
-  const slug = brandSlug(brand);
+  const slug = (brand?.name || 'postimity').toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 20);
   const a = document.createElement('a');
   a.href = carouselResults[idx];
   a.download = slug + '-slide-' + (idx+1) + '-' + Date.now() + '.jpg';
@@ -3871,7 +3872,7 @@ async function adjustResult() {
 
 async function downloadAllSlides() {
   const brand = loadBrand();
-  const slug = brandSlug(brand);
+  const slug = (brand?.name || 'postimity').toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 20);
   const ts = Date.now();
   const total = carouselResults.length;
   const isES = detectLanguage() === 'es';
@@ -4341,7 +4342,7 @@ function showVideoResult(videoUrl, topic, captionsData) {
     videoDlBtn = document.createElement('a');
     videoDlBtn.id = 'videoDlBtn';
     videoDlBtn.href = videoUrl;
-    videoDlBtn.download = brandSlug(brand) + '-video-' + Date.now() + '.mp4';
+    videoDlBtn.download = ((brand?.name||'postimity').toLowerCase().replace(/[^a-z0-9]+/g,'-').slice(0,20)) + '-video-' + Date.now() + '.mp4';
     videoDlBtn.className = 'btn btn-primary btn-full';
     videoDlBtn.style.cssText = 'margin-bottom:10px;text-decoration:none;text-align:center';
     videoDlBtn.textContent = isES ? '⬇️ Descargar video (.mp4)' : '⬇️ Download video (.mp4)';
@@ -4430,7 +4431,7 @@ async function shareVideoToSocial(platform) {
     try {
       const resp = await fetch(videoEl.src);
       const blob = await resp.blob();
-      const file = new File([blob], brandSlug() + '-video-' + Date.now() + '.mp4', { type: 'video/mp4' });
+      const file = new File([blob], ((loadBrand()?.name||'postimity').toLowerCase().replace(/[^a-z0-9]+/g,'-').slice(0,20)) + '-video-' + Date.now() + '.mp4', { type: 'video/mp4' });
       const shareData = { files: [file] };
       if (navigator.canShare(shareData)) {
         await navigator.share(shareData);
@@ -4448,7 +4449,7 @@ async function shareVideoToSocial(platform) {
   // 3. Fallback: Download video + open platform
   if (videoEl && videoEl.src) {
     const a = document.createElement('a');
-    a.href = videoEl.src; a.download = brandSlug() + '-video-' + Date.now() + '.mp4';
+    a.href = videoEl.src; a.download = ((loadBrand()?.name||'postimity').toLowerCase().replace(/[^a-z0-9]+/g,'-').slice(0,20)) + '-video-' + Date.now() + '.mp4';
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
   }
 
@@ -6324,13 +6325,12 @@ function showResult(data) {
   if(dlLabel) dlLabel.style.display = isCarousel ? 'none' : '';
   const dlBtnsEl = document.querySelector('.dl-btns');
   if(dlBtnsEl) dlBtnsEl.style.display = isCarousel ? 'none' : '';
-  // Always reset pub label/hint/handlers to default (may be stale from carousel or video)
+  // Always reset pub label/hint to defaults (may be stale from carousel or video)
   if(pubSec) {
     const pubLabel = pubSec.querySelector('.pub-label');
     if(pubLabel) pubLabel.textContent = t('pubLabel');
     const pubHint = pubSec.querySelector('.pub-hint');
     if(pubHint) pubHint.textContent = t('pubHint');
-    // Restore standard social handlers (video mode replaces them)
     pubSec.querySelectorAll('.pub-btn').forEach(btn => {
       const plat = btn.classList.contains('ig') ? 'instagram' : btn.classList.contains('fb') ? 'facebook' : 'tiktok';
       btn.onclick = function(){ openInSocial(plat); };
@@ -6555,11 +6555,6 @@ async function getCanvasBlob(format) {
   return new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.93));
 }
 
-// ─── HELPER: Brand slug for filenames (used in downloads, share, etc) ──
-function brandSlug(brand) {
-  return ((brand || loadBrand())?.name || 'postimity').toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 20);
-}
-
 // ─── HELPER: Convert data URL to Blob (Safari-safe, no fetch needed) ──
 function dataUrlToBlob(dataUrl) {
   const parts = dataUrl.split(',');
@@ -6606,7 +6601,7 @@ async function openInSocial(platform) {
       if (isCarouselMode) {
         // Convert carousel data URLs to File objects (Safari-safe — no fetch(data:URL))
         showToast(isES ? '📦 Preparando slides...' : '📦 Preparing slides...');
-        const wsSlug = brandSlug();
+        const wsSlug = (loadBrand()?.name || 'postimity').toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 20);
         const wsTs = Date.now();
         for (let i = 0; i < carouselResults.length; i++) {
           const blob = dataUrlToBlob(carouselResults[i]);
@@ -6615,7 +6610,7 @@ async function openInSocial(platform) {
       } else {
         // Single image from canvas (includes logo + watermark)
         const blob = await getCanvasBlob('square');
-        if (blob) { files.push(new File([blob], brandSlug() + '-post-' + Date.now() + '.jpg', { type: 'image/jpeg' })); }
+        if (blob) { const pSlug = (loadBrand()?.name || 'postimity').toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 20); files.push(new File([blob], pSlug + '-post-' + Date.now() + '.jpg', { type: 'image/jpeg' })); }
       }
 
       if (files.length) {
@@ -6733,7 +6728,7 @@ async function downloadImg(format) {
     ctx.restore();
   }
 
-  canvas.toBlob(blob=>{ const sl=brandSlug(); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=sl+'-'+format+'-'+Date.now()+'.jpg'; a.click(); setTimeout(()=>URL.revokeObjectURL(url),1000); },'image/jpeg',.93);
+  canvas.toBlob(blob=>{ const brd=loadBrand(); const sl=(brd?.name||'postimity').toLowerCase().replace(/[^a-z0-9]+/g,'-').slice(0,20); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=sl+'-'+format+'-'+Date.now()+'.jpg'; a.click(); setTimeout(()=>URL.revokeObjectURL(url),1000); },'image/jpeg',.93);
 }
 
 async function redrawCanvas() { /* visual refresh only — logo toggle affects download */ }
@@ -6850,7 +6845,10 @@ function loadImg(src, timeoutMs=10000) {
     i.src=src;
   });
 }
-function darken(hex,amt) { return darkenHex(hex, amt/255); }
+function darken(hex,amt) {
+  const n=parseInt(hex.replace('#',''),16);
+  return '#'+[Math.max(0,(n>>16)-amt),Math.max(0,((n>>8)&0xff)-amt),Math.max(0,(n&0xff)-amt)].map(v=>v.toString(16).padStart(2,'0')).join('');
+}
 
 // ═══════════════════════════════════════════════════════
 // LOADING
@@ -6961,11 +6959,6 @@ function resetCreator() {
   document.getElementById('inputCard').style.display='block';
   document.querySelector('.mode-cards').style.display='grid';
   updateStyleSelector();
-  // Reset pub section and adjust wrap (hidden until next generation)
-  const pubSec = document.getElementById('pubSection');
-  if(pubSec) pubSec.style.display = '';
-  const adjWrap = document.getElementById('adjustWrap');
-  if(adjWrap) adjWrap.style.display = '';
   document.getElementById('postText').value='';
   // Reset enhance mode
   enhanceMode='auto';
