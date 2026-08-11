@@ -6167,7 +6167,7 @@ function getFlyerData() {
 async function post(body) {
   return postWithTimeout(body);
 }
-async function postWithTimeout(body, timeoutMs=65000) {
+async function postWithTimeout(body, timeoutMs=130000) {
   // Always inject brandId for server-side validation (Fix #1, #2)
   if (brandId && !body.brandId) body.brandId = brandId;
   const controller = new AbortController();
@@ -6197,7 +6197,7 @@ async function postWithTimeout(body, timeoutMs=65000) {
     return data;
   } catch(e) {
     clearTimeout(timer);
-    if(e.name==='AbortError') throw new Error('La solicitud tardó demasiado. Intenta de nuevo — las imágenes AI pueden tardar hasta 45 seg.');
+    if(e.name==='AbortError') throw new Error('La solicitud tardó demasiado. Intenta de nuevo — las imágenes AI pueden tardar hasta 90 seg.');
     throw e;
   }
 }
