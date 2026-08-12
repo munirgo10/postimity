@@ -2754,11 +2754,11 @@ function updateGenCounter() {
   }
 }
 // ─── UTILITIES ───────────────────────────────────────
-function showToast(msg) {
+function showToast(msg, duration) {
   const t = document.getElementById('toast');
   t.textContent = msg || T[detectLanguage()]?.toastSaved || '✅ Post saved';
   t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3000);
+  setTimeout(() => t.classList.remove('show'), duration || 3000);
 }
 
 // Sync brand to Cloudflare KV
@@ -4135,6 +4135,10 @@ async function generateVideo(brand) {
         useGalleryPhoto: usingGalleryPhoto || false,
       }, 25000);
       videoPrompt = promptData.videoPrompt;
+      // Show warning if topic was classified as not directly feasible for Kling
+      if (promptData.topicWarning) {
+        showToast('💡 ' + promptData.topicWarning, 8000);
+      }
     } catch(promptErr) {
       videoPrompt = usingGalleryPhoto
         ? 'Subtle cinematic animation of the existing image. Gentle camera movement, soft parallax, elements breathe with life. Keep ALL original elements exactly as they are. ' + topic
