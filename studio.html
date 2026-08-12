@@ -2838,17 +2838,15 @@ async function loadBrandFromCloud(id) {
     const data = await res.json();
     if (data.found && data.brand) {
       // Sync server-side gen counts to localStorage (server is source of truth)
+      // D7 fix (Session 19): Server is source of truth — always overwrite localStorage
       if (typeof data.genCount === 'number') {
         const mk = genMonthKey();
-        const localCount = parseInt(localStorage.getItem(mk) || '0');
-        // Use the higher of server vs local (prevents rollback exploits)
-        localStorage.setItem(mk, String(Math.max(data.genCount, localCount)));
-        genCount = Math.max(data.genCount, localCount);
+        localStorage.setItem(mk, String(data.genCount));
+        genCount = data.genCount;
       }
       if (typeof data.videoCount === 'number') {
         const vk = videoMonthKey();
-        const localVC = parseInt(localStorage.getItem(vk) || '0');
-        localStorage.setItem(vk, String(Math.max(data.videoCount, localVC)));
+        localStorage.setItem(vk, String(data.videoCount));
       }
       return data.brand;
     }
@@ -2914,16 +2912,18 @@ window.addEventListener('DOMContentLoaded', async () => {
       localStorage.setItem(STORE_KEY, JSON.stringify(localBrand));
     }
   }
+  // D7 fix (Session 19): Server is ALWAYS source of truth for gen counts.
+  // Math.max was causing client inflation — if client got ahead (failed requests),
+  // the count could never go back down. Server-side validateGeneration() already
+  // enforces limits, so anti-rollback protection is not needed client-side.
   if (typeof auth.genCount === 'number') {
     const mk = genMonthKey();
-    const localCount = parseInt(localStorage.getItem(mk) || '0');
-    localStorage.setItem(mk, String(Math.max(auth.genCount, localCount)));
-    genCount = Math.max(auth.genCount, localCount);
+    localStorage.setItem(mk, String(auth.genCount));
+    genCount = auth.genCount;
   }
   if (typeof auth.videoCount === 'number') {
     const vk = videoMonthKey();
-    const localVC = parseInt(localStorage.getItem(vk) || '0');
-    localStorage.setItem(vk, String(Math.max(auth.videoCount, localVC)));
+    localStorage.setItem(vk, String(auth.videoCount));
   }
 
   // Authenticated — load brand if exists
