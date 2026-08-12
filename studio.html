@@ -1885,7 +1885,7 @@ Ej: 'Wonderik es increíble. Mi hija de 3 años ya lee palabras cortas y su desa
 // ═══════════════════════════════════════════════════════
 // CONFIG
 // ═══════════════════════════════════════════════════════
-const POSTIMITY_VERSION = '2.12.0'; // Aug 12 2026 — Session 19: N2 XSS fix (esc helper + escaped innerHTML)
+const POSTIMITY_VERSION = '2.13.0'; // Aug 12 2026 — Session 19: D1-D5 sync fix, N2 XSS, H2 feature unlock, D5 pricing grid
 console.log('Postimity Studio v' + POSTIMITY_VERSION);
 
 // ── GLOBAL ERROR HANDLER — prevents silent failures ──
@@ -2905,12 +2905,34 @@ window.addEventListener('DOMContentLoaded', async () => {
     return;
   }
 
+  // D1/D2/D3 fix (Session 19): Sync plan + gen counts from server IMMEDIATELY
+  // This ensures localStorage has the server truth BEFORE any UI renders
+  if (auth.plan) {
+    const localBrand = loadBrand();
+    if (localBrand && localBrand.plan !== auth.plan) {
+      localBrand.plan = auth.plan;
+      localStorage.setItem(STORE_KEY, JSON.stringify(localBrand));
+    }
+  }
+  if (typeof auth.genCount === 'number') {
+    const mk = genMonthKey();
+    const localCount = parseInt(localStorage.getItem(mk) || '0');
+    localStorage.setItem(mk, String(Math.max(auth.genCount, localCount)));
+    genCount = Math.max(auth.genCount, localCount);
+  }
+  if (typeof auth.videoCount === 'number') {
+    const vk = videoMonthKey();
+    const localVC = parseInt(localStorage.getItem(vk) || '0');
+    localStorage.setItem(vk, String(Math.max(auth.videoCount, localVC)));
+  }
+
   // Authenticated — load brand if exists
   if (auth.brandId) {
     brandId = auth.brandId;
     const cloudBrand = await loadBrandFromCloud(brandId);
     if (cloudBrand) {
       const localBrand = loadBrand();
+      // Cloud brand plan is authoritative — merge with local (keep logo only)
       const merged = { ...cloudBrand, logo: localBrand?.logo || null };
       localStorage.setItem(STORE_KEY, JSON.stringify({ ...merged, brandId }));
       applyBrand(merged);
@@ -4529,6 +4551,7 @@ function resetVideoCreator() {
 function getPlanConfig() {
   const lang = detectLanguage();
   const mxn = lang === 'es';
+  const isES = lang === 'es';
   return {
     trial:   { name: t('planTrialName'), badge: t('planTrialBadge'), gens: 20, videos: 2, price: t('planTrialPrice'), upgradeLabel: t('planStarterUp'), color: 'trial' },
     starter: { name: 'Starter', badge: '💙 Starter', gens: 40, videos: 2, price: mxn?'$149 MXN/mes':'$9 USD/mo', upgradeLabel: t('planGrowthUp'), color: 'starter' },
@@ -4686,8 +4709,8 @@ function renderCuenta() {
     const mxn = detectLanguage() === 'es';
     const isES = detectLanguage() === 'es';
     const tiers = [
-      { key:'starter', name:'Starter', price: mxn?'$149':'$9', period: mxn?'MXN/mes':'USD/mo', gens:'40 '+t('genPerMonth'), videos:'2 videos', features: isES ? 'Post, Estudio Pro, Testimonios, Video AI' : 'Post, Studio Pro, Testimonials, Video AI' },
-      { key:'growth',  name:'Growth',  price: mxn?'$349':'$19', period: mxn?'MXN/mes':'USD/mo', gens:'100 '+t('genPerMonth'), videos:'8 videos', features: isES ? 'Todo + Flyers, Carruseles, Marketing Agent' : 'All + Flyers, Carousels, Marketing Agent', popular: true },
+      { key:'starter', name:'Starter', price: mxn?'$149':'$9', period: mxn?'MXN/mes':'USD/mo', gens:'40 '+t('genPerMonth'), videos:'2 videos', features: isES ? 'Post, Flyer, Carrusel, Estudio Pro, Video AI' : 'Post, Flyer, Carousel, Studio Pro, Video AI' },
+      { key:'growth',  name:'Growth',  price: mxn?'$349':'$19', period: mxn?'MXN/mes':'USD/mo', gens:'100 '+t('genPerMonth'), videos:'8 videos', features: isES ? 'Todo + Marketing Agent' : 'All + Marketing Agent', popular: true },
       { key:'agency',  name:'Agency',  price: mxn?'$799':'$45', period: mxn?'MXN/mes':'USD/mo', gens:'250 '+t('genPerMonth'), videos:'20 videos', features: isES ? 'Todo + sin watermark + soporte prioritario' : 'All + no watermark + priority support' },
     ];
     const activateLabel = isES ? 'Activar' : 'Activate';
