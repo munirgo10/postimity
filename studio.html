@@ -1885,7 +1885,7 @@ Ej: 'Wonderik es increíble. Mi hija de 3 años ya lee palabras cortas y su desa
 // ═══════════════════════════════════════════════════════
 // CONFIG
 // ═══════════════════════════════════════════════════════
-const POSTIMITY_VERSION = '2.10.0'; // Aug 11 2026 — Session 17: integral consistency + carousel hardening
+const POSTIMITY_VERSION = '2.12.0'; // Aug 12 2026 — Session 19: N2 XSS fix (esc helper + escaped innerHTML)
 console.log('Postimity Studio v' + POSTIMITY_VERSION);
 
 // ── GLOBAL ERROR HANDLER — prevents silent failures ──
@@ -1922,6 +1922,8 @@ function getPltInfo() {
 // ── WORKER CONFIG ──────────────────────────────────────────
 const WORKER = 'https://api.postimity.com/';
 const STORE_KEY = 'postimity_brand_v1';
+// N2 fix (Session 19): HTML escape helper — prevents XSS in innerHTML assignments
+function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
 const GEN_LIMITS = { trial: 20, starter: 40, growth: 100, agency: 250 };
 const VIDEO_LIMITS = { trial: 2, starter: 2, growth: 8, agency: 20 };
 
@@ -1929,7 +1931,7 @@ const VIDEO_LIMITS = { trial: 2, starter: 2, growth: 8, agency: 20 };
 // Defines which features are available per plan
 const FEATURE_ACCESS = {
   trial:   { post:true, enhance:true, testimonial:true, flyer:true, carousel:true, agent:true, adBrief:true, video:true },
-  starter: { post:true, enhance:true, testimonial:true, flyer:false, carousel:false, agent:false, adBrief:false, video:true },
+  starter: { post:true, enhance:true, testimonial:true, flyer:true, carousel:true, agent:false, adBrief:true, video:true },
   growth:  { post:true, enhance:true, testimonial:true, flyer:true, carousel:true, agent:true, adBrief:true, video:true },
   agency:  { post:true, enhance:true, testimonial:true, flyer:true, carousel:true, agent:true, adBrief:true, video:true },
 };
@@ -2152,8 +2154,8 @@ const T = {
     // ── Feature Gating ──
     lockBadge:'GROWTH', lockSoonBadge:'PRONTO',
     upsellTitle:'Disponible en Growth',
-    upsellDesc:'Este modo está incluido en el plan Growth. Desbloquea todo el potencial de tu contenido.',
-    upsellFeat1:'Flyers profesionales', upsellFeat2:'Carruseles multi-slide', upsellFeat3:'Marketing Agent completo', upsellFeat4:'Ad Brief con targeting', upsellFeat5:'Sin watermark',
+    upsellDesc:'El Marketing Agent está incluido en el plan Growth. Genera un plan de contenido mensual completo con un clic.',
+    upsellFeat1:'Plan mensual de 20+ posts', upsellFeat2:'Deep links directos a crear', upsellFeat3:'Recordatorios de publicación', upsellFeat4:'Estrategia por pilares de contenido', upsellFeat5:'100 generaciones/mes',
     upsellCta:'Ver planes →', upsellClose:'Ahora no',
     upsellVideoTitle:'Video AI — Disponible en Growth',
     upsellVideoDesc:'Crea videos cortos para Reels, TikTok y Shorts con inteligencia artificial. Incluido desde el plan Growth.',
@@ -2419,8 +2421,8 @@ const T = {
     // ── Feature Gating ──
     lockBadge:'GROWTH', lockSoonBadge:'SOON',
     upsellTitle:'Available on Growth',
-    upsellDesc:'This mode is included in the Growth plan. Unlock the full potential of your content.',
-    upsellFeat1:'Professional flyers', upsellFeat2:'Multi-slide carousels', upsellFeat3:'Full Marketing Agent', upsellFeat4:'Ad Brief with targeting', upsellFeat5:'No watermark',
+    upsellDesc:'Marketing Agent is included in the Growth plan. Generate a complete monthly content plan with one click.',
+    upsellFeat1:'Monthly plan with 20+ posts', upsellFeat2:'Deep links to create directly', upsellFeat3:'Publishing reminders', upsellFeat4:'Content pillar strategy', upsellFeat5:'100 generations/month',
     upsellCta:'View plans →', upsellClose:'Not now',
     upsellVideoTitle:'Video AI — Available on Growth',
     upsellVideoDesc:'Create short videos for Reels, TikTok and Shorts with AI. Included from the Growth plan.',
@@ -2612,11 +2614,10 @@ function hideAuthError(step) {
 
 async function checkAuth() {
   try {
-    const res = await fetch(WORKER, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ mode: 'check-auth' })
+    // M5 fix (Session 19): GET doesn't consume POST rate limit on page load
+    const res = await fetch(WORKER + 'check-auth', {
+      method: 'GET',
+      credentials: 'include'
     });
     const data = await res.json();
     return data.authenticated ? data : null;
@@ -3934,6 +3935,8 @@ async function generate() {
     const msg = detectLanguage()==='en'
       ? `You've reached the limit of ${limit} generations this month. Email us at support@postimity.com to upgrade.`
       : `Llegaste al límite de ${limit} generaciones este mes. Escríbenos a support@postimity.com para hacer upgrade.`;
+    // B3 (Session 18): Meta Pixel — upgrade intent signal
+    if(typeof fbq==='function') fbq('track', 'AddToCart', { content_name: 'upgrade_from_' + plan, value: plan === 'trial' ? 9 : 19, currency: 'USD' });
     alert(msg);
     return;
   }
@@ -4099,6 +4102,7 @@ async function generateVideo(brand) {
     const msg = detectLanguage()==='en'
       ? `You've reached your limit of ${videoLimit} videos this month.`
       : `Llegaste al límite de ${videoLimit} videos este mes.`;
+    if(typeof fbq==='function') fbq('track', 'AddToCart', { content_name: 'upgrade_video_' + plan, value: plan === 'trial' ? 9 : 19, currency: 'USD' });
     alert(msg); return;
   }
 
@@ -4280,6 +4284,11 @@ function showVideoResult(videoUrl, topic, captionsData) {
   // Hide loading
   const loadWrap = document.getElementById('loadWrap');
   if(loadWrap) loadWrap.classList.remove('show');
+  // B3 (Session 18): Meta Pixel — track video generation
+  if(typeof fbq==='function') {
+    fbq('track', 'ViewContent', { content_name: 'video', content_category: pillar, content_type: 'video' });
+    fbq('trackCustom', 'Generate', { mode: 'video', pillar, platform, plan: loadBrand()?.plan || 'trial' });
+  }
   // Restore mode cards, style selector & input card (same as showLoading(false) does for other modes)
   const inputCard = document.getElementById('inputCard');
   if(inputCard) inputCard.style.display = 'block';
@@ -4655,10 +4664,10 @@ function renderCuenta() {
   const brandInfo = document.getElementById('cuentaBrandInfo');
   if(brandInfo && brand) {
     const rows = [
-      ['🏢', t('dashBrandBusiness'), brand.name || '—'],
-      ['📍', t('dashBrandTypeLocation'), (brand.type || '—') + (brand.location ? ' · ' + brand.location : '')],
-      ['📱', t('dashBrandWA'), brand.whatsapp || '—'],
-      ['🆔', t('dashBrandID'), (brandId || '—').slice(0,8) + '...'],
+      ['🏢', t('dashBrandBusiness'), esc(brand.name) || '—'],
+      ['📍', t('dashBrandTypeLocation'), esc(brand.type || '—') + (brand.location ? ' · ' + esc(brand.location) : '')],
+      ['📱', t('dashBrandWA'), esc(brand.whatsapp) || '—'],
+      ['🆔', t('dashBrandID'), esc((brandId || '—').slice(0,8)) + '...'],
     ];
     brandInfo.innerHTML = rows.map(([icon, label, val]) =>
       '<div class="brand-row">' +
@@ -5248,7 +5257,7 @@ function renderHistGrid(posts) {
       '<div class="hist-card-meta">' +
         '<div class="hist-card-date">' + dateStr + '</div>' +
         '<span class="hist-card-plat ' + platClass + '">' + platLabel + '</span>' +
-        '<div class="hist-card-pilar">' + (p.pillar || 'General') + '</div>' +
+        '<div class="hist-card-pilar">' + esc(p.pillar || 'General') + '</div>' +
       '</div></div>';
   }).join('');
 }
@@ -5639,8 +5648,8 @@ function renderReminderCard(active, brand) {
         '<button class="reminder-btn on" onclick="toggleReminders(false)" style="flex-shrink:0">' + t('remActiveBtn') + '</button>' +
       '</div>' +
       '<div style="font-size:11px;color:#1a8a4a;background:rgba(37,211,102,.08);border-radius:8px;padding:8px 10px;width:100%">' +
-        (savedCh==='email'||savedCh==='both' ? '📧 ' + savedEmail + '  ' : '') +
-        (savedCh==='whatsapp'||savedCh==='both' ? '📱 ' + savedWA : '') +
+        (savedCh==='email'||savedCh==='both' ? '📧 ' + esc(savedEmail) + '  ' : '') +
+        (savedCh==='whatsapp'||savedCh==='both' ? '📱 ' + esc(savedWA) : '') +
       '</div>' +
     '</div>';
   }
@@ -6214,6 +6223,8 @@ async function postWithTimeout(body, timeoutMs=130000) {
       throw new Error(data.error);
     }
     if (data.code === 'TRIAL_EXPIRED' || data.code === 'GEN_LIMIT' || data.code === 'VIDEO_LIMIT' || data.code === 'FEATURE_LOCKED') {
+      // B3 (Session 18): Meta Pixel — upgrade intent from server-side blocks
+      if(typeof fbq==='function') fbq('track', 'AddToCart', { content_name: 'server_block_' + data.code, currency: 'USD' });
       throw new Error(data.error);
     }
     if(!res.ok||!data.success) {
@@ -6314,6 +6325,11 @@ function showResult(data) {
   lastGeneratedData=data;
   checkIsFirstPost();
   showLoading(false);
+  // B3 (Session 18): Meta Pixel — track content generation as ViewContent + custom Generate
+  if(typeof fbq==='function') {
+    fbq('track', 'ViewContent', { content_name: mode, content_category: pillar, content_type: imageStyle });
+    fbq('trackCustom', 'Generate', { mode, pillar, platform, imageStyle, plan: loadBrand()?.plan || 'trial' });
+  }
   // Watermark toggle: only Growth+ can disable it
   const srBrand = loadBrand();
   const srPlan = srBrand?.plan || 'trial';
