@@ -239,6 +239,9 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
 </div>
 <script>
 const WORKER='https://api.postimity.com';
+// S22-2: Plan limits for display context (must match worker + studio)
+const GEN_LIMITS={trial:20,starter:40,growth:100,agency:250};
+const VIDEO_LIMITS={trial:2,starter:2,growth:8,agency:20};
 let adminData=null;
 async function doAuth(){
   const key=document.getElementById('authKey').value.trim();
@@ -327,7 +330,7 @@ function renderDashboard(){
   const sortedC=Object.entries(d.countryCounts).sort((a,b)=>b[1]-a[1]);
   document.getElementById('countryGrid').innerHTML=sortedC.map(([c,n])=>'<div class="country-chip">'+esc(c)+' <span>'+n+'</span></div>').join('');
   // Top Users
-  document.querySelector('#topUsersTable tbody').innerHTML=d.topUsers.map((u,i)=>'<tr><td class="rank">'+(i+1)+'</td><td style="font-weight:600">'+esc(u.name)+'</td><td><span class="plan-tag '+u.plan+'">'+u.plan+'</span></td><td style="font-weight:700">'+(u.monthlyGens!==undefined?u.monthlyGens:u.gens)+'</td><td style="font-size:11px;color:#E53935">'+(u.monthlyVideos!==undefined?u.monthlyVideos:(u.videos||0))+'</td><td style="font-size:11px;color:var(--r)">$'+(u.cost||0).toFixed(2)+'</td></tr>').join('');
+  document.querySelector('#topUsersTable tbody').innerHTML=d.topUsers.map((u,i)=>{const gl=GEN_LIMITS[u.plan]||20;const mg=u.monthlyGens!==undefined?u.monthlyGens:u.gens;const vl=VIDEO_LIMITS[u.plan]||2;const mv=u.monthlyVideos!==undefined?u.monthlyVideos:(u.videos||0);return '<tr><td class="rank">'+(i+1)+'</td><td style="font-weight:600">'+esc(u.name)+'</td><td><span class="plan-tag '+u.plan+'">'+u.plan+'</span></td><td style="font-weight:700">'+mg+'<span style="color:var(--t4);font-size:9px"> /'+gl+'</span></td><td style="font-size:11px;color:#E53935">'+mv+'<span style="color:var(--t4);font-size:9px"> /'+vl+'</span></td><td style="font-size:11px;color:var(--r)">$'+(u.cost||0).toFixed(2)+'</td></tr>';}).join('');
   filterBrands();
 }
 function filterBrands(){
@@ -342,7 +345,8 @@ function filterBrands(){
   document.querySelector('#brandTable tbody').innerHTML=filtered.slice(0,100).map(b=>{
     const lastGen=b.lastGen?new Date(b.lastGen).toLocaleDateString():'—';
     const costStr=b.cost>0?'$'+b.cost.toFixed(2):'—';
-    const genStr=b.monthlyGens!==undefined?'<span title="Este mes / Total">'+b.monthlyGens+'<span style="color:var(--t4);font-size:9px"> /'+b.gens+'</span></span>'+(b.monthlyVideos>0?' <span style="color:#E53935;font-size:9px">('+b.monthlyVideos+'🎬)</span>':''):(b.gens>0?b.gens+(b.videos>0?' <span style="color:#E53935;font-size:9px">('+b.videos+'🎬)</span>':''):'0');
+    const gl=GEN_LIMITS[b.plan||'trial']||20;const vl=VIDEO_LIMITS[b.plan||'trial']||2;
+    const genStr=b.monthlyGens!==undefined?'<span title="Este mes / Límite plan (Total histórico: '+b.gens+')">'+b.monthlyGens+'<span style="color:var(--t4);font-size:9px"> /'+gl+'</span></span>'+(b.monthlyVideos>0?' <span title="Videos: '+b.monthlyVideos+'/'+vl+'" style="color:#E53935;font-size:9px">('+b.monthlyVideos+'/'+vl+'🎬)</span>':''):(b.gens>0?b.gens+(b.videos>0?' <span style="color:#E53935;font-size:9px">('+b.videos+'🎬)</span>':''):'0');
     const adminBadge=b.adminOverride?' <span style="font-size:8px;padding:1px 4px;border-radius:3px;background:#FEF3C7;color:#92400E;font-weight:700">ADMIN</span>':'';
     return '<tr><td style="font-weight:600">'+esc(b.name)+'<div style="font-size:9px;color:var(--t4)">'+esc(b.email||b.type)+'</div></td><td><span class="plan-tag '+(b.plan||'trial')+'">'+(b.plan||'trial')+'</span>'+adminBadge+'</td><td style="font-size:11px">'+esc(b.country)+'</td><td style="font-size:11px;font-weight:600">'+genStr+'</td><td style="font-size:11px;color:var(--r)">'+costStr+'</td><td style="font-size:10px;color:var(--t3)">'+lastGen+'</td><td style="white-space:nowrap"><button class="btn-plan" data-bid="'+esc(b.brandId)+'" data-bname="'+esc(b.name)+'" data-plan="'+(b.plan||'trial')+'" onclick="openPlanModal(this.dataset.bid,this.dataset.bname,this.dataset.plan)">Plan</button> <button class="btn-del" data-bid="'+esc(b.brandId)+'" data-bname="'+esc(b.name)+'" onclick="deleteBrand(this.dataset.bid,this.dataset.bname)">🗑</button></td></tr>';
   }).join('');
