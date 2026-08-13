@@ -1885,7 +1885,7 @@ Ej: 'Wonderik es increíble. Mi hija de 3 años ya lee palabras cortas y su desa
 // ═══════════════════════════════════════════════════════
 // CONFIG
 // ═══════════════════════════════════════════════════════
-const POSTIMITY_VERSION = '2.13.0'; // Aug 12 2026 — Session 19: D1-D5 sync fix, N2 XSS, H2 feature unlock, D5 pricing grid
+const POSTIMITY_VERSION = '2.14.0'; // Aug 12 2026 — Session 20: email change functions, R14 browser fingerprint, TRIAL_USED handler
 console.log('Postimity Studio v' + POSTIMITY_VERSION);
 
 // ── GLOBAL ERROR HANDLER — prevents silent failures ──
@@ -2656,6 +2656,25 @@ function generateBrandId() {
   return hex.slice(0,8)+'-'+hex.slice(8,12)+'-'+hex.slice(12,16)+'-'+hex.slice(16,20)+'-'+hex.slice(20);
 }
 
+// R14 (Session 20): Browser fingerprint to prevent trial abuse with different emails
+function getBrowserFingerprint() {
+  try {
+    const raw = [
+      screen.width, screen.height, screen.colorDepth,
+      navigator.language, navigator.hardwareConcurrency || 0,
+      Intl.DateTimeFormat().resolvedOptions().timeZone,
+      navigator.platform || '',
+      new Date().getTimezoneOffset()
+    ].join('|');
+    // Simple hash (djb2)
+    let hash = 5381;
+    for (let i = 0; i < raw.length; i++) {
+      hash = ((hash << 5) + hash + raw.charCodeAt(i)) >>> 0;
+    }
+    return hash.toString(36);
+  } catch(e) { return null; }
+}
+
 function getBrandUrl(id) {
   return window.location.origin + window.location.pathname + '?b=' + (id || brandId);
 }
@@ -2768,11 +2787,16 @@ function showToast(msg, duration) {
 // ─── KV / CLOUD SYNC ──────────────────────────────────
 async function syncBrandToCloud(brand, id) {
   try {
+    // R14 (Session 20): attach browser fingerprint on first save to prevent trial abuse
+    const brandCopy = { ...brand };
+    if (!brand.createdAt) {
+      brandCopy.fingerprint = getBrowserFingerprint();
+    }
     const res = await fetch(WORKER, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
-      body: JSON.stringify({ mode: 'save-brand', brandId: id, brandData: brand })
+      body: JSON.stringify({ mode: 'save-brand', brandId: id, brandData: brandCopy })
     });
     const data = await res.json();
     // Fix #20 — Trial abuse: if email already has an account, redirect to it
@@ -2785,6 +2809,14 @@ async function syncBrandToCloud(brand, id) {
       // Clear the new brandId data and redirect to existing account
       localStorage.removeItem(STORE_KEY);
       window.location.href = window.location.pathname + '?b=' + data.existingBrandId;
+      return;
+    }
+    // R14 — Trial abuse: fingerprint detected existing trial from this browser
+    if (data.error === 'TRIAL_USED') {
+      const lang = detectLanguage();
+      alert(lang === 'en'
+        ? 'A trial was already created from this device. Please log in with your original email.'
+        : 'Ya se creó una cuenta trial desde este dispositivo. Inicia sesión con tu email original.');
       return;
     }
   } catch(e) {
@@ -4596,6 +4628,110 @@ function showCreatorFromCuenta() {
 function goEditBrand() {
   showCreatorFromCuenta();
   setTimeout(() => showScreen('setupScreen'), 100);
+}
+
+// ── Email Change Flow (Session 15 worker endpoints, Session 20 frontend) ──
+function updateChangeEmailDisplay() {
+  const el = document.getElementById('changeEmailCurrent');
+  if (el) el.textContent = authEmail || '';
+  // Reset to default state
+  const d = document.getElementById('changeEmailDefault');
+  const s1 = document.getElementById('changeEmailStep1');
+  const s2 = document.getElementById('changeEmailStep2');
+  if (d) d.style.display = '';
+  if (s1) s1.style.display = 'none';
+  if (s2) s2.style.display = 'none';
+}
+
+function showChangeEmailFlow() {
+  document.getElementById('changeEmailDefault').style.display = 'none';
+  document.getElementById('changeEmailStep1').style.display = '';
+  document.getElementById('changeEmailInput').value = '';
+  document.getElementById('changeEmailError1').textContent = '';
+  document.getElementById('changeEmailInput').focus();
+}
+
+function cancelChangeEmail() {
+  updateChangeEmailDisplay();
+}
+
+async function requestEmailChange() {
+  const newEmail = (document.getElementById('changeEmailInput').value || '').trim().toLowerCase();
+  const errEl = document.getElementById('changeEmailError1');
+  const btn = document.getElementById('changeEmailSendBtn');
+  if (!newEmail || !newEmail.includes('@')) {
+    errEl.textContent = detectLanguage() === 'es' ? 'Ingresa un email válido' : 'Enter a valid email';
+    return;
+  }
+  if (newEmail === (authEmail || '').toLowerCase()) {
+    errEl.textContent = detectLanguage() === 'es' ? 'Este ya es tu email actual' : 'This is already your current email';
+    return;
+  }
+  btn.disabled = true;
+  btn.textContent = '...';
+  errEl.textContent = '';
+  try {
+    const res = await fetch(WORKER, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ mode: 'request-email-change', newEmail })
+    });
+    const data = await res.json();
+    if (data.success) {
+      document.getElementById('changeEmailStep1').style.display = 'none';
+      document.getElementById('changeEmailStep2').style.display = '';
+      document.getElementById('changeEmailTarget').textContent = newEmail;
+      document.getElementById('changeEmailCode').value = '';
+      document.getElementById('changeEmailError2').textContent = '';
+      document.getElementById('changeEmailCode').focus();
+    } else {
+      errEl.textContent = data.error || (detectLanguage() === 'es' ? 'Error enviando código' : 'Error sending code');
+    }
+  } catch(e) {
+    errEl.textContent = detectLanguage() === 'es' ? 'Error de conexión' : 'Connection error';
+  }
+  btn.disabled = false;
+  btn.textContent = detectLanguage() === 'es' ? 'Enviar código' : 'Send code';
+}
+
+async function confirmEmailChange() {
+  const code = (document.getElementById('changeEmailCode').value || '').trim();
+  const errEl = document.getElementById('changeEmailError2');
+  const btn = document.getElementById('changeEmailConfirmBtn');
+  if (!code || code.length !== 6) {
+    errEl.textContent = detectLanguage() === 'es' ? 'Ingresa el código de 6 dígitos' : 'Enter the 6-digit code';
+    return;
+  }
+  btn.disabled = true;
+  btn.textContent = '...';
+  errEl.textContent = '';
+  try {
+    const res = await fetch(WORKER, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ mode: 'confirm-email-change', code })
+    });
+    const data = await res.json();
+    if (data.success) {
+      authEmail = data.newEmail || authEmail;
+      // Update brand in localStorage
+      const brand = JSON.parse(localStorage.getItem('postimity_brand_v1') || '{}');
+      if (brand && data.newEmail) {
+        brand.email = data.newEmail;
+        localStorage.setItem('postimity_brand_v1', JSON.stringify(brand));
+      }
+      updateChangeEmailDisplay();
+      showToast(detectLanguage() === 'es' ? '✅ Email actualizado' : '✅ Email updated', 4000);
+    } else {
+      errEl.textContent = data.error || (detectLanguage() === 'es' ? 'Código incorrecto' : 'Incorrect code');
+    }
+  } catch(e) {
+    errEl.textContent = detectLanguage() === 'es' ? 'Error de conexión' : 'Connection error';
+  }
+  btn.disabled = false;
+  btn.textContent = detectLanguage() === 'es' ? 'Confirmar' : 'Confirm';
 }
 
 // Fix #21 — Self-delete account (R08)
