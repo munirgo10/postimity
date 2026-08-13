@@ -246,7 +246,7 @@ async function doAuth(){
   document.getElementById('authScreen').style.display='none';
   document.getElementById('loadingScreen').style.display='block';
   try{
-    const resp=await fetch(WORKER+'/admin-stats?key='+encodeURIComponent(key));
+    const resp=await fetch(WORKER+'/admin-stats',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({adminKey:key})});
     if(resp.status===401){document.getElementById('loadingScreen').style.display='none';document.getElementById('authScreen').style.display='block';document.getElementById('authError').style.display='block';return}
     adminData=await resp.json();
     if(adminData.error)throw new Error(adminData.error);
