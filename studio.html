@@ -6396,6 +6396,9 @@ function checkDeepLink() {
     if(dlMode === 'carousel') {
       const ta = document.getElementById('carouselTopic');
       if(ta && dlPrompt) ta.value = decodeURIComponent(dlPrompt);
+    } else if(dlMode === 'video') {
+      const ta = document.getElementById('videoTopic');
+      if(ta && dlPrompt) ta.value = decodeURIComponent(dlPrompt);
     } else {
       if(dlPrompt) { const ta = document.getElementById('postText'); if(ta) ta.value = decodeURIComponent(dlPrompt); }
     }
