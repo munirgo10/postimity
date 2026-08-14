@@ -3815,8 +3815,9 @@ async function renderCarouselSlide(slide, brand, coverImageUrl, totalSlides) {
     ctx.fillText(brand?.name || '', W/2, H-30);
   }
 
-  // Logo overlay (top left for content/cta, top left for cover)
-  const logoSrc = logoB64 || brand?.logo;
+  // Logo overlay — respects logoToggle state
+  const logoChecked = document.getElementById('logoToggle')?.checked !== false;
+  const logoSrc = logoChecked ? (logoB64 || brand?.logo) : null;
   if(logoSrc) {
     try {
       const logo = await loadImg(logoSrc);
@@ -6625,11 +6626,11 @@ function showResult(data) {
   if(amtToggle) amtToggle.style.display = isCarousel ? 'none' : 'flex';
   // Reset adjust mode to text when showing new result
   setAdjustMode('text');
-  // Carousel: hide single-image controls (logo, watermark, download format buttons)
+  // Carousel: hide download format buttons (carousel uses ZIP), but KEEP logo/watermark toggles
   const logoToggle = document.querySelector('.logo-toggle');
-  if(logoToggle) logoToggle.style.display = isCarousel ? 'none' : '';
+  if(logoToggle) logoToggle.style.display = '';
   const wmRow = document.getElementById('wmToggleRow');
-  if(wmRow) wmRow.style.display = isCarousel ? 'none' : '';
+  if(wmRow) wmRow.style.display = '';
   const dlLabel = document.querySelector('.dl-label');
   if(dlLabel) dlLabel.style.display = isCarousel ? 'none' : '';
   const dlBtnsEl = document.querySelector('.dl-btns');
