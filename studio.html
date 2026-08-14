@@ -273,6 +273,10 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
 /* ─── ADJUST RESULT ────────────────────────────────── */
 .adjust-wrap{padding:12px 14px;border-top:.5px solid var(--bor);background:var(--bg)}
 .adjust-label{font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px}
+.adjust-mode-toggle{display:flex;gap:6px;margin-bottom:10px}
+.amt-btn{flex:1;padding:8px 12px;border-radius:9px;border:1.5px solid var(--bor);background:var(--w);font-size:12px;font-weight:700;cursor:pointer;color:var(--t3);transition:all .18s;text-align:center;font-family:inherit}
+.amt-btn:hover{border-color:var(--b);color:var(--b);background:var(--b3)}
+.amt-btn.active{border-color:var(--b);background:var(--b3);color:var(--b2)}
 .adjust-row{display:flex;gap:8px;margin-bottom:8px}
 .adjust-input{flex:1;padding:8px 12px;border-radius:9px;border:1.5px solid var(--bor);background:var(--w);font-size:12px;font-family:inherit;color:var(--t1)}
 .adjust-input:focus{border-color:var(--b);outline:none}
@@ -1833,17 +1837,32 @@ Ej: 'Wonderik es increíble. Mi hija de 3 años ya lee palabras cortas y su desa
       <!-- Adjust Result -->
       <div class="adjust-wrap" id="adjustWrap" style="display:none">
         <div class="adjust-label">✏️ Ajustar el contenido</div>
+        <!-- Adjust mode toggle: Text vs Image -->
+        <div class="adjust-mode-toggle" id="adjustModeToggle">
+          <button class="amt-btn active" id="amtText" onclick="setAdjustMode('text')">📝 Texto</button>
+          <button class="amt-btn" id="amtImage" onclick="setAdjustMode('image')">🖼️ Imagen</button>
+        </div>
         <div class="adjust-row">
           <input type="text" class="adjust-input" id="adjustInput" placeholder="Ej: hazlo más corto · más formal · agrega urgencia · cambia el CTA">
           <button class="adjust-btn" id="adjustBtn" onclick="adjustResult()">Aplicar</button>
         </div>
-        <div class="adjust-chips">
+        <!-- Text chips (default) -->
+        <div class="adjust-chips" id="adjustChipsText">
           <button class="adj-chip" onclick="setAdjust('Hazlo más corto, máximo 3 líneas')">Más corto</button>
           <button class="adj-chip" onclick="setAdjust('Tono más formal y profesional')">Más formal</button>
           <button class="adj-chip" onclick="setAdjust('Tono más cercano y conversacional')">Más cercano</button>
           <button class="adj-chip" onclick="setAdjust('Agrega más urgencia y llamada a la acción')">Más urgencia</button>
           <button class="adj-chip" onclick="setAdjust('Cambia el CTA por uno más directo')">Cambiar CTA</button>
           <button class="adj-chip" onclick="setAdjust('Añade 2-3 emojis relevantes')">+ Emojis</button>
+        </div>
+        <!-- Image chips (shown when image mode selected) -->
+        <div class="adjust-chips" id="adjustChipsImage" style="display:none">
+          <button class="adj-chip" onclick="setAdjust('Hazla más brillante y vibrante')">Más brillante</button>
+          <button class="adj-chip" onclick="setAdjust('Cambia el fondo a un color más llamativo')">Cambiar fondo</button>
+          <button class="adj-chip" onclick="setAdjust('Agrega más contraste y profundidad')">Más contraste</button>
+          <button class="adj-chip" onclick="setAdjust('Hazla más cálida con tonos dorados')">Más cálida</button>
+          <button class="adj-chip" onclick="setAdjust('Cambia el texto principal por OFERTA ESPECIAL')">Cambiar texto</button>
+          <button class="adj-chip" onclick="setAdjust('Simplifica la composición, menos elementos')">Simplificar</button>
         </div>
       </div>
 
@@ -2050,6 +2069,9 @@ const T = {
     adjustLabel:'✏️ Ajustar el contenido', adjustPlaceholder:'Ej: hazlo más corto · más formal · agrega urgencia · cambia el CTA', adjustBtn:'Aplicar',
     adjShorter:'Más corto', adjFormal:'Más formal', adjCloser:'Más cercano', adjUrgency:'Más urgencia', adjCTA:'Cambiar CTA', adjEmoji:'+ Emojis',
     adjShorterVal:'Hazlo más corto, máximo 3 líneas', adjFormalVal:'Tono más formal y profesional', adjCloserVal:'Tono más cercano y conversacional',
+    adjImgBrighter:'Más brillante', adjImgBg:'Cambiar fondo', adjImgContrast:'Más contraste', adjImgWarm:'Más cálida', adjImgText:'Cambiar texto', adjImgSimplify:'Simplificar',
+    adjImgBrighterVal:'Hazla más brillante y vibrante', adjImgBgVal:'Cambia el fondo a un color más llamativo', adjImgContrastVal:'Agrega más contraste y profundidad', adjImgWarmVal:'Hazla más cálida con tonos dorados', adjImgTextVal:'Cambia el texto principal por OFERTA ESPECIAL', adjImgSimplifyVal:'Simplifica la composición, menos elementos',
+    amtTextLabel:'📝 Texto', amtImageLabel:'🖼️ Imagen',
     adjUrgencyVal:'Agrega más urgencia y llamada a la acción', adjCTAVal:'Cambia el CTA por uno más directo', adjEmojiVal:'Añade 2-3 emojis relevantes',
     // ── Ad Brief ──
     adBriefToggle:'💡 ¿Vas a invertir dinero en este post? Ver recomendaciones de targeting',
@@ -2318,6 +2340,9 @@ const T = {
     adjShorter:'Shorter', adjFormal:'More formal', adjCloser:'More personal', adjUrgency:'More urgency', adjCTA:'Change CTA', adjEmoji:'+ Emojis',
     adjShorterVal:'Make it shorter, max 3 lines', adjFormalVal:'More formal and professional tone', adjCloserVal:'More personal and conversational tone',
     adjUrgencyVal:'Add more urgency and call to action', adjCTAVal:'Change the CTA to a more direct one', adjEmojiVal:'Add 2-3 relevant emojis',
+    adjImgBrighter:'Brighter', adjImgBg:'Change bg', adjImgContrast:'More contrast', adjImgWarm:'Warmer', adjImgText:'Change text', adjImgSimplify:'Simplify',
+    adjImgBrighterVal:'Make it brighter and more vibrant', adjImgBgVal:'Change the background to a more eye-catching color', adjImgContrastVal:'Add more contrast and depth', adjImgWarmVal:'Make it warmer with golden tones', adjImgTextVal:'Change the main text to SPECIAL OFFER', adjImgSimplifyVal:'Simplify the composition, fewer elements',
+    amtTextLabel:'📝 Text', amtImageLabel:'🖼️ Image',
     // ── Ad Brief ──
     adBriefToggle:'💡 Investing money on this post? See targeting recommendations',
     abAudience:'👥 Audience', abInterests:'🎯 Interests', abObjective:'🎯 Campaign objective', abDuration:'⏱️ Duration', abPlacements:'📱 Placements',
@@ -3878,10 +3903,39 @@ function downloadCarouselSlide(idx) {
 
 // ─── ADJUST RESULT ─────────────────────────────────────────────────────
 let lastGeneratedData = null; // stores last result for adjust
+let currentAdjustMode = 'text'; // 'text' or 'image'
 
 function setAdjust(text) {
   const inp = document.getElementById('adjustInput');
   if(inp) { inp.value = text; inp.focus(); }
+}
+
+function setAdjustMode(adjustModeVal) {
+  currentAdjustMode = adjustModeVal;
+  const isES = detectLanguage() === 'es';
+  const btnText = document.getElementById('amtText');
+  const btnImage = document.getElementById('amtImage');
+  const chipsText = document.getElementById('adjustChipsText');
+  const chipsImage = document.getElementById('adjustChipsImage');
+  const inp = document.getElementById('adjustInput');
+  if (adjustModeVal === 'image') {
+    if(btnText) btnText.classList.remove('active');
+    if(btnImage) btnImage.classList.add('active');
+    if(chipsText) chipsText.style.display = 'none';
+    if(chipsImage) chipsImage.style.display = 'flex';
+    if(inp) inp.placeholder = isES
+      ? 'Ej: hazla más brillante · cambia el fondo · más contraste · cambia el texto'
+      : 'E.g.: make it brighter · change the background · more contrast · change the text';
+  } else {
+    if(btnText) btnText.classList.add('active');
+    if(btnImage) btnImage.classList.remove('active');
+    if(chipsText) chipsText.style.display = 'flex';
+    if(chipsImage) chipsImage.style.display = 'none';
+    if(inp) inp.placeholder = isES
+      ? 'Ej: hazlo más corto · más formal · agrega urgencia · cambia el CTA'
+      : 'E.g.: make it shorter · more formal · add urgency · change the CTA';
+  }
+  if(inp) { inp.value = ''; inp.focus(); }
 }
 
 async function adjustResult() {
@@ -3893,37 +3947,69 @@ async function adjustResult() {
 
   const btn = document.getElementById('adjustBtn');
   const btnOrig = btn ? btn.textContent : '';
-  if(btn) { btn.disabled = true; btn.textContent = detectLanguage()==='en' ? '⏳ Adjusting...' : '⏳ Ajustando...'; }
+  const isES = detectLanguage() === 'es';
 
-  try {
-    const currentIG = document.getElementById('igCap')?.textContent || '';
-    const currentFB = document.getElementById('fbCap')?.textContent || '';
-    const currentTT = document.getElementById('ttCap')?.textContent || '';
-
-    const res = await fetch(WORKER,{ method:'POST', headers:{'Content-Type':'application/json'}, credentials:'include',
-      body: JSON.stringify({
-        mode: 'adjust',
+  if (currentAdjustMode === 'image') {
+    // ── IMAGE ADJUST: edit existing image via OpenAI Edit API ──
+    const imgEl = document.getElementById('resultImg');
+    const imageUrl = imgEl?.src;
+    if (!imageUrl || imageUrl === window.location.href) {
+      showToast(isES ? 'No hay imagen para ajustar' : 'No image to adjust');
+      return;
+    }
+    if(btn) { btn.disabled = true; btn.textContent = isES ? '⏳ Editando imagen...' : '⏳ Editing image...'; }
+    try {
+      const res = await postWithTimeout({
+        mode: 'adjust-image',
+        imageUrl,
         adjustment,
-        currentCaptions: { instagram: currentIG, facebook: currentFB, tiktok: currentTT },
-        brandGuide: bg,
-        brandData: brand,
-        pillar,
-        platform
-      })
-    });
-    const data = await res.json();
-    if(!data.success) throw new Error(data.error || 'Error al ajustar');
+        brandData: brand
+      });
+      if (res.imageUrl) {
+        imgEl.src = res.imageUrl;
+        if (lastResult) lastResult.imageUrl = res.imageUrl;
+        if (lastGeneratedData) lastGeneratedData.imageUrl = res.imageUrl;
+      }
+      document.getElementById('adjustInput').value = '';
+      showToast(isES ? '✅ Imagen ajustada' : '✅ Image adjusted');
+      updateGenCounter();
+    } catch(e) {
+      showToast('Error: ' + e.message);
+    } finally {
+      if(btn) { btn.disabled = false; btn.textContent = t('adjustBtn'); }
+    }
+  } else {
+    // ── TEXT ADJUST: refine captions (existing behavior) ──
+    if(btn) { btn.disabled = true; btn.textContent = isES ? '⏳ Ajustando...' : '⏳ Adjusting...'; }
+    try {
+      const currentIG = document.getElementById('igCap')?.textContent || '';
+      const currentFB = document.getElementById('fbCap')?.textContent || '';
+      const currentTT = document.getElementById('ttCap')?.textContent || '';
 
-    // Update captions in place (don't touch image)
-    if(data.instagram) document.getElementById('igCap').textContent = data.instagram.caption || '';
-    if(data.facebook) document.getElementById('fbCap').textContent = data.facebook.caption || '';
-    if(data.tiktok) document.getElementById('ttCap').textContent = data.tiktok.caption || '';
-    document.getElementById('adjustInput').value = '';
-    showToast(t('toastAdjusted'));
-  } catch(e) {
-    showToast('Error: ' + e.message);
-  } finally {
-    if(btn) { btn.disabled = false; btn.textContent = t('adjustBtn'); }
+      const res = await fetch(WORKER,{ method:'POST', headers:{'Content-Type':'application/json'}, credentials:'include',
+        body: JSON.stringify({
+          mode: 'adjust',
+          adjustment,
+          currentCaptions: { instagram: currentIG, facebook: currentFB, tiktok: currentTT },
+          brandGuide: bg,
+          brandData: brand,
+          pillar,
+          platform
+        })
+      });
+      const data = await res.json();
+      if(!data.success) throw new Error(data.error || 'Error al ajustar');
+
+      if(data.instagram) document.getElementById('igCap').textContent = data.instagram.caption || '';
+      if(data.facebook) document.getElementById('fbCap').textContent = data.facebook.caption || '';
+      if(data.tiktok) document.getElementById('ttCap').textContent = data.tiktok.caption || '';
+      document.getElementById('adjustInput').value = '';
+      showToast(t('toastAdjusted'));
+    } catch(e) {
+      showToast('Error: ' + e.message);
+    } finally {
+      if(btn) { btn.disabled = false; btn.textContent = t('adjustBtn'); }
+    }
   }
 }
 
@@ -4450,6 +4536,10 @@ function showVideoResult(videoUrl, topic, captionsData) {
   // Show adjust bar (for caption adjustments — video itself doesn't regenerate)
   const adjWrap = document.getElementById('adjustWrap');
   if(adjWrap) adjWrap.style.display = 'block';
+  // Video: force text-only adjust (can't edit video frames)
+  const amtToggle = document.getElementById('adjustModeToggle');
+  if(amtToggle) amtToggle.style.display = 'none';
+  setAdjustMode('text');
 
   // Set regen buttons for video
   const regenBtns = document.querySelector('.regen-btns');
@@ -6158,13 +6248,23 @@ function applyBilingualUI() {
   const adjLbl = document.querySelector('.adjust-label'); if(adjLbl) adjLbl.textContent = t('adjustLabel');
   sp('adjustInput','adjustPlaceholder');
   st('adjustBtn','adjustBtn');
-  const adjChips = document.querySelectorAll('.adj-chip');
+  const adjChipsText = document.querySelectorAll('#adjustChipsText .adj-chip');
   const adjTextKeys = ['adjShorter','adjFormal','adjCloser','adjUrgency','adjCTA','adjEmoji'];
   const adjValKeys = ['adjShorterVal','adjFormalVal','adjCloserVal','adjUrgencyVal','adjCTAVal','adjEmojiVal'];
-  adjChips.forEach((chip, i) => {
+  adjChipsText.forEach((chip, i) => {
     if(adjTextKeys[i]) chip.textContent = t(adjTextKeys[i]);
     if(adjValKeys[i]) chip.setAttribute('onclick', "setAdjust('" + t(adjValKeys[i]).replace(/'/g,"\\'") + "')");
   });
+  const adjChipsImg = document.querySelectorAll('#adjustChipsImage .adj-chip');
+  const adjImgKeys = ['adjImgBrighter','adjImgBg','adjImgContrast','adjImgWarm','adjImgText','adjImgSimplify'];
+  const adjImgValKeys = ['adjImgBrighterVal','adjImgBgVal','adjImgContrastVal','adjImgWarmVal','adjImgTextVal','adjImgSimplifyVal'];
+  adjChipsImg.forEach((chip, i) => {
+    if(adjImgKeys[i]) chip.textContent = t(adjImgKeys[i]);
+    if(adjImgValKeys[i]) chip.setAttribute('onclick', "setAdjust('" + t(adjImgValKeys[i]).replace(/'/g,"\\'") + "')");
+  });
+  // Adjust mode toggle button labels
+  const amtText = document.getElementById('amtText'); if(amtText) amtText.textContent = t('amtTextLabel');
+  const amtImage = document.getElementById('amtImage'); if(amtImage) amtImage.textContent = t('amtImageLabel');
   // Ad Brief
   const abToggle = document.querySelector('.ab-toggle span:first-child'); if(abToggle) abToggle.textContent = t('adBriefToggle');
   const abKeys = document.querySelectorAll('.ab-k');
@@ -6516,8 +6616,13 @@ function showResult(data) {
   if(adjWrap) adjWrap.style.display = 'block';
   const pubSec = document.getElementById('pubSection');
   if(pubSec) pubSec.style.display = 'block';
-  // Carousel: hide single-image controls (logo, watermark, download format buttons)
+  // Adjust mode toggle: show for single-image modes, hide for carousel
   const isCarousel = (mode === 'carousel');
+  const amtToggle = document.getElementById('adjustModeToggle');
+  if(amtToggle) amtToggle.style.display = isCarousel ? 'none' : 'flex';
+  // Reset adjust mode to text when showing new result
+  setAdjustMode('text');
+  // Carousel: hide single-image controls (logo, watermark, download format buttons)
   const logoToggle = document.querySelector('.logo-toggle');
   if(logoToggle) logoToggle.style.display = isCarousel ? 'none' : '';
   const wmRow = document.getElementById('wmToggleRow');
@@ -7123,6 +7228,10 @@ function resetCreator() {
   if(videoDlBtn) videoDlBtn.remove();
   const resultImg = document.getElementById('resultImg');
   if(resultImg) resultImg.style.display = '';
+  // Restore adjust mode toggle (video mode hides it)
+  const amtToggle = document.getElementById('adjustModeToggle');
+  if(amtToggle) amtToggle.style.display = 'flex';
+  currentAdjustMode = 'text';
   // Restore image-specific controls that video may have hidden
   const logoToggle = document.querySelector('.logo-toggle');
   if(logoToggle) logoToggle.style.display = '';
