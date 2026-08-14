@@ -1764,7 +1764,7 @@ Ej: 'Wonderik es increíble. Mi hija de 3 años ya lee palabras cortas y su desa
             <div class="wm-toggle-row" id="wmToggleRow">
               <span class="wm-label">✦ Watermark Postimity <span class="wm-lock" id="wmLockBadge">Growth+ para quitar</span></span>
               <label class="lt-switch" id="wmToggleWrap" style="display:none">
-                <input type="checkbox" id="wmToggle" checked>
+                <input type="checkbox" id="wmToggle" checked onchange="redrawCanvas()">
                 <span class="lt-slider"></span>
               </label>
             </div>
@@ -2509,6 +2509,7 @@ let mode = 'post', platform = 'instagram', pillar = 'General', flyerMode = 'ai',
 let brandId = null; // Phase 2: unique brand identifier for KV sync
 let genCount = 0;   // Phase 2: generation counter for plan limits
 let logoB64 = null, enhanceB64 = null, enhanceMime = 'image/jpeg';
+let originalImageUrl = null; // S23: stores clean image URL for live preview redraws
 let flyerPhotoB64 = null, flyerPhotoMime = 'image/jpeg';
 let testPhotoB64 = null, testPhotoMime = 'image/jpeg';
 let lastResult = null, lastInput = null;
@@ -4492,9 +4493,10 @@ function showVideoResult(videoUrl, topic, captionsData) {
     });
   }
 
-  // Add download video button above publish section
+  // Add download video button above publish section (remove old one first for video→video transition)
   let videoDlBtn = document.getElementById('videoDlBtn');
-  if(!videoDlBtn && imgControls) {
+  if(videoDlBtn) videoDlBtn.remove();
+  if(imgControls) {
     videoDlBtn = document.createElement('a');
     videoDlBtn.id = 'videoDlBtn';
     videoDlBtn.href = videoUrl;
@@ -4505,8 +4507,13 @@ function showVideoResult(videoUrl, topic, captionsData) {
     imgControls.insertBefore(videoDlBtn, imgControls.firstChild);
   }
 
-  // Hide carousel preview and key quote
-  ['carouselPreviewWrap','keyQuoteWrap'].forEach(id => { const el=document.getElementById(id); if(el) el.style.display='none'; });
+  // Hide carousel preview and key quote — aggressive cleanup
+  ['carouselPreviewWrap','keyQuoteWrap'].forEach(id => { const el=document.getElementById(id); if(el) { el.style.display='none'; } });
+  // Also clear carousel slides content to prevent any re-show issues
+  const csp = document.getElementById('carouselSlidesPreview');
+  if(csp) csp.innerHTML = '';
+  const csDots = document.getElementById('csDots');
+  if(csDots) csDots.innerHTML = '';
   const photoDesc = document.getElementById('photoDescBar');
   if(photoDesc) photoDesc.classList.remove('show');
 
@@ -6613,6 +6620,7 @@ function showResult(data) {
   const staleVDL = document.getElementById('videoDlBtn');
   if(staleVDL) staleVDL.remove();
   resultImg.src=data.imageUrl||'';
+  originalImageUrl = data.imageUrl || null; // S23: store for live preview
   const pd=document.getElementById('photoDescBar');
   if(data.photoDescription){ pd.textContent='📷 '+data.photoDescription; pd.classList.add('show'); } else pd.classList.remove('show');
   // Show adjust + publish for ALL modes (including carousel)
@@ -6701,6 +6709,8 @@ function showResult(data) {
   // Show results
   document.getElementById('resultWrap').classList.add('show');
   document.getElementById('resultWrap').scrollIntoView({ behavior:'smooth', block:'start' });
+  // S23: Draw logo/watermark overlay on preview image
+  if (!isCarousel) { setTimeout(() => redrawCanvas(), 100); }
   // Increment generation counter
   const gmk = genMonthKey();
   localStorage.setItem(gmk, String(parseInt(localStorage.getItem(gmk)||'0') + 1));
@@ -7041,7 +7051,96 @@ async function downloadImg(format) {
   canvas.toBlob(blob=>{ const brd=loadBrand(); const sl=(brd?.name||'postimity').toLowerCase().replace(/[^a-z0-9]+/g,'-').slice(0,20); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=sl+'-'+format+'-'+Date.now()+'.jpg'; a.click(); setTimeout(()=>URL.revokeObjectURL(url),1000); },'image/jpeg',.93);
 }
 
-async function redrawCanvas() { /* visual refresh only — logo toggle affects download */ }
+async function redrawCanvas() {
+  // S23: Live preview of logo/watermark toggles
+  // Only applies to single-image modes (Post, Enhance, Flyer, Testimonial)
+  if (!originalImageUrl) return;
+  if (mode === 'carousel' || mode === 'video') {
+    // Carousel: re-render all slides with current toggle states
+    if (mode === 'carousel' && lastGeneratedData?.slides) {
+      const brand = loadBrand();
+      const preview = document.getElementById('carouselSlidesPreview');
+      if (!preview || !brand) return;
+      preview.innerHTML = '';
+      const dots = document.getElementById('csDots');
+      if (dots) dots.innerHTML = '';
+      for (let i = 0; i < lastGeneratedData.slides.length; i++) {
+        const slide = lastGeneratedData.slides[i];
+        const canvas = await renderCarouselSlide(slide, brand, lastGeneratedData.imageUrl, lastGeneratedData.slides.length);
+        const thumb = document.createElement('div');
+        thumb.className = 'cs-slide';
+        thumb.innerHTML = '<span class="cs-num">' + (i + 1) + '</span>';
+        const img = document.createElement('img');
+        img.src = canvas.toDataURL('image/jpeg', 0.85);
+        img.onclick = () => { document.getElementById('resultImg').src = img.src; };
+        thumb.prepend(img);
+        preview.appendChild(thumb);
+        if (dots) { const d = document.createElement('span'); d.className = 'cs-dot' + (i === 0 ? ' active' : ''); dots.appendChild(d); }
+      }
+    }
+    return;
+  }
+
+  const resultImg = document.getElementById('resultImg');
+  if (!resultImg) return;
+
+  const brand = loadBrand();
+  const showLogo = document.getElementById('logoToggle')?.checked !== false;
+  const logoSrc = showLogo ? (logoB64 || brand?.logo) : null;
+  const wmToggleEl = document.getElementById('wmToggle');
+  const wmOff = wmToggleEl && !wmToggleEl.checked;
+  const wmPlan = brand?.plan || 'trial';
+  const showWm = !(['growth', 'agency'].includes(wmPlan) && wmOff);
+
+  // If no overlays needed, show original
+  if (!logoSrc && !showWm) {
+    resultImg.src = originalImageUrl;
+    return;
+  }
+
+  try {
+    const img = await loadImg(originalImageUrl);
+    if (!img) return;
+    const canvas = document.createElement('canvas');
+    canvas.width = img.naturalWidth || img.width;
+    canvas.height = img.naturalHeight || img.height;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0);
+
+    // Logo
+    if (logoSrc) {
+      try {
+        const logo = await loadImg(logoSrc);
+        if (logo) {
+          const sz = Math.round(canvas.width * 0.13);
+          const x = canvas.width - sz - 20, y = canvas.height - sz - 20;
+          ctx.save();
+          ctx.beginPath(); ctx.arc(x + sz / 2, y + sz / 2, sz / 2 + 6, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(255,255,255,0.92)'; ctx.fill();
+          ctx.beginPath(); ctx.arc(x + sz / 2, y + sz / 2, sz / 2, 0, Math.PI * 2); ctx.clip();
+          ctx.drawImage(logo, x, y, sz, sz); ctx.restore();
+        }
+      } catch(e) { /* silent */ }
+    }
+
+    // Watermark
+    if (showWm) {
+      const wmText = '✦ postimity.com';
+      const wfs = Math.round(canvas.width * 0.021);
+      ctx.font = '600 ' + wfs + 'px -apple-system,sans-serif';
+      const wtw = ctx.measureText(wmText).width;
+      const wpw = wtw + 20, wph = wfs + 12;
+      const wpx = canvas.width - wpw - 16, wpy = canvas.height - wph - 16;
+      ctx.save();
+      ctx.fillStyle = 'rgba(0,0,0,0.42)'; ctx.beginPath();
+      if (ctx.roundRect) ctx.roundRect(wpx, wpy, wpw, wph, 6); else ctx.rect(wpx, wpy, wpw, wph);
+      ctx.fill(); ctx.fillStyle = 'rgba(255,255,255,0.88)'; ctx.textBaseline = 'middle';
+      ctx.fillText(wmText, wpx + 10, wpy + wph / 2); ctx.restore();
+    }
+
+    resultImg.src = canvas.toDataURL('image/jpeg', 0.92);
+  } catch(e) { /* silent — keep current preview */ }
+}
 
 async function composeFlyerCanvas(photoB64, photoMime, fd, brand) {
   const W=1080, H=1080;
