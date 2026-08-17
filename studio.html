@@ -1904,7 +1904,7 @@ Ej: 'Wonderik es increíble. Mi hija de 3 años ya lee palabras cortas y su desa
 // ═══════════════════════════════════════════════════════
 // CONFIG
 // ═══════════════════════════════════════════════════════
-const POSTIMITY_VERSION = '2.17.0'; // Aug 17 2026 — Session 25: Stripe Checkout integration, video cross-mode fix, manage subscription portal
+const POSTIMITY_VERSION = '2.17.1'; // Aug 17 2026 — Session 25: Stripe Checkout, video display fix (resultWrap.show), cross-mode clearing
 console.log('Postimity Studio v' + POSTIMITY_VERSION);
 
 // ── GLOBAL ERROR HANDLER — prevents silent failures ──
@@ -3511,8 +3511,10 @@ function setMode(m) {
   if(gToggle) gToggle.checked = false;
   // S25: Clear video results when switching AWAY from video mode to prevent cross-mode contamination
   if(m !== 'video') {
-    const vr = document.getElementById('videoResultSection');
-    if(vr) vr.innerHTML = '';
+    const vp = document.getElementById('videoPlayerWrap');
+    if(vp) vp.remove();
+    const vdl = document.getElementById('videoDlBtn');
+    if(vdl) vdl.remove();
   }
   // S25: Clear carousel content area when switching away from carousel
   if(m !== 'carousel') {
@@ -4437,6 +4439,9 @@ function showVideoResult(videoUrl, topic, captionsData) {
   // Hide loading
   const loadWrap = document.getElementById('loadWrap');
   if(loadWrap) loadWrap.classList.remove('show');
+  // S25 FIX: Show resultWrap — was missing, causing video to generate but never display
+  const resultWrap = document.getElementById('resultWrap');
+  if(resultWrap) { resultWrap.classList.add('show'); resultWrap.scrollIntoView({ behavior:'smooth', block:'start' }); }
   // B3 (Session 18): Meta Pixel — track video generation
   if(typeof fbq==='function') {
     fbq('track', 'ViewContent', { content_name: 'video', content_category: pillar, content_type: 'video' });
