@@ -1904,7 +1904,7 @@ Ej: 'Wonderik es increíble. Mi hija de 3 años ya lee palabras cortas y su desa
 // ═══════════════════════════════════════════════════════
 // CONFIG
 // ═══════════════════════════════════════════════════════
-const POSTIMITY_VERSION = '2.17.2'; // Aug 17 2026 — Session 25: Stripe Checkout, video cross-mode clearing, resultWrap duplicate fix
+const POSTIMITY_VERSION = '2.17.3'; // Aug 17 2026 — Session 25: Stripe, video polling error visibility fix, showUpgradeInfo screen ID fix
 console.log('Postimity Studio v' + POSTIMITY_VERSION);
 
 // ── GLOBAL ERROR HANDLER — prevents silent failures ──
@@ -4415,7 +4415,17 @@ function startVideoPolling(requestId, endpoint, statusUrl, responseUrl, brand, t
           const vkUsed = parseInt(localStorage.getItem(videoMonthKey()) || '0');
           localStorage.setItem(videoMonthKey(), String(vkUsed + 1));
           // Show video result — unwrap captionsBox (by now the fetch should have completed)
-          showVideoResult(data.videoUrl, topic, captionsBox.data);
+          try {
+            showVideoResult(data.videoUrl, topic, captionsBox.data);
+          } catch(renderErr) {
+            console.error('showVideoResult error:', renderErr);
+            // Still show the video even if UI rendering partially fails
+            const rw = document.getElementById('resultWrap');
+            if(rw) { rw.classList.add('show'); rw.scrollIntoView({ behavior:'smooth', block:'start' }); }
+            const lw = document.getElementById('loadWrap');
+            if(lw) lw.classList.remove('show');
+            showToast(detectLanguage()==='es' ? '⚠️ Video generado pero hubo un error de visualización: ' + renderErr.message : '⚠️ Video generated but display error: ' + renderErr.message, 8000);
+          }
         } else {
           // Video completed but URL missing — show debug
           showLoading(false);
@@ -4430,7 +4440,8 @@ function startVideoPolling(requestId, endpoint, statusUrl, responseUrl, brand, t
       }
       // IN_QUEUE or IN_PROGRESS — keep polling
     } catch(e) {
-      // Network error — keep trying
+      // Network error during polling — keep trying (don't break the interval)
+      console.warn('Video polling network error:', e.message);
     }
   }, 5000);
 }
