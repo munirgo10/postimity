@@ -1904,7 +1904,7 @@ Ej: 'Wonderik es increíble. Mi hija de 3 años ya lee palabras cortas y su desa
 // ═══════════════════════════════════════════════════════
 // CONFIG
 // ═══════════════════════════════════════════════════════
-const POSTIMITY_VERSION = '2.17.1'; // Aug 17 2026 — Session 25: Stripe Checkout, video display fix (resultWrap.show), cross-mode clearing
+const POSTIMITY_VERSION = '2.17.2'; // Aug 17 2026 — Session 25: Stripe Checkout, video cross-mode clearing, resultWrap duplicate fix
 console.log('Postimity Studio v' + POSTIMITY_VERSION);
 
 // ── GLOBAL ERROR HANDLER — prevents silent failures ──
@@ -4439,9 +4439,6 @@ function showVideoResult(videoUrl, topic, captionsData) {
   // Hide loading
   const loadWrap = document.getElementById('loadWrap');
   if(loadWrap) loadWrap.classList.remove('show');
-  // S25 FIX: Show resultWrap — was missing, causing video to generate but never display
-  const resultWrap = document.getElementById('resultWrap');
-  if(resultWrap) { resultWrap.classList.add('show'); resultWrap.scrollIntoView({ behavior:'smooth', block:'start' }); }
   // B3 (Session 18): Meta Pixel — track video generation
   if(typeof fbq==='function') {
     fbq('track', 'ViewContent', { content_name: 'video', content_category: pillar, content_type: 'video' });
@@ -5404,9 +5401,9 @@ async function postJSON(body) {
 }
 
 function showUpgradeInfo() {
-  // S25: Open the plan dashboard which already has upgrade buttons
-  const dashEl = document.getElementById('dashScreen');
-  if(dashEl) { showScreen('dashScreen'); loadDashboard(); }
+  // S25: Navigate to dashboard which has plan upgrade buttons
+  const dashEl = document.getElementById('cuentaScreen');
+  if(dashEl) { showScreen('cuentaScreen'); loadDashboard(); }
 }
 
 async function activatePlan(planKey) {
