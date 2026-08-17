@@ -2091,7 +2091,7 @@ const T = {
     dashBrandTitle:'🏢 Mi marca', dashEditBG:'✏️ Editar Brand Guide',
     dashBrandBusiness:'Negocio', dashBrandTypeLocation:'Tipo y ubicación', dashBrandWA:'WhatsApp', dashBrandID:'Brand ID',
     dashNoBrand:'No hay marca configurada',
-    dashPlansTitle:'⬆️ Mejora tu plan', dashStripeNote:'Los pagos se activarán próximamente con Stripe',
+    dashPlansTitle:'⬆️ Mejora tu plan', dashManageSub:'Gestionar suscripción',
     dashUpgradeToast:'💳 Pagos con Stripe — disponibles muy pronto. ¡Gracias por tu paciencia!',
     dashTrialDays:'⏳ Quedan <strong>{n} días</strong> de trial', dashMaxPlan:'✅ Estás en el plan máximo', dashCurrentPlan:'Plan actual',
     dashNoVideo:'Sin video',
@@ -2361,7 +2361,7 @@ const T = {
     dashBrandTitle:'🏢 My brand', dashEditBG:'✏️ Edit Brand Guide',
     dashBrandBusiness:'Business', dashBrandTypeLocation:'Type & location', dashBrandWA:'WhatsApp', dashBrandID:'Brand ID',
     dashNoBrand:'No brand configured',
-    dashPlansTitle:'⬆️ Upgrade your plan', dashStripeNote:'Payments will be enabled soon with Stripe',
+    dashPlansTitle:'⬆️ Upgrade your plan', dashManageSub:'Manage subscription',
     dashUpgradeToast:'💳 Stripe payments — coming very soon. Thanks for your patience!',
     dashTrialDays:'⏳ <strong>{n} days</strong> of trial remaining', dashMaxPlan:'✅ You are on the top plan', dashCurrentPlan:'Current plan',
     dashNoVideo:'No video',
@@ -3009,6 +3009,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   updateGenCounter();
   updateLangToggleUI(detectLanguage());
   checkDeepLink();
+  handleStripeRedirect(); // S25: Handle Stripe payment redirect results
   initSetupScrollTracking();
   initGalleryUpload();
   // Pre-load gallery data for toggle state
@@ -3508,6 +3509,16 @@ function setMode(m) {
   gallerySelectedPhoto = null;
   const gToggle = document.getElementById('galleryToggle');
   if(gToggle) gToggle.checked = false;
+  // S25: Clear video results when switching AWAY from video mode to prevent cross-mode contamination
+  if(m !== 'video') {
+    const vr = document.getElementById('videoResultSection');
+    if(vr) vr.innerHTML = '';
+  }
+  // S25: Clear carousel content area when switching away from carousel
+  if(m !== 'carousel') {
+    const cr = document.getElementById('carouselResult');
+    if(cr) cr.innerHTML = '';
+  }
 }
 
 function showUpsell(lockedMode) {
@@ -5388,38 +5399,113 @@ async function postJSON(body) {
 }
 
 function showUpgradeInfo() {
-  showToast(t('dashUpgradeToast'));
+  // S25: Open the plan dashboard which already has upgrade buttons
+  const dashEl = document.getElementById('dashScreen');
+  if(dashEl) { showScreen('dashScreen'); loadDashboard(); }
 }
 
-function activatePlan(planKey) {
+async function activatePlan(planKey) {
   const isES = detectLanguage() === 'es';
+  const validPlans = ['starter', 'growth', 'agency'];
+  if (!validPlans.includes(planKey)) return;
+  const currency = isES ? 'mxn' : 'usd';
   const planNames = { starter: 'Starter', growth: 'Growth', agency: 'Agency' };
   const prices = isES
     ? { starter: '$149 MXN/mes', growth: '$349 MXN/mes', agency: '$799 MXN/mes' }
     : { starter: '$9 USD/mo', growth: '$19 USD/mo', agency: '$45 USD/mo' };
-  // Pre-Stripe: show confirmation with plan details
-  const msg = isES
-    ? `🚀 Plan ${planNames[planKey]} — ${prices[planKey]}\n\nPagos con Stripe estarán disponibles muy pronto.\n¿Quieres que te notifiquemos cuando esté listo?`
-    : `🚀 ${planNames[planKey]} Plan — ${prices[planKey]}\n\nStripe payments will be available very soon.\nWant us to notify you when it's ready?`;
-  if(confirm(msg)) {
-    // Save interest for follow-up
-    const brand = loadBrand();
-    fetch(WORKER, {
+
+  // Show payment method selection for MXN
+  let paymentMethod = 'card';
+  if (currency === 'mxn') {
+    const choice = confirm(
+      isES
+        ? `💳 Plan ${planNames[planKey]} — ${prices[planKey]}\n\n¿Pagar con tarjeta?\n\n• OK = Tarjeta de crédito/débito (suscripción automática)\n• Cancelar = Ver opción OXXO (pago único mensual)`
+        : `💳 ${planNames[planKey]} Plan — ${prices[planKey]}\n\nPay with card?\n\n• OK = Credit/debit card (auto-renewal)\n• Cancel = See OXXO option (monthly one-time)`
+    );
+    if (!choice) {
+      const oxxoConfirm = confirm(
+        isES
+          ? `🏪 Pago en OXXO — ${prices[planKey]}\n\nSe generará un voucher para pagar en cualquier OXXO.\nTu plan se activa por 30 días.\nTe avisaremos 5 días antes de que expire.\n\n¿Continuar?`
+          : `🏪 OXXO Payment — ${prices[planKey]}\n\nA payment voucher will be generated.\nYour plan activates for 30 days.\nWe'll remind you 5 days before expiry.\n\nContinue?`
+      );
+      if (!oxxoConfirm) return;
+      paymentMethod = 'oxxo';
+    }
+  }
+
+  // Show loading state
+  showToast(isES ? '⏳ Conectando con Stripe...' : '⏳ Connecting to Stripe...', 5000);
+
+  try {
+    const res = await fetch(WORKER, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
       body: JSON.stringify({
-        mode: 'submit-feedback',
-        type: 'suggestion',
-        category: 'billing',
-        message: 'Interested in activating plan: ' + planKey + ' (' + prices[planKey] + ')',
+        mode: 'create-checkout',
+        plan: planKey,
+        currency: currency,
+        paymentMethod: paymentMethod,
         brandId: brandId || null,
-        brandName: brand?.name || null,
-        email: brand?.email || null,
-        plan: brand?.plan || 'trial',
       }),
-    }).catch(() => {});
-    showToast(isES ? '✅ Te notificaremos cuando los pagos estén activos' : '✅ We\'ll notify you when payments are active');
+    });
+    const data = await res.json();
+    if (data.checkoutUrl) {
+      // Redirect to Stripe Checkout
+      window.location.href = data.checkoutUrl;
+    } else {
+      showToast(isES ? '❌ Error: ' + (data.error || 'No se pudo crear la sesión de pago') : '❌ Error: ' + (data.error || 'Could not create checkout session'));
+    }
+  } catch(e) {
+    showToast(isES ? '❌ Error de conexión. Intenta de nuevo.' : '❌ Connection error. Please try again.');
+  }
+}
+
+async function openStripePortal() {
+  const isES = detectLanguage() === 'es';
+  showToast(isES ? '⏳ Abriendo portal de facturación...' : '⏳ Opening billing portal...', 5000);
+  try {
+    const res = await fetch(WORKER, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ mode: 'create-portal', brandId: brandId || null }),
+    });
+    const data = await res.json();
+    if (data.portalUrl) {
+      window.location.href = data.portalUrl;
+    } else {
+      showToast(isES ? '❌ ' + (data.error || 'No se pudo abrir el portal') : '❌ ' + (data.error || 'Could not open portal'));
+    }
+  } catch(e) {
+    showToast(isES ? '❌ Error de conexión' : '❌ Connection error');
+  }
+}
+
+// S25: Handle Stripe redirect results
+function handleStripeRedirect() {
+  const params = new URLSearchParams(window.location.search);
+  const payment = params.get('payment');
+  const portal = params.get('portal');
+  if (payment === 'success') {
+    const plan = params.get('plan') || '';
+    const isES = detectLanguage() === 'es';
+    setTimeout(() => {
+      showToast(isES ? '🎉 ¡Pago exitoso! Tu plan ' + plan.charAt(0).toUpperCase() + plan.slice(1) + ' está activo.' : '🎉 Payment successful! Your ' + plan.charAt(0).toUpperCase() + plan.slice(1) + ' plan is now active.', 8000);
+    }, 1500);
+    // Clean URL
+    window.history.replaceState({}, '', window.location.pathname + '?b=' + (params.get('b') || brandId || ''));
+    // Refresh brand data to get updated plan
+    setTimeout(() => { checkAuth(); }, 2000);
+  } else if (payment === 'cancelled') {
+    const isES = detectLanguage() === 'es';
+    setTimeout(() => {
+      showToast(isES ? 'Pago cancelado. Puedes intentar de nuevo cuando quieras.' : 'Payment cancelled. You can try again anytime.', 5000);
+    }, 1500);
+    window.history.replaceState({}, '', window.location.pathname + '?b=' + (params.get('b') || brandId || ''));
+  } else if (portal === 'returned') {
+    setTimeout(() => { checkAuth(); }, 1000);
+    window.history.replaceState({}, '', window.location.pathname + '?b=' + (params.get('b') || brandId || ''));
   }
 }
 
@@ -6313,7 +6399,15 @@ function applyBilingualUI() {
   const brandCardTitle = document.querySelector('.brand-card-title'); if(brandCardTitle) brandCardTitle.textContent = t('dashBrandTitle');
   const brandEditBtn = document.querySelector('.brand-edit-btn'); if(brandEditBtn) brandEditBtn.textContent = t('dashEditBG');
   const plansTitle = document.querySelectorAll('.brand-card-title')[1]; if(plansTitle) plansTitle.textContent = t('dashPlansTitle');
-  const stripeNote = document.querySelector('.pricing-grid + div'); if(stripeNote) stripeNote.textContent = t('dashStripeNote');
+  const stripeNote = document.querySelector('.pricing-grid + div');
+  if(stripeNote) {
+    const plan = getUserPlan();
+    if(plan !== 'trial') {
+      stripeNote.innerHTML = '<a href="#" onclick="openStripePortal();return false;" style="color:var(--p);font-weight:600;text-decoration:underline;cursor:pointer">' + t('dashManageSub') + '</a>';
+    } else {
+      stripeNote.textContent = '';
+    }
+  }
 
   // ── History ──
   const histTitleEl = document.querySelector('.hist-title'); if(histTitleEl) histTitleEl.textContent = t('histTitle');
