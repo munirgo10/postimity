@@ -1904,7 +1904,7 @@ Ej: 'Wonderik es increíble. Mi hija de 3 años ya lee palabras cortas y su desa
 // ═══════════════════════════════════════════════════════
 // CONFIG
 // ═══════════════════════════════════════════════════════
-const POSTIMITY_VERSION = '2.17.4'; // Aug 17 2026 — Session 25: Stripe, video brand fix, carousel nicheData fix, polling error visibility
+const POSTIMITY_VERSION = '2.17.5'; // Aug 17 2026 — Session 25: Stripe, plan sync from server, upgrade CTA, all bug fixes
 console.log('Postimity Studio v' + POSTIMITY_VERSION);
 
 // ── GLOBAL ERROR HANDLER — prevents silent failures ──
@@ -2905,6 +2905,17 @@ async function loadBrandFromCloud(id) {
       if (typeof data.videoCount === 'number') {
         const vk = videoMonthKey();
         localStorage.setItem(vk, String(data.videoCount));
+      }
+      // S25: Sync plan from server — critical for Stripe upgrades and admin overrides
+      // Server plan ALWAYS wins over localStorage plan
+      if (data.brand.plan) {
+        const localBrand = loadBrand();
+        if (localBrand && localBrand.plan !== data.brand.plan) {
+          localBrand.plan = data.brand.plan;
+          if (data.brand.planChangedBy) localBrand.planChangedBy = data.brand.planChangedBy;
+          if (data.brand.planSource) localBrand.planSource = data.brand.planSource;
+          saveBrand(localBrand);
+        }
       }
       return data.brand;
     }
@@ -4088,11 +4099,12 @@ async function generate() {
   const usedThisMonth = parseInt(localStorage.getItem(genMonthKey()) || '0');
   if (usedThisMonth >= limit) {
     const msg = detectLanguage()==='en'
-      ? `You've reached the limit of ${limit} generations this month. Email us at support@postimity.com to upgrade.`
-      : `Llegaste al límite de ${limit} generaciones este mes. Escríbenos a support@postimity.com para hacer upgrade.`;
+      ? `You've reached the limit of ${limit} generations this month. Upgrade your plan to continue generating.`
+      : `Llegaste al límite de ${limit} generaciones este mes. Mejora tu plan para seguir generando.`;
     // B3 (Session 18): Meta Pixel — upgrade intent signal
     if(typeof fbq==='function') fbq('track', 'AddToCart', { content_name: 'upgrade_from_' + plan, value: plan === 'trial' ? 9 : 19, currency: 'USD' });
     alert(msg);
+    showUpgradeInfo();
     return;
   }
   // Validate inputs
