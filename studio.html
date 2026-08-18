@@ -5814,7 +5814,11 @@ async function generateAgentPlan() {
       })
     });
     const data = await res.json();
-    if(!data.success) throw new Error(data.error || t('errServer'));
+    if(!data.success) {
+      // S26: Log full server response for debugging
+      console.error('MA server response:', data);
+      throw new Error(data.error || t('errServer'));
+    }
 
     agentPlan = data;
 
