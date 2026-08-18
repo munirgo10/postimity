@@ -1904,7 +1904,7 @@ Ej: 'Wonderik es increíble. Mi hija de 3 años ya lee palabras cortas y su desa
 // ═══════════════════════════════════════════════════════
 // CONFIG
 // ═══════════════════════════════════════════════════════
-const POSTIMITY_VERSION = '2.17.5'; // Aug 17 2026 — Session 25: Stripe, plan sync from server, upgrade CTA, all bug fixes
+const POSTIMITY_VERSION = '2.18.0'; // Aug 17 2026 — Session 26: Director Split — portrait images, niche-aware handleImage, scene brief prompts
 console.log('Postimity Studio v' + POSTIMITY_VERSION);
 
 // ── GLOBAL ERROR HANDLER — prevents silent failures ──
@@ -4197,7 +4197,7 @@ async function genPost(brand,bg) {
     return;
   }
 
-  const imgRes=await post({ mode:'image', imagePrompt:capRes.imagePrompt, imageStyle, brandColors:brand.colors });
+  const imgRes=await post({ mode:'image', imagePrompt:capRes.imagePrompt, imageStyle, brandColors:brand.colors, brandType:brand.type });
   setStep(4);
   showResult({ ...capRes, imageUrl:imgRes.imageUrl });
 }
@@ -6652,7 +6652,7 @@ async function regenImage() {
   const regenImgOrig = regenImgBtn.textContent;
   regenImgBtn.textContent = detectLanguage()==='en' ? '⏳ Generating...' : '⏳ Generando...';
   try {
-    const imgRes=await postWithTimeout({ mode:'image', imagePrompt:prompt, imageStyle, brandColors:loadBrand()?.colors, quality:'low' });
+    const imgRes=await postWithTimeout({ mode:'image', imagePrompt:prompt, imageStyle, brandColors:loadBrand()?.colors, brandType:loadBrand()?.type, quality:'low' });
     if(mode === 'carousel' && lastResult?.slides && lastResult.slides.length) {
       // Re-render all carousel slides with new cover image
       lastResult.coverImage = imgRes.imageUrl;
