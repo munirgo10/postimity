@@ -1668,7 +1668,7 @@ Ej: 'Wonderik es increíble. Mi hija de 3 años ya lee palabras cortas y su desa
             </div>
           </div>
         </div>
-        <div style="font-size:11px;color:var(--t3);line-height:1.5;margin-bottom:8px" id="videoHint">💡 El video se genera con Kling 2.6 Pro. Toma ~2-5 minutos. Puedes seguir usando el Studio mientras se genera.</div>
+        <div style="font-size:11px;color:var(--t3);line-height:1.5;margin-bottom:8px" id="videoHint">💡 El video se genera con Kling 2.6 Pro. Toma ~2-5 minutos.</div>
         <div class="upload-zone" id="videoPhotoZone" onclick="document.getElementById('videoFile').click()" style="margin-bottom:0;padding:14px">
           <input type="file" id="videoFile" accept="image/*" style="display:none" onchange="handleVideoPhoto(this)">
           <div class="uz-icon" style="font-size:20px">📸</div>
@@ -2186,7 +2186,7 @@ const T = {
     mcVideoTitle:'Video AI', mcVideoDesc:'Reels, TikTok, Shorts',
     // ── Video generation ──
     videoTopicLabel:'🎬 Tema del video', videoDurLabel:'Duración', videoRatioLabel:'Formato',
-    videoHint:'💡 El video se genera con Kling 2.6 Pro. Toma ~2-5 minutos. Puedes seguir usando el Studio mientras se genera.',
+    videoHint:'💡 El video se genera con Kling 2.6 Pro. Toma ~2-5 minutos.',
     videoGenBtn:'Generar video con AI', genBtn:'Generar contenido con AI',
     videoPhTopic:'Ej: Mostrar el ambiente acogedor de nuestra cafetería con clientes disfrutando...',
     videoPolling:'Generando video... esto toma ~2-5 min',
@@ -2456,7 +2456,7 @@ const T = {
     mcVideoTitle:'Video AI', mcVideoDesc:'Reels, TikTok, Shorts',
     // ── Video generation ──
     videoTopicLabel:'🎬 Video topic', videoDurLabel:'Duration', videoRatioLabel:'Format',
-    videoHint:'💡 Video is generated with Kling 2.6 Pro. Takes ~2-5 minutes. You can keep using Studio while it generates.',
+    videoHint:'💡 Video is generated with Kling 2.6 Pro. Takes ~2-5 minutes.',
     videoGenBtn:'Generate video with AI', genBtn:'Generate content with AI',
     videoPhTopic:'E.g.: Show the cozy atmosphere of our coffee shop with customers enjoying a latte...',
     videoPolling:'Generating video... ~2-5 min',
@@ -4308,9 +4308,11 @@ async function generateVideo(brand) {
         useGalleryPhoto: usingGalleryPhoto || false,
       }, 25000);
       videoPrompt = promptData.videoPrompt;
-      // Show warning if topic was classified as not directly feasible for Kling
+      // S26: topicWarning is logged but NOT shown during generation — 
+      // user already clicked generate, a toast now is confusing.
+      // MA plan should guide content choices BEFORE generation.
       if (promptData.topicWarning) {
-        showToast('💡 ' + promptData.topicWarning, 8000);
+        console.log('Video topic warning (suppressed during gen):', promptData.topicWarning);
       }
     } catch(promptErr) {
       videoPrompt = usingGalleryPhoto
@@ -4381,8 +4383,8 @@ async function generateVideo(brand) {
     document.getElementById('loadTitle').textContent = t('videoProcessing');
     const loadHint = document.querySelector('.load-wrap p');
     if(loadHint) loadHint.innerHTML = isES
-      ? '⏱️ ~2-5 minutos · <span style="color:var(--t3)">Puedes seguir usando el Studio mientras se genera</span>'
-      : '⏱️ ~2-5 minutes · <span style="color:var(--t3)">You can keep using Studio while it generates</span>';
+      ? '⏱️ ~2-5 minutos'
+      : '⏱️ ~2-5 minutes';
     startVideoPolling(submitData.requestId, submitData.endpoint, submitData.statusUrl, submitData.responseUrl, brand, topic, captionsBox);
 
   } catch(err) {
