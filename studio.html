@@ -1904,7 +1904,7 @@ Ej: 'Wonderik es increíble. Mi hija de 3 años ya lee palabras cortas y su desa
 // ═══════════════════════════════════════════════════════
 // CONFIG
 // ═══════════════════════════════════════════════════════
-const POSTIMITY_VERSION = '2.17.3'; // Aug 17 2026 — Session 25: Stripe, video polling error visibility fix, showUpgradeInfo screen ID fix
+const POSTIMITY_VERSION = '2.17.4'; // Aug 17 2026 — Session 25: Stripe, video brand fix, carousel nicheData fix, polling error visibility
 console.log('Postimity Studio v' + POSTIMITY_VERSION);
 
 // ── GLOBAL ERROR HANDLER — prevents silent failures ──
@@ -4524,7 +4524,7 @@ function showVideoResult(videoUrl, topic, captionsData) {
     videoDlBtn = document.createElement('a');
     videoDlBtn.id = 'videoDlBtn';
     videoDlBtn.href = videoUrl;
-    videoDlBtn.download = ((brand?.name||'postimity').toLowerCase().replace(/[^a-z0-9]+/g,'-').slice(0,20)) + '-video-' + Date.now() + '.mp4';
+    videoDlBtn.download = ((loadBrand()?.name||'postimity').toLowerCase().replace(/[^a-z0-9]+/g,'-').slice(0,20)) + '-video-' + Date.now() + '.mp4';
     videoDlBtn.className = 'btn btn-primary btn-full';
     videoDlBtn.style.cssText = 'margin-bottom:10px;text-decoration:none;text-align:center';
     videoDlBtn.textContent = isES ? '⬇️ Descargar video (.mp4)' : '⬇️ Download video (.mp4)';
