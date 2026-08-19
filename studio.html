@@ -4931,7 +4931,7 @@ function renderCuenta() {
       '<div class="plan-name">' + plan.name + '</div>' +
       '<div class="plan-desc">' + plan.price + (planKey === 'trial' ? ' · ' + t('planTrialAllModes') : ' · ' + limit + ' ' + t('genPerMonth') + (plan.videos > 0 ? ' + ' + plan.videos + ' videos' : '')) + '</div>' +
       (daysLeft !== null ? '<div class="plan-days">' + t('dashTrialDays').replace('{n}', daysLeft) + '</div>' : '') +
-      (planKey === 'agency' || plan.maxAvailable ? '<div style="font-size:12px;font-weight:700;color:var(--g3);text-align:center;padding:8px">' + plan.upgradeLabel + '</div>' : '<button class="plan-upgrade-btn" onclick="showUpgradeInfo()">' + plan.upgradeLabel + '</button>') +
+      (planKey === 'agency' || plan.maxAvailable ? '<div style="font-size:12px;font-weight:700;color:var(--g3);text-align:center;padding:8px">' + plan.upgradeLabel + '</div>' : '<button class="plan-upgrade-btn" onclick="activatePlan(\'' + (planKey === 'trial' ? 'starter' : planKey === 'starter' ? 'growth' : 'agency') + '\')">' + plan.upgradeLabel + '</button>') +
     '</div>';
   }
 
