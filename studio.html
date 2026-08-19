@@ -2611,6 +2611,7 @@ async function verifyAuthCode() {
       }
     } else {
       // New user — go to brand setup
+      if(typeof fbq==='function') fbq('track', 'CompleteRegistration', { content_name: authEmail });
       showScreen('setupScreen');
     }
     applyBilingualUI();
@@ -5480,6 +5481,8 @@ async function activatePlan(planKey) {
     });
     const data = await res.json();
     if (data.checkoutUrl) {
+      // S28: Meta Pixel — InitiateCheckout
+      if(typeof fbq==='function') fbq('track', 'InitiateCheckout', { content_name: plan, currency: currency.toUpperCase() });
       // Redirect to Stripe Checkout
       window.location.href = data.checkoutUrl;
     } else {
@@ -5519,6 +5522,9 @@ function handleStripeRedirect() {
   if (payment === 'success') {
     const plan = params.get('plan') || '';
     const isES = detectLanguage() === 'es';
+    // S28: Meta Pixel — Purchase event
+    const planValues = { starter: 9, growth: 19, agency: 45 };
+    if(typeof fbq==='function') fbq('track', 'Purchase', { content_name: plan, value: planValues[plan] || 9, currency: 'USD' });
     setTimeout(() => {
       showToast(isES ? '🎉 ¡Pago exitoso! Tu plan ' + plan.charAt(0).toUpperCase() + plan.slice(1) + ' está activo.' : '🎉 Payment successful! Your ' + plan.charAt(0).toUpperCase() + plan.slice(1) + ' plan is now active.', 8000);
     }, 1500);
