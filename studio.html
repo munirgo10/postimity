@@ -406,7 +406,7 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
 .modal-sub{font-size:13px;color:var(--t3);margin-bottom:16px;line-height:1.5}
 .modal-actions{display:flex;gap:8px;margin-top:14px}
 /* Post saved toast */
-.toast{position:fixed;bottom:24px;right:24px;background:var(--t1);color:#fff;padding:10px 16px;border-radius:10px;font-size:13px;font-weight:600;z-index:999;transform:translateY(80px);transition:transform .3s;display:flex;align-items:center;gap:8px;box-shadow:var(--s2)}
+.toast{position:fixed;bottom:24px;right:24px;left:24px;background:var(--t1);color:#fff;padding:12px 16px;border-radius:10px;font-size:13px;font-weight:600;z-index:999;transform:translateY(80px);transition:transform .3s;box-shadow:var(--s2);line-height:1.5;text-align:left;max-width:420px;margin-left:auto}
 .toast.show{transform:translateY(0)}
 /* Offline banner */
 .offline-banner{position:fixed;top:0;left:0;right:0;background:#E74C3C;color:#fff;text-align:center;padding:10px 16px;font-size:13px;font-weight:700;z-index:10000;transform:translateY(-100%);transition:transform .3s}
@@ -2839,7 +2839,10 @@ function updateGenCounter() {
 // ─── UTILITIES ───────────────────────────────────────
 function showToast(msg, duration) {
   const t = document.getElementById('toast');
-  t.textContent = msg || T[detectLanguage()]?.toastSaved || '✅ Post saved';
+  // S29: support \n in messages by converting to <br>
+  const safeMsg = (msg || T[detectLanguage()]?.toastSaved || '✅ Post saved')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+  t.innerHTML = safeMsg;
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), duration || 3000);
 }
@@ -6660,6 +6663,7 @@ async function postWithTimeout(body, timeoutMs=130000) {
     const data = await res.json();
     // Handle server-side validation errors (plan/limit/trial)
     if (data.code === 'AUTH_REQUIRED') {
+      clearAuthToken(); // S29: clear expired token from localStorage
       showScreen('authScreen');
       throw new Error(data.error);
     }
