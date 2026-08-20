@@ -700,6 +700,9 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
 /* ─── RESPONSIVE ──────────────────────────────────── */
 /* Responsive */
 @media(max-width:640px){
+  /* S29: Prevent iOS auto-zoom on input focus (triggered when font-size < 16px) */
+  input,textarea,select{font-size:16px!important}
+  .auth-wrap{margin-top:36px}
   .mode-cards{grid-template-columns:repeat(3,1fr)!important;gap:6px}
   .mc-desc{display:none}
   .mc-icon{font-size:20px}
@@ -746,22 +749,14 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
 @media(max-width:640px){
   .fb-panel{width:calc(100% - 32px);right:16px;bottom:74px;max-height:70vh}
 }
-/* ── AUTH SCREEN (Session 15) ── */
-.auth-wrap{max-width:380px;margin:80px auto;text-align:center;padding:0 20px}
-.auth-input{width:100%;padding:12px 14px;border:1.5px solid var(--bor);border-radius:10px;font-size:14px;font-family:inherit;outline:none;background:var(--w);color:var(--t1)}
+/* ── AUTH SCREEN (Session 15, mobile fixes Session 29) ── */
+.auth-wrap{max-width:360px;margin:60px auto;text-align:center;padding:0 20px}
+.auth-input{width:100%;padding:12px 14px;border:1.5px solid var(--bor);border-radius:10px;font-size:16px;font-family:inherit;outline:none;background:var(--w);color:var(--t1)}
 .auth-input:focus{border-color:var(--b)}
-.auth-btn{width:100%;padding:12px;border:none;border-radius:10px;background:var(--b);color:#fff;font-size:14px;font-weight:700;cursor:pointer;margin-top:10px;font-family:inherit;transition:.15s}
+.auth-btn{width:100%;padding:14px;border:none;border-radius:10px;background:var(--b);color:#fff;font-size:15px;font-weight:700;cursor:pointer;margin-top:10px;font-family:inherit;transition:.15s;min-height:48px}
 .auth-btn:hover{background:var(--b2)}
 .auth-btn:disabled{opacity:.6;cursor:not-allowed}
-.auth-error{color:var(--r);font-size:12px;margin-top:8px;display:none}
-/* Auth screen (Session 15) */
-.auth-wrap{max-width:360px;margin:80px auto;text-align:center;padding:0 20px}
-.auth-input{width:100%;padding:12px 14px;border:1.5px solid var(--bor);border-radius:10px;font-size:14px;font-family:inherit;outline:none;background:var(--w);color:var(--t1)}
-.auth-input:focus{border-color:var(--b)}
-.auth-btn{width:100%;padding:12px;border:none;border-radius:10px;background:var(--b);color:#fff;font-size:14px;font-weight:700;cursor:pointer;margin-top:10px;font-family:inherit;transition:.15s}
-.auth-btn:hover{background:var(--b2)}
-.auth-btn:disabled{opacity:.6;cursor:not-allowed}
-.auth-error{color:var(--r);font-size:12px;margin-top:8px;display:none}
+.auth-error{color:var(--r);font-size:13px;margin-top:10px;display:none;padding:8px 12px;background:rgba(239,68,68,.08);border-radius:8px;line-height:1.4}
 </style>
 <script defer data-domain="postimity.com" src="https://plausible.io/js/script.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -1906,7 +1901,7 @@ Ej: 'Wonderik es increíble. Mi hija de 3 años ya lee palabras cortas y su desa
 // ═══════════════════════════════════════════════════════
 // CONFIG
 // ═══════════════════════════════════════════════════════
-const POSTIMITY_VERSION = '2.19.0'; // Aug 18 2026 — Session 28: Strategic pivot, MA weekly themes, enhanced summary
+const POSTIMITY_VERSION = '2.20.0'; // Aug 19 2026 — Session 29: Hybrid auth for in-app browser compatibility (Google, Instagram, Facebook)
 console.log('Postimity Studio v' + POSTIMITY_VERSION);
 
 // ── GLOBAL ERROR HANDLER — prevents silent failures ──
@@ -1943,6 +1938,21 @@ function getPltInfo() {
 // ── WORKER CONFIG ──────────────────────────────────────────
 const WORKER = 'https://api.postimity.com/';
 const STORE_KEY = 'postimity_brand_v1';
+// ── AUTH TOKEN HELPERS (Session 29: in-app browser compatibility) ──
+// In-app browsers (Google, Instagram, Facebook) block cross-origin cookies.
+// We store the JWT in localStorage as fallback and send via Authorization header.
+function getAuthToken() { return localStorage.getItem('postimity_auth_token'); }
+function setAuthToken(t) { if(t) localStorage.setItem('postimity_auth_token', t); }
+function clearAuthToken() { localStorage.removeItem('postimity_auth_token'); }
+function apiFetch(url, opts = {}) {
+  const token = getAuthToken();
+  if (token) {
+    opts.headers = opts.headers || {};
+    opts.headers['Authorization'] = 'Bearer ' + token;
+  }
+  opts.credentials = 'include'; // still send cookie where supported
+  return fetch(url, opts);
+}
 // N2 fix (Session 19): HTML escape helper — prevents XSS in innerHTML assignments
 function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
 const GEN_LIMITS = { trial: 20, starter: 40, growth: 100, agency: 250 };
@@ -2544,7 +2554,7 @@ async function sendAuthCode() {
   btn.disabled = true;
   btn.textContent = 'Enviando...';
   try {
-    const res = await fetch(WORKER, {
+    const res = await apiFetch(WORKER, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -2566,7 +2576,16 @@ async function sendAuthCode() {
     document.getElementById('authCode').value = '';
     document.getElementById('authCode').focus();
   } catch(e) {
-    showAuthError(1, e.message);
+    // S29: In-app browsers (Google, Instagram) may show raw "Load failed" — give actionable message
+    const isNetworkError = e.message === 'Load failed' || e.message === 'Failed to fetch' || e.name === 'TypeError';
+    const lang = detectLanguage();
+    if (isNetworkError) {
+      showAuthError(1, lang === 'en'
+        ? 'Connection error. Try opening in Safari or Chrome.'
+        : 'Error de conexión. Intenta abrir en Safari o Chrome.');
+    } else {
+      showAuthError(1, e.message);
+    }
   } finally {
     btn.disabled = false;
     btn.textContent = 'Enviar código';
@@ -2585,7 +2604,7 @@ async function verifyAuthCode() {
   btn.disabled = true;
   btn.textContent = 'Verificando...';
   try {
-    const res = await fetch(WORKER, {
+    const res = await apiFetch(WORKER, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -2593,7 +2612,8 @@ async function verifyAuthCode() {
     });
     const data = await res.json();
     if (!res.ok || !data.success) throw new Error(data.error || 'Código incorrecto');
-    // Authenticated! Cookie is set by server
+    // Authenticated! Cookie is set by server; token stored for in-app browser fallback
+    if (data.token) setAuthToken(data.token);
     if (data.brandId) {
       // Existing user — load their brand
       brandId = data.brandId;
@@ -2617,7 +2637,15 @@ async function verifyAuthCode() {
     applyBilingualUI();
     updateGenCounter();
   } catch(e) {
-    showAuthError(2, e.message);
+    const isNetworkError = e.message === 'Load failed' || e.message === 'Failed to fetch' || e.name === 'TypeError';
+    const lang = detectLanguage();
+    if (isNetworkError) {
+      showAuthError(2, lang === 'en'
+        ? 'Connection error. Try opening in Safari or Chrome.'
+        : 'Error de conexión. Intenta abrir en Safari o Chrome.');
+    } else {
+      showAuthError(2, e.message);
+    }
   } finally {
     btn.disabled = false;
     btn.textContent = 'Verificar';
@@ -2644,7 +2672,7 @@ function hideAuthError(step) {
 async function checkAuth() {
   try {
     // M5 fix (Session 19): GET doesn't consume POST rate limit on page load
-    const res = await fetch(WORKER + 'check-auth', {
+    const res = await apiFetch(WORKER + 'check-auth', {
       method: 'GET',
       credentials: 'include'
     });
@@ -2658,7 +2686,7 @@ async function checkAuth() {
 
 async function doLogout() {
   try {
-    await fetch(WORKER, {
+    await apiFetch(WORKER, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -2666,6 +2694,7 @@ async function doLogout() {
     });
   } catch(e) { /* ignore */ }
   brandId = null;
+  clearAuthToken();
   localStorage.removeItem(STORE_KEY);
   showScreen('authScreen');
 }
@@ -2821,7 +2850,7 @@ async function syncBrandToCloud(brand, id) {
     if (!brand.createdAt) {
       brandCopy.fingerprint = getBrowserFingerprint();
     }
-    const res = await fetch(WORKER, {
+    const res = await apiFetch(WORKER, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -2879,7 +2908,7 @@ async function autoSavePost(resultData) {
       postData.carouselImages = resultData.carouselImages.filter(u => u && u.startsWith('http')).slice(0, 10);
       postData.slideCount = resultData.carouselImages.length;
     }
-    await fetch(WORKER,{ method:'POST', headers:{'Content-Type':'application/json'}, credentials:'include',
+    await apiFetch(WORKER,{ method:'POST', headers:{'Content-Type':'application/json'}, credentials:'include',
       body: JSON.stringify({ mode: 'save-post', brandId, postData })
     });
   } catch(e) {
@@ -2890,7 +2919,7 @@ async function autoSavePost(resultData) {
 // Try to load brand from KV using URL brandId
 async function loadBrandFromCloud(id) {
   try {
-    const res = await fetch(WORKER, {
+    const res = await apiFetch(WORKER, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -3192,7 +3221,7 @@ async function generateBrandGuide() {
   timeNote.textContent = detectLanguage()==='en' ? '☕ This may take up to 1 minute — the AI is deeply analyzing your business' : '☕ Esto puede tomar hasta 1 minuto — la AI está analizando tu negocio a fondo';
   btn.parentNode.insertBefore(timeNote, btn.nextSibling);
   try {
-    const res=await fetch(WORKER,{ method:'POST', headers:{'Content-Type':'application/json'}, credentials:'include',
+    const res=await apiFetch(WORKER,{ method:'POST', headers:{'Content-Type':'application/json'}, credentials:'include',
       body:JSON.stringify({ mode:'brand-guide', brandData:{
         name: name,
         type: bType,
@@ -4015,7 +4044,7 @@ async function adjustResult() {
       const currentFB = document.getElementById('fbCap')?.textContent || '';
       const currentTT = document.getElementById('ttCap')?.textContent || '';
 
-      const res = await fetch(WORKER,{ method:'POST', headers:{'Content-Type':'application/json'}, credentials:'include',
+      const res = await apiFetch(WORKER,{ method:'POST', headers:{'Content-Type':'application/json'}, credentials:'include',
         body: JSON.stringify({
           mode: 'adjust',
           adjustment,
@@ -4374,7 +4403,7 @@ async function generateVideo(brand) {
 
     // Step 4: Captions in parallel — use object wrapper so reference stays live
     const captionsBox = { data: null };
-    fetch(WORKER, {
+    apiFetch(WORKER, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -4417,7 +4446,7 @@ function startVideoPolling(requestId, endpoint, statusUrl, responseUrl, brand, t
     }
 
     try {
-      const resp = await fetch(WORKER, {
+      const resp = await apiFetch(WORKER, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -4680,7 +4709,7 @@ async function saveVideoToHistory(videoUrl, topic) {
     const fbHash = document.getElementById('fbHash')?.textContent || '';
     const ttCap = document.getElementById('ttCap')?.textContent || '';
     const ttHash = document.getElementById('ttHash')?.textContent || '';
-    await fetch(WORKER, {
+    await apiFetch(WORKER, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -4810,7 +4839,7 @@ async function requestEmailChange() {
   btn.textContent = '...';
   errEl.textContent = '';
   try {
-    const res = await fetch(WORKER, {
+    const res = await apiFetch(WORKER, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -4846,7 +4875,7 @@ async function confirmEmailChange() {
   btn.textContent = '...';
   errEl.textContent = '';
   try {
-    const res = await fetch(WORKER, {
+    const res = await apiFetch(WORKER, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -4890,7 +4919,7 @@ async function handleDeleteAccount() {
     return;
   }
   try {
-    const res = await fetch(WORKER, {
+    const res = await apiFetch(WORKER, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -5419,7 +5448,7 @@ function selectGalleryPhoto(photoId, el) {
 
 // ── Helper: postJSON wrapper ─────────────────────────
 async function postJSON(body) {
-  const res = await fetch(WORKER, {
+  const res = await apiFetch(WORKER, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -5467,7 +5496,7 @@ async function activatePlan(planKey) {
   showToast(isES ? '⏳ Conectando con Stripe...' : '⏳ Connecting to Stripe...', 5000);
 
   try {
-    const res = await fetch(WORKER, {
+    const res = await apiFetch(WORKER, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -5497,7 +5526,7 @@ async function openStripePortal() {
   const isES = detectLanguage() === 'es';
   showToast(isES ? '⏳ Abriendo portal de facturación...' : '⏳ Opening billing portal...', 5000);
   try {
-    const res = await fetch(WORKER, {
+    const res = await apiFetch(WORKER, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -5573,7 +5602,7 @@ async function loadHistorial() {
     return;
   }
   try {
-    const res = await fetch(WORKER,{ method:'POST', headers:{'Content-Type':'application/json'}, credentials:'include',
+    const res = await apiFetch(WORKER,{ method:'POST', headers:{'Content-Type':'application/json'}, credentials:'include',
       body: JSON.stringify({ mode:'get-history', brandId, limit: 200 })
     });
     const data = await res.json();
@@ -5744,7 +5773,7 @@ function showAgentScreen() {
   // Try to load saved plan for this month
   const brand = loadBrand();
   if(brand?.brandId) {
-    fetch(WORKER,{ method:'POST', headers:{'Content-Type':'application/json'}, credentials:'include',
+    apiFetch(WORKER,{ method:'POST', headers:{'Content-Type':'application/json'}, credentials:'include',
       body: JSON.stringify({ mode:'get-agent-plan', brandId: brand.brandId, month })
     }).then(r=>r.json()).then(data => {
       if(data.success && data.plan) {
@@ -5812,7 +5841,7 @@ async function generateAgentPlan() {
     const lang = detectLanguage();
     // Check if gallery has photos and toggle is meaningful
     const galleryActive = galleryData.length > 0;
-    const res = await fetch(WORKER,{ method:'POST', headers:{'Content-Type':'application/json'}, credentials:'include',
+    const res = await apiFetch(WORKER,{ method:'POST', headers:{'Content-Type':'application/json'}, credentials:'include',
       body: JSON.stringify({
         mode: 'marketing-agent',
         brandGuide: bg,
@@ -5834,7 +5863,7 @@ async function generateAgentPlan() {
 
     // Save plan to KV
     if(brandId) {
-      fetch(WORKER,{ method:'POST', headers:{'Content-Type':'application/json'}, credentials:'include',
+      apiFetch(WORKER,{ method:'POST', headers:{'Content-Type':'application/json'}, credentials:'include',
         body: JSON.stringify({ mode:'save-agent-plan', brandId, month, plan: data })
       }).catch(() => {});
     }
@@ -6090,7 +6119,7 @@ async function activateReminders() {
 
   // Save to KV
   try {
-    await fetch(WORKER,{ method:'POST', headers:{'Content-Type':'application/json'}, credentials:'include',
+    await apiFetch(WORKER,{ method:'POST', headers:{'Content-Type':'application/json'}, credentials:'include',
       body: JSON.stringify({ mode:'save-reminders', brandId, reminder: {
         active: true, channel: ch, email, whatsappPersonal: wa,
         month, language: lang, businessName: brand?.name || ''
@@ -6120,7 +6149,7 @@ function toggleReminders(activate) {
   } else {
     localStorage.removeItem('postimity_reminders_' + month);
     if(brandId) {
-      fetch(WORKER,{ method:'POST', headers:{'Content-Type':'application/json'}, credentials:'include',
+      apiFetch(WORKER,{ method:'POST', headers:{'Content-Type':'application/json'}, credentials:'include',
         body: JSON.stringify({ mode:'save-reminders', brandId, reminder: { active: false, month } })
       }).catch(()=>{});
     }
@@ -6617,7 +6646,7 @@ async function postWithTimeout(body, timeoutMs=130000) {
   const controller = new AbortController();
   const timer = setTimeout(()=>controller.abort(), timeoutMs);
   try {
-    const res = await fetch(WORKER, {
+    const res = await apiFetch(WORKER, {
       method:'POST',
       headers:{'Content-Type':'application/json'},
       credentials:'include',
@@ -7592,7 +7621,7 @@ async function submitFeedback() {
   btn.disabled = true;
   btn.textContent = detectLanguage() === 'es' ? 'Enviando...' : 'Sending...';
   try {
-    await fetch(WORKER, {
+    await apiFetch(WORKER, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
