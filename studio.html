@@ -1067,6 +1067,13 @@ fbq('track', 'PageView');
         <div style="font-size:20px;font-weight:800;color:var(--t1)">✦ Postimity</div>
       </div>
 
+      <!-- S29: In-app browser warning (Google, Instagram, Facebook, TikTok) -->
+      <div id="inAppWarning" style="display:none;margin-bottom:20px;padding:16px;background:linear-gradient(135deg,#FFF7ED,#FEF3C7);border:1.5px solid #F59E0B;border-radius:12px;text-align:center">
+        <p style="font-size:14px;font-weight:600;color:#92400E;margin-bottom:8px">⚠️ Abre en tu navegador</p>
+        <p style="font-size:12px;color:#78350F;margin-bottom:12px;line-height:1.4">Este navegador integrado tiene limitaciones. Para la mejor experiencia, abre Postimity en Safari o Chrome.</p>
+        <a id="inAppOpenBtn" href="" target="_blank" style="display:inline-block;padding:12px 24px;background:#F59E0B;color:#fff;font-weight:700;font-size:14px;border-radius:10px;text-decoration:none;font-family:inherit;min-height:44px;line-height:20px">Abrir en Safari →</a>
+      </div>
+
       <!-- Step 1: Email -->
       <div id="authStep1">
         <h2 id="authTitle" style="font-size:18px;font-weight:700;margin-bottom:6px">Ingresa tu email para comenzar</h2>
@@ -2553,8 +2560,8 @@ async function sendAuthCode() {
   try {
     const res = await apiFetch(WORKER, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      
+      // S29: No Content-Type header — avoids CORS preflight that in-app browsers block.
+      // Cloudflare Workers request.json() parses body regardless of Content-Type.
       body: JSON.stringify({ mode: 'send-auth-code', email })
     });
     const data = await res.json();
@@ -2595,8 +2602,6 @@ async function verifyAuthCode() {
   try {
     const res = await apiFetch(WORKER, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      
       body: JSON.stringify({ mode: 'verify-auth-code', email: authEmail, code })
     });
     const data = await res.json();
@@ -2981,6 +2986,13 @@ window.addEventListener('DOMContentLoaded', async () => {
     // Not authenticated — reveal login form (authScreen already active)
     document.getElementById('authLoading').style.display = 'none';
     document.getElementById('authStep1').style.display = 'block';
+    // S29: Detect in-app browsers and show warning
+    const ua = navigator.userAgent || '';
+    const isInApp = /GSA\/|FBAN\/|FBAV\/|Instagram|TikTok|BytedanceWebview|Line\/|Twitter|Snapchat/i.test(ua);
+    if (isInApp) {
+      const w = document.getElementById('inAppWarning');
+      if (w) { w.style.display = 'block'; document.getElementById('inAppOpenBtn').href = window.location.href; }
+    }
     applyBilingualUI();
     updateLangToggleUI(detectLanguage());
     return;
