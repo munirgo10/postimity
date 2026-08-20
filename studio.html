@@ -702,13 +702,49 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
 @media(max-width:640px){
   input,textarea,select{font-size:16px!important}
   .auth-wrap{margin-top:36px}
-  .mode-cards{grid-template-columns:repeat(3,1fr)!important;gap:6px}
+  /* Mode cards: 2x3 grid with more room */
+  .mode-cards{grid-template-columns:repeat(3,1fr)!important;gap:8px}
   .mc-desc{display:none}
-  .mc-icon{font-size:20px}
-  .result-grid{grid-template-columns:1fr}
-  .fg{grid-template-columns:1fr}
+  .mc-icon{font-size:22px}
+  .mode-card{padding:14px 6px 10px;border-radius:10px}
+  /* Form fields: single column, more breathing room */
+  .fg{grid-template-columns:1fr;gap:12px}
   .fg-item.span2{grid-column:span 1}
-  .dl-btns{flex-wrap:wrap}
+  .fg-label{font-size:12px}
+  /* Results: stack vertically */
+  .result-grid{grid-template-columns:1fr;gap:12px}
+  /* Download buttons: full width, larger touch targets */
+  .dl-btns{flex-wrap:wrap;gap:6px}
+  .dl-btns button,.dl-btns a{flex:1;min-width:calc(33% - 6px);min-height:44px;font-size:12px;padding:10px 8px}
+  /* Publish buttons: larger touch targets */
+  .pub-btn{padding:12px 6px;font-size:11px;min-height:48px}
+  /* Cloud bar: stack on mobile */
+  .cloud-bar{flex-wrap:wrap;padding:8px 16px;gap:6px}
+  .cloud-bar .cb-left{width:100%;font-size:11px}
+  .cloud-bar .cb-hist{padding:6px 12px;font-size:11px}
+  /* Brand bar: compact */
+  .brand-bar{padding:10px 14px;margin-bottom:14px}
+  .brand-bar .chip-logo{width:28px;height:28px;font-size:13px}
+  #chipName{font-size:12px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  /* Creator panel: less side padding */
+  .creator-wrap{padding:16px 14px 80px}
+  .setup-wrap{padding:20px 16px 80px}
+  /* Generate button: bigger touch target */
+  .btn-gen{padding:16px;font-size:15px;min-height:52px}
+  /* Agent & Historial screens */
+  .agent-screen,.hist-screen,.cuenta-screen{padding:0 14px 80px}
+  /* Caption cards: better readability */
+  .cap-card{font-size:13px;line-height:1.6;padding:14px}
+  /* Logo/watermark toggle: bigger touch */
+  .logo-toggle label,.wm-toggle label{font-size:12px;padding:6px 0}
+  /* Welcome screen */
+  .welcome-h1{font-size:22px}
+  .welcome-sub{font-size:13px}
+  /* Feedback fab: don't overlap with content */
+  .fb-fab{bottom:16px;right:16px;width:48px;height:48px;font-size:20px}
+  /* Modal: fill mobile screen better */
+  .modal{margin:12px;max-width:calc(100vw - 24px);max-height:85vh;overflow-y:auto}
+  .modal-overlay{padding:0;align-items:flex-end}
 }
 /* ─── FEEDBACK WIDGET ─────────────────────────────── */
 .fb-fab{position:fixed;bottom:20px;right:20px;z-index:300;width:56px;height:56px;border-radius:50%;background:var(--b);color:#fff;border:none;font-size:24px;cursor:pointer;box-shadow:0 4px 20px rgba(41,121,255,.4);transition:.2s;display:flex;align-items:center;justify-content:center;font-family:inherit}
