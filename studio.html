@@ -1955,6 +1955,17 @@ function apiFetch(url, opts = {}) {
     if (typeof opts.headers === 'object' && !Array.isArray(opts.headers))
       opts.headers['Authorization'] = 'Bearer ' + token;
   }
+  // S29: Strip Content-Type: application/json to avoid CORS preflight.
+  // In-app browsers (Google, Instagram, Facebook) block the OPTIONS preflight.
+  // Without this header, POST becomes a "simple request" — no preflight needed.
+  // Cloudflare Workers request.json() parses body regardless of Content-Type.
+  if (opts.headers) {
+    const ct = opts.headers['Content-Type'] || opts.headers['content-type'];
+    if (ct === 'application/json') {
+      delete opts.headers['Content-Type'];
+      delete opts.headers['content-type'];
+    }
+  }
   return fetch(url, opts);
 }
 // N2 fix (Session 19): HTML escape helper — prevents XSS in innerHTML assignments
@@ -2581,6 +2592,11 @@ async function sendAuthCode() {
     document.getElementById('authCode').focus();
   } catch(e) {
     const isNet = e.message === 'Load failed' || e.message === 'Failed to fetch' || e.name === 'TypeError';
+    if (isNet) {
+      // S29: Show in-app browser warning only on actual network failure
+      const w = document.getElementById('inAppWarning');
+      if (w) { w.style.display = 'block'; document.getElementById('inAppOpenBtn').href = window.location.href; }
+    }
     showAuthError(1, isNet ? (detectLanguage()==='en' ? 'Connection error. Try opening in Safari or Chrome.' : 'Error de conexión. Intenta abrir en Safari o Chrome.') : e.message);
   } finally {
     btn.disabled = false;
@@ -2986,13 +3002,6 @@ window.addEventListener('DOMContentLoaded', async () => {
     // Not authenticated — reveal login form (authScreen already active)
     document.getElementById('authLoading').style.display = 'none';
     document.getElementById('authStep1').style.display = 'block';
-    // S29: Detect in-app browsers and show warning
-    const ua = navigator.userAgent || '';
-    const isInApp = /GSA\/|FBAN\/|FBAV\/|Instagram|TikTok|BytedanceWebview|Line\/|Twitter|Snapchat/i.test(ua);
-    if (isInApp) {
-      const w = document.getElementById('inAppWarning');
-      if (w) { w.style.display = 'block'; document.getElementById('inAppOpenBtn').href = window.location.href; }
-    }
     applyBilingualUI();
     updateLangToggleUI(detectLanguage());
     return;
@@ -7113,33 +7122,28 @@ async function openInSocial(platform) {
     }
   }
 
-  // 3. Fallback: Download + Open URL (desktop or Web Share not supported)
+  // 3. Fallback: Download + instructions (desktop opens URL, mobile shows instructions)
   if (isCarouselMode) {
     downloadAllSlides();
   } else {
     await downloadImg('square');
   }
 
-  // 4. Toast with step-by-step instructions
-  if (isCarouselMode) {
+  // 4. Platform-specific guidance
+  const pName = platform.charAt(0).toUpperCase() + platform.slice(1);
+  if (isMobile) {
+    // S29: On mobile, window.open is blocked by popup blocker. Just give clear instructions.
     showToast(isES
-      ? '📸 Slides descargados · Caption copiado\n→ Abre ' + platform.charAt(0).toUpperCase() + platform.slice(1) + ' · Toca + · Selecciona múltiples fotos · Pega el caption'
-      : '📸 Slides downloaded · Caption copied\n→ Open ' + platform.charAt(0).toUpperCase() + platform.slice(1) + ' · Tap + · Select multiple photos · Paste caption');
+      ? '✅ Imagen descargada · Caption copiado\n→ Abre ' + pName + ' y crea un post nuevo\n→ Selecciona la imagen del carrete\n→ Pega el caption'
+      : '✅ Image downloaded · Caption copied\n→ Open ' + pName + ' and create a new post\n→ Pick the image from your gallery\n→ Paste the caption', 6000);
   } else {
+    // Desktop: open platform website
     showToast(isES
-      ? '📸 Imagen descargada · Caption copiado — abre la app y pégalo'
-      : '📸 Image downloaded · Caption copied — open the app and paste');
+      ? '📸 Imagen descargada · Caption copiado — pégalo en ' + pName
+      : '📸 Image downloaded · Caption copied — paste it in ' + pName);
+    const urls = { instagram: 'https://www.instagram.com/', facebook: 'https://www.facebook.com/', tiktok: 'https://www.tiktok.com/' };
+    setTimeout(() => { window.open(urls[platform] || 'https://www.instagram.com/', '_blank'); }, 900);
   }
-
-  // 5. Open platform
-  const urls = {
-    instagram: 'https://www.instagram.com/',
-    facebook:  'https://www.facebook.com/',
-    tiktok:    'https://www.tiktok.com/',
-  };
-  setTimeout(() => {
-    window.open(urls[platform] || 'https://www.instagram.com/', '_blank');
-  }, 900);
 }
 
 // ─── DOWNLOAD ─────────────────────────────────────────
