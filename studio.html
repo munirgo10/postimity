@@ -698,7 +698,6 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
 .setup-step-label{font-size:11px;font-weight:700;color:var(--t3);text-align:center;margin-bottom:14px;letter-spacing:.2px}
 
 /* ─── RESPONSIVE ──────────────────────────────────── */
-/* Responsive */
 @media(max-width:640px){
   input,textarea,select{font-size:16px!important}
   .auth-wrap{margin-top:36px}
@@ -737,12 +736,10 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
   .cap-card{font-size:13px;line-height:1.6;padding:14px}
   /* Logo/watermark toggle: bigger touch */
   .logo-toggle label,.wm-toggle label{font-size:12px;padding:6px 0}
-  /* Welcome screen */
   .welcome-h1{font-size:22px}
   .welcome-sub{font-size:13px}
-  /* Feedback fab: don't overlap with content */
   .fb-fab{bottom:16px;right:16px;width:48px;height:48px;font-size:20px}
-  /* Modal: fill mobile screen better */
+  .fb-panel{width:calc(100% - 32px);right:16px;bottom:74px;max-height:70vh}
   .modal{margin:12px;max-width:calc(100vw - 24px);max-height:85vh;overflow-y:auto}
   .modal-overlay{padding:0;align-items:flex-end}
 }
@@ -781,10 +778,7 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
 .fb-faq-q:hover{background:var(--b3)}
 .fb-faq-a{padding:0 12px;font-size:12px;color:var(--t2);line-height:1.6;max-height:0;overflow:hidden;transition:max-height .2s,padding .2s}
 .fb-faq-item.open .fb-faq-a{max-height:200px;padding:8px 12px 10px}
-@media(max-width:640px){
-  .fb-panel{width:calc(100% - 32px);right:16px;bottom:74px;max-height:70vh}
-}
-/* ── AUTH SCREEN (S15, mobile fixes S29) ── */
+/* ── AUTH SCREEN (S15, S29) ── */
 .auth-wrap{max-width:360px;margin:60px auto;text-align:center;padding:0 20px}
 .auth-input{width:100%;padding:12px 14px;border:1.5px solid var(--bor);border-radius:10px;font-size:16px;font-family:inherit;outline:none;background:var(--w);color:var(--t1)}
 .auth-input:focus{border-color:var(--b)}
@@ -1985,22 +1979,16 @@ function getAuthToken() { return localStorage.getItem('postimity_auth_token'); }
 function setAuthToken(t) { if(t) localStorage.setItem('postimity_auth_token', t); }
 function clearAuthToken() { localStorage.removeItem('postimity_auth_token'); }
 function apiFetch(url, opts = {}) {
+  // S30: Inject auth token into the request BODY (not as header).
+  // Headers like Authorization trigger CORS preflight which in-app browsers block.
+  // Token in body avoids preflight entirely. Worker reads body._authToken as fallback.
   const token = getAuthToken();
-  if (token) {
-    opts.headers = opts.headers || {};
-    if (typeof opts.headers === 'object' && !Array.isArray(opts.headers))
-      opts.headers['Authorization'] = 'Bearer ' + token;
-  }
-  // S29: Strip Content-Type: application/json to avoid CORS preflight.
-  // In-app browsers (Google, Instagram, Facebook) block the OPTIONS preflight.
-  // Without this header, POST becomes a "simple request" — no preflight needed.
-  // Cloudflare Workers request.json() parses body regardless of Content-Type.
-  if (opts.headers) {
-    const ct = opts.headers['Content-Type'] || opts.headers['content-type'];
-    if (ct === 'application/json') {
-      delete opts.headers['Content-Type'];
-      delete opts.headers['content-type'];
-    }
+  if (token && opts.body) {
+    try {
+      const b = JSON.parse(opts.body);
+      b._authToken = token;
+      opts.body = JSON.stringify(b);
+    } catch(e) { /* non-JSON body, skip */ }
   }
   return fetch(url, opts);
 }
@@ -2710,10 +2698,12 @@ function hideAuthError(step) {
 
 async function checkAuth() {
   try {
-    // M5 fix (Session 19): GET doesn't consume POST rate limit on page load
-    const res = await apiFetch(WORKER + 'check-auth', {
-      method: 'GET',
-      
+    // S30: Changed from GET to POST so apiFetch can inject _authToken in body
+    // (GET has no body → token can't be sent → in-app browsers always see "not authenticated")
+    const res = await apiFetch(WORKER, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mode: 'check-auth' })
     });
     const data = await res.json();
     return data.authenticated ? data : null;
@@ -2728,10 +2718,9 @@ async function doLogout() {
     await apiFetch(WORKER, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      
       body: JSON.stringify({ mode: 'logout' })
     });
-  } catch(e) { /* ignore */ }
+  } catch(e) { console.warn('Logout request failed:', e.message); }
   brandId = null;
   clearAuthToken();
   localStorage.removeItem(STORE_KEY);
@@ -2895,7 +2884,6 @@ async function syncBrandToCloud(brand, id) {
     const res = await apiFetch(WORKER, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      
       body: JSON.stringify({ mode: 'save-brand', brandId: id, brandData: brandCopy })
     });
     const data = await res.json();
@@ -2964,7 +2952,6 @@ async function loadBrandFromCloud(id) {
     const res = await apiFetch(WORKER, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      
       body: JSON.stringify({ mode: 'get-brand', brandId: id })
     });
     const data = await res.json();
@@ -4448,7 +4435,6 @@ async function generateVideo(brand) {
     apiFetch(WORKER, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      
       body: JSON.stringify({ mode: 'captions', textInput: topic, brandGuide: brand.brandGuide, brandData: { name: brand.name, type: brand.type, whatsapp: brand.whatsapp }, platform, imageStyle: 'video', pillar }),
     }).then(r => r.json()).then(d => { if(d && d.success !== false) captionsBox.data = d; }).catch(() => {});
 
@@ -4491,7 +4477,6 @@ function startVideoPolling(requestId, endpoint, statusUrl, responseUrl, brand, t
       const resp = await apiFetch(WORKER, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-      
         body: JSON.stringify({ mode: 'video-status', requestId, endpoint, statusUrl, responseUrl }),
       });
       const data = await resp.json();
@@ -4754,7 +4739,6 @@ async function saveVideoToHistory(videoUrl, topic) {
     await apiFetch(WORKER, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      
       body: JSON.stringify({
         mode: 'save-post',
         brandId: brand.brandId,
@@ -4884,7 +4868,6 @@ async function requestEmailChange() {
     const res = await apiFetch(WORKER, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      
       body: JSON.stringify({ mode: 'request-email-change', newEmail })
     });
     const data = await res.json();
@@ -4920,7 +4903,6 @@ async function confirmEmailChange() {
     const res = await apiFetch(WORKER, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      
       body: JSON.stringify({ mode: 'confirm-email-change', code })
     });
     const data = await res.json();
@@ -4964,7 +4946,6 @@ async function handleDeleteAccount() {
     const res = await apiFetch(WORKER, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      
       body: JSON.stringify({ mode: 'delete-my-account', brandId })
     });
     const data = await res.json();
@@ -5493,7 +5474,6 @@ async function postJSON(body) {
   const res = await apiFetch(WORKER, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-      
     body: JSON.stringify(body),
   });
   return await res.json();
@@ -5541,7 +5521,6 @@ async function activatePlan(planKey) {
     const res = await apiFetch(WORKER, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      
       body: JSON.stringify({
         mode: 'create-checkout',
         plan: planKey,
@@ -5571,7 +5550,6 @@ async function openStripePortal() {
     const res = await apiFetch(WORKER, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      
       body: JSON.stringify({ mode: 'create-portal', brandId: brandId || null }),
     });
     const data = await res.json();
@@ -6691,7 +6669,6 @@ async function postWithTimeout(body, timeoutMs=130000) {
     const res = await apiFetch(WORKER, {
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      
       body:JSON.stringify(body),
       signal: controller.signal
     });
@@ -7162,20 +7139,46 @@ async function openInSocial(platform) {
     }
   }
 
-  // 3. Fallback: Download + instructions (desktop opens URL, mobile shows instructions)
+  // 3. Fallback: Download image + open native app via URL scheme
   if (isCarouselMode) {
     downloadAllSlides();
   } else {
     await downloadImg('square');
   }
 
-  // 4. Platform-specific guidance
+  // 4. Open native app (mobile) or website (desktop)
   const pName = platform.charAt(0).toUpperCase() + platform.slice(1);
   if (isMobile) {
-    // S29: On mobile, window.open is blocked by popup blocker. Just give clear instructions.
+    // S30: URL schemes open the native app directly from the browser
+    const appSchemes = {
+      instagram: 'instagram://library',
+      facebook:  'fb://composer',
+      tiktok:    'snssdk1233://'
+    };
+    const webUrls = {
+      instagram: 'https://www.instagram.com/',
+      facebook:  'https://www.facebook.com/',
+      tiktok:    'https://www.tiktok.com/'
+    };
+
     showToast(isES
-      ? '✅ Imagen descargada · Caption copiado\n→ Abre ' + pName + ' y crea un post nuevo\n→ Selecciona la imagen del carrete\n→ Pega el caption'
-      : '✅ Image downloaded · Caption copied\n→ Open ' + pName + ' and create a new post\n→ Pick the image from your gallery\n→ Paste the caption', 6000);
+      ? '✅ Imagen guardada · Caption copiado\n→ Selecciona la foto del carrete\n→ Pega el caption'
+      : '✅ Image saved · Caption copied\n→ Select the photo from your gallery\n→ Paste the caption', 5000);
+
+    // Try to open native app; if not installed, fall back to web after 1.5s
+    const scheme = appSchemes[platform] || appSchemes.instagram;
+    const webUrl = webUrls[platform] || webUrls.instagram;
+    const appOpened = Date.now();
+
+    setTimeout(() => {
+      window.location.href = scheme;
+      // If app not installed, iOS stays on the page — detect and open web version
+      setTimeout(() => {
+        if (Date.now() - appOpened < 3000) {
+          window.open(webUrl, '_blank');
+        }
+      }, 1500);
+    }, 800); // Small delay so image download completes first
   } else {
     // Desktop: open platform website
     showToast(isES
@@ -7703,7 +7706,6 @@ async function submitFeedback() {
     await apiFetch(WORKER, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      
       body: JSON.stringify({
         mode: 'submit-feedback',
         type: fbType,
