@@ -1937,7 +1937,7 @@ Ej: 'Wonderik es increíble. Mi hija de 3 años ya lee palabras cortas y su desa
 // ═══════════════════════════════════════════════════════
 // CONFIG
 // ═══════════════════════════════════════════════════════
-const POSTIMITY_VERSION = '2.20.0'; // Aug 20 2026 — Session 29: Hybrid auth, mobile UX, logo/watermark fixes
+const POSTIMITY_VERSION = '2.21.0'; // Aug 21 2026 — Session 30: Integral audit fixes
 console.log('Postimity Studio v' + POSTIMITY_VERSION);
 
 // ── GLOBAL ERROR HANDLER — prevents silent failures ──
@@ -4684,6 +4684,7 @@ function copyVideoCaption() {
 async function shareVideoToSocial(platform) {
   const isES = detectLanguage() === 'es';
   const caption = getCaptionForPlatform(platform);
+  const pName = platform.charAt(0).toUpperCase() + platform.slice(1);
 
   // 1. Copy caption
   await copyToClipboard(caption);
@@ -4710,19 +4711,34 @@ async function shareVideoToSocial(platform) {
     }
   }
 
-  // 3. Fallback: Download video + open platform
+  // 3. Fallback: Download video + open native app
   if (videoEl && videoEl.src) {
     const a = document.createElement('a');
     a.href = videoEl.src; a.download = ((loadBrand()?.name||'postimity').toLowerCase().replace(/[^a-z0-9]+/g,'-').slice(0,20)) + '-video-' + Date.now() + '.mp4';
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
   }
 
-  showToast(isES
-    ? '🎬 Video descargado · Caption copiado — abre la app y pégalo'
-    : '🎬 Video downloaded · Caption copied — open the app and paste');
-
-  const urls = { instagram: 'https://www.instagram.com/', facebook: 'https://www.facebook.com/', tiktok: 'https://www.tiktok.com/' };
-  setTimeout(() => { window.open(urls[platform] || 'https://www.instagram.com/', '_blank'); }, 900);
+  if (isMobile) {
+    // S30: URL schemes open native app; window.open is blocked on mobile
+    const appSchemes = { instagram: 'instagram://library', facebook: 'fb://composer', tiktok: 'snssdk1233://' };
+    const webUrls = { instagram: 'https://www.instagram.com/', facebook: 'https://www.facebook.com/', tiktok: 'https://www.tiktok.com/' };
+    showToast(isES
+      ? '🎬 Video descargado · Caption copiado\n→ Selecciona el video del carrete\n→ Pega el caption'
+      : '🎬 Video downloaded · Caption copied\n→ Select the video from your gallery\n→ Paste the caption', 5000);
+    const scheme = appSchemes[platform] || appSchemes.instagram;
+    const webUrl = webUrls[platform] || webUrls.instagram;
+    const appOpened = Date.now();
+    setTimeout(() => {
+      window.location.href = scheme;
+      setTimeout(() => { if (Date.now() - appOpened < 3000) window.open(webUrl, '_blank'); }, 1500);
+    }, 800);
+  } else {
+    showToast(isES
+      ? '🎬 Video descargado · Caption copiado — pégalo en ' + pName
+      : '🎬 Video downloaded · Caption copied — paste it in ' + pName);
+    const urls = { instagram: 'https://www.instagram.com/', facebook: 'https://www.facebook.com/', tiktok: 'https://www.tiktok.com/' };
+    setTimeout(() => { window.open(urls[platform] || 'https://www.instagram.com/', '_blank'); }, 900);
+  }
 }
 
 async function saveVideoToHistory(videoUrl, topic) {
@@ -7007,12 +7023,11 @@ async function getCanvasBlob(format) {
   const primary = brand?.colors?.primary || '#2979FF';
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
-  // S29: Use originalImageUrl (clean) to avoid double overlay
-  const imgSrc = originalImageUrl || imgEl.src;
-  const img = await loadImg(imgSrc);
+  // S30: Use resultImg.src (data URL from redrawCanvas, already has logo/watermark)
+  // instead of originalImageUrl (R2 cross-origin URL that causes canvas tainting).
+  // Since the image already has overlay, we ONLY resize — no logo/watermark added here.
+  const img = await loadImg(imgEl.src);
   if(!img) return null;
-  const showLogo = document.getElementById('logoToggle')?.checked;
-  const logoSrc = logoB64 || brand?.logo;
 
   if (format === 'square') { canvas.width = canvas.height = 1080; drawCover(ctx, img, 0, 0, 1080, 1080); }
   else if (format === 'portrait') {
@@ -7028,40 +7043,7 @@ async function getCanvasBlob(format) {
     if (brand?.name) { ctx.fillStyle = 'rgba(255,255,255,.85)'; ctx.font = 'bold 32px Plus Jakarta Sans,sans-serif'; ctx.textAlign = 'center'; ctx.fillText(brand.name, 540, 1680); }
   }
 
-  if (showLogo && logoSrc) {
-    try {
-      const logo = await loadImg(logoSrc);
-      if (logo) {
-        const sz = Math.round(canvas.width * 0.13);
-        const x = canvas.width - sz - 20, y = canvas.height - sz - 20;
-        ctx.save();
-        ctx.beginPath(); ctx.arc(x + sz / 2, y + sz / 2, sz / 2 + 6, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(255,255,255,0.92)'; ctx.fill();
-        ctx.beginPath(); ctx.arc(x + sz / 2, y + sz / 2, sz / 2, 0, Math.PI * 2); ctx.clip();
-        ctx.drawImage(logo, x, y, sz, sz); ctx.restore();
-      }
-    } catch (e) { /* silent */ }
-  }
-
-  // Watermark
-  const wmPlan = brand?.plan || 'trial';
-  const wmToggleEl = document.getElementById('wmToggle');
-  const wmOff = wmToggleEl && !wmToggleEl.checked;
-  const showWm = !(['growth', 'agency'].includes(wmPlan) && wmOff);
-  if (showWm) {
-    const wmText = '✦ postimity.com';
-    const wfs = Math.round(canvas.width * 0.021);
-    ctx.font = '600 ' + wfs + 'px -apple-system,sans-serif';
-    const wtw = ctx.measureText(wmText).width;
-    const wpw = wtw + 20, wph = wfs + 12;
-    const wpx = canvas.width - wpw - 16, wpy = canvas.height - wph - 16;
-    ctx.save();
-    ctx.fillStyle = 'rgba(0,0,0,0.42)'; ctx.beginPath();
-    if (ctx.roundRect) ctx.roundRect(wpx, wpy, wpw, wph, 6); else ctx.rect(wpx, wpy, wpw, wph);
-    ctx.fill(); ctx.fillStyle = 'rgba(255,255,255,0.88)'; ctx.textBaseline = 'middle';
-    ctx.fillText(wmText, wpx + 10, wpy + wph / 2); ctx.restore();
-  }
-
+  // No logo/watermark here — already in the image from redrawCanvas
   return new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.93));
 }
 
@@ -7197,12 +7179,17 @@ async function downloadImg(format) {
   const primary=brand?.colors?.primary||'#2979FF';
   const canvas=document.createElement('canvas');
   const ctx=canvas.getContext('2d');
-  // S29: Use originalImageUrl (clean, no overlay) to avoid double logo/watermark
-  const imgSrc = originalImageUrl || imgEl.src;
-  const img=await loadImg(imgSrc);
+  // S30: Try originalImageUrl (clean, for adding fresh overlay), fallback to
+  // resultImg.src (data URL, already has overlay from redrawCanvas) if CORS blocks canvas
+  let img = await loadImg(originalImageUrl);
+  let imgFromDataUrl = false;
+  if (!img) {
+    img = await loadImg(imgEl.src); // data URL from redrawCanvas — never taints
+    imgFromDataUrl = true;
+  }
   if(!img) { showToast(detectLanguage()==='es'?'Error cargando imagen':'Error loading image'); return; }
   const showLogo = document.getElementById('logoToggle').checked;
-  const logoSrc = logoB64 || brand?.logo; // Use session upload or stored brand logo
+  const logoSrc = logoB64 || brand?.logo;
 
   // S29: drawCover center-crops the image preserving aspect ratio (no stretching)
   if(format==='square'){ canvas.width=canvas.height=1080; drawCover(ctx,img,0,0,1080,1080); }
@@ -7219,7 +7206,8 @@ async function downloadImg(format) {
     if(brand?.name){ ctx.fillStyle='rgba(255,255,255,.85)'; ctx.font='bold 32px Plus Jakarta Sans,sans-serif'; ctx.textAlign='center'; ctx.fillText(brand.name,540,1680); }
   }
 
-  if(showLogo && logoSrc) {
+  // Only add logo/watermark if using clean originalImageUrl (not data URL which already has overlay)
+  if (!imgFromDataUrl && showLogo && logoSrc) {
     try {
       const logo = await loadImg(logoSrc);
       if(logo) { // loadImg returns null on error
@@ -7238,7 +7226,8 @@ async function downloadImg(format) {
     } catch(e){ console.warn('Logo overlay failed:', e); }
   }
 
-  // ── Watermark "✦ postimity.com" ──────────────────────────────────────
+  // ── Watermark "✦ postimity.com" (skip if data URL — already has it) ──
+  if (!imgFromDataUrl) {
   const wmBrand = loadBrand();
   const wmPlan = wmBrand?.plan || 'trial';
   const wmToggleEl = document.getElementById('wmToggle');
@@ -7261,6 +7250,7 @@ async function downloadImg(format) {
     ctx.fillText(wmText, wpx + 10, wpy + wph/2);
     ctx.restore();
   }
+  } // end !imgFromDataUrl
 
   canvas.toBlob(blob=>{ const brd=loadBrand(); const sl=(brd?.name||'postimity').toLowerCase().replace(/[^a-z0-9]+/g,'-').slice(0,20); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=sl+'-'+format+'-'+Date.now()+'.jpg'; a.click(); setTimeout(()=>URL.revokeObjectURL(url),1000); },'image/jpeg',.93);
 }
