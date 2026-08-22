@@ -1937,7 +1937,7 @@ Ej: 'Wonderik es increíble. Mi hija de 3 años ya lee palabras cortas y su desa
 // ═══════════════════════════════════════════════════════
 // CONFIG
 // ═══════════════════════════════════════════════════════
-const POSTIMITY_VERSION = '2.21.0'; // Aug 21 2026 — Session 30: Integral audit fixes
+const POSTIMITY_VERSION = '2.22.0'; // Aug 22 2026 — Session 31: Mobile sharing fix + iOS-safe download
 console.log('Postimity Studio v' + POSTIMITY_VERSION);
 
 // ── GLOBAL ERROR HANDLER — prevents silent failures ──
@@ -4711,28 +4711,60 @@ async function shareVideoToSocial(platform) {
     }
   }
 
-  // 3. Fallback: Download video + open native app
-  if (videoEl && videoEl.src) {
-    const a = document.createElement('a');
-    a.href = videoEl.src; a.download = ((loadBrand()?.name||'postimity').toLowerCase().replace(/[^a-z0-9]+/g,'-').slice(0,20)) + '-video-' + Date.now() + '.mp4';
-    document.body.appendChild(a); a.click(); document.body.removeChild(a);
-  }
+  // 3. Fallback: Save video + open native app
+  const slug = (loadBrand()?.name||'postimity').toLowerCase().replace(/[^a-z0-9]+/g,'-').slice(0,20);
+  const vFilename = slug + '-video-' + Date.now() + '.mp4';
 
-  if (isMobile) {
-    // S30: URL schemes open native app; window.open is blocked on mobile
+  if (isMobile && videoEl && videoEl.src) {
+    // S31: iOS-safe video save — try Web Share "Save Video", then fallback
+    let saved = false;
+    if (navigator.share && navigator.canShare) {
+      try {
+        const resp = await fetch(videoEl.src);
+        const blob = await resp.blob();
+        const file = new File([blob], vFilename, { type: 'video/mp4' });
+        if (navigator.canShare({ files: [file] })) {
+          await navigator.share({ files: [file] });
+          return; // User chose destination via share sheet
+        }
+      } catch(e) {
+        if (e.name === 'AbortError') return;
+        console.warn('Video save via share failed:', e);
+      }
+    }
+    // iOS: open video in new tab for manual save; Android: <a download>
+    const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+    if (isIOS) {
+      window.open(videoEl.src, '_blank');
+      showToast(isES
+        ? '🎬 Mantén presionado el video → "Guardar video"\nCaption ya copiado ✓'
+        : '🎬 Long-press the video → "Save Video"\nCaption already copied ✓', 6000);
+    } else {
+      const a = document.createElement('a');
+      a.href = videoEl.src; a.download = vFilename;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      showToast(isES
+        ? '🎬 Video descargado · Caption copiado\n→ Selecciona el video del carrete\n→ Pega el caption'
+        : '🎬 Video downloaded · Caption copied\n→ Select the video from your gallery\n→ Paste the caption', 5000);
+    }
+
+    // Open social app after save
     const appSchemes = { instagram: 'instagram://library', facebook: 'fb://composer', tiktok: 'snssdk1233://' };
     const webUrls = { instagram: 'https://www.instagram.com/', facebook: 'https://www.facebook.com/', tiktok: 'https://www.tiktok.com/' };
-    showToast(isES
-      ? '🎬 Video descargado · Caption copiado\n→ Selecciona el video del carrete\n→ Pega el caption'
-      : '🎬 Video downloaded · Caption copied\n→ Select the video from your gallery\n→ Paste the caption', 5000);
     const scheme = appSchemes[platform] || appSchemes.instagram;
     const webUrl = webUrls[platform] || webUrls.instagram;
     const appOpened = Date.now();
     setTimeout(() => {
       window.location.href = scheme;
       setTimeout(() => { if (Date.now() - appOpened < 3000) window.open(webUrl, '_blank'); }, 1500);
-    }, 800);
+    }, 1200);
   } else {
+    // Desktop
+    if (videoEl && videoEl.src) {
+      const a = document.createElement('a');
+      a.href = videoEl.src; a.download = vFilename;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    }
     showToast(isES
       ? '🎬 Video descargado · Caption copiado — pégalo en ' + pName
       : '🎬 Video downloaded · Caption copied — paste it in ' + pName);
@@ -6825,6 +6857,14 @@ function showResult(data) {
   if(staleVDL) staleVDL.remove();
   resultImg.src=data.imageUrl||'';
   originalImageUrl = data.imageUrl || null; // S23: store for live preview
+  // S31 PC-2: Error handler if R2 image fails to load
+  resultImg.onerror = function() {
+    const isES = detectLanguage() === 'es';
+    showToast(isES
+      ? '⚠️ Error cargando imagen. Intenta generar de nuevo.'
+      : '⚠️ Image load error. Try generating again.');
+    resultImg.onerror = null;
+  };
   const pd=document.getElementById('photoDescBar');
   if(data.photoDescription){ pd.textContent='📷 '+data.photoDescription; pd.classList.add('show'); } else pd.classList.remove('show');
   // Show adjust + publish for ALL modes (including carousel)
@@ -6913,8 +6953,12 @@ function showResult(data) {
   // Show results
   document.getElementById('resultWrap').classList.add('show');
   document.getElementById('resultWrap').scrollIntoView({ behavior:'smooth', block:'start' });
-  // S23: Draw logo/watermark overlay on preview image
-  if (!isCarousel) { setTimeout(() => redrawCanvas(), 100); }
+  // S31: Wait for image to actually load before redrawCanvas (fixes mobile timing issue)
+  if (!isCarousel) {
+    const _ri = document.getElementById('resultImg');
+    if (_ri.complete && _ri.naturalWidth) { redrawCanvas(); }
+    else { _ri.addEventListener('load', function _rl(){ _ri.removeEventListener('load',_rl); redrawCanvas(); }, { once:true }); }
+  }
   // Increment generation counter
   const gmk = genMonthKey();
   localStorage.setItem(gmk, String(parseInt(localStorage.getItem(gmk)||'0') + 1));
@@ -7021,13 +7065,27 @@ async function getCanvasBlob(format) {
   if (!imgEl.src || imgEl.src === window.location.href) return null;
   const brand = loadBrand();
   const primary = brand?.colors?.primary || '#2979FF';
+
+  // S31: Try using resultImg directly in canvas first (already loaded, should be CORS-clean)
+  // If that fails (canvas tainted), fall back to ensureDataUrl conversion
+  let img = null;
+  try {
+    // Quick test: draw resultImg directly into a test canvas
+    const testCanvas = document.createElement('canvas');
+    testCanvas.width = 1; testCanvas.height = 1;
+    testCanvas.getContext('2d').drawImage(imgEl, 0, 0, 1, 1);
+    testCanvas.toDataURL(); // This throws if canvas is tainted
+    img = imgEl; // Safe to use directly
+  } catch(e) {
+    // Canvas tainted — try loadImg with CORS or ensureDataUrl
+    const dataUrl = await ensureDataUrl();
+    if (dataUrl) img = await loadImg(dataUrl);
+    if (!img) img = await loadImg(imgEl.src);
+    if (!img) return null;
+  }
+
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
-  // S30: Use resultImg.src (data URL from redrawCanvas, already has logo/watermark)
-  // instead of originalImageUrl (R2 cross-origin URL that causes canvas tainting).
-  // Since the image already has overlay, we ONLY resize — no logo/watermark added here.
-  const img = await loadImg(imgEl.src);
-  if(!img) return null;
 
   if (format === 'square') { canvas.width = canvas.height = 1080; drawCover(ctx, img, 0, 0, 1080, 1080); }
   else if (format === 'portrait') {
@@ -7076,33 +7134,99 @@ async function copyToClipboard(text) {
   }
 }
 
+// ─── S31: Ensure resultImg is a usable data URL for canvas/sharing ──
+async function ensureDataUrl() {
+  const imgEl = document.getElementById('resultImg');
+  if (!imgEl || !imgEl.src || imgEl.src === window.location.href) return null;
+  // Already a data URL → good
+  if (imgEl.src.startsWith('data:')) return imgEl.src;
+  // External URL → convert to data URL via canvas (guaranteed no CORS taint since
+  // resultImg has crossorigin="anonymous" and already loaded successfully)
+  try {
+    const canvas = document.createElement('canvas');
+    canvas.width = imgEl.naturalWidth || imgEl.width;
+    canvas.height = imgEl.naturalHeight || imgEl.height;
+    canvas.getContext('2d').drawImage(imgEl, 0, 0);
+    const du = canvas.toDataURL('image/jpeg', 0.92);
+    return du;
+  } catch(e) {
+    console.warn('ensureDataUrl canvas tainted, trying loadImg:', e);
+    // Canvas tainted — try loading fresh with CORS
+    const img = await loadImg(imgEl.src);
+    if (!img) return null;
+    try {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.naturalWidth || img.width;
+      canvas.height = img.naturalHeight || img.height;
+      canvas.getContext('2d').drawImage(img, 0, 0);
+      return canvas.toDataURL('image/jpeg', 0.92);
+    } catch(e2) { return null; }
+  }
+}
+
+// ─── S31: iOS-safe image save (blob → Web Share "Save Image" or fallback modal) ──
+async function saveImageMobile(blob, filename, isES) {
+  // Try Web Share API to save file (shows "Save Image" on iOS share sheet)
+  if (navigator.share && navigator.canShare) {
+    try {
+      const file = new File([blob], filename, { type: 'image/jpeg' });
+      const shareData = { files: [file] };
+      if (navigator.canShare(shareData)) {
+        await navigator.share(shareData);
+        return 'shared'; // User chose where to save/share
+      }
+    } catch(e) {
+      if (e.name === 'AbortError') return 'cancelled';
+      console.warn('Web Share save failed:', e);
+    }
+  }
+  // Fallback: create blob URL and open in new tab (user can long-press to save)
+  const blobUrl = URL.createObjectURL(blob);
+  // On iOS, <a download> doesn't work — open the image for manual save
+  const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+  if (isIOS) {
+    window.open(blobUrl, '_blank');
+    showToast(isES
+      ? '📷 Mantén presionada la imagen → "Guardar imagen"\nCaption ya copiado ✓'
+      : '📷 Long-press the image → "Save Image"\nCaption already copied ✓', 6000);
+    return 'opened';
+  }
+  // Android: <a download> usually works
+  const a = document.createElement('a');
+  a.href = blobUrl; a.download = filename;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(blobUrl), 5000);
+  return 'downloaded';
+}
+
 // ─── OPEN IN SOCIAL (with Web Share API) ────────────────────────
 async function openInSocial(platform) {
   const isES = detectLanguage() === 'es';
   const caption = getCaptionForPlatform(platform);
+  const pName = platform.charAt(0).toUpperCase() + platform.slice(1);
   const isCarouselMode = (mode === 'carousel' && carouselResults && carouselResults.length);
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const slug = (loadBrand()?.name || 'postimity').toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 20);
 
-  // 1. Always copy caption to clipboard first
+  // 1. Copy caption FIRST (must be in direct click context for clipboard to work)
   await copyToClipboard(caption);
 
-  // 2. Try Web Share API (works on mobile — opens native share sheet)
-  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  // 2. Try Web Share API with files (mobile — opens native share sheet with image)
   if (isMobile && navigator.share && navigator.canShare) {
     try {
       let files = [];
       if (isCarouselMode) {
-        // Convert carousel data URLs to File objects (Safari-safe — no fetch(data:URL))
         showToast(isES ? '📦 Preparando slides...' : '📦 Preparing slides...');
-        const wsSlug = (loadBrand()?.name || 'postimity').toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 20);
-        const wsTs = Date.now();
         for (let i = 0; i < carouselResults.length; i++) {
           const blob = dataUrlToBlob(carouselResults[i]);
-          files.push(new File([blob], wsSlug + '-slide-' + (i + 1) + '-' + wsTs + '.jpg', { type: 'image/jpeg' }));
+          files.push(new File([blob], slug + '-slide-' + (i + 1) + '-' + Date.now() + '.jpg', { type: 'image/jpeg' }));
         }
       } else {
-        // Single image from canvas (includes logo + watermark)
+        // S31: Ensure image source is usable for canvas operations
         const blob = await getCanvasBlob('square');
-        if (blob) { const pSlug = (loadBrand()?.name || 'postimity').toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 20); files.push(new File([blob], pSlug + '-post-' + Date.now() + '.jpg', { type: 'image/jpeg' })); }
+        if (blob) {
+          files.push(new File([blob], slug + '-post-' + Date.now() + '.jpg', { type: 'image/jpeg' }));
+        }
       }
 
       if (files.length) {
@@ -7116,53 +7240,49 @@ async function openInSocial(platform) {
         }
       }
     } catch (e) {
-      if (e.name === 'AbortError') return; // User cancelled — don't fall through
+      if (e.name === 'AbortError') return;
       console.warn('Web Share failed, using fallback:', e);
     }
   }
 
-  // 3. Fallback: Download image + open native app via URL scheme
-  if (isCarouselMode) {
-    downloadAllSlides();
-  } else {
-    await downloadImg('square');
-  }
-
-  // 4. Open native app (mobile) or website (desktop)
-  const pName = platform.charAt(0).toUpperCase() + platform.slice(1);
+  // 3. Fallback path — save image then open social app
   if (isMobile) {
-    // S30: URL schemes open the native app directly from the browser
-    const appSchemes = {
-      instagram: 'instagram://library',
-      facebook:  'fb://composer',
-      tiktok:    'snssdk1233://'
-    };
-    const webUrls = {
-      instagram: 'https://www.instagram.com/',
-      facebook:  'https://www.facebook.com/',
-      tiktok:    'https://www.tiktok.com/'
-    };
+    // S31: iOS-safe image saving (no <a download> — it doesn't work on iOS)
+    if (isCarouselMode) {
+      // Carousel: save all slides via ZIP (downloadAllSlides handles this)
+      downloadAllSlides();
+    } else {
+      const blob = await getCanvasBlob('square');
+      if (blob) {
+        const result = await saveImageMobile(blob, slug + '-post-' + Date.now() + '.jpg', isES);
+        if (result === 'cancelled') return;
+        if (result === 'shared') return; // Web Share handled everything
+        // 'opened' (iOS) or 'downloaded' (Android) — continue to open social app
+      }
+    }
 
-    showToast(isES
-      ? '✅ Imagen guardada · Caption copiado\n→ Selecciona la foto del carrete\n→ Pega el caption'
-      : '✅ Image saved · Caption copied\n→ Select the photo from your gallery\n→ Paste the caption', 5000);
-
-    // Try to open native app; if not installed, fall back to web after 1.5s
+    // S31: Open social app AFTER image is saved (not during)
+    const appSchemes = { instagram: 'instagram://library', facebook: 'fb://composer', tiktok: 'snssdk1233://' };
+    const webUrls = { instagram: 'https://www.instagram.com/', facebook: 'https://www.facebook.com/', tiktok: 'https://www.tiktok.com/' };
     const scheme = appSchemes[platform] || appSchemes.instagram;
     const webUrl = webUrls[platform] || webUrls.instagram;
-    const appOpened = Date.now();
 
+    if (!(/iPhone|iPad|iPod/i.test(navigator.userAgent))) {
+      // Android: show instructions then open app
+      showToast(isES
+        ? '✅ Imagen guardada · Caption copiado\n→ Selecciona la foto del carrete\n→ Pega el caption'
+        : '✅ Image saved · Caption copied\n→ Select the photo from your gallery\n→ Paste the caption', 5000);
+    }
+
+    const appOpened = Date.now();
     setTimeout(() => {
       window.location.href = scheme;
-      // If app not installed, iOS stays on the page — detect and open web version
-      setTimeout(() => {
-        if (Date.now() - appOpened < 3000) {
-          window.open(webUrl, '_blank');
-        }
-      }, 1500);
-    }, 800); // Small delay so image download completes first
+      setTimeout(() => { if (Date.now() - appOpened < 3000) window.open(webUrl, '_blank'); }, 1500);
+    }, 1200);
   } else {
-    // Desktop: open platform website
+    // Desktop: download + open platform website
+    if (isCarouselMode) { downloadAllSlides(); }
+    else { await downloadImg('square'); }
     showToast(isES
       ? '📸 Imagen descargada · Caption copiado — pégalo en ' + pName
       : '📸 Image downloaded · Caption copied — paste it in ' + pName);
