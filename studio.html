@@ -4820,12 +4820,19 @@ function getNextRenewalDate() {
   return '1 de ' + t('monthsLower')[next.getMonth()] + ' de ' + next.getFullYear();
 }
 
-function showCuentaScreen() {
+async function showCuentaScreen() {
   document.querySelectorAll('.screen').forEach(s => { s.classList.remove('active'); s.style.display = ''; });
   const el = document.getElementById('cuentaScreen');
   if(el) { el.classList.add('active'); el.style.display = 'block'; }
   window.scrollTo(0, 0);
-  renderCuenta();
+  renderCuenta(); // Show immediately with cached data
+  // S32: Sync from server THEN re-render with fresh data
+  const brand = loadBrand();
+  if (brand?.brandId) {
+    await loadBrandFromCloud(brand.brandId);
+    renderCuenta(); // Re-render with server data
+    updateGenCounter(); // Update header bar too
+  }
   loadGallery();
   updateChangeEmailDisplay();
 }
@@ -6935,10 +6942,19 @@ function showResult(data) {
     if (_ri.complete && _ri.naturalWidth) { redrawCanvas(); }
     else { _ri.addEventListener('load', function _rl(){ _ri.removeEventListener('load',_rl); redrawCanvas(); }, { once:true }); }
   }
-  // Increment generation counter
+  // S32: Use server-authoritative genCount if available, fallback to local +1
   const gmk = genMonthKey();
-  localStorage.setItem(gmk, String(parseInt(localStorage.getItem(gmk)||'0') + 1));
-  genCount = parseInt(localStorage.getItem(gmk));
+  if (typeof data.genCount === 'number') {
+    localStorage.setItem(gmk, String(data.genCount));
+    genCount = data.genCount;
+  } else {
+    localStorage.setItem(gmk, String(parseInt(localStorage.getItem(gmk)||'0') + 1));
+    genCount = parseInt(localStorage.getItem(gmk));
+  }
+  // Video counter sync
+  if (typeof data.videoCount === 'number') {
+    localStorage.setItem(videoMonthKey(), String(data.videoCount));
+  }
   // Auto-save to cloud history (non-blocking)
   autoSavePost(data);
   // Show gen count in cloud bar
