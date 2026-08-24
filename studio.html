@@ -1937,7 +1937,7 @@ Ej: 'Wonderik es increíble. Mi hija de 3 años ya lee palabras cortas y su desa
 // ═══════════════════════════════════════════════════════
 // CONFIG
 // ═══════════════════════════════════════════════════════
-const POSTIMITY_VERSION = '2.22.0'; // Aug 22 2026 — Session 31: Mobile sharing fix + iOS-safe download
+const POSTIMITY_VERSION = '2.23.0'; // Aug 23 2026 — Session 32: QA architecture + Stripe timeout fix
 console.log('Postimity Studio v' + POSTIMITY_VERSION);
 
 // ── GLOBAL ERROR HANDLER — prevents silent failures ──
@@ -4669,17 +4669,7 @@ function showVideoResult(videoUrl, topic, captionsData) {
   saveVideoToHistory(videoUrl, topic);
   updateGenCounter();
 }
-function switchVideoCap(tab, btn) {
-  document.querySelectorAll('.vcap-content').forEach(el => el.style.display = 'none');
-  document.querySelectorAll('.vcap-tab').forEach(el => { el.classList.remove('active'); el.style.background='transparent'; el.style.color='var(--t3)'; });
-  const target = document.getElementById('vcap-' + tab);
-  if(target) target.style.display = 'block';
-  btn.classList.add('active'); btn.style.background='var(--b3)'; btn.style.color='var(--b2)';
-}
-function copyVideoCaption() {
-  const visible = document.querySelector('.vcap-content[style*="block"]') || document.getElementById('vcap-ig');
-  if(visible) navigator.clipboard.writeText(visible.textContent).then(() => showToast(detectLanguage()==='es'?'Caption copiado \u2713':'Caption copied \u2713'));
-}
+// [S32 cleanup] switchVideoCap and copyVideoCaption removed — dead code since showVideoResult uses fillCaptions()
 
 async function shareVideoToSocial(platform) {
   const isES = detectLanguage() === 'es';
