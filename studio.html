@@ -1801,27 +1801,24 @@ Ej: 'Wonderik es increíble. Mi hija de 3 años ya lee palabras cortas y su desa
                 <span class="lt-slider"></span>
               </label>
             </div>
-            <!-- Open in social — PRIMARY ACTION -->
+            <!-- Share section — S32: simplified architecture -->
             <div class="pub-section" id="pubSection">
-              <div class="pub-label">📤 Publicar en redes sociales</div>
+              <div class="pub-label" id="pubLabel">📤 Publicar en redes sociales</div>
               <div class="pub-btns">
                 <button class="pub-btn ig" onclick="openInSocial('instagram')">
-                  📸 Instagram<br><span style="font-size:9px;font-weight:400">Copiar + Descargar + Abrir</span>
+                  📸 Instagram<br><span style="font-size:9px;font-weight:400">4:5 · Guardar + Copiar</span>
                 </button>
                 <button class="pub-btn fb" onclick="openInSocial('facebook')">
-                  👥 Facebook<br><span style="font-size:9px;font-weight:400">Copiar + Descargar + Abrir</span>
+                  👥 Facebook<br><span style="font-size:9px;font-weight:400">1:1 · Guardar + Copiar</span>
                 </button>
                 <button class="pub-btn tk" onclick="openInSocial('tiktok')">
-                  🎵 TikTok<br><span style="font-size:9px;font-weight:400">Copiar + Descargar + Abrir</span>
+                  🎵 TikTok<br><span style="font-size:9px;font-weight:400">9:16 · Guardar + Copiar</span>
                 </button>
               </div>
-              <div class="pub-hint">💡 Un toque: se copia el caption, se descarga la imagen y se abre la app — solo pega y publica</div>
+              <div class="pub-hint" id="pubHint">💡 Guarda la imagen en el formato ideal y copia el caption — luego abre la app y pega</div>
             </div>
-            <div class="dl-label">⬇ Solo descargar imagen</div>
-            <div class="dl-btns">
-              <button class="btn-dl" onclick="downloadImg('square')">1:1<br><span style="font-size:9px;font-weight:400">Feed</span></button>
-              <button class="btn-dl" onclick="downloadImg('portrait')">4:5<br><span style="font-size:9px;font-weight:400">IG Feed</span></button>
-              <button class="btn-dl" onclick="downloadImg('story')">9:16<br><span style="font-size:9px;font-weight:400">Stories</span></button>
+            <div class="dl-btns" style="justify-content:center">
+              <button class="btn-dl" onclick="downloadImg('square')" style="flex:1;max-width:200px">⬇ Descargar imagen<br><span style="font-size:9px;font-weight:400">1:1 · Para WhatsApp, email, etc.</span></button>
             </div>
           </div>
         </div>
@@ -2109,7 +2106,7 @@ const T = {
     logoInImgLabel:'🏷️ Logo en la imagen',
     wmLabel:'✦ Watermark Postimity', wmLock:'Growth+ para quitar',
     pubLabel:'📤 Publicar en redes sociales',
-    pubCopySub:'Copiar + Descargar + Abrir', pubHint:'💡 Un toque: se copia el caption, se descarga la imagen y se abre la app — solo pega y publica',
+    pubCopySub:'Guardar + Copiar caption', pubHint:'💡 Guarda la imagen en el formato ideal y copia el caption — luego abre la app y pega',
     dlLabel:'⬇ Solo descargar imagen',
     copyForIG:'📋 Copiar para Instagram', copyForFB:'📋 Copiar para Facebook', copyForTK:'📋 Copiar para TikTok',
     postHintIG:'⏰ <strong>Mejor hora:</strong> Martes a Viernes, 9-11am o 6-8pm · Objetivo: que lo guarden y lo compartan por DM',
@@ -2379,7 +2376,7 @@ const T = {
     logoInImgLabel:'🏷️ Logo on image',
     wmLabel:'✦ Watermark Postimity', wmLock:'Growth+ to remove',
     pubLabel:'📤 Publish to social media',
-    pubCopySub:'Copy + Download + Open', pubHint:'💡 One tap: copies the caption, downloads the image and opens the app — just paste and publish',
+    pubCopySub:'Save + Copy caption', pubHint:'💡 Saves the image in the ideal format and copies the caption — then open the app and paste',
     dlLabel:'⬇ Download image only',
     copyForIG:'📋 Copy for Instagram', copyForFB:'📋 Copy for Facebook', copyForTK:'📋 Copy for TikTok',
     postHintIG:'⏰ <strong>Best time:</strong> Tue–Fri, 9-11am or 6-8pm · Goal: saves + DM shares',
@@ -4580,8 +4577,8 @@ function showVideoResult(videoUrl, topic, captionsData) {
     if(pubLabel) pubLabel.textContent = isES ? '📤 Publicar video en redes sociales' : '📤 Publish video to social media';
     const pubHint = pubSection.querySelector('.pub-hint');
     if(pubHint) pubHint.textContent = isES
-      ? '💡 Un toque: se copia el caption, se descarga el video y puedes subirlo a la app'
-      : '💡 One tap: copies the caption, downloads the video so you can upload it to the app';
+      ? '💡 Guarda el video y copia el caption — luego abre la app y pega'
+      : '💡 Saves the video and copies the caption — then open the app and paste';
     // Replace button onclick to use video share
     const pubBtns = pubSection.querySelectorAll('.pub-btn');
     pubBtns.forEach(btn => {
@@ -4671,43 +4668,25 @@ function showVideoResult(videoUrl, topic, captionsData) {
 }
 // [S32 cleanup] switchVideoCap and copyVideoCaption removed — dead code since showVideoResult uses fillCaptions()
 
+// S32: Simplified video sharing — same architecture as openInSocial
 async function shareVideoToSocial(platform) {
   const isES = detectLanguage() === 'es';
   const caption = getCaptionForPlatform(platform);
   const pName = platform.charAt(0).toUpperCase() + platform.slice(1);
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const slug = (loadBrand()?.name||'postimity').toLowerCase().replace(/[^a-z0-9]+/g,'-').slice(0,20);
+  const videoEl = document.querySelector('#videoPlayerWrap video');
 
-  // 1. Copy caption
+  // 1. Copy caption FIRST (RD-4)
   await copyToClipboard(caption);
 
-  // 2. Try Web Share API (mobile — share video directly to app)
-  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-  const videoEl = document.querySelector('#videoPlayerWrap video');
-  if (isMobile && navigator.share && navigator.canShare && videoEl && videoEl.src) {
-    try {
-      const resp = await fetch(videoEl.src);
-      const blob = await resp.blob();
-      const file = new File([blob], ((loadBrand()?.name||'postimity').toLowerCase().replace(/[^a-z0-9]+/g,'-').slice(0,20)) + '-video-' + Date.now() + '.mp4', { type: 'video/mp4' });
-      const shareData = { files: [file] };
-      if (navigator.canShare(shareData)) {
-        await navigator.share(shareData);
-        showToast(isES
-          ? '✅ ¡Listo! Pega el caption (ya está copiado)'
-          : '✅ Done! Paste the caption (already copied)');
-        return;
-      }
-    } catch (e) {
-      if (e.name === 'AbortError') return;
-      console.warn('Web Share video failed, using fallback:', e);
-    }
-  }
-
-  // 3. Fallback: Save video + open native app
-  const slug = (loadBrand()?.name||'postimity').toLowerCase().replace(/[^a-z0-9]+/g,'-').slice(0,20);
-  const vFilename = slug + '-video-' + Date.now() + '.mp4';
-
+  // 2. Save video
+  let saved = false;
   if (isMobile && videoEl && videoEl.src) {
-    // S31: iOS-safe video save — try Web Share "Save Video", then fallback
-    let saved = false;
+    const vFilename = slug + '-video-' + Date.now() + '.mp4';
+
+    // Try Web Share API
     if (navigator.share && navigator.canShare) {
       try {
         const resp = await fetch(videoEl.src);
@@ -4715,51 +4694,51 @@ async function shareVideoToSocial(platform) {
         const file = new File([blob], vFilename, { type: 'video/mp4' });
         if (navigator.canShare({ files: [file] })) {
           await navigator.share({ files: [file] });
-          return; // User chose destination via share sheet
+          saved = true;
         }
       } catch(e) {
         if (e.name === 'AbortError') return;
-        console.warn('Video save via share failed:', e);
+        console.warn('Video share failed:', e);
       }
     }
-    // iOS: open video in new tab for manual save; Android: <a download>
-    const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-    if (isIOS) {
-      window.open(videoEl.src, '_blank');
-      showToast(isES
-        ? '🎬 Mantén presionado el video → "Guardar video"\nCaption ya copiado ✓'
-        : '🎬 Long-press the video → "Save Video"\nCaption already copied ✓', 6000);
-    } else {
-      const a = document.createElement('a');
-      a.href = videoEl.src; a.download = vFilename;
-      document.body.appendChild(a); a.click(); document.body.removeChild(a);
-      showToast(isES
-        ? '🎬 Video descargado · Caption copiado\n→ Selecciona el video del carrete\n→ Pega el caption'
-        : '🎬 Video downloaded · Caption copied\n→ Select the video from your gallery\n→ Paste the caption', 5000);
-    }
 
-    // Open social app after save
-    const appSchemes = { instagram: 'instagram://library', facebook: 'fb://composer', tiktok: 'snssdk1233://' };
-    const webUrls = { instagram: 'https://www.instagram.com/', facebook: 'https://www.facebook.com/', tiktok: 'https://www.tiktok.com/' };
-    const scheme = appSchemes[platform] || appSchemes.instagram;
-    const webUrl = webUrls[platform] || webUrls.instagram;
-    const appOpened = Date.now();
-    setTimeout(() => {
-      window.location.href = scheme;
-      setTimeout(() => { if (Date.now() - appOpened < 3000) window.open(webUrl, '_blank'); }, 1500);
-    }, 1200);
-  } else {
-    // Desktop
-    if (videoEl && videoEl.src) {
-      const a = document.createElement('a');
-      a.href = videoEl.src; a.download = vFilename;
-      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    // Fallback
+    if (!saved) {
+      if (isIOS) {
+        window.open(videoEl.src, '_blank');
+      } else {
+        const a = document.createElement('a');
+        a.href = videoEl.src; a.download = vFilename;
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      }
+      saved = true;
     }
-    showToast(isES
-      ? '🎬 Video descargado · Caption copiado — pégalo en ' + pName
-      : '🎬 Video downloaded · Caption copied — paste it in ' + pName);
-    const urls = { instagram: 'https://www.instagram.com/', facebook: 'https://www.facebook.com/', tiktok: 'https://www.tiktok.com/' };
-    setTimeout(() => { window.open(urls[platform] || 'https://www.instagram.com/', '_blank'); }, 900);
+  } else if (videoEl && videoEl.src) {
+    // Desktop
+    const vFilename = slug + '-video-' + Date.now() + '.mp4';
+    const a = document.createElement('a');
+    a.href = videoEl.src; a.download = vFilename;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    saved = true;
+  }
+
+  // 3. Show instructions
+  if (saved) {
+    let msg;
+    if (isMobile && isIOS) {
+      msg = isES
+        ? '📋 Caption copiado ✓\n🎬 Guarda el video desde la pestaña\n→ Abre ' + pName + ', selecciona el video y pega'
+        : '📋 Caption copied ✓\n🎬 Save the video from the tab\n→ Open ' + pName + ', select the video and paste';
+    } else if (isMobile) {
+      msg = isES
+        ? '✅ Video guardado · Caption copiado ✓\n→ Abre ' + pName + ', selecciona el video y pega'
+        : '✅ Video saved · Caption copied ✓\n→ Open ' + pName + ', select the video and paste';
+    } else {
+      msg = isES
+        ? '🎬 Video descargado · Caption copiado ✓\n→ Abre ' + pName + ' y pega el caption'
+        : '🎬 Video downloaded · Caption copied ✓\n→ Open ' + pName + ' and paste the caption';
+    }
+    showToast(msg, 6000);
   }
 }
 
@@ -6455,7 +6434,14 @@ function applyBilingualUI() {
   const wmLbl = document.querySelector('.wm-label'); if(wmLbl) wmLbl.innerHTML = t('wmLabel') + ' <span class="wm-lock" id="wmLockBadge">' + t('wmLock') + '</span>';
   // Publish section
   const pubLbl = document.querySelector('.pub-label'); if(pubLbl) pubLbl.textContent = t('pubLabel');
-  document.querySelectorAll('.pub-btn span').forEach(s => s.textContent = t('pubCopySub'));
+  const pubFormats = { ig: '4:5', fb: '1:1', tk: '9:16' };
+  document.querySelectorAll('.pub-btn').forEach(btn => {
+    const span = btn.querySelector('span');
+    if (span) {
+      const plat = btn.classList.contains('ig') ? 'ig' : btn.classList.contains('fb') ? 'fb' : 'tk';
+      span.textContent = pubFormats[plat] + ' · ' + t('pubCopySub');
+    }
+  });
   const pubHintEl = document.querySelector('.pub-hint'); if(pubHintEl) pubHintEl.textContent = t('pubHint');
   const dlLbl = document.querySelector('.dl-label'); if(dlLbl) dlLbl.textContent = t('dlLabel');
   // Caption copy buttons
@@ -6895,8 +6881,8 @@ function showResult(data) {
     if(pubLabel) pubLabel.textContent = isES ? '📤 Publicar carrusel en redes sociales' : '📤 Publish carousel to social media';
     const pubHint = pubSec.querySelector('.pub-hint');
     if(pubHint) pubHint.textContent = isES
-      ? '💡 Un toque: se copia el caption, se descargan todos los slides y se abre la app — súbelos como carrusel'
-      : '💡 One tap: copies the caption, downloads all slides and opens the app — upload as carousel';
+      ? '💡 Guarda todos los slides y copia el caption — luego abre la app y súbelos como carrusel'
+      : '💡 Saves all slides and copies the caption — then open the app and upload as carousel';
   }
   // First post celebration
   showFirstPostCelebration();
@@ -7154,132 +7140,91 @@ async function ensureDataUrl() {
   }
 }
 
-// ─── S31: iOS-safe image save (blob → Web Share "Save Image" or fallback modal) ──
-async function saveImageMobile(blob, filename, isES) {
-  // Try Web Share API to save file (shows "Save Image" on iOS share sheet)
-  if (navigator.share && navigator.canShare) {
-    try {
-      const file = new File([blob], filename, { type: 'image/jpeg' });
-      const shareData = { files: [file] };
-      if (navigator.canShare(shareData)) {
-        await navigator.share(shareData);
-        return 'shared'; // User chose where to save/share
-      }
-    } catch(e) {
-      if (e.name === 'AbortError') return 'cancelled';
-      console.warn('Web Share save failed:', e);
-    }
-  }
-  // Fallback: create blob URL and open in new tab (user can long-press to save)
-  const blobUrl = URL.createObjectURL(blob);
-  // On iOS, <a download> doesn't work — open the image for manual save
-  const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-  if (isIOS) {
-    window.open(blobUrl, '_blank');
-    showToast(isES
-      ? '📷 Mantén presionada la imagen → "Guardar imagen"\nCaption ya copiado ✓'
-      : '📷 Long-press the image → "Save Image"\nCaption already copied ✓', 6000);
-    return 'opened';
-  }
-  // Android: <a download> usually works
-  const a = document.createElement('a');
-  a.href = blobUrl; a.download = filename;
-  document.body.appendChild(a); a.click(); document.body.removeChild(a);
-  setTimeout(() => URL.revokeObjectURL(blobUrl), 5000);
-  return 'downloaded';
-}
 
-// ─── OPEN IN SOCIAL (with Web Share API) ────────────────────────
+// [S32] saveImageMobile removed — logic inlined in openInSocial
+// ─── S32: Simplified sharing — save in platform format + copy caption ─────
+// Rule: Each button = save image in optimal format + copy caption + instructions
+// Never auto-opens apps. Works on: iOS Safari, iOS in-app browsers, Android, Desktop
+// Platform formats: Instagram 4:5, Facebook 1:1, TikTok 9:16
 async function openInSocial(platform) {
   const isES = detectLanguage() === 'es';
   const caption = getCaptionForPlatform(platform);
   const pName = platform.charAt(0).toUpperCase() + platform.slice(1);
   const isCarouselMode = (mode === 'carousel' && carouselResults && carouselResults.length);
   const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
   const slug = (loadBrand()?.name || 'postimity').toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 20);
 
-  // 1. Copy caption FIRST (must be in direct click context for clipboard to work)
+  // Platform-specific image format
+  const platformFormats = { instagram: 'portrait', facebook: 'square', tiktok: 'story' };
+  const format = platformFormats[platform] || 'square';
+  const formatLabels = { portrait: '4:5', square: '1:1', story: '9:16' };
+
+  // 1. Copy caption FIRST (must be first await — iOS clipboard requirement, RD-4)
   await copyToClipboard(caption);
 
-  // 2. Try Web Share API with files (mobile — opens native share sheet with image)
-  if (isMobile && navigator.share && navigator.canShare) {
-    try {
-      let files = [];
-      if (isCarouselMode) {
-        showToast(isES ? '📦 Preparando slides...' : '📦 Preparing slides...');
-        for (let i = 0; i < carouselResults.length; i++) {
-          const blob = dataUrlToBlob(carouselResults[i]);
-          files.push(new File([blob], slug + '-slide-' + (i + 1) + '-' + Date.now() + '.jpg', { type: 'image/jpeg' }));
-        }
-      } else {
-        // S31: Ensure image source is usable for canvas operations
-        const blob = await getCanvasBlob('square');
-        if (blob) {
-          files.push(new File([blob], slug + '-post-' + Date.now() + '.jpg', { type: 'image/jpeg' }));
+  // 2. Save image in platform-optimal format
+  let saved = false;
+  if (isCarouselMode) {
+    downloadAllSlides();
+    saved = true;
+  } else {
+    const blob = await getCanvasBlob(format);
+    if (blob) {
+      const filename = slug + '-' + platform + '-' + formatLabels[format] + '-' + Date.now() + '.jpg';
+
+      // Try Web Share API first (best UX on mobile — shows native save/share)
+      if (isMobile && navigator.share && navigator.canShare) {
+        try {
+          const file = new File([blob], filename, { type: 'image/jpeg' });
+          if (navigator.canShare({ files: [file] })) {
+            await navigator.share({ files: [file] });
+            saved = true;
+          }
+        } catch(e) {
+          if (e.name === 'AbortError') return;
+          console.warn('Share API save failed:', e);
         }
       }
 
-      if (files.length) {
-        const shareData = { files: files };
-        if (navigator.canShare(shareData)) {
-          await navigator.share(shareData);
-          showToast(isES
-            ? '✅ ¡Listo! Pega el caption (ya está copiado)'
-            : '✅ Done! Paste the caption (already copied)');
-          return;
+      // Fallback: blob URL save
+      if (!saved) {
+        const blobUrl = URL.createObjectURL(blob);
+        if (isIOS) {
+          window.open(blobUrl, '_blank');
+        } else {
+          const a = document.createElement('a');
+          a.href = blobUrl; a.download = filename;
+          document.body.appendChild(a); a.click(); document.body.removeChild(a);
+          setTimeout(() => URL.revokeObjectURL(blobUrl), 5000);
         }
+        saved = true;
       }
-    } catch (e) {
-      if (e.name === 'AbortError') return;
-      console.warn('Web Share failed, using fallback:', e);
     }
   }
 
-  // 3. Fallback path — save image then open social app
-  if (isMobile) {
-    // S31: iOS-safe image saving (no <a download> — it doesn't work on iOS)
-    if (isCarouselMode) {
-      // Carousel: save all slides via ZIP (downloadAllSlides handles this)
-      downloadAllSlides();
+  // 3. Show clear instructions
+  if (saved) {
+    const fmtInfo = '(' + formatLabels[format] + ')';
+    let msg;
+    if (isMobile && isIOS) {
+      msg = isES
+        ? '📋 Caption copiado ✓\n📷 Guarda la imagen ' + fmtInfo + ' desde la pestaña\n→ Abre ' + pName + ', selecciona la foto y pega'
+        : '📋 Caption copied ✓\n📷 Save the image ' + fmtInfo + ' from the tab\n→ Open ' + pName + ', select the photo and paste';
+    } else if (isMobile) {
+      msg = isES
+        ? '✅ Imagen ' + fmtInfo + ' guardada · Caption copiado ✓\n→ Abre ' + pName + ', selecciona la foto y pega'
+        : '✅ Image ' + fmtInfo + ' saved · Caption copied ✓\n→ Open ' + pName + ', select the photo and paste';
     } else {
-      const blob = await getCanvasBlob('square');
-      if (blob) {
-        const result = await saveImageMobile(blob, slug + '-post-' + Date.now() + '.jpg', isES);
-        if (result === 'cancelled') return;
-        if (result === 'shared') return; // Web Share handled everything
-        // 'opened' (iOS) or 'downloaded' (Android) — continue to open social app
-      }
+      msg = isES
+        ? '📸 Imagen ' + fmtInfo + ' descargada · Caption copiado ✓\n→ Abre ' + pName + ' y pega el caption'
+        : '📸 Image ' + fmtInfo + ' downloaded · Caption copied ✓\n→ Open ' + pName + ' and paste the caption';
     }
-
-    // S31: Open social app AFTER image is saved (not during)
-    const appSchemes = { instagram: 'instagram://library', facebook: 'fb://composer', tiktok: 'snssdk1233://' };
-    const webUrls = { instagram: 'https://www.instagram.com/', facebook: 'https://www.facebook.com/', tiktok: 'https://www.tiktok.com/' };
-    const scheme = appSchemes[platform] || appSchemes.instagram;
-    const webUrl = webUrls[platform] || webUrls.instagram;
-
-    if (!(/iPhone|iPad|iPod/i.test(navigator.userAgent))) {
-      // Android: show instructions then open app
-      showToast(isES
-        ? '✅ Imagen guardada · Caption copiado\n→ Selecciona la foto del carrete\n→ Pega el caption'
-        : '✅ Image saved · Caption copied\n→ Select the photo from your gallery\n→ Paste the caption', 5000);
-    }
-
-    const appOpened = Date.now();
-    setTimeout(() => {
-      window.location.href = scheme;
-      setTimeout(() => { if (Date.now() - appOpened < 3000) window.open(webUrl, '_blank'); }, 1500);
-    }, 1200);
-  } else {
-    // Desktop: download + open platform website
-    if (isCarouselMode) { downloadAllSlides(); }
-    else { await downloadImg('square'); }
-    showToast(isES
-      ? '📸 Imagen descargada · Caption copiado — pégalo en ' + pName
-      : '📸 Image downloaded · Caption copied — paste it in ' + pName);
-    const urls = { instagram: 'https://www.instagram.com/', facebook: 'https://www.facebook.com/', tiktok: 'https://www.tiktok.com/' };
-    setTimeout(() => { window.open(urls[platform] || 'https://www.instagram.com/', '_blank'); }, 900);
+    showToast(msg, 6000);
   }
 }
+
+
 
 // ─── DOWNLOAD ─────────────────────────────────────────
 async function downloadImg(format) {
@@ -7858,12 +7803,12 @@ function initFeedbackWidget() {
   if(el('fbSuccessClose')) el('fbSuccessClose').textContent = isES ? 'Cerrar' : 'Close';
   // FAQ items
   const faqData = isES
-    ? [['¿Cómo publico en Instagram/Facebook/TikTok?','Genera un post, toca el botón de la plataforma. Postimity copia el caption y descarga la imagen — solo pega y publica.'],
+    ? [['¿Cómo publico en Instagram/Facebook/TikTok?','Genera un post, toca el botón de la plataforma. Postimity guarda la imagen en el formato ideal y copia el caption — abre la app, selecciona la foto y pega.'],
        ['¿Los videos cuentan como generaciones?','No. Videos y generaciones tienen contadores separados. Ambos se reinician cada mes.'],
        ['¿Cómo cambio mi plan?','Ve a "Mi cuenta" en la barra superior. Ahí puedes ver tu plan actual y opciones de upgrade.'],
        ['¿Puedo editar mi Brand Guide?','Sí. Toca el chip de tu marca en la esquina superior y edita cualquier campo.'],
        ['¿Necesito más ayuda?','Escríbenos a support@postimity.com y te respondemos en menos de 24 horas.']]
-    : [['How do I publish to Instagram/Facebook/TikTok?','Generate a post, tap the platform button. Postimity copies the caption and downloads the image — just paste and publish.'],
+    : [['How do I publish to Instagram/Facebook/TikTok?','Generate a post, tap the platform button. Postimity saves the image in the ideal format and copies the caption — open the app, select the photo and paste.'],
        ['Do videos count as generations?','No. Videos and generations have separate counters. Both reset monthly.'],
        ['How do I change my plan?','Go to "My Account" in the top bar. You can see your current plan and upgrade options.'],
        ['Can I edit my Brand Guide?','Yes. Tap your brand chip in the top corner and edit any field.'],
