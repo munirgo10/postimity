@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
+<meta name="app-version" content="2.24.0">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Postimity Studio — Tu estudio de contenido con AI</title>
 <meta name="description" content="Crea posts, flyers, carruseles y videos profesionales con AI. Describe tu negocio una vez y genera contenido listo para publicar en 20 segundos.">
@@ -1806,19 +1807,19 @@ Ej: 'Wonderik es increíble. Mi hija de 3 años ya lee palabras cortas y su desa
               <div class="pub-label" id="pubLabel">📤 Publicar en redes sociales</div>
               <div class="pub-btns">
                 <button class="pub-btn ig" onclick="openInSocial('instagram')">
-                  📸 Instagram<br><span style="font-size:9px;font-weight:400">4:5 · Guardar + Copiar</span>
+                  📸 Instagram<br><span class="fmt-lbl" id="fmtIg" style="font-size:9px;font-weight:400">4:5 · Guardar + Copiar</span>
                 </button>
                 <button class="pub-btn fb" onclick="openInSocial('facebook')">
-                  👥 Facebook<br><span style="font-size:9px;font-weight:400">1:1 · Guardar + Copiar</span>
+                  👥 Facebook<br><span class="fmt-lbl" id="fmtFb" style="font-size:9px;font-weight:400">1:1 · Guardar + Copiar</span>
                 </button>
                 <button class="pub-btn tk" onclick="openInSocial('tiktok')">
-                  🎵 TikTok<br><span style="font-size:9px;font-weight:400">9:16 · Guardar + Copiar</span>
+                  🎵 TikTok<br><span class="fmt-lbl" id="fmtTk" style="font-size:9px;font-weight:400">9:16 · Guardar + Copiar</span>
                 </button>
               </div>
               <div class="pub-hint" id="pubHint">💡 Guarda la imagen en el formato ideal y copia el caption — luego abre la app y pega</div>
             </div>
             <div class="dl-btns" style="justify-content:center">
-              <button class="btn-dl" onclick="downloadImg('square')" style="flex:1;max-width:200px">⬇ Descargar imagen<br><span style="font-size:9px;font-weight:400">1:1 · Para WhatsApp, email, etc.</span></button>
+              <button class="btn-dl" onclick="downloadImg('square')" style="flex:1;max-width:200px">⬇ Descargar imagen<br><span class="fmt-lbl" id="fmtDl" style="font-size:9px;font-weight:400">1:1 · Para WhatsApp, email, etc.</span></button>
             </div>
           </div>
         </div>
@@ -1934,7 +1935,7 @@ Ej: 'Wonderik es increíble. Mi hija de 3 años ya lee palabras cortas y su desa
 // ═══════════════════════════════════════════════════════
 // CONFIG
 // ═══════════════════════════════════════════════════════
-const POSTIMITY_VERSION = '2.23.0'; // Aug 23 2026 — Session 32: QA architecture + Stripe timeout fix
+const POSTIMITY_VERSION = '2.24.0'; // Aug 24 2026 — Session 33: universalSave architecture — all downloads/shares platform-safe
 console.log('Postimity Studio v' + POSTIMITY_VERSION);
 
 // ── GLOBAL ERROR HANDLER — prevents silent failures ──
@@ -1991,12 +1992,119 @@ function apiFetch(url, opts = {}) {
 }
 // N2 fix (Session 19): HTML escape helper — prevents XSS in innerHTML assignments
 function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+// ═══════════════════════════════════════════════════════
+// T2 (S34) — Verdad en pantalla: etiquetas, modo lectura, offline, reintento
+// ═══════════════════════════════════════════════════════
+
+// UX-9 / INV-034 — PRODUCT_CONTRACT Parte 1.6.
+// Carrusel sale fijo 4:5; video sale en el aspecto elegido al generar. Mostrar
+// "1:1" o "9:16" en esos modos es una promesa incumplida en pantalla.
+function updateShareLabels(mode) {
+  const set = (id, txt) => { const el = document.getElementById(id); if (el) el.textContent = txt; };
+  const es = detectLanguage() === 'es';
+  const save = es ? 'Guardar + Copiar' : 'Save + Copy';
+  if (mode === 'carousel') {
+    const n = es ? 'slides · óptimo IG/FB' : 'slides · best for IG/FB';
+    set('fmtIg', '4:5 ' + n); set('fmtFb', '4:5 ' + n); set('fmtTk', '4:5 ' + n);
+    set('fmtDl', es ? '4:5 · todas las slides' : '4:5 · all slides');
+  } else if (mode === 'video') {
+    const ar = (window.videoAspectRatio === '16:9') ? '16:9' : '9:16';
+    const g = es ? 'formato elegido' : 'chosen format';
+    set('fmtIg', ar + ' · ' + g); set('fmtFb', ar + ' · ' + g); set('fmtTk', ar + ' · ' + g);
+    set('fmtDl', ar + ' · ' + (es ? 'video' : 'video'));
+  } else {
+    set('fmtIg', '4:5 · ' + save); set('fmtFb', '1:1 · ' + save); set('fmtTk', '9:16 · ' + save);
+    set('fmtDl', es ? '1:1 · Para WhatsApp, email, etc.' : '1:1 · For WhatsApp, email, etc.');
+  }
+}
+
+// UX-12 / INV-051 — PRODUCT_CONTRACT Parte 1.7 (Modo Lectura).
+// Principio: restringir la creación, nunca el acceso. El servidor ya lo cumple
+// (get-history y gallery-list no están gateados). Faltaba comunicárselo al usuario:
+// sin banner, un plan vencido parece pérdida de datos.
+function applyReadOnlyMode(isReadOnly, reason) {
+  const es = detectLanguage() === 'es';
+  let b = document.getElementById('readOnlyBanner');
+  if (!b) {
+    b = document.createElement('div');
+    b.id = 'readOnlyBanner';
+    b.className = 'offline-banner';
+    b.style.cssText = 'background:#7c3aed;cursor:pointer';
+    b.onclick = () => showUpgradeInfo();  // punto de entrada real a planes (cuentaScreen)
+    document.body.appendChild(b);
+  }
+  b.textContent = (reason === 'trial'
+    ? (es ? '🔒 Tu prueba terminó. Tu contenido sigue aquí — elige un plan para seguir creando'
+          : '🔒 Your trial ended. Your content is still here — pick a plan to keep creating')
+    : (es ? '🔒 Tu plan venció. Puedes ver y descargar todo tu contenido'
+          : '🔒 Your plan expired. You can still view and download all your content'));
+  b.classList.toggle('show', !!isReadOnly);
+  document.querySelectorAll('.btn-gen').forEach(el => { el.disabled = !!isReadOnly; });
+  window._readOnly = !!isReadOnly;
+}
+
+// UX-15 / INV-060 — PRODUCT_CONTRACT Parte 1.8.
+// Deshabilitar es más barato que avisar después del click: evita que el usuario
+// gaste un intento contra la nada.
+function setOfflineUI(isOffline) {
+  document.querySelectorAll('.btn-gen').forEach(el => {
+    el.disabled = isOffline || !!window._readOnly;
+  });
+}
+
+// UX-16 / INV-061 — PRODUCT_CONTRACT Parte 1.8.
+// Un reintento absorbe los 429/5xx transitorios de OpenAI sin que el usuario se entere.
+// Solo reintenta lo que es seguro reintentar: fallo de red o 5xx/429. Nunca un 4xx
+// de negocio (límite alcanzado, plan bloqueado) — eso no mejora al repetirlo.
+const RETRY_ONCE = { attempts: 2, backoffMs: 1200 };
+async function apiFetchRetry(url, opts = {}) {
+  let lastErr;
+  for (let i = 0; i < RETRY_ONCE.attempts; i++) {
+    try {
+      const res = await apiFetch(url, opts);
+      if (res.status >= 500 || res.status === 429) {
+        if (i < RETRY_ONCE.attempts - 1) {
+          await new Promise(r => setTimeout(r, RETRY_ONCE.backoffMs));
+          continue;
+        }
+      }
+      return res;
+    } catch (e) {
+      lastErr = e;
+      if (i < RETRY_ONCE.attempts - 1) {
+        await new Promise(r => setTimeout(r, RETRY_ONCE.backoffMs));
+        continue;
+      }
+    }
+  }
+  throw lastErr;
+}
+
+// S34 / INV-036: normalize carousel slides for persistence.
+// Rendered slides are data URLs; slides recovered from history are already R2 http URLs.
+// Both are valid to send — the worker persists data URLs to R2 and passes http through.
+// Never filter by startsWith('http'): that silently drops every freshly rendered slide.
+function persistSlides(imgs) {
+  if (!Array.isArray(imgs)) return [];
+  return imgs
+    .filter(u => typeof u === 'string' && (u.startsWith('data:image') || u.startsWith('http')))
+    .slice(0, 10);
+}
+
+// APP_VERSION (S34) — deploy verification. Must match worker /version and all HTML files.
+const APP_VERSION = '2.24.0';
+window.APP_VERSION = APP_VERSION;
+console.info('Postimity Studio v' + APP_VERSION);
+
 const GEN_LIMITS = { trial: 20, starter: 40, growth: 100, agency: 250 };
 const VIDEO_LIMITS = { trial: 2, starter: 2, growth: 8, agency: 20 };
 
 // ── FEATURE ACCESS MAP ──────────────────────────────────────
-// Defines which features are available per plan
-const FEATURE_ACCESS = {
+// Defines which features are available per plan.
+// ⚠️ MUST be byte-identical to PLAN_FEATURE_ACCESS in publica-worker-v2.js.
+// This is a UX gate only — the server enforces the real gate via MODE_TO_FEATURE.
+// Never set a key to false here without adding the matching server gate first (RD-6).
+const PLAN_FEATURE_ACCESS = {
   trial:   { post:true, enhance:true, testimonial:true, flyer:true, carousel:true, agent:true, adBrief:true, video:true },
   starter: { post:true, enhance:true, testimonial:true, flyer:true, carousel:true, agent:true, adBrief:true, video:true },
   growth:  { post:true, enhance:true, testimonial:true, flyer:true, carousel:true, agent:true, adBrief:true, video:true },
@@ -2930,10 +3038,14 @@ async function autoSavePost(resultData) {
       },
       createdAt: new Date().toISOString(),
     };
-    // Include carousel slide URLs if available
-    if (resultData.carouselImages && resultData.carouselImages.length) {
-      postData.carouselImages = resultData.carouselImages.filter(u => u && u.startsWith('http')).slice(0, 10);
-      postData.slideCount = resultData.carouselImages.length;
+    // S34 / INV-036: slides are RENDERED data URLs ("data:image/..."), never "http".
+    // The previous filter startsWith('http') silently emptied the array on every save,
+    // so carousels lost all N slides in history. persistSlides sends them to the worker,
+    // which uploads each to R2 and stores the permanent URLs (see handleSavePost).
+    const slides = persistSlides(resultData.carouselImages);
+    if (slides.length) {
+      postData.carouselImages = slides;
+      postData.slideCount = slides.length;
     }
     await apiFetch(WORKER,{ method:'POST', headers:{'Content-Type':'application/json'}, 
       body: JSON.stringify({ mode: 'save-post', brandId, postData })
@@ -3086,12 +3198,20 @@ window.addEventListener('DOMContentLoaded', async () => {
 
   // Offline/online detection (Fix #6)
   const offBanner = document.getElementById('offlineBanner');
-  window.addEventListener('offline', () => offBanner.classList.add('show'));
+  window.addEventListener('offline', () => { offBanner.classList.add('show'); setOfflineUI(true); });
   window.addEventListener('online', () => {
     offBanner.classList.remove('show');
+    setOfflineUI(false);
     showToast(detectLanguage() === 'es' ? '✅ Conexión restaurada' : '✅ Connection restored');
   });
-  if (!navigator.onLine) offBanner.classList.add('show');
+  if (!navigator.onLine) { offBanner.classList.add('show'); setOfflineUI(true); }
+  // S34 / INV-051: evaluar modo lectura al arrancar (plan vencido o trial terminado)
+  try {
+    const _b = loadBrand();
+    const _p = _b?.plan || 'trial';
+    const _exp = _b?.planExpired === true || _b?.trialExpired === true;
+    if (_exp) applyReadOnlyMode(true, _p === 'trial' ? 'trial' : 'plan');
+  } catch(e) { /* sin marca aún, nada que evaluar */ }
 });
 
 function showScreen(id) {
@@ -3247,7 +3367,8 @@ async function generateBrandGuide() {
   timeNote.textContent = detectLanguage()==='en' ? '☕ This may take up to 1 minute — the AI is deeply analyzing your business' : '☕ Esto puede tomar hasta 1 minuto — la AI está analizando tu negocio a fondo';
   btn.parentNode.insertBefore(timeNote, btn.nextSibling);
   try {
-    const res=await apiFetch(WORKER,{ method:'POST', headers:{'Content-Type':'application/json'}, 
+    // S34 / INV-061: brand-guide es idempotente — seguro de reintentar ante 429/5xx
+    const res=await apiFetchRetry(WORKER,{ method:'POST', headers:{'Content-Type':'application/json'}, 
       body:JSON.stringify({ mode:'brand-guide', brandData:{
         name: name,
         type: bType,
@@ -3551,7 +3672,7 @@ function getUserPlan() {
 
 function handleModeClick(m) {
   const plan = getUserPlan();
-  const access = FEATURE_ACCESS[plan] || FEATURE_ACCESS.trial;
+  const access = PLAN_FEATURE_ACCESS[plan] || PLAN_FEATURE_ACCESS.trial;
   // Check if mode is locked for this plan
   if(!access[m]) {
     if(m === 'video') { showUpsellVideo(); return; }
@@ -3624,7 +3745,7 @@ function closeUpsell() {
 
 function applyFeatureGating() {
   const plan = getUserPlan();
-  const access = FEATURE_ACCESS[plan] || FEATURE_ACCESS.trial;
+  const access = PLAN_FEATURE_ACCESS[plan] || PLAN_FEATURE_ACCESS.trial;
   const modeMap = {mc3:'flyer', mc4:'testimonial', mc5:'carousel'};
   // Lock/unlock mode cards
   Object.entries(modeMap).forEach(([id, m]) => {
@@ -3976,13 +4097,13 @@ function darkenHex(hex, amount) {
   } catch(e) { return hex; }
 }
 
-function downloadCarouselSlide(idx) {
+async function downloadCarouselSlide(idx) {
+  // S33: Use universalSave — works on iOS (was broken with bare <a download>, RD-3)
   const brand = loadBrand();
   const slug = (brand?.name || 'postimity').toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 20);
-  const a = document.createElement('a');
-  a.href = carouselResults[idx];
-  a.download = slug + '-slide-' + (idx+1) + '-' + Date.now() + '.jpg';
-  a.click();
+  const blob = dataUrlToBlob(carouselResults[idx]);
+  const filename = slug + '-slide-' + (idx+1) + '-' + Date.now() + '.jpg';
+  await universalSave(blob, filename);
 }
 
 // ─── ADJUST RESULT ─────────────────────────────────────────────────────
@@ -4070,7 +4191,8 @@ async function adjustResult() {
       const currentFB = document.getElementById('fbCap')?.textContent || '';
       const currentTT = document.getElementById('ttCap')?.textContent || '';
 
-      const res = await apiFetch(WORKER,{ method:'POST', headers:{'Content-Type':'application/json'}, 
+      // S34 / INV-061: adjust no consume generación — seguro de reintentar
+      const res = await apiFetchRetry(WORKER,{ method:'POST', headers:{'Content-Type':'application/json'}, 
         body: JSON.stringify({
           mode: 'adjust',
           adjustment,
@@ -4103,31 +4225,19 @@ async function downloadAllSlides() {
   const ts = Date.now();
   const total = carouselResults.length;
   const isES = detectLanguage() === 'es';
-  showToast(isES ? '📦 Empaquetando ' + total + ' slides...' : '📦 Packaging ' + total + ' slides...');
-  try {
-    if (typeof JSZip === 'undefined') throw new Error('JSZip not loaded');
-    const zip = new JSZip();
-    for (let i = 0; i < total; i++) {
-      const blob = dataUrlToBlob(carouselResults[i]);
-      zip.file(slug + '-slide-' + (i + 1) + '.jpg', blob);
-    }
-    const zipBlob = await zip.generateAsync({ type: 'blob' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(zipBlob);
-    a.download = slug + '-carousel-' + ts + '.zip';
-    a.click();
-    URL.revokeObjectURL(a.href);
-    showToast(isES ? '✅ ZIP con ' + total + ' slides descargado' : '✅ ZIP with ' + total + ' slides downloaded');
-  } catch(e) {
-    // Fallback: sequential download if JSZip fails
-    console.warn('JSZip failed, using fallback:', e);
-    carouselResults.forEach((url, i) => {
-      setTimeout(() => {
-        const a = document.createElement('a');
-        a.href = url; a.download = slug + '-slide-' + (i + 1) + '-' + ts + '.jpg';
-        a.click();
-      }, i * 400);
-    });
+  showToast(isES ? '📦 Preparando ' + total + ' slides...' : '📦 Preparing ' + total + ' slides...');
+
+  // S33: Use universalSaveMultiple — handles mobile (Web Share → camera roll) vs desktop (ZIP)
+  const blobs = carouselResults.map(dataUrl => dataUrlToBlob(dataUrl));
+  const names = blobs.map((_, i) => slug + '-slide-' + (i + 1) + '-' + ts + '.jpg');
+  const zipName = slug + '-carousel-' + ts + '.zip';
+  const result = await universalSaveMultiple(blobs, names, zipName);
+
+  if (result === 'shared') {
+    showToast(isES ? '✅ ' + total + ' slides guardados en carrete' : '✅ ' + total + ' slides saved to camera roll');
+  } else if (result === 'opened') {
+    showToast(isES ? '📷 Guarda los ' + total + ' slides desde las pestañas' : '📷 Save the ' + total + ' slides from the tabs', 5000);
+  } else if (result === 'downloaded') {
     showToast(isES ? '✅ ' + total + ' slides descargados' : '✅ ' + total + ' slides downloaded');
   }
 }
@@ -4573,6 +4683,7 @@ function showVideoResult(videoUrl, topic, captionsData) {
   const pubSection = document.getElementById('pubSection');
   if(pubSection) {
     pubSection.style.display = 'block';
+    updateShareLabels('video');  // S34 / INV-034: el video no se reformatea, la etiqueta debe decirlo
     const pubLabel = pubSection.querySelector('.pub-label');
     if(pubLabel) pubLabel.textContent = isES ? '📤 Publicar video en redes sociales' : '📤 Publish video to social media';
     const pubHint = pubSection.querySelector('.pub-hint');
@@ -4587,17 +4698,32 @@ function showVideoResult(videoUrl, topic, captionsData) {
     });
   }
 
-  // Add download video button above publish section (remove old one first for video→video transition)
+  // S33: Add download video button — uses universalSave for iOS compatibility (RD-3)
   let videoDlBtn = document.getElementById('videoDlBtn');
   if(videoDlBtn) videoDlBtn.remove();
   if(imgControls) {
-    videoDlBtn = document.createElement('a');
+    videoDlBtn = document.createElement('button');
     videoDlBtn.id = 'videoDlBtn';
-    videoDlBtn.href = videoUrl;
-    videoDlBtn.download = ((loadBrand()?.name||'postimity').toLowerCase().replace(/[^a-z0-9]+/g,'-').slice(0,20)) + '-video-' + Date.now() + '.mp4';
     videoDlBtn.className = 'btn btn-primary btn-full';
-    videoDlBtn.style.cssText = 'margin-bottom:10px;text-decoration:none;text-align:center';
+    videoDlBtn.style.cssText = 'margin-bottom:10px;text-align:center';
     videoDlBtn.textContent = isES ? '⬇️ Descargar video (.mp4)' : '⬇️ Download video (.mp4)';
+    const vSlug = ((loadBrand()?.name||'postimity').toLowerCase().replace(/[^a-z0-9]+/g,'-').slice(0,20));
+    const vSrc = videoUrl;
+    videoDlBtn.onclick = async function() {
+      const isESv = detectLanguage() === 'es';
+      this.disabled = true;
+      this.textContent = isESv ? '⏳ Preparando...' : '⏳ Preparing...';
+      try {
+        const resp = await fetch(vSrc);
+        const blob = await resp.blob();
+        const result = await universalSave(blob, vSlug + '-video-' + Date.now() + '.mp4');
+        if (result === 'shared') showToast(isESv ? '✅ Video guardado en carrete' : '✅ Video saved to camera roll');
+        else if (result === 'opened') showToast(isESv ? '📷 Mantén presionado para guardar el video' : '📷 Long-press to save the video', 5000);
+        else if (result === 'downloaded') showToast(isESv ? '✅ Video descargado' : '✅ Video downloaded');
+      } catch(e) { showToast('Error: ' + e.message); }
+      this.disabled = false;
+      this.textContent = isESv ? '⬇️ Descargar video (.mp4)' : '⬇️ Download video (.mp4)';
+    };
     imgControls.insertBefore(videoDlBtn, imgControls.firstChild);
   }
 
@@ -4673,66 +4799,36 @@ async function shareVideoToSocial(platform) {
   const isES = detectLanguage() === 'es';
   const caption = getCaptionForPlatform(platform);
   const pName = platform.charAt(0).toUpperCase() + platform.slice(1);
-  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-  const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
   const slug = (loadBrand()?.name||'postimity').toLowerCase().replace(/[^a-z0-9]+/g,'-').slice(0,20);
   const videoEl = document.querySelector('#videoPlayerWrap video');
 
   // 1. Copy caption FIRST (RD-4)
   await copyToClipboard(caption);
 
-  // 2. Save video
-  let saved = false;
-  if (isMobile && videoEl && videoEl.src) {
-    const vFilename = slug + '-video-' + Date.now() + '.mp4';
-
-    // Try Web Share API
-    if (navigator.share && navigator.canShare) {
-      try {
-        const resp = await fetch(videoEl.src);
-        const blob = await resp.blob();
-        const file = new File([blob], vFilename, { type: 'video/mp4' });
-        if (navigator.canShare({ files: [file] })) {
-          await navigator.share({ files: [file] });
-          saved = true;
-        }
-      } catch(e) {
-        if (e.name === 'AbortError') return;
-        console.warn('Video share failed:', e);
-      }
+  // 2. Save video using universalSave (S33)
+  let result = false;
+  if (videoEl && videoEl.src) {
+    try {
+      const resp = await fetch(videoEl.src);
+      const blob = await resp.blob();
+      const vFilename = slug + '-video-' + Date.now() + '.mp4';
+      result = await universalSave(blob, vFilename);
+    } catch(e) {
+      console.warn('Video fetch for save failed:', e);
     }
-
-    // Fallback
-    if (!saved) {
-      if (isIOS) {
-        window.open(videoEl.src, '_blank');
-      } else {
-        const a = document.createElement('a');
-        a.href = videoEl.src; a.download = vFilename;
-        document.body.appendChild(a); a.click(); document.body.removeChild(a);
-      }
-      saved = true;
-    }
-  } else if (videoEl && videoEl.src) {
-    // Desktop
-    const vFilename = slug + '-video-' + Date.now() + '.mp4';
-    const a = document.createElement('a');
-    a.href = videoEl.src; a.download = vFilename;
-    document.body.appendChild(a); a.click(); document.body.removeChild(a);
-    saved = true;
   }
 
-  // 3. Show instructions
-  if (saved) {
+  // 3. Show instructions based on result
+  if (result) {
     let msg;
-    if (isMobile && isIOS) {
-      msg = isES
-        ? '📋 Caption copiado ✓\n🎬 Guarda el video desde la pestaña\n→ Abre ' + pName + ', selecciona el video y pega'
-        : '📋 Caption copied ✓\n🎬 Save the video from the tab\n→ Open ' + pName + ', select the video and paste';
-    } else if (isMobile) {
+    if (result === 'shared') {
       msg = isES
         ? '✅ Video guardado · Caption copiado ✓\n→ Abre ' + pName + ', selecciona el video y pega'
         : '✅ Video saved · Caption copied ✓\n→ Open ' + pName + ', select the video and paste';
+    } else if (result === 'opened') {
+      msg = isES
+        ? '📋 Caption copiado ✓\n🎬 Guarda el video desde la pestaña\n→ Abre ' + pName + ', selecciona el video y pega'
+        : '📋 Caption copied ✓\n🎬 Save the video from the tab\n→ Open ' + pName + ', select the video and paste';
     } else {
       msg = isES
         ? '🎬 Video descargado · Caption copiado ✓\n→ Abre ' + pName + ' y pega el caption'
@@ -6812,6 +6908,10 @@ async function regenText() {
 function showResult(data) {
   lastResult=data;
   lastGeneratedData=data;
+  // S34 / INV-034: las etiquetas de formato deben reflejar el modo real.
+  // El carrusel sale fijo 4:5 y el video en el aspecto elegido al generar;
+  // mostrar "1:1" o "9:16" ahí sería una promesa incumplida en pantalla.
+  updateShareLabels(data?.mode || (Array.isArray(data?.carouselImages) && data.carouselImages.length ? 'carousel' : mode));
   checkIsFirstPost();
   showLoading(false);
   // B3 (Session 18): Meta Pixel — track content generation as ViewContent + custom Generate
@@ -7157,8 +7257,107 @@ async function ensureDataUrl() {
 }
 
 
+// ─── S33: Universal save — single download/save path for ALL modes ────────
+// Handles: Desktop (Downloads folder via <a download>), Android (Downloads via <a download>),
+// iOS (Web Share API → camera roll, or window.open blob for long-press save)
+// Returns: 'shared' | 'downloaded' | 'opened' | false (user cancelled)
+async function universalSave(blob, filename) {
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+  // Path 1: Web Share API (mobile — saves to camera roll via share sheet)
+  if (isMobile && navigator.share && navigator.canShare) {
+    try {
+      const file = new File([blob], filename, { type: blob.type });
+      if (navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file] });
+        return 'shared';
+      }
+    } catch(e) {
+      if (e.name === 'AbortError') return false; // user cancelled
+      console.warn('universalSave share failed:', e);
+    }
+  }
+
+  // Path 2: iOS fallback — blob URL in new tab (user long-presses to save)
+  if (isIOS) {
+    const blobUrl = URL.createObjectURL(blob);
+    window.open(blobUrl, '_blank');
+    // Don't revoke immediately — user needs time to save from tab
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
+    return 'opened';
+  }
+
+  // Path 3: Desktop / Android — <a download> (saves to Downloads folder)
+  const blobUrl = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = blobUrl; a.download = filename;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(blobUrl), 5000);
+  return 'downloaded';
+}
+
+// S33: Universal save for multiple files (carousel slides)
+// Desktop: ZIP download. Mobile: Web Share with multiple files, or sequential save.
+async function universalSaveMultiple(blobs, filenames, zipName) {
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+  // Path 1: Mobile — try Web Share API with multiple files
+  if (isMobile && navigator.share && navigator.canShare) {
+    try {
+      const files = blobs.map((b, i) => new File([b], filenames[i], { type: 'image/jpeg' }));
+      if (navigator.canShare({ files })) {
+        await navigator.share({ files });
+        return 'shared';
+      }
+    } catch(e) {
+      if (e.name === 'AbortError') return false;
+      console.warn('universalSaveMultiple share failed:', e);
+    }
+  }
+
+  // Path 2: iOS fallback — save first slide via blob URL, show count
+  if (isIOS) {
+    // iOS can't batch-save — share API is the only good path
+    // If share API failed/unavailable, open first slide for manual save
+    for (let i = 0; i < blobs.length; i++) {
+      const blobUrl = URL.createObjectURL(blobs[i]);
+      window.open(blobUrl, '_blank');
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
+      // Small delay between opens to avoid popup blocker
+      if (i < blobs.length - 1) await new Promise(r => setTimeout(r, 600));
+    }
+    return 'opened';
+  }
+
+  // Path 3: Desktop / Android — ZIP download (saves to Downloads folder)
+  try {
+    if (typeof JSZip === 'undefined') throw new Error('JSZip not loaded');
+    const zip = new JSZip();
+    blobs.forEach((b, i) => zip.file(filenames[i], b));
+    const zipBlob = await zip.generateAsync({ type: 'blob' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(zipBlob);
+    a.download = zipName;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+    return 'downloaded';
+  } catch(e) {
+    // JSZip fallback: sequential <a download>
+    console.warn('JSZip failed, sequential download:', e);
+    for (let i = 0; i < blobs.length; i++) {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blobs[i]); a.download = filenames[i];
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      if (i < blobs.length - 1) await new Promise(r => setTimeout(r, 400));
+    }
+    return 'downloaded';
+  }
+}
+
 // [S32] saveImageMobile removed — logic inlined in openInSocial
-// ─── S32: Simplified sharing — save in platform format + copy caption ─────
+// ─── S33: Unified sharing — save in platform format + copy caption ─────
 // Rule: Each button = save image in optimal format + copy caption + instructions
 // Never auto-opens apps. Works on: iOS Safari, iOS in-app browsers, Android, Desktop
 // Platform formats: Instagram 4:5, Facebook 1:1, TikTok 9:16
@@ -7170,6 +7369,7 @@ async function openInSocial(platform) {
   const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
   const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
   const slug = (loadBrand()?.name || 'postimity').toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 20);
+  const ts = Date.now();
 
   // Platform-specific image format
   const platformFormats = { instagram: 'portrait', facebook: 'square', tiktok: 'story' };
@@ -7179,62 +7379,40 @@ async function openInSocial(platform) {
   // 1. Copy caption FIRST (must be first await — iOS clipboard requirement, RD-4)
   await copyToClipboard(caption);
 
-  // 2. Save image in platform-optimal format
-  let saved = false;
+  // 2. Save image(s) using universalSave
+  let result = false;
   if (isCarouselMode) {
-    downloadAllSlides();
-    saved = true;
+    // S33: Carousel → save individual slides (not ZIP on mobile)
+    const total = carouselResults.length;
+    showToast(isES ? '📦 Preparando ' + total + ' slides...' : '📦 Preparing ' + total + ' slides...');
+    const blobs = carouselResults.map(dataUrl => dataUrlToBlob(dataUrl));
+    const names = blobs.map((_, i) => slug + '-slide-' + (i + 1) + '-' + ts + '.jpg');
+    const zipName = slug + '-carousel-' + ts + '.zip';
+    result = await universalSaveMultiple(blobs, names, zipName);
   } else {
     const blob = await getCanvasBlob(format);
     if (blob) {
-      const filename = slug + '-' + platform + '-' + formatLabels[format] + '-' + Date.now() + '.jpg';
-
-      // Try Web Share API first (best UX on mobile — shows native save/share)
-      if (isMobile && navigator.share && navigator.canShare) {
-        try {
-          const file = new File([blob], filename, { type: 'image/jpeg' });
-          if (navigator.canShare({ files: [file] })) {
-            await navigator.share({ files: [file] });
-            saved = true;
-          }
-        } catch(e) {
-          if (e.name === 'AbortError') return;
-          console.warn('Share API save failed:', e);
-        }
-      }
-
-      // Fallback: blob URL save
-      if (!saved) {
-        const blobUrl = URL.createObjectURL(blob);
-        if (isIOS) {
-          window.open(blobUrl, '_blank');
-        } else {
-          const a = document.createElement('a');
-          a.href = blobUrl; a.download = filename;
-          document.body.appendChild(a); a.click(); document.body.removeChild(a);
-          setTimeout(() => URL.revokeObjectURL(blobUrl), 5000);
-        }
-        saved = true;
-      }
+      const filename = slug + '-' + platform + '-' + formatLabels[format] + '-' + ts + '.jpg';
+      result = await universalSave(blob, filename);
     }
   }
 
-  // 3. Show clear instructions
-  if (saved) {
-    const fmtInfo = '(' + formatLabels[format] + ')';
+  // 3. Show clear instructions based on what happened
+  if (result) {
+    const fmtInfo = isCarouselMode ? '(' + carouselResults.length + ' slides)' : '(' + formatLabels[format] + ')';
     let msg;
-    if (isMobile && isIOS) {
+    if (result === 'shared') {
       msg = isES
-        ? '📋 Caption copiado ✓\n📷 Guarda la imagen ' + fmtInfo + ' desde la pestaña\n→ Abre ' + pName + ', selecciona la foto y pega'
-        : '📋 Caption copied ✓\n📷 Save the image ' + fmtInfo + ' from the tab\n→ Open ' + pName + ', select the photo and paste';
-    } else if (isMobile) {
+        ? '✅ ' + (isCarouselMode ? 'Slides guardados' : 'Imagen ' + fmtInfo + ' guardada') + ' · Caption copiado ✓\n→ Abre ' + pName + ', selecciona ' + (isCarouselMode ? 'las fotos' : 'la foto') + ' y pega'
+        : '✅ ' + (isCarouselMode ? 'Slides saved' : 'Image ' + fmtInfo + ' saved') + ' · Caption copied ✓\n→ Open ' + pName + ', select ' + (isCarouselMode ? 'the photos' : 'the photo') + ' and paste';
+    } else if (result === 'opened') {
       msg = isES
-        ? '✅ Imagen ' + fmtInfo + ' guardada · Caption copiado ✓\n→ Abre ' + pName + ', selecciona la foto y pega'
-        : '✅ Image ' + fmtInfo + ' saved · Caption copied ✓\n→ Open ' + pName + ', select the photo and paste';
+        ? '📋 Caption copiado ✓\n📷 ' + (isCarouselMode ? 'Guarda los slides desde las pestañas' : 'Guarda la imagen ' + fmtInfo + ' desde la pestaña') + '\n→ Abre ' + pName + ', selecciona ' + (isCarouselMode ? 'las fotos' : 'la foto') + ' y pega'
+        : '📋 Caption copied ✓\n📷 ' + (isCarouselMode ? 'Save the slides from the tabs' : 'Save the image ' + fmtInfo + ' from the tab') + '\n→ Open ' + pName + ', select ' + (isCarouselMode ? 'the photos' : 'the photo') + ' and paste';
     } else {
       msg = isES
-        ? '📸 Imagen ' + fmtInfo + ' descargada · Caption copiado ✓\n→ Abre ' + pName + ' y pega el caption'
-        : '📸 Image ' + fmtInfo + ' downloaded · Caption copied ✓\n→ Open ' + pName + ' and paste the caption';
+        ? '📸 ' + (isCarouselMode ? carouselResults.length + ' slides descargados' : 'Imagen ' + fmtInfo + ' descargada') + ' · Caption copiado ✓\n→ Abre ' + pName + ' y pega el caption'
+        : '📸 ' + (isCarouselMode ? carouselResults.length + ' slides downloaded' : 'Image ' + fmtInfo + ' downloaded') + ' · Caption copied ✓\n→ Open ' + pName + ' and paste the caption';
     }
     showToast(msg, 6000);
   }
@@ -7323,7 +7501,17 @@ async function downloadImg(format) {
   }
   } // end !imgFromDataUrl
 
-  canvas.toBlob(blob=>{ const brd=loadBrand(); const sl=(brd?.name||'postimity').toLowerCase().replace(/[^a-z0-9]+/g,'-').slice(0,20); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=sl+'-'+format+'-'+Date.now()+'.jpg'; a.click(); setTimeout(()=>URL.revokeObjectURL(url),1000); },'image/jpeg',.93);
+  // S33: Use universalSave — works on iOS (was broken with bare <a download>, RD-3)
+  const dlBlob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.93));
+  if (dlBlob) {
+    const brd = loadBrand();
+    const sl = (brd?.name||'postimity').toLowerCase().replace(/[^a-z0-9]+/g,'-').slice(0,20);
+    const result = await universalSave(dlBlob, sl + '-' + format + '-' + Date.now() + '.jpg');
+    const isES = detectLanguage() === 'es';
+    if (result === 'shared') showToast(isES ? '✅ Imagen guardada en carrete' : '✅ Image saved to camera roll');
+    else if (result === 'opened') showToast(isES ? '📷 Mantén presionado para guardar la imagen' : '📷 Long-press to save the image', 5000);
+    else if (result === 'downloaded') showToast(isES ? '✅ Imagen descargada' : '✅ Image downloaded');
+  }
 }
 
 async function redrawCanvas() {
