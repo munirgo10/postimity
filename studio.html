@@ -3017,13 +3017,21 @@ async function syncBrandToCloud(brand, id) {
   }
 }
 
+// S35 / INV-038b: un solo guardado por generación. El video tenía dos rutas
+// (autoSavePost genérico + save-post explícito) y se duplicaba en historial.
+let _lastSavedKey = null;
+
 // Auto-save post to history after generation
 async function autoSavePost(resultData) {
   if (!brandId) return;
   try {
     const imgEl = document.getElementById('resultImg');
-    // Only save https:// URLs (not data: URLs — too large for KV)
-    const imageUrl = (imgEl?.src && imgEl.src.startsWith('http')) ? imgEl.src : null;
+    // S35 / INV-035b: NO filtrar por startsWith('http'). En carrusel, testimonial y
+    // flyer el resultImg es un dataURL renderizado en canvas — el filtro lo convertía
+    // en null y el historial caía al placeholder de emoji. El worker sube a R2 lo que
+    // sea data:image y deja pasar lo que ya sea http.
+    const rawSrc = imgEl?.src || '';
+    const imageUrl = (rawSrc.startsWith('http') || rawSrc.startsWith('data:image')) ? rawSrc : null;
     const postData = {
       mode, platform, pillar, imageStyle,
       postType: resultData.postType || pillar,
@@ -3047,6 +3055,10 @@ async function autoSavePost(resultData) {
       postData.carouselImages = slides;
       postData.slideCount = slides.length;
     }
+    const saveKey = mode + '|' + (imageUrl || '').slice(-64) + '|' + postData.caption.slice(0, 40);
+    if (saveKey === _lastSavedKey) return;
+    _lastSavedKey = saveKey;
+
     await apiFetch(WORKER,{ method:'POST', headers:{'Content-Type':'application/json'}, 
       body: JSON.stringify({ mode: 'save-post', brandId, postData })
     });
@@ -4019,43 +4031,11 @@ async function renderCarouselSlide(slide, brand, coverImageUrl, totalSlides) {
     ctx.fillText(brand?.name || '', W/2, H-30);
   }
 
-  // Logo overlay — respects logoToggle state
-  const logoChecked = document.getElementById('logoToggle')?.checked !== false;
-  const logoSrc = logoChecked ? (logoB64 || brand?.logo) : null;
-  if(logoSrc) {
-    try {
-      const logo = await loadImg(logoSrc);
-      if(logo) {
-        const sz = 56, lx = 20, ly = 16;
-        ctx.save();
-        ctx.beginPath(); ctx.arc(lx+sz/2, ly+sz/2, sz/2+3, 0, Math.PI*2);
-        ctx.fillStyle = 'rgba(255,255,255,0.9)'; ctx.fill();
-        ctx.beginPath(); ctx.arc(lx+sz/2, ly+sz/2, sz/2, 0, Math.PI*2); ctx.clip();
-        ctx.drawImage(logo, lx, ly, sz, sz);
-        ctx.restore();
-      }
-    } catch(e) { console.warn('Carousel logo render failed:', e.message); }
-  }
-
-  // Watermark (same logic as single-image posts — trial/starter always show)
-  const wmPlan = brand?.plan || 'trial';
-  const wmToggleEl = document.getElementById('wmToggle');
-  const wmOff = wmToggleEl && !wmToggleEl.checked;
-  const showWm = !(['growth', 'agency'].includes(wmPlan) && wmOff);
-  if (showWm) {
-    const wmText = '✦ postimity.com';
-    const wfs = Math.round(W * 0.021);
-    ctx.font = '600 ' + wfs + 'px -apple-system,sans-serif';
-    ctx.textAlign = 'left';
-    const wtw = ctx.measureText(wmText).width;
-    const wpw = wtw + 20, wph = wfs + 12;
-    const wpx = W - wpw - 16, wpy = H - wph - 16;
-    ctx.save();
-    ctx.fillStyle = 'rgba(0,0,0,0.42)'; ctx.beginPath();
-    if (ctx.roundRect) ctx.roundRect(wpx, wpy, wpw, wph, 6); else ctx.rect(wpx, wpy, wpw, wph);
-    ctx.fill(); ctx.fillStyle = 'rgba(255,255,255,0.88)'; ctx.textBaseline = 'middle';
-    ctx.fillText(wmText, wpx + 10, wpy + wph / 2); ctx.restore();
-  }
+  // S35 / RD-25: overlays centralizados. El carrusel tenía su propia copia del
+  // dibujo del logo y del watermark, con valores de tamaño y posición distintos
+  // a los de los modos de imagen simple. Ahora comparte la fuente única.
+  const ovRes = await applyBrandOverlays(ctx, W, H);
+  warnIfLogoFailed(ovRes);
 
   return new Promise(res => canvas.toBlob(b => {
     const reader = new FileReader();
@@ -4174,6 +4154,9 @@ async function adjustResult() {
         imgEl.src = res.imageUrl;
         if (lastResult) lastResult.imageUrl = res.imageUrl;
         if (lastGeneratedData) lastGeneratedData.imageUrl = res.imageUrl;
+        // S35 / INV-037: el ajuste reemplaza la imagen visible, pero autoSavePost sólo
+        // corría al generar — el historial conservaba la versión vieja.
+        autoSavePost(lastGeneratedData || lastResult || res);
       }
       document.getElementById('adjustInput').value = '';
       showToast(isES ? '✅ Imagen ajustada' : '✅ Image adjusted');
@@ -4839,6 +4822,9 @@ async function shareVideoToSocial(platform) {
 }
 
 async function saveVideoToHistory(videoUrl, topic) {
+  const vKey = 'video|' + (videoUrl || '').slice(-64) + '|' + (topic || '').slice(0, 40);
+  if (vKey === _lastSavedKey) return;
+  _lastSavedKey = vKey;
   try {
     const brand = loadBrand();
     if(!brand?.brandId) return;
@@ -6908,6 +6894,20 @@ async function regenText() {
 function showResult(data) {
   lastResult=data;
   lastGeneratedData=data;
+  // S35 / RD-25 + RD-2: aplicar overlays al generar, no sólo en el onchange del toggle.
+  // Se engancha a img.onload, nunca a setTimeout: el timing por temporizador con
+  // operaciones de canvas es la violación que RD-2 prohíbe (el preflight cazó mi
+  // primer intento con setTimeout). El guard ovBaked evita el bucle, porque
+  // redrawCanvas vuelve a asignar src y dispara load otra vez.
+  (function scheduleOverlay(){
+    const el = document.getElementById('resultImg');
+    if (!el) return;
+    delete el.dataset.ovBaked;
+    el.addEventListener('load', function onceOverlay(){
+      if (el.dataset.ovBaked) return;
+      redrawCanvas();
+    });
+  })();
   // S34 / INV-034: las etiquetas de formato deben reflejar el modo real.
   // El carrusel sale fijo 4:5 y el video en el aspecto elegido al generar;
   // mostrar "1:1" o "9:16" ahí sería una promesa incumplida en pantalla.
@@ -7193,7 +7193,15 @@ async function getCanvasBlob(format) {
     if (brand?.name) { ctx.fillStyle = 'rgba(255,255,255,.85)'; ctx.font = 'bold 32px Plus Jakarta Sans,sans-serif'; ctx.textAlign = 'center'; ctx.fillText(brand.name, 540, 1680); }
   }
 
-  // No logo/watermark here — already in the image from redrawCanvas
+  // S35 / RD-25: antes decía "No logo/watermark here — already in the image from
+  // redrawCanvas". Esa suposición era falsa: redrawCanvas sólo corría en el onchange
+  // del toggle, así que en una generación normal resultImg nunca traía overlay y
+  // compartir salía sin logo. Ahora se dibuja aquí, desde la fuente única.
+  // _ovAlreadyBaked lo pone redrawCanvas para no duplicar el overlay.
+  if (!imgEl.dataset.ovBaked) {
+    const ovRes = await applyBrandOverlays(ctx, canvas.width, canvas.height);
+    warnIfLogoFailed(ovRes);
+  }
   return new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.93));
 }
 
@@ -7437,8 +7445,7 @@ async function downloadImg(format) {
     imgFromDataUrl = true;
   }
   if(!img) { showToast(detectLanguage()==='es'?'Error cargando imagen':'Error loading image'); return; }
-  const showLogo = document.getElementById('logoToggle').checked;
-  const logoSrc = logoB64 || brand?.logo;
+  // S35: showLogo/logoSrc eliminados — la decisión vive en resolveLogoSrc()
 
   // S29: drawCover center-crops the image preserving aspect ratio (no stretching)
   if(format==='square'){ canvas.width=canvas.height=1080; drawCover(ctx,img,0,0,1080,1080); }
@@ -7456,50 +7463,14 @@ async function downloadImg(format) {
   }
 
   // Only add logo/watermark if using clean originalImageUrl (not data URL which already has overlay)
-  if (!imgFromDataUrl && showLogo && logoSrc) {
-    try {
-      const logo = await loadImg(logoSrc);
-      if(logo) { // loadImg returns null on error
-        const sz = Math.round(canvas.width * 0.13);
-        const x = canvas.width - sz - 20;
-        const y = canvas.height - sz - 20;
-        ctx.save();
-        // White circle background
-        ctx.beginPath(); ctx.arc(x+sz/2, y+sz/2, sz/2+6, 0, Math.PI*2);
-        ctx.fillStyle = 'rgba(255,255,255,0.92)'; ctx.fill();
-        // Clip to circle and draw logo
-        ctx.beginPath(); ctx.arc(x+sz/2, y+sz/2, sz/2, 0, Math.PI*2); ctx.clip();
-        ctx.drawImage(logo, x, y, sz, sz);
-        ctx.restore();
-      }
-    } catch(e){ console.warn('Logo overlay failed:', e); }
-  }
-
-  // ── Watermark "✦ postimity.com" (skip if data URL — already has it) ──
+  // S35 / RD-25: overlays centralizados. Este bloque tenía su propia copia del
+  // dibujo, con logoSrc resuelto SIN gate del toggle y cargando el logo por http
+  // con crossOrigin — si el logo no traía cabecera CORS, loadImg devolvía null y
+  // el logo se saltaba en silencio mientras el watermark sí se dibujaba.
   if (!imgFromDataUrl) {
-  const wmBrand = loadBrand();
-  const wmPlan = wmBrand?.plan || 'trial';
-  const wmToggleEl = document.getElementById('wmToggle');
-  const wmOff = wmToggleEl && !wmToggleEl.checked;
-  const showWm = !(['growth','agency'].includes(wmPlan) && wmOff);
-  if(showWm) {
-    const wmText = '✦ postimity.com';
-    const wfs = Math.round(canvas.width * 0.021);
-    ctx.font = '600 ' + wfs + 'px -apple-system,sans-serif';
-    const wtw = ctx.measureText(wmText).width;
-    const wpw = wtw + 20, wph = wfs + 12;
-    const wpx = canvas.width - wpw - 16, wpy = canvas.height - wph - 16;
-    ctx.save();
-    ctx.fillStyle = 'rgba(0,0,0,0.42)';
-    ctx.beginPath();
-    if(ctx.roundRect) ctx.roundRect(wpx, wpy, wpw, wph, 6); else ctx.rect(wpx, wpy, wpw, wph);
-    ctx.fill();
-    ctx.fillStyle = 'rgba(255,255,255,0.88)';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(wmText, wpx + 10, wpy + wph/2);
-    ctx.restore();
+    const ovRes = await applyBrandOverlays(ctx, canvas.width, canvas.height);
+    warnIfLogoFailed(ovRes);
   }
-  } // end !imgFromDataUrl
 
   // S33: Use universalSave — works on iOS (was broken with bare <a download>, RD-3)
   const dlBlob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.93));
@@ -7512,6 +7483,107 @@ async function downloadImg(format) {
     else if (result === 'opened') showToast(isES ? '📷 Mantén presionado para guardar la imagen' : '📷 Long-press to save the image', 5000);
     else if (result === 'downloaded') showToast(isES ? '✅ Imagen descargada' : '✅ Image downloaded');
   }
+}
+
+// ═══════════════════════════════════════════════════════
+// OVERLAYS DE MARCA — fuente única de verdad (S35 / RD-25)
+// ═══════════════════════════════════════════════════════
+// Antes había DOS composers con lógicas opuestas: getCanvasBlob (compartir) no
+// dibujaba nada asumiendo que redrawCanvas ya lo había horneado en resultImg, y
+// downloadImg dibujaba por su cuenta con logoSrc SIN gate del toggle. Como
+// redrawCanvas sólo corría en el onchange del toggle, el resultado dependía de si
+// el usuario lo había tocado antes de descargar. Síntoma en producción: con el
+// toggle en ON, el watermark se descargaba y el logo no.
+// Regla: preview, descarga, compartir y carrusel usan EXACTAMENTE este código.
+// Video queda ✗ declarado en PRODUCT_CONTRACT Parte 1.6.
+
+let _logoDataUrlCache = null;
+let _logoWarnShown = false;
+
+// Único lugar donde se decide el origen del logo. Respeta el toggle.
+function resolveLogoSrc() {
+  if (document.getElementById('logoToggle')?.checked === false) return null;
+  return logoB64 || loadBrand()?.logo || null;
+}
+
+// El logo se dibuja SIEMPRE desde dataURL. Dos motivos:
+//  1. Un logo servido por http sin cabecera CORS hace fallar loadImg (onerror → null).
+//  2. Aunque cargue, mancharía el canvas y toBlob() lanzaría, rompiendo la descarga.
+async function logoAsDataUrl(src) {
+  if (!src) return null;
+  if (src.startsWith('data:')) return src;
+  if (_logoDataUrlCache && _logoDataUrlCache.src === src) return _logoDataUrlCache.data;
+  try {
+    const r = await fetch(src, { cache: 'force-cache' });
+    if (!r.ok) return null;
+    const blob = await r.blob();
+    const data = await new Promise((res, rej) => {
+      const fr = new FileReader();
+      fr.onload = () => res(fr.result);
+      fr.onerror = () => rej(new Error('read failed'));
+      fr.readAsDataURL(blob);
+    });
+    _logoDataUrlCache = { src, data };
+    return data;
+  } catch (e) { console.warn('logoAsDataUrl failed:', e.message); return null; }
+}
+
+// Sólo Growth y Agency pueden apagar el watermark.
+function shouldShowWatermark() {
+  const plan = loadBrand()?.plan || 'trial';
+  const el = document.getElementById('wmToggle');
+  return !(['growth', 'agency'].includes(plan) && el && !el.checked);
+}
+
+// Dibuja logo + watermark sobre un contexto ya pintado.
+async function applyBrandOverlays(ctx, w, h) {
+  const out = { logoDrawn: false, logoFailed: false, wmDrawn: false };
+  const rawLogo = resolveLogoSrc();
+  if (rawLogo) {
+    const src = await logoAsDataUrl(rawLogo);
+    const logo = src ? await loadImg(src) : null;
+    if (logo) {
+      const sz = Math.round(w * 0.13);
+      const x = w - sz - 20, y = h - sz - 20;
+      ctx.save();
+      ctx.beginPath(); ctx.arc(x + sz/2, y + sz/2, sz/2 + 6, 0, Math.PI*2);
+      ctx.fillStyle = 'rgba(255,255,255,0.92)'; ctx.fill();
+      ctx.beginPath(); ctx.arc(x + sz/2, y + sz/2, sz/2, 0, Math.PI*2); ctx.clip();
+      ctx.drawImage(logo, x, y, sz, sz);
+      ctx.restore();
+      out.logoDrawn = true;
+    } else {
+      // INV-072: nunca en silencio. El toggle está en ON y el usuario espera su logo.
+      out.logoFailed = true;
+      console.warn('LOGO_LOAD_FAILED', rawLogo);
+    }
+  }
+  if (shouldShowWatermark()) {
+    const wmText = '✦ postimity.com';
+    const wfs = Math.round(w * 0.021);
+    ctx.save();
+    ctx.font = '600 ' + wfs + 'px -apple-system,sans-serif';
+    const wtw = ctx.measureText(wmText).width;
+    const wpw = wtw + 20, wph = wfs + 12;
+    const wpx = w - wpw - 16, wpy = h - wph - 16;
+    ctx.fillStyle = 'rgba(15,23,42,0.72)'; ctx.beginPath();
+    if (ctx.roundRect) ctx.roundRect(wpx, wpy, wpw, wph, 6); else ctx.rect(wpx, wpy, wpw, wph);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.95)';
+    ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+    ctx.fillText(wmText, wpx + 10, wpy + wph/2);
+    ctx.restore();
+    out.wmDrawn = true;
+  }
+  return out;
+}
+
+function warnIfLogoFailed(res) {
+  if (!res || !res.logoFailed || _logoWarnShown) return;
+  _logoWarnShown = true;
+  showToast(detectLanguage() === 'es'
+    ? '⚠️ No pudimos cargar tu logo — vuelve a subirlo en tu marca'
+    : '⚠️ We could not load your logo — re-upload it in your brand');
 }
 
 async function redrawCanvas() {
@@ -7547,17 +7619,11 @@ async function redrawCanvas() {
   const resultImg = document.getElementById('resultImg');
   if (!resultImg) return;
 
-  const brand = loadBrand();
-  const showLogo = document.getElementById('logoToggle')?.checked !== false;
-  const logoSrc = showLogo ? (logoB64 || brand?.logo) : null;
-  const wmToggleEl = document.getElementById('wmToggle');
-  const wmOff = wmToggleEl && !wmToggleEl.checked;
-  const wmPlan = brand?.plan || 'trial';
-  const showWm = !(['growth', 'agency'].includes(wmPlan) && wmOff);
-
-  // If no overlays needed, show original
-  if (!logoSrc && !showWm) {
+  // S35 / RD-25: usa la fuente única. Antes tenía su propia copia del dibujo,
+  // distinta a la de downloadImg y a la de getCanvasBlob.
+  if (!resolveLogoSrc() && !shouldShowWatermark()) {
     resultImg.src = originalImageUrl;
+    delete resultImg.dataset.ovBaked;
     return;
   }
 
@@ -7570,36 +7636,9 @@ async function redrawCanvas() {
     const ctx = canvas.getContext('2d');
     ctx.drawImage(img, 0, 0);
 
-    // Logo
-    if (logoSrc) {
-      try {
-        const logo = await loadImg(logoSrc);
-        if (logo) {
-          const sz = Math.round(canvas.width * 0.13);
-          const x = canvas.width - sz - 20, y = canvas.height - sz - 20;
-          ctx.save();
-          ctx.beginPath(); ctx.arc(x + sz / 2, y + sz / 2, sz / 2 + 6, 0, Math.PI * 2);
-          ctx.fillStyle = 'rgba(255,255,255,0.92)'; ctx.fill();
-          ctx.beginPath(); ctx.arc(x + sz / 2, y + sz / 2, sz / 2, 0, Math.PI * 2); ctx.clip();
-          ctx.drawImage(logo, x, y, sz, sz); ctx.restore();
-        }
-      } catch(e) { /* silent */ }
-    }
-
-    // Watermark
-    if (showWm) {
-      const wmText = '✦ postimity.com';
-      const wfs = Math.round(canvas.width * 0.021);
-      ctx.font = '600 ' + wfs + 'px -apple-system,sans-serif';
-      const wtw = ctx.measureText(wmText).width;
-      const wpw = wtw + 20, wph = wfs + 12;
-      const wpx = canvas.width - wpw - 16, wpy = canvas.height - wph - 16;
-      ctx.save();
-      ctx.fillStyle = 'rgba(0,0,0,0.42)'; ctx.beginPath();
-      if (ctx.roundRect) ctx.roundRect(wpx, wpy, wpw, wph, 6); else ctx.rect(wpx, wpy, wpw, wph);
-      ctx.fill(); ctx.fillStyle = 'rgba(255,255,255,0.88)'; ctx.textBaseline = 'middle';
-      ctx.fillText(wmText, wpx + 10, wpy + wph / 2); ctx.restore();
-    }
+    const ovRes = await applyBrandOverlays(ctx, canvas.width, canvas.height);
+    warnIfLogoFailed(ovRes);
+    resultImg.dataset.ovBaked = '1';   // getCanvasBlob no vuelve a dibujar
 
     resultImg.src = canvas.toDataURL('image/jpeg', 0.92);
   } catch(e) { /* silent — keep current preview */ }
@@ -7612,7 +7651,7 @@ async function composeFlyerCanvas(photoB64, photoMime, fd, brand) {
   const ctx=canvas.getContext('2d');
   const primary=brand?.colors?.primary||'#2979FF';
   const accent=brand?.colors?.accent||'#E91E8C';
-  const logoSrc=logoB64||brand?.logo;
+  // S35: logoSrc eliminado — la decisión vive en resolveLogoSrc()
 
   // 1. Draw real photo filling the entire canvas (center crop to square)
   const photo=await loadImg('data:'+photoMime+';base64,'+photoB64);
@@ -7679,40 +7718,10 @@ async function composeFlyerCanvas(photoB64, photoMime, fd, brand) {
     ctx.fillText(fd.extraInfo.slice(0,55),W/2,Math.min(y,1040));
   }
 
-  // 8. Logo (top right) — S29: respects logoToggle state
-  const logoChecked = document.getElementById('logoToggle')?.checked !== false;
-  if(logoSrc && logoChecked){
-    try{
-      const logo=await loadImg(logoSrc);
-      const sz=65; const lx=W-sz-10, ly=10;
-      ctx.save();
-      ctx.beginPath(); ctx.arc(lx+sz/2,ly+sz/2,sz/2+4,0,Math.PI*2);
-      ctx.fillStyle='rgba(255,255,255,0.9)'; ctx.fill();
-      ctx.beginPath(); ctx.arc(lx+sz/2,ly+sz/2,sz/2,0,Math.PI*2); ctx.clip();
-      ctx.drawImage(logo,lx,ly,sz,sz);
-      ctx.restore();
-    }catch(e){ console.warn('Logo render failed:', e.message); }
-  }
-
-  // S29: Watermark (same logic as other modes)
-  const wmPlan = brand?.plan || 'trial';
-  const wmToggleEl = document.getElementById('wmToggle');
-  const wmOff = wmToggleEl && !wmToggleEl.checked;
-  const showWm = !(['growth', 'agency'].includes(wmPlan) && wmOff);
-  if (showWm) {
-    const wmText = '✦ postimity.com';
-    const wfs = Math.round(W * 0.021);
-    ctx.font = '600 ' + wfs + 'px -apple-system,sans-serif';
-    ctx.textAlign = 'left';
-    const wtw = ctx.measureText(wmText).width;
-    const wpw = wtw + 20, wph = wfs + 12;
-    const wpx = W - wpw - 16, wpy = H - wph - 16;
-    ctx.save();
-    ctx.fillStyle = 'rgba(0,0,0,0.42)'; ctx.beginPath();
-    if (ctx.roundRect) ctx.roundRect(wpx, wpy, wpw, wph, 6); else ctx.rect(wpx, wpy, wpw, wph);
-    ctx.fill(); ctx.fillStyle = 'rgba(255,255,255,0.88)'; ctx.textBaseline = 'middle';
-    ctx.fillText(wmText, wpx + 10, wpy + wph / 2); ctx.restore();
-  }
+  // 8. S35 / RD-25: overlays centralizados. El flyer tenía su tercera copia del
+  // dibujo, con el logo arriba a la derecha y tamaño propio. Fuente única.
+  const ovRes = await applyBrandOverlays(ctx, W, H);
+  warnIfLogoFailed(ovRes);
 
   return new Promise(res=>canvas.toBlob(blob=>{
     const reader=new FileReader();
