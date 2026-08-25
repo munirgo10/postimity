@@ -4154,6 +4154,11 @@ async function adjustResult() {
         imgEl.src = res.imageUrl;
         if (lastResult) lastResult.imageUrl = res.imageUrl;
         if (lastGeneratedData) lastGeneratedData.imageUrl = res.imageUrl;
+        // S35 / INV-075: originalImageUrl es la BASE LIMPIA de la que parte redrawCanvas.
+        // Sólo se asignaba al generar, así que tras "Nueva imagen" quedaba apuntando a
+        // la imagen anterior: al apagar el logo, el preview revertía a la vieja.
+        originalImageUrl = res.imageUrl;
+        delete imgEl.dataset.ovBaked;
         // S35 / INV-037: el ajuste reemplaza la imagen visible, pero autoSavePost sólo
         // corría al generar — el historial conservaba la versión vieja.
         autoSavePost(lastGeneratedData || lastResult || res);
@@ -7509,6 +7514,26 @@ function resolveLogoSrc() {
 // El logo se dibuja SIEMPRE desde dataURL. Dos motivos:
 //  1. Un logo servido por http sin cabecera CORS hace fallar loadImg (onerror → null).
 //  2. Aunque cargue, mancharía el canvas y toBlob() lanzaría, rompiendo la descarga.
+// Convierte cualquier imagen remota a dataURL. Un fetch normal (sin crossOrigin)
+// no puede manchar el canvas y funciona aunque el recurso no traiga cabecera CORS,
+// que es justo donde loadImg fallaba devolviendo null en silencio.
+async function toDataUrlCached(src, cacheObj) {
+  if (!src) return null;
+  if (src.startsWith('data:')) return src;
+  if (cacheObj && cacheObj.src === src) return cacheObj.data;
+  try {
+    const r = await fetch(src, { cache: 'force-cache' });
+    if (!r.ok) return null;
+    const blob = await r.blob();
+    return await new Promise((res, rej) => {
+      const fr = new FileReader();
+      fr.onload = () => res(fr.result);
+      fr.onerror = () => rej(new Error('read failed'));
+      fr.readAsDataURL(blob);
+    });
+  } catch (e) { console.warn('toDataUrlCached failed:', e.message); return null; }
+}
+
 async function logoAsDataUrl(src) {
   if (!src) return null;
   if (src.startsWith('data:')) return src;
@@ -7589,7 +7614,16 @@ function warnIfLogoFailed(res) {
 async function redrawCanvas() {
   // S23: Live preview of logo/watermark toggles
   // Only applies to single-image modes (Post, Enhance, Flyer, Testimonial)
-  if (!originalImageUrl) return;
+  // S35: si no hay base limpia registrada, usar la imagen visible actual como base.
+  // Antes esto era un `return` mudo: el usuario picaba el toggle y no pasaba nada.
+  if (!originalImageUrl) {
+    const cur = document.getElementById('resultImg')?.src || '';
+    if (cur && !cur.startsWith('data:')) originalImageUrl = cur;
+    else if (mode !== 'carousel' && mode !== 'video') {
+      console.warn('redrawCanvas: sin imagen base para aplicar overlays');
+      return;
+    }
+  }
   if (mode === 'carousel' || mode === 'video') {
     // Carousel: re-render all slides with current toggle states
     if (mode === 'carousel' && lastGeneratedData?.slides) {
@@ -7628,8 +7662,20 @@ async function redrawCanvas() {
   }
 
   try {
-    const img = await loadImg(originalImageUrl);
-    if (!img) return;
+    // S35: si originalImageUrl es cross-origin sin CORS, loadImg devuelve null y el
+    // toggle no hacía nada visible. Se convierte a dataURL y se reintenta — misma
+    // técnica que el logo. Un dataURL nunca mancha el canvas.
+    let img = await loadImg(originalImageUrl);
+    if (!img) {
+      const asData = await toDataUrlCached(originalImageUrl);
+      if (asData) img = await loadImg(asData);
+    }
+    if (!img) {
+      showToast(detectLanguage() === 'es'
+        ? '⚠️ No pudimos aplicar el logo a esta imagen'
+        : '⚠️ We could not apply the logo to this image');
+      return;
+    }
     const canvas = document.createElement('canvas');
     canvas.width = img.naturalWidth || img.width;
     canvas.height = img.naturalHeight || img.height;
