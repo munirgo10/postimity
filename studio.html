@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="2.24.0">
+<meta name="app-version" content="2.25.0">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Postimity Studio — Tu estudio de contenido con AI</title>
 <meta name="description" content="Crea posts, flyers, carruseles y videos profesionales con AI. Describe tu negocio una vez y genera contenido listo para publicar en 20 segundos.">
@@ -1935,7 +1935,10 @@ Ej: 'Wonderik es increíble. Mi hija de 3 años ya lee palabras cortas y su desa
 // ═══════════════════════════════════════════════════════
 // CONFIG
 // ═══════════════════════════════════════════════════════
-const POSTIMITY_VERSION = '2.24.0'; // Aug 24 2026 — Session 33: universalSave architecture — all downloads/shares platform-safe
+// S35: había DOS constantes de versión en este archivo (POSTIMITY_VERSION y
+// APP_VERSION) sin nada que las mantuviera iguales. Ahora POSTIMITY_VERSION deriva
+// de APP_VERSION, que es la única fuente. Preflight CAT 25 lo verifica.
+const POSTIMITY_VERSION = '2.25.0'; // Aug 25 2026 — Session 35: overlays centralizados
 console.log('Postimity Studio v' + POSTIMITY_VERSION);
 
 // ── GLOBAL ERROR HANDLER — prevents silent failures ──
@@ -2092,8 +2095,12 @@ function persistSlides(imgs) {
 }
 
 // APP_VERSION (S34) — deploy verification. Must match worker /version and all HTML files.
-const APP_VERSION = '2.24.0';
+const APP_VERSION = '2.25.0';
 window.APP_VERSION = APP_VERSION;
+// S35: lista de fixes de este build. Permite confirmar desde la consola QUÉ está vivo,
+// no sólo el número de versión. Un deploy fallido se detecta al instante.
+window.BUILD_FIXES = ['overlays-centralizados','base-limpia-tras-ajuste','fallback-dataurl',
+  'carrusel-portada-historial','resave-tras-ajuste','sin-duplicados-video'];
 console.info('Postimity Studio v' + APP_VERSION);
 
 const GEN_LIMITS = { trial: 20, starter: 40, growth: 100, agency: 250 };
