@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="2.27.0">
+<meta name="app-version" content="2.28.0">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Postimity Studio — Tu estudio de contenido con AI</title>
 <meta name="description" content="Crea posts, flyers, carruseles y videos profesionales con AI. Describe tu negocio una vez y genera contenido listo para publicar en 20 segundos.">
@@ -1021,7 +1021,7 @@ fbq('track', 'PageView');
         <div style="font-size:14px;font-weight:700;color:var(--t1);margin-bottom:8px" id="histDetailPilar"></div>
         <div class="hist-detail-caption" id="histDetailCaption"></div>
         <div class="hist-detail-btns">
-          <button class="btn btn-primary" style="flex:1;padding:10px;font-size:12px;border-radius:8px" onclick="reuseHistPost()">↺ Reutilizar prompt</button>
+          <button class="btn btn-primary" style="flex:1;padding:10px;font-size:12px;border-radius:8px" onclick="reuseHistPost()">↺ Usar este modo y pilar</button>
           <button class="btn" style="flex:1;padding:10px;font-size:12px;border-radius:8px;background:var(--bg);color:var(--t2);border:.5px solid var(--bor)" onclick="copyHistCaption()">📋 Copiar caption</button>
         </div>
       </div>
@@ -1781,7 +1781,7 @@ Ej: 'Wonderik es increíble. Mi hija de 3 años ya lee palabras cortas y su desa
               <div class="carousel-slides-preview" id="carouselSlidesPreview"></div>
               <div class="cs-dots" id="csDots"></div>
             </div>
-            <button class="carousel-dl-all" onclick="downloadAllSlides()">⬇️ Descargar todos los slides (ZIP)</button>
+            <button class="carousel-dl-all" onclick="downloadAllSlides()">⬇️ Guardar todos los slides</button>
           </div>
           <div id="keyQuoteWrap" style="display:none;padding:10px 14px;background:#FDF0DC;border-top:1px solid rgba(200,121,26,.2)">
             <div style="font-size:10px;font-weight:700;color:#854F0B;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px">⭐ Quote destacada del cliente</div>
@@ -1938,7 +1938,7 @@ Ej: 'Wonderik es increíble. Mi hija de 3 años ya lee palabras cortas y su desa
 // S35: había DOS constantes de versión en este archivo (POSTIMITY_VERSION y
 // APP_VERSION) sin nada que las mantuviera iguales. Ahora POSTIMITY_VERSION deriva
 // de APP_VERSION, que es la única fuente. Preflight CAT 25 lo verifica.
-const POSTIMITY_VERSION = '2.27.0'; // Aug 28 2026 — S37 L1: RD-27 escritor unico de imagen
+const POSTIMITY_VERSION = '2.28.0'; // Aug 28 2026 — S37 L1: RD-27 escritor unico de imagen
 console.log('Postimity Studio v' + POSTIMITY_VERSION);
 
 // ── GLOBAL ERROR HANDLER — prevents silent failures ──
@@ -2095,12 +2095,12 @@ function persistSlides(imgs) {
 }
 
 // APP_VERSION (S34) — deploy verification. Must match worker /version and all HTML files.
-const APP_VERSION = '2.27.0';
+const APP_VERSION = '2.28.0';
 window.APP_VERSION = APP_VERSION;
 // S35: lista de fixes de este build. Permite confirmar desde la consola QUÉ está vivo,
 // no sólo el número de versión. Un deploy fallido se detecta al instante.
-window.BUILD_FIXES = ['preview-sin-recorte','ovbaked-despues-de-todataurl',
-  'redrawcanvas-sin-catch-mudo','rd27-set-result-image','preflight-only-filter'];
+window.BUILD_FIXES = ['rd29-sello-al-encuadre-final','rd30-tira-slides-unica','geometria-diagonal',
+  'export-sin-recorte-de-sello','carrusel-toggle-en-vivo','etiquetas-honestas'];
 console.info('Postimity Studio v' + APP_VERSION);
 
 const GEN_LIMITS = { trial: 20, starter: 40, growth: 100, agency: 250 };
@@ -2216,7 +2216,7 @@ const T = {
     // ── Results ──
     regenImg:'🔄 Nueva imagen', regenText:'✍️ Nuevo texto', regenBack:'← Crear otro',
     carouselSlidesLabel:'🎠 Slides del carrusel', carouselNavHint:'← → para navegar · click para previsualizar',
-    carouselDlAll:'⬇️ Descargar todos los slides (ZIP)',
+    carouselDlAll:'⬇️ Guardar todos los slides',
     quoteLabel:'⭐ Quote destacada del cliente',
     logoInImgLabel:'🏷️ Logo en la imagen',
     wmLabel:'✦ Watermark Postimity', wmLock:'Growth+ para quitar',
@@ -2263,7 +2263,7 @@ const T = {
     histAll:'Todos', histPosts:'Posts', histEnhance:'Estudio Pro', histFlyers:'Flyers', histCarousels:'Carruseles', histTestimonials:'Testimonios', histVideos:'🎬 Videos',
     histEmpty:'📭', histEmptyTitle:'Aún no hay posts guardados', histEmptySub:'Genera tu primer post y aparecerá aquí automáticamente',
     histEmptyFilter:'No hay posts en este filtro', histEmptyFilterSub:'Genera contenido y aparecerá aquí',
-    histReuse:'↺ Reutilizar prompt', histCopyCaption:'📋 Copiar caption', histNoCaption:'Sin caption guardado',
+    histReuse:'↺ Usar este modo y pilar', histCopyCaption:'📋 Copiar caption', histNoCaption:'Sin caption guardado',
     histDlSlide:'Descargar slide',
     // ── Agent screen ──
     agentBack:'← Volver', agentTitle:'🤖 Marketing Agent',
@@ -2486,7 +2486,7 @@ const T = {
     // ── Results ──
     regenImg:'🔄 New image', regenText:'✍️ New text', regenBack:'← Create another',
     carouselSlidesLabel:'🎠 Carousel slides', carouselNavHint:'← → to navigate · click to preview',
-    carouselDlAll:'⬇️ Download all slides (ZIP)',
+    carouselDlAll:'⬇️ Save all slides',
     quoteLabel:'⭐ Featured customer quote',
     logoInImgLabel:'🏷️ Logo on image',
     wmLabel:'✦ Watermark Postimity', wmLock:'Growth+ to remove',
@@ -2533,7 +2533,7 @@ const T = {
     histAll:'All', histPosts:'Posts', histEnhance:'Studio Pro', histFlyers:'Flyers', histCarousels:'Carousels', histTestimonials:'Testimonials', histVideos:'🎬 Videos',
     histEmpty:'📭', histEmptyTitle:'No saved posts yet', histEmptySub:'Generate your first post and it will appear here',
     histEmptyFilter:'No posts in this filter', histEmptyFilterSub:'Generate content and it will appear here',
-    histReuse:'↺ Reuse prompt', histCopyCaption:'📋 Copy caption', histNoCaption:'No saved caption',
+    histReuse:'↺ Use this mode and pillar', histCopyCaption:'📋 Copy caption', histNoCaption:'No saved caption',
     histDlSlide:'Download slide',
     // ── Agent screen ──
     agentBack:'← Back', agentTitle:'🤖 Marketing Agent',
@@ -3862,6 +3862,43 @@ function scrollCarousel(dir) {
   const el = document.getElementById('carouselSlidesPreview');
   if(el) el.scrollBy({ left: dir * 150, behavior: 'smooth' });
 }
+// ═══════════════════════════════════════════════════════════════════
+// RD-30 — CONSTRUCTOR UNICO DE LA TIRA DE SLIDES (S37 / L1b)
+// ═══════════════════════════════════════════════════════════════════
+// showResult construia la tira con class="cs-preview" y redrawCanvas la borraba
+// y la reconstruia con class="cs-slide" — clase que NO existe en el CSS. Peor:
+// esa segunda copia llamaba .toDataURL() sobre el valor devuelto por
+// renderCarouselSlide, que es un dataURL (string), no un canvas. El primer toque
+// al toggle vaciaba la tira y lanzaba TypeError. Bug S37-4.
+// Tercer caso de la misma clase que RD-25 (dibujo) y RD-27 (estado): dos
+// constructores de la misma cosa con reglas distintas.
+function renderSlideStrip(images, activeIdx) {
+  const preview = document.getElementById('carouselSlidesPreview');
+  if (!preview || !Array.isArray(images) || !images.length) return;
+  const dots = document.getElementById('csDots');
+  const act = activeIdx || 0;
+  preview.innerHTML = '';
+  if (dots) dots.innerHTML = '';
+  images.forEach(function(url, i) {
+    const div = document.createElement('div');
+    div.className = 'cs-preview' + (i === act ? ' active' : '');
+    div.innerHTML = '<img src="' + url + '" alt="Slide ' + (i+1) + '"><span class="cs-num">' + (i+1) +
+      '</span><button class="cs-dl" onclick="event.stopPropagation();downloadCarouselSlide(' + i +
+      ')" title="' + t('histDlSlide') + '">⬇</button>';
+    div.onclick = function(){ updateCarouselDots(i); };
+    preview.appendChild(div);
+    if (dots) {
+      const dot = document.createElement('div');
+      dot.className = 'cs-dot' + (i === act ? ' active' : '');
+      dot.onclick = function(){
+        updateCarouselDots(i);
+        document.querySelectorAll('.cs-preview')[i]?.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+      };
+      dots.appendChild(dot);
+    }
+  });
+}
+
 function updateCarouselDots(activeIdx) {
   const dots = document.querySelectorAll('.cs-dot');
   dots.forEach((d,i) => d.classList.toggle('active', i === activeIdx));
@@ -6947,7 +6984,9 @@ function showResult(data) {
   // slides de más abajo, no esta llamada (redrawCanvas en modo carrusel re-renderiza
   // la tira completa y pelearía con el preview que showResult acaba de construir).
   const isCarousel = (mode === 'carousel');
-  setResultImage(data.imageUrl || '', { redraw: !isCarousel });
+  // S37/L1b: en carrusel la base limpia es la PORTADA. Sin esto lastGeneratedData.imageUrl
+  // quedaba undefined y redrawCanvas re-renderizaba los slides sin imagen de portada.
+  setResultImage(data.imageUrl || data.coverImage || '', { redraw: !isCarousel });
   // S31 PC-2: Error handler if R2 image fails to load
   resultImg.onerror = function() {
     const isES = detectLanguage() === 'es';
@@ -7005,23 +7044,8 @@ function showResult(data) {
   if(data.carouselImages && data.carouselImages.length && carouselPreviewWrap) {
     carouselPreviewWrap.style.display = 'block';
     const preview = document.getElementById('carouselSlidesPreview');
-    preview.innerHTML = '';
-    const dots = document.getElementById('csDots');
-    if(dots) dots.innerHTML = '';
-    data.carouselImages.forEach((url, i) => {
-      const div = document.createElement('div');
-      div.className = 'cs-preview' + (i===0?' active':'');
-      div.innerHTML = '<img src="'+url+'" alt="Slide '+(i+1)+'"><span class="cs-num">'+(i+1)+'</span><button class="cs-dl" onclick="event.stopPropagation();downloadCarouselSlide('+i+')" title="'+t('histDlSlide')+'">⬇</button>';
-      div.onclick = () => updateCarouselDots(i);
-      preview.appendChild(div);
-      // Add dot
-      if(dots) {
-        const dot = document.createElement('div');
-        dot.className = 'cs-dot' + (i===0?' active':'');
-        dot.onclick = () => { updateCarouselDots(i); document.querySelectorAll('.cs-preview')[i]?.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'}); };
-        dots.appendChild(dot);
-      }
-    });
+    // RD-30: constructor unico
+    renderSlideStrip(data.carouselImages, 0);
     // Show first slide in main result img — ya horneado, no es base limpia (RD-27)
     setResultImage(data.carouselImages[0], { base:false, redraw:false });
   } else if(carouselPreviewWrap) {
@@ -7162,21 +7186,30 @@ async function getCanvasBlob(format) {
   const brand = loadBrand();
   const primary = brand?.colors?.primary || '#2979FF';
 
-  // S31: Try using resultImg directly in canvas first (already loaded, should be CORS-clean)
-  // If that fails (canvas tainted), fall back to ensureDataUrl conversion
+  // S37/L1b · RD-29: se parte SIEMPRE de la BASE LIMPIA, nunca de resultImg.
+  // resultImg trae el sello horneado al aspecto ORIGINAL de la imagen; reencuadrarlo
+  // con drawCover recortaba el logo y la firma en toda exportacion cuyo aspecto
+  // difiriera del original. Ese era el bug D2 que Munir reprodujo en 1:1 y en 4:5.
   let img = null;
-  try {
-    // Quick test: draw resultImg directly into a test canvas
-    const testCanvas = document.createElement('canvas');
-    testCanvas.width = 1; testCanvas.height = 1;
-    testCanvas.getContext('2d').drawImage(imgEl, 0, 0, 1, 1);
-    testCanvas.toDataURL(); // This throws if canvas is tainted
-    img = imgEl; // Safe to use directly
-  } catch(e) {
-    // Canvas tainted — try loadImg with CORS or ensureDataUrl
-    const dataUrl = await ensureDataUrl();
-    if (dataUrl) img = await loadImg(dataUrl);
-    if (!img) img = await loadImg(imgEl.src);
+  const cleanBase = originalImageUrl || imgEl.src;
+  img = await loadImg(cleanBase);
+  if (!img) {
+    const asData = await toDataUrlCached(cleanBase);
+    if (asData) img = await loadImg(asData);
+  }
+  if (!img) {
+    // Ultimo recurso: el elemento visible. Sale sellado al aspecto original, pero
+    // es preferible a no entregar nada.
+    try {
+      const testCanvas = document.createElement('canvas');
+      testCanvas.width = 1; testCanvas.height = 1;
+      testCanvas.getContext('2d').drawImage(imgEl, 0, 0, 1, 1);
+      testCanvas.toDataURL();
+      img = imgEl;
+    } catch(e) {
+      const dataUrl = await ensureDataUrl();
+      if (dataUrl) img = await loadImg(dataUrl);
+    }
     if (!img) return null;
   }
 
@@ -7197,15 +7230,12 @@ async function getCanvasBlob(format) {
     if (brand?.name) { ctx.fillStyle = 'rgba(255,255,255,.85)'; ctx.font = 'bold 32px Plus Jakarta Sans,sans-serif'; ctx.textAlign = 'center'; ctx.fillText(brand.name, 540, 1680); }
   }
 
-  // S35 / RD-25: antes decía "No logo/watermark here — already in the image from
-  // redrawCanvas". Esa suposición era falsa: redrawCanvas sólo corría en el onchange
-  // del toggle, así que en una generación normal resultImg nunca traía overlay y
-  // compartir salía sin logo. Ahora se dibuja aquí, desde la fuente única.
-  // _ovAlreadyBaked lo pone redrawCanvas para no duplicar el overlay.
-  if (!imgEl.dataset.ovBaked) {
-    const ovRes = await applyBrandOverlays(ctx, canvas.width, canvas.height);
-    warnIfLogoFailed(ovRes);
-  }
+  // S37/L1b · RD-29: el sello se aplica SIEMPRE y al ENCUADRE FINAL, despues de
+  // drawCover. El gate `if (!imgEl.dataset.ovBaked)` que vivia aqui hacia que la
+  // exportacion reutilizara un sello pintado a otro aspecto. ovBaked sigue existiendo
+  // pero solo gobierna el preview; ninguna ruta de exportacion lo consulta.
+  const ovRes = await applyBrandOverlays(ctx, canvas.width, canvas.height);
+  warnIfLogoFailed(ovRes);
   return new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.93));
 }
 
@@ -7562,16 +7592,22 @@ function shouldShowWatermark() {
 // Dibuja logo + watermark sobre un contexto ya pintado.
 async function applyBrandOverlays(ctx, w, h) {
   const out = { logoDrawn: false, logoFailed: false, wmDrawn: false };
+  // S37/L1b: geometria en diagonal. Antes logo y firma compartian la esquina
+  // inferior derecha y se encimaban. Tamanos y margenes proporcionales a min(w,h),
+  // no en pixeles fijos: la misma marca debe verse igual en 1:1, 4:5 y 9:16.
+  const SIDE = Math.min(w, h);
+  const PAD  = Math.round(SIDE * 0.035);
   const rawLogo = resolveLogoSrc();
   if (rawLogo) {
     const src = await logoAsDataUrl(rawLogo);
     const logo = src ? await loadImg(src) : null;
     if (logo) {
-      const sz = Math.round(w * 0.13);
-      const x = w - sz - 20, y = h - sz - 20;
+      const sz = Math.round(SIDE * 0.09);
+      const x = PAD, y = PAD;                       // arriba-izquierda
       ctx.save();
-      ctx.beginPath(); ctx.arc(x + sz/2, y + sz/2, sz/2 + 6, 0, Math.PI*2);
-      ctx.fillStyle = 'rgba(255,255,255,0.92)'; ctx.fill();
+      // Sombra suave en vez del disco blanco: legible sobre foto sin parecer calcomania.
+      ctx.shadowColor = 'rgba(0,0,0,0.35)';
+      ctx.shadowBlur = Math.round(sz * 0.18);
       ctx.beginPath(); ctx.arc(x + sz/2, y + sz/2, sz/2, 0, Math.PI*2); ctx.clip();
       ctx.drawImage(logo, x, y, sz, sz);
       ctx.restore();
@@ -7584,12 +7620,12 @@ async function applyBrandOverlays(ctx, w, h) {
   }
   if (shouldShowWatermark()) {
     const wmText = '✦ postimity.com';
-    const wfs = Math.round(w * 0.021);
+    const wfs = Math.round(SIDE * 0.024);
     ctx.save();
     ctx.font = '600 ' + wfs + 'px -apple-system,sans-serif';
     const wtw = ctx.measureText(wmText).width;
-    const wpw = wtw + 20, wph = wfs + 12;
-    const wpx = w - wpw - 16, wpy = h - wph - 16;
+    const wpw = wtw + wfs, wph = Math.round(wfs * 1.7);
+    const wpx = w - wpw - PAD, wpy = h - wph - PAD;   // abajo-derecha
     ctx.fillStyle = 'rgba(15,23,42,0.72)'; ctx.beginPath();
     if (ctx.roundRect) ctx.roundRect(wpx, wpy, wpw, wph, 6); else ctx.rect(wpx, wpy, wpw, wph);
     ctx.fill();
@@ -7682,24 +7718,19 @@ async function redrawCanvas() {
     // Carousel: re-render all slides with current toggle states
     if (mode === 'carousel' && lastGeneratedData?.slides) {
       const brand = loadBrand();
-      const preview = document.getElementById('carouselSlidesPreview');
-      if (!preview || !brand) return;
-      preview.innerHTML = '';
-      const dots = document.getElementById('csDots');
-      if (dots) dots.innerHTML = '';
+      if (!brand) return;
+      const cover = lastGeneratedData.imageUrl || lastResult?.coverImage || null;
+      const imgs = [];
       for (let i = 0; i < lastGeneratedData.slides.length; i++) {
-        const slide = lastGeneratedData.slides[i];
-        const canvas = await renderCarouselSlide(slide, brand, lastGeneratedData.imageUrl, lastGeneratedData.slides.length);
-        const thumb = document.createElement('div');
-        thumb.className = 'cs-slide';
-        thumb.innerHTML = '<span class="cs-num">' + (i + 1) + '</span>';
-        const img = document.createElement('img');
-        img.src = canvas.toDataURL('image/jpeg', 0.85);
-        img.onclick = () => setResultImage(img.src, { base:false, redraw:false });
-        thumb.prepend(img);
-        preview.appendChild(thumb);
-        if (dots) { const d = document.createElement('span'); d.className = 'cs-dot' + (i === 0 ? ' active' : ''); dots.appendChild(d); }
+        imgs.push(await renderCarouselSlide(lastGeneratedData.slides[i], brand, cover, lastGeneratedData.slides.length));
       }
+      carouselResults = imgs;
+      if (lastResult) lastResult.carouselImages = imgs;
+      lastGeneratedData.carouselImages = imgs;
+      renderSlideStrip(imgs, 0);
+      // S37-5: la portada grande tambien se actualiza. Antes solo cambiaban las
+      // miniaturas y el usuario veia el sello viejo en la imagen principal.
+      await setResultImage(imgs[0], { base:false, redraw:false });
     }
     return;
   }
@@ -7828,10 +7859,9 @@ async function composeFlyerCanvas(photoB64, photoMime, fd, brand) {
     ctx.fillText(fd.extraInfo.slice(0,55),W/2,Math.min(y,1040));
   }
 
-  // 8. S35 / RD-25: overlays centralizados. El flyer tenía su tercera copia del
-  // dibujo, con el logo arriba a la derecha y tamaño propio. Fuente única.
-  const ovRes = await applyBrandOverlays(ctx, W, H);
-  warnIfLogoFailed(ovRes);
+  // 8. S37/L1b · RD-29: el composer NO sella. Devuelve el flyer limpio; el sello lo
+  // aplica redrawCanvas para el preview y getCanvasBlob para cada exportacion, ya
+  // sobre el encuadre final. Sellar aqui obligaba a reencuadrar un sello pintado.
 
   return new Promise(res=>canvas.toBlob(blob=>{
     const reader=new FileReader();
