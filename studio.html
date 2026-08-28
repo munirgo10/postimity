@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="2.25.0">
+<meta name="app-version" content="2.26.0">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Postimity Studio — Tu estudio de contenido con AI</title>
 <meta name="description" content="Crea posts, flyers, carruseles y videos profesionales con AI. Describe tu negocio una vez y genera contenido listo para publicar en 20 segundos.">
@@ -1938,7 +1938,7 @@ Ej: 'Wonderik es increíble. Mi hija de 3 años ya lee palabras cortas y su desa
 // S35: había DOS constantes de versión en este archivo (POSTIMITY_VERSION y
 // APP_VERSION) sin nada que las mantuviera iguales. Ahora POSTIMITY_VERSION deriva
 // de APP_VERSION, que es la única fuente. Preflight CAT 25 lo verifica.
-const POSTIMITY_VERSION = '2.25.0'; // Aug 25 2026 — Session 35: overlays centralizados
+const POSTIMITY_VERSION = '2.26.0'; // Aug 28 2026 — S37 L1: RD-27 escritor unico de imagen
 console.log('Postimity Studio v' + POSTIMITY_VERSION);
 
 // ── GLOBAL ERROR HANDLER — prevents silent failures ──
@@ -2095,12 +2095,12 @@ function persistSlides(imgs) {
 }
 
 // APP_VERSION (S34) — deploy verification. Must match worker /version and all HTML files.
-const APP_VERSION = '2.25.0';
+const APP_VERSION = '2.26.0';
 window.APP_VERSION = APP_VERSION;
 // S35: lista de fixes de este build. Permite confirmar desde la consola QUÉ está vivo,
 // no sólo el número de versión. Un deploy fallido se detecta al instante.
-window.BUILD_FIXES = ['overlays-centralizados','base-limpia-tras-ajuste','fallback-dataurl',
-  'carrusel-portada-historial','resave-tras-ajuste','sin-duplicados-video'];
+window.BUILD_FIXES = ['rd27-set-result-image','revert-logo-tras-regenerar','toggle-en-vivo',
+  'historial-tras-regenerar','portada-carrusel-sincronizada','preflight-only-filter'];
 console.info('Postimity Studio v' + APP_VERSION);
 
 const GEN_LIMITS = { trial: 20, starter: 40, growth: 100, agency: 250 };
@@ -3868,7 +3868,9 @@ function updateCarouselDots(activeIdx) {
   // Update active thumbnail
   const previews = document.querySelectorAll('.cs-preview');
   previews.forEach((p,i) => p.classList.toggle('active', i === activeIdx));
-  if(carouselResults[activeIdx]) document.getElementById('resultImg').src = carouselResults[activeIdx];
+  // S37 / RD-27: el slide ya trae sus overlays horneados. No es base limpia
+  // (la base del carrusel es la portada) y no debe disparar re-dibujo.
+  if(carouselResults[activeIdx]) setResultImage(carouselResults[activeIdx], { base:false, redraw:false });
 }
 function adjustSlides(delta) {
   carouselSlides = Math.min(Math.max(carouselSlides + delta, 3), 10);
@@ -4158,17 +4160,10 @@ async function adjustResult() {
         brandData: brand
       });
       if (res.imageUrl) {
-        imgEl.src = res.imageUrl;
-        if (lastResult) lastResult.imageUrl = res.imageUrl;
-        if (lastGeneratedData) lastGeneratedData.imageUrl = res.imageUrl;
-        // S35 / INV-075: originalImageUrl es la BASE LIMPIA de la que parte redrawCanvas.
-        // Sólo se asignaba al generar, así que tras "Nueva imagen" quedaba apuntando a
-        // la imagen anterior: al apagar el logo, el preview revertía a la vieja.
-        originalImageUrl = res.imageUrl;
-        delete imgEl.dataset.ovBaked;
-        // S35 / INV-037: el ajuste reemplaza la imagen visible, pero autoSavePost sólo
-        // corría al generar — el historial conservaba la versión vieja.
-        autoSavePost(lastGeneratedData || lastResult || res);
+        // S37 / RD-27: las seis asignaciones que vivían aquí (src, lastResult,
+        // lastGeneratedData, originalImageUrl, ovBaked) y el re-guardado son ahora
+        // responsabilidad del escritor único. INV-075 + INV-037b.
+        await setResultImage(res.imageUrl, { save:true });
       }
       document.getElementById('adjustInput').value = '';
       showToast(isES ? '✅ Imagen ajustada' : '✅ Image adjusted');
@@ -6848,8 +6843,12 @@ async function regenImage() {
   try {
     const imgRes=await postWithTimeout({ mode:'image', imagePrompt:prompt, imageStyle, brandColors:loadBrand()?.colors, brandType:loadBrand()?.type, quality:'low' });
     if(mode === 'carousel' && lastResult?.slides && lastResult.slides.length) {
-      // Re-render all carousel slides with new cover image
+      // S37 / RD-27 + INV-082: la portada nueva entra al estado ANTES de re-renderizar.
+      // Antes se escribía sólo en lastResult.coverImage mientras redrawCanvas leía
+      // lastGeneratedData.imageUrl: al picar el toggle, el carrusel se re-renderizaba
+      // con la portada ANTERIOR.
       lastResult.coverImage = imgRes.imageUrl;
+      await setResultImage(imgRes.imageUrl, { redraw:false });
       carouselResults = [];
       for (let i = 0; i < lastResult.slides.length; i++) {
         const dataUrl = await renderCarouselSlide(lastResult.slides[i], loadBrand(), imgRes.imageUrl, lastResult.slides.length);
@@ -6861,11 +6860,15 @@ async function regenImage() {
         const items = preview.querySelectorAll('.cs-preview img');
         carouselResults.forEach((url, i) => { if(items[i]) items[i].src = url; });
       }
-      document.getElementById('resultImg').src = carouselResults[0];
       lastResult.carouselImages = carouselResults;
+      if (lastGeneratedData) lastGeneratedData.carouselImages = carouselResults;
+      // El slide 0 ya viene horneado: se muestra sin tocar la base limpia.
+      await setResultImage(carouselResults[0], { base:false, redraw:false, save:true });
     } else {
-      lastResult.imageUrl=imgRes.imageUrl;
-      document.getElementById('resultImg').src=imgRes.imageUrl;
+      // S37 / RD-27: una sola llamada reemplaza src + lastResult + lastGeneratedData
+      // + originalImageUrl + ovBaked + re-dibujo + re-guardado. Cierra S35-12, S35-13
+      // y el historial que no guardaba la imagen regenerada.
+      await setResultImage(imgRes.imageUrl, { save:true });
     }
     showToast(detectLanguage()==='en' ? '✅ Image updated' : '✅ Imagen actualizada');
   } catch(e){ alert((detectLanguage()==='en'?'Error regenerating image: ':'Error al regenerar imagen: ')+e.message); }
@@ -6906,20 +6909,10 @@ async function regenText() {
 function showResult(data) {
   lastResult=data;
   lastGeneratedData=data;
-  // S35 / RD-25 + RD-2: aplicar overlays al generar, no sólo en el onchange del toggle.
-  // Se engancha a img.onload, nunca a setTimeout: el timing por temporizador con
-  // operaciones de canvas es la violación que RD-2 prohíbe (el preflight cazó mi
-  // primer intento con setTimeout). El guard ovBaked evita el bucle, porque
-  // redrawCanvas vuelve a asignar src y dispara load otra vez.
-  (function scheduleOverlay(){
-    const el = document.getElementById('resultImg');
-    if (!el) return;
-    delete el.dataset.ovBaked;
-    el.addEventListener('load', function onceOverlay(){
-      if (el.dataset.ovBaked) return;
-      redrawCanvas();
-    });
-  })();
+  // S37 / RD-27: el enganche de overlays al onload vivía aquí y otra copia vivía
+  // 140 líneas más abajo. Ambas son ahora responsabilidad de setResultImage, que
+  // espera el load y llama a redrawCanvas una sola vez. RD-2 se sigue respetando:
+  // se espera el evento load, nunca un temporizador.
   // S34 / INV-034: las etiquetas de formato deben reflejar el modo real.
   // El carrusel sale fijo 4:5 y el video en el aspecto elegido al generar;
   // mostrar "1:1" o "9:16" ahí sería una promesa incumplida en pantalla.
@@ -6950,8 +6943,11 @@ function showResult(data) {
   if(staleVP) staleVP.remove();
   const staleVDL = document.getElementById('videoDlBtn');
   if(staleVDL) staleVDL.remove();
-  resultImg.src=data.imageUrl||'';
-  originalImageUrl = data.imageUrl || null; // S23: store for live preview
+  // S37 / RD-27: escritor único. En carrusel el re-dibujo lo dispara el bloque de
+  // slides de más abajo, no esta llamada (redrawCanvas en modo carrusel re-renderiza
+  // la tira completa y pelearía con el preview que showResult acaba de construir).
+  const isCarousel = (mode === 'carousel');
+  setResultImage(data.imageUrl || '', { redraw: !isCarousel });
   // S31 PC-2: Error handler if R2 image fails to load
   resultImg.onerror = function() {
     const isES = detectLanguage() === 'es';
@@ -6968,7 +6964,6 @@ function showResult(data) {
   const pubSec = document.getElementById('pubSection');
   if(pubSec) pubSec.style.display = 'block';
   // Adjust mode toggle: show for single-image modes, hide for carousel
-  const isCarousel = (mode === 'carousel');
   const amtToggle = document.getElementById('adjustModeToggle');
   if(amtToggle) amtToggle.style.display = isCarousel ? 'none' : 'flex';
   // Reset adjust mode to text when showing new result
@@ -7027,8 +7022,8 @@ function showResult(data) {
         dots.appendChild(dot);
       }
     });
-    // Show first slide in main result img
-    document.getElementById('resultImg').src = data.carouselImages[0];
+    // Show first slide in main result img — ya horneado, no es base limpia (RD-27)
+    setResultImage(data.carouselImages[0], { base:false, redraw:false });
   } else if(carouselPreviewWrap) {
     carouselPreviewWrap.style.display = 'none';
   }
@@ -7048,12 +7043,9 @@ function showResult(data) {
   // Show results
   document.getElementById('resultWrap').classList.add('show');
   document.getElementById('resultWrap').scrollIntoView({ behavior:'smooth', block:'start' });
-  // S31: Wait for image to actually load before redrawCanvas (fixes mobile timing issue)
-  if (!isCarousel) {
-    const _ri = document.getElementById('resultImg');
-    if (_ri.complete && _ri.naturalWidth) { redrawCanvas(); }
-    else { _ri.addEventListener('load', function _rl(){ _ri.removeEventListener('load',_rl); redrawCanvas(); }, { once:true }); }
-  }
+  // S37 / RD-27: la segunda copia del enganche de overlays vivía aquí. Eliminada:
+  // setResultImage ya esperó el load y llamó a redrawCanvas. Dos enganches sobre el
+  // mismo evento eran la causa de que el resultado se horneara dos veces en móvil.
   // S32: Use server-authoritative genCount if available, fallback to local +1
   const gmk = genMonthKey();
   if (typeof data.genCount === 'number') {
@@ -7618,6 +7610,61 @@ function warnIfLogoFailed(res) {
     : '⚠️ We could not load your logo — re-upload it in your brand');
 }
 
+// ═══════════════════════════════════════════════════════════════════
+// RD-27 — ESCRITOR ÚNICO DEL ESTADO DE LA IMAGEN (S37 / L1)
+// ═══════════════════════════════════════════════════════════════════
+// Antes de S37 había SEIS escritores sueltos de resultImg.src y sólo dos
+// actualizaban el estado acompañante. De ahí salieron, como un solo bug,
+// S35-12 (al apagar el logo el preview revertía a la imagen anterior),
+// S35-13 (el toggle no aplicaba en vivo), el historial que no guardaba la
+// imagen regenerada y el desfase de portada del carrusel (redrawCanvas leía
+// lastGeneratedData.imageUrl mientras regenImage escribía lastResult.coverImage).
+//
+// INV-075 describía esta clase completa desde S36 y aun así el bug sobrevivió a
+// 240 checks: no existía una función única contra la cual verificarlo.
+//
+// A partir de aquí, resultImg.src, originalImageUrl, lastResult.imageUrl,
+// lastGeneratedData.imageUrl y el flag ovBaked se escriben EXCLUSIVAMENTE aquí.
+// Única excepción: redrawCanvas, que rehornea una imagen YA registrada — llamar
+// a setResultImage desde ahí sería recursión infinita. El preflight (IS-2) trata
+// esas dos asignaciones como las únicas permitidas fuera de esta función.
+//
+//   opts.base   = false → la url ya trae overlays horneados (slide de carrusel,
+//                         canvas de redrawCanvas). No toca la base limpia.
+//   opts.redraw = false → el llamador se encarga del re-dibujo.
+//   opts.save   = true  → re-guarda en historial (INV-037b).
+async function setResultImage(url, opts) {
+  const o = opts || {};
+  // El identificador se llama resultImg a propósito: IS-2 cuenta las asignaciones
+  // a resultImg.src y así la del escritor único queda DENTRO de su rango permitido
+  // en vez de ser invisible al check.
+  const resultImg = document.getElementById('resultImg');
+  if (!resultImg || !url) return;
+  resultImg.src = url;
+  delete resultImg.dataset.ovBaked;
+  if (o.base !== false) {
+    originalImageUrl = url;
+    if (lastResult) lastResult.imageUrl = url;
+    if (lastGeneratedData) lastGeneratedData.imageUrl = url;
+  }
+  if (o.redraw !== false) {
+    // RD-2: se espera el evento load, nunca un temporizador.
+    if (!(resultImg.complete && resultImg.naturalWidth)) {
+      await new Promise(function(resolve) {
+        resultImg.addEventListener('load', resolve, { once:true });
+        resultImg.addEventListener('error', resolve, { once:true });
+      });
+    }
+    await redrawCanvas();
+  }
+  if (o.save === true) {
+    // autoSavePost lee resultImg.src, así que corre DESPUÉS del re-dibujo:
+    // el historial guarda exactamente lo que el usuario está viendo.
+    try { autoSavePost(lastGeneratedData || lastResult); }
+    catch (e) { console.warn('setResultImage: autoSavePost falló', e && e.message); }
+  }
+}
+
 async function redrawCanvas() {
   // S23: Live preview of logo/watermark toggles
   // Only applies to single-image modes (Post, Enhance, Flyer, Testimonial)
@@ -7648,7 +7695,7 @@ async function redrawCanvas() {
         thumb.innerHTML = '<span class="cs-num">' + (i + 1) + '</span>';
         const img = document.createElement('img');
         img.src = canvas.toDataURL('image/jpeg', 0.85);
-        img.onclick = () => { document.getElementById('resultImg').src = img.src; };
+        img.onclick = () => setResultImage(img.src, { base:false, redraw:false });
         thumb.prepend(img);
         preview.appendChild(thumb);
         if (dots) { const d = document.createElement('span'); d.className = 'cs-dot' + (i === 0 ? ' active' : ''); dots.appendChild(d); }
