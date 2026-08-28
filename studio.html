@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="2.26.0">
+<meta name="app-version" content="2.27.0">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Postimity Studio — Tu estudio de contenido con AI</title>
 <meta name="description" content="Crea posts, flyers, carruseles y videos profesionales con AI. Describe tu negocio una vez y genera contenido listo para publicar en 20 segundos.">
@@ -251,7 +251,7 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
 .result-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
 /* Image panel */
 .img-panel{background:var(--w);border:1px solid var(--bor);border-radius:var(--r2);overflow:hidden;box-shadow:var(--s2)}
-.img-panel img{width:100%;aspect-ratio:1/1;object-fit:cover;display:block}
+.img-panel img{width:100%;aspect-ratio:1/1;object-fit:contain;background:#0f172a;display:block}
 .photo-desc-bar{padding:9px 14px;background:var(--g3);font-size:12px;color:var(--g2);border-top:1px solid rgba(118,196,66,.2);display:none;line-height:1.4}
 .photo-desc-bar.show{display:block}
 .img-controls{padding:12px 14px;border-top:1px solid var(--bor)}
@@ -1938,7 +1938,7 @@ Ej: 'Wonderik es increíble. Mi hija de 3 años ya lee palabras cortas y su desa
 // S35: había DOS constantes de versión en este archivo (POSTIMITY_VERSION y
 // APP_VERSION) sin nada que las mantuviera iguales. Ahora POSTIMITY_VERSION deriva
 // de APP_VERSION, que es la única fuente. Preflight CAT 25 lo verifica.
-const POSTIMITY_VERSION = '2.26.0'; // Aug 28 2026 — S37 L1: RD-27 escritor unico de imagen
+const POSTIMITY_VERSION = '2.27.0'; // Aug 28 2026 — S37 L1: RD-27 escritor unico de imagen
 console.log('Postimity Studio v' + POSTIMITY_VERSION);
 
 // ── GLOBAL ERROR HANDLER — prevents silent failures ──
@@ -2095,12 +2095,12 @@ function persistSlides(imgs) {
 }
 
 // APP_VERSION (S34) — deploy verification. Must match worker /version and all HTML files.
-const APP_VERSION = '2.26.0';
+const APP_VERSION = '2.27.0';
 window.APP_VERSION = APP_VERSION;
 // S35: lista de fixes de este build. Permite confirmar desde la consola QUÉ está vivo,
 // no sólo el número de versión. Un deploy fallido se detecta al instante.
-window.BUILD_FIXES = ['rd27-set-result-image','revert-logo-tras-regenerar','toggle-en-vivo',
-  'historial-tras-regenerar','portada-carrusel-sincronizada','preflight-only-filter'];
+window.BUILD_FIXES = ['preview-sin-recorte','ovbaked-despues-de-todataurl',
+  'redrawcanvas-sin-catch-mudo','rd27-set-result-image','preflight-only-filter'];
 console.info('Postimity Studio v' + APP_VERSION);
 
 const GEN_LIMITS = { trial: 20, starter: 40, growth: 100, agency: 250 };
@@ -7738,10 +7738,20 @@ async function redrawCanvas() {
 
     const ovRes = await applyBrandOverlays(ctx, canvas.width, canvas.height);
     warnIfLogoFailed(ovRes);
-    resultImg.dataset.ovBaked = '1';   // getCanvasBlob no vuelve a dibujar
-
-    resultImg.src = canvas.toDataURL('image/jpeg', 0.92);
-  } catch(e) { /* silent — keep current preview */ }
+    // S37/L1: la bandera se marca DESPUES de toDataURL. Antes se marcaba antes, asi que
+    // si toDataURL lanzaba, quedaba en '1' sobre una imagen SIN overlays y getCanvasBlob
+    // la leia como "ya horneada": la descarga salia sin logo y sin avisar.
+    const baked = canvas.toDataURL('image/jpeg', 0.92);
+    resultImg.src = baked;
+    resultImg.dataset.ovBaked = '1';
+  } catch(e) {
+    // INV-076: nunca en silencio. El catch mudo que vivia aqui costo tres ciclos de
+    // diagnostico a ciegas en S37.
+    console.error('redrawCanvas fallo:', e);
+    showToast(detectLanguage() === 'es'
+      ? '\u26a0\ufe0f No pudimos aplicar logo/firma a esta imagen'
+      : '\u26a0\ufe0f We could not apply logo/signature to this image');
+  }
 }
 
 async function composeFlyerCanvas(photoB64, photoMime, fd, brand) {
