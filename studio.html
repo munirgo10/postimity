@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="2.28.0">
+<meta name="app-version" content="2.29.0">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Postimity Studio — Tu estudio de contenido con AI</title>
 <meta name="description" content="Crea posts, flyers, carruseles y videos profesionales con AI. Describe tu negocio una vez y genera contenido listo para publicar en 20 segundos.">
@@ -1938,7 +1938,7 @@ Ej: 'Wonderik es increíble. Mi hija de 3 años ya lee palabras cortas y su desa
 // S35: había DOS constantes de versión en este archivo (POSTIMITY_VERSION y
 // APP_VERSION) sin nada que las mantuviera iguales. Ahora POSTIMITY_VERSION deriva
 // de APP_VERSION, que es la única fuente. Preflight CAT 25 lo verifica.
-const POSTIMITY_VERSION = '2.28.0'; // Aug 28 2026 — S37 L1: RD-27 escritor unico de imagen
+const POSTIMITY_VERSION = '2.29.0'; // Aug 28 2026 — S37 L1: RD-27 escritor unico de imagen
 console.log('Postimity Studio v' + POSTIMITY_VERSION);
 
 // ── GLOBAL ERROR HANDLER — prevents silent failures ──
@@ -2095,12 +2095,12 @@ function persistSlides(imgs) {
 }
 
 // APP_VERSION (S34) — deploy verification. Must match worker /version and all HTML files.
-const APP_VERSION = '2.28.0';
+const APP_VERSION = '2.29.0';
 window.APP_VERSION = APP_VERSION;
 // S35: lista de fixes de este build. Permite confirmar desde la consola QUÉ está vivo,
 // no sólo el número de versión. Un deploy fallido se detecta al instante.
 window.BUILD_FIXES = ['rd29-sello-al-encuadre-final','rd30-tira-slides-unica','geometria-diagonal',
-  'export-sin-recorte-de-sello','carrusel-toggle-en-vivo','etiquetas-honestas'];
+  'rd31-reencuadre-por-perdida','slides-individuales-en-escritorio','etiquetas-honestas'];
 console.info('Postimity Studio v' + APP_VERSION);
 
 const GEN_LIMITS = { trial: 20, starter: 40, growth: 100, agency: 250 };
@@ -7216,17 +7216,23 @@ async function getCanvasBlob(format) {
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
 
-  if (format === 'square') { canvas.width = canvas.height = 1080; drawCover(ctx, img, 0, 0, 1080, 1080); }
+  // S37/L1c · RD-31: el fondo de marca que se pintaba aqui quedaba tapado al 100%
+  // por drawCover — codigo muerto desde siempre (S37-8). Ahora es el respaldo real
+  // de drawFramed cuando el navegador no soporta ctx.filter.
+  if (format === 'square') {
+    canvas.width = canvas.height = 1080;
+    drawFramed(ctx, img, 1080, 1080, function(){ ctx.fillStyle = primary; ctx.fillRect(0, 0, 1080, 1080); });
+  }
   else if (format === 'portrait') {
     canvas.width = 1080; canvas.height = 1350;
-    ctx.fillStyle = primary; ctx.fillRect(0, 0, 1080, 1350);
-    drawCover(ctx, img, 0, 0, 1080, 1350);
+    drawFramed(ctx, img, 1080, 1350, function(){ ctx.fillStyle = primary; ctx.fillRect(0, 0, 1080, 1350); });
   } else {
     canvas.width = 1080; canvas.height = 1920;
-    const grad = ctx.createLinearGradient(0, 0, 0, 1920);
-    grad.addColorStop(0, primary); grad.addColorStop(1, darken(primary, 50));
-    ctx.fillStyle = grad; ctx.fillRect(0, 0, 1080, 1920);
-    drawCover(ctx, img, 0, 0, 1080, 1920);
+    drawFramed(ctx, img, 1080, 1920, function(){
+      const grad = ctx.createLinearGradient(0, 0, 0, 1920);
+      grad.addColorStop(0, primary); grad.addColorStop(1, darken(primary, 50));
+      ctx.fillStyle = grad; ctx.fillRect(0, 0, 1080, 1920);
+    });
     if (brand?.name) { ctx.fillStyle = 'rgba(255,255,255,.85)'; ctx.font = 'bold 32px Plus Jakarta Sans,sans-serif'; ctx.textAlign = 'center'; ctx.fillText(brand.name, 540, 1680); }
   }
 
@@ -7373,9 +7379,26 @@ async function universalSaveMultiple(blobs, filenames, zipName) {
     return 'opened';
   }
 
-  // Path 3: Desktop / Android — ZIP download (saves to Downloads folder)
+  // Path 3: Escritorio / Android — S37/L1c: ARCHIVOS INDIVIDUALES, no ZIP.
+  // El objetivo del carrusel es seleccionar N fotos y subirlas a la app. Un ZIP
+  // obliga a descomprimir antes de poder hacerlo, y en Chromebook eso son cuatro
+  // pasos extra. El ZIP pasa a ser el respaldo, no la ruta principal.
   try {
-    if (typeof JSZip === 'undefined') throw new Error('JSZip not loaded');
+    for (let i = 0; i < blobs.length; i++) {
+      const a = document.createElement('a');
+      const href = URL.createObjectURL(blobs[i]);
+      a.href = href;
+      a.download = filenames[i];
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      setTimeout(function(){ URL.revokeObjectURL(href); }, 30000);
+      if (i < blobs.length - 1) await new Promise(r => setTimeout(r, 400));
+    }
+    return 'downloaded';
+  } catch(e) {
+    // Respaldo: si el navegador bloquea la descarga multiple, un ZIP es mejor
+    // que perder los slides. RD-10-OK
+    console.warn('Descarga individual fallo, cayendo a ZIP:', e);
+    if (typeof JSZip === 'undefined') return false;
     const zip = new JSZip();
     blobs.forEach((b, i) => zip.file(filenames[i], b));
     const zipBlob = await zip.generateAsync({ type: 'blob' });
@@ -7384,16 +7407,6 @@ async function universalSaveMultiple(blobs, filenames, zipName) {
     a.download = zipName;
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
     setTimeout(() => URL.revokeObjectURL(a.href), 5000);
-    return 'downloaded';
-  } catch(e) {
-    // JSZip fallback: sequential <a download>
-    console.warn('JSZip failed, sequential download:', e);
-    for (let i = 0; i < blobs.length; i++) {
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blobs[i]); a.download = filenames[i];
-      document.body.appendChild(a); a.click(); document.body.removeChild(a);
-      if (i < blobs.length - 1) await new Promise(r => setTimeout(r, 400));
-    }
     return 'downloaded';
   }
 }
@@ -7878,6 +7891,49 @@ function hexToRgba(hex,alpha){
 // ─── IMAGE UTILS ─────────────────────────────────────
 // S29: Center-crop draw — equivalent to CSS object-fit:cover
 // Draws img into canvas area (dx,dy,dw,dh) preserving aspect ratio, cropping overflow
+// ═══════════════════════════════════════════════════════════════════
+// RD-31 — EL REENCUADRE SE DECIDE POR CUANTO SE PIERDE, NO POR FORMATO
+// ═══════════════════════════════════════════════════════════════════
+// Una imagen 2:3 conserva 83% en 4:5 y 84% en 9:16 — recorte imperceptible.
+// En 1:1 conserva 67%: un tercio fuera, y ahi es donde se cortan cabezas.
+// La regla se evalua contra la imagen REAL, no contra una lista de formatos,
+// porque en Estudio Pro la foto la sube el usuario y puede venir horizontal.
+// Umbral: por debajo de 75% conservado se usa contain con fondo.
+const FRAME_KEEP_MIN = 0.75;
+
+function coverKeepRatio(sw, sh, dw, dh) {
+  const sr = sw / sh, dr = dw / dh;
+  return sr > dr ? (dr / sr) : (sr / dr);
+}
+
+// paintFallback: fondo de marca si el navegador no soporta ctx.filter (Safari viejo).
+function drawFramed(ctx, img, dw, dh, paintFallback) {
+  const sw = img.naturalWidth || img.width;
+  const sh = img.naturalHeight || img.height;
+  if (!sw || !sh) { drawCover(ctx, img, 0, 0, dw, dh); return 'cover'; }
+  if (coverKeepRatio(sw, sh, dw, dh) >= FRAME_KEEP_MIN) {
+    drawCover(ctx, img, 0, 0, dw, dh);
+    return 'cover';
+  }
+  // Fondo: la propia imagen desenfocada. Las barras de color plano se leen como
+  // error de exportacion; el desenfoque se lee como intencion.
+  let painted = false;
+  try {
+    if (typeof ctx.filter === 'string') {
+      ctx.save();
+      ctx.filter = 'blur(' + Math.round(Math.min(dw, dh) * 0.05) + 'px) brightness(0.72)';
+      drawCover(ctx, img, 0, 0, dw, dh);
+      ctx.restore();
+      painted = true;
+    }
+  } catch(e) { painted = false; }
+  if (!painted && typeof paintFallback === 'function') paintFallback();
+  const sc = Math.min(dw / sw, dh / sh);
+  const w = Math.round(sw * sc), h = Math.round(sh * sc);
+  ctx.drawImage(img, Math.round((dw - w) / 2), Math.round((dh - h) / 2), w, h);
+  return 'contain';
+}
+
 function drawCover(ctx, img, dx, dy, dw, dh) {
   const sr = img.naturalWidth / img.naturalHeight; // source ratio
   const dr = dw / dh; // destination ratio
