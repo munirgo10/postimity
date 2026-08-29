@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="2.29.0">
+<meta name="app-version" content="2.31.0">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Postimity Studio — Tu estudio de contenido con AI</title>
 <meta name="description" content="Crea posts, flyers, carruseles y videos profesionales con AI. Describe tu negocio una vez y genera contenido listo para publicar en 20 segundos.">
@@ -1810,7 +1810,7 @@ Ej: 'Wonderik es increíble. Mi hija de 3 años ya lee palabras cortas y su desa
                   📸 Instagram<br><span class="fmt-lbl" id="fmtIg" style="font-size:9px;font-weight:400">4:5 · Guardar + Copiar</span>
                 </button>
                 <button class="pub-btn fb" onclick="openInSocial('facebook')">
-                  👥 Facebook<br><span class="fmt-lbl" id="fmtFb" style="font-size:9px;font-weight:400">1:1 · Guardar + Copiar</span>
+                  👥 Facebook<br><span class="fmt-lbl" id="fmtFb" style="font-size:9px;font-weight:400">4:5 · Guardar + Copiar</span>
                 </button>
                 <button class="pub-btn tk" onclick="openInSocial('tiktok')">
                   🎵 TikTok<br><span class="fmt-lbl" id="fmtTk" style="font-size:9px;font-weight:400">9:16 · Guardar + Copiar</span>
@@ -1938,7 +1938,7 @@ Ej: 'Wonderik es increíble. Mi hija de 3 años ya lee palabras cortas y su desa
 // S35: había DOS constantes de versión en este archivo (POSTIMITY_VERSION y
 // APP_VERSION) sin nada que las mantuviera iguales. Ahora POSTIMITY_VERSION deriva
 // de APP_VERSION, que es la única fuente. Preflight CAT 25 lo verifica.
-const POSTIMITY_VERSION = '2.29.0'; // Aug 28 2026 — S37 L1: RD-27 escritor unico de imagen
+const POSTIMITY_VERSION = '2.31.0'; // Aug 28 2026 — S37 L1: RD-27 escritor unico de imagen
 console.log('Postimity Studio v' + POSTIMITY_VERSION);
 
 // ── GLOBAL ERROR HANDLER — prevents silent failures ──
@@ -2016,7 +2016,7 @@ function updateShareLabels(mode) {
     set('fmtIg', ar + ' · ' + g); set('fmtFb', ar + ' · ' + g); set('fmtTk', ar + ' · ' + g);
     set('fmtDl', ar + ' · ' + (es ? 'video' : 'video'));
   } else {
-    set('fmtIg', '4:5 · ' + save); set('fmtFb', '1:1 · ' + save); set('fmtTk', '9:16 · ' + save);
+    set('fmtIg', '4:5 · ' + save); set('fmtFb', '4:5 · ' + save); set('fmtTk', '9:16 · ' + save);
     set('fmtDl', es ? '1:1 · Para WhatsApp, email, etc.' : '1:1 · For WhatsApp, email, etc.');
   }
 }
@@ -2095,12 +2095,12 @@ function persistSlides(imgs) {
 }
 
 // APP_VERSION (S34) — deploy verification. Must match worker /version and all HTML files.
-const APP_VERSION = '2.29.0';
+const APP_VERSION = '2.31.0';
 window.APP_VERSION = APP_VERSION;
 // S35: lista de fixes de este build. Permite confirmar desde la consola QUÉ está vivo,
 // no sólo el número de versión. Un deploy fallido se detecta al instante.
 window.BUILD_FIXES = ['rd29-sello-al-encuadre-final','rd30-tira-slides-unica','geometria-diagonal',
-  'rd31-reencuadre-por-perdida','slides-individuales-en-escritorio','etiquetas-honestas'];
+  'rd32-formato-optimo-por-red','una-identidad-por-encuadre','rd31-reencuadre-por-perdida'];
 console.info('Postimity Studio v' + APP_VERSION);
 
 const GEN_LIMITS = { trial: 20, starter: 40, growth: 100, agency: 250 };
@@ -6567,7 +6567,7 @@ function applyBilingualUI() {
   const wmLbl = document.querySelector('.wm-label'); if(wmLbl) wmLbl.innerHTML = t('wmLabel') + ' <span class="wm-lock" id="wmLockBadge">' + t('wmLock') + '</span>';
   // Publish section
   const pubLbl = document.querySelector('.pub-label'); if(pubLbl) pubLbl.textContent = t('pubLabel');
-  const pubFormats = { ig: '4:5', fb: '1:1', tk: '9:16' };
+  const pubFormats = { ig: '4:5', fb: '4:5', tk: '9:16' };
   document.querySelectorAll('.pub-btn').forEach(btn => {
     const span = btn.querySelector('span');
     if (span) {
@@ -7233,7 +7233,18 @@ async function getCanvasBlob(format) {
       grad.addColorStop(0, primary); grad.addColorStop(1, darken(primary, 50));
       ctx.fillStyle = grad; ctx.fillRect(0, 0, 1080, 1920);
     });
-    if (brand?.name) { ctx.fillStyle = 'rgba(255,255,255,.85)'; ctx.font = 'bold 32px Plus Jakarta Sans,sans-serif'; ctx.textAlign = 'center'; ctx.fillText(brand.name, 540, 1680); }
+    // S37/L1c: UNA identidad de marca por encuadre. El nombre centrado se dibujaba
+    // siempre, asi que en 9:16 convivia con el logo arriba-izquierda y con la firma
+    // de Postimity abajo-derecha: tres marcas en una sola imagen. Ahora el nombre
+    // solo aparece cuando NO hay logo, que es el unico caso en que hace falta.
+    if (brand?.name && !resolveLogoSrc()) {
+      ctx.save();
+      ctx.fillStyle = 'rgba(255,255,255,.85)';
+      ctx.font = 'bold 32px Plus Jakarta Sans,sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(brand.name, 540, 1680);
+      ctx.restore();
+    }
   }
 
   // S37/L1b · RD-29: el sello se aplica SIEMPRE y al ENCUADRE FINAL, despues de
@@ -7427,7 +7438,13 @@ async function openInSocial(platform) {
   const ts = Date.now();
 
   // Platform-specific image format
-  const platformFormats = { instagram: 'portrait', facebook: 'square', tiktok: 'story' };
+  // S37/L1c · RD-32: cada red recibe el formato que MAXIMIZA su superficie en el
+  // feed, no el historico. Facebook paso de 1:1 a 4:5 en S37: el feed de Facebook
+  // es vertical desde hace anos y 4:5 ocupa 25% mas alto en el scroll con la misma
+  // imagen y sin recortar nada (una fuente 2:3 conserva 83% en 4:5 y solo 67% en 1:1).
+  // El 1:1 sigue disponible en "Descargar imagen", que es donde de verdad se usa:
+  // WhatsApp y correo. Un cambio aqui obliga a mover fmtIg/fmtFb/fmtTk y pubFormats.
+  const platformFormats = { instagram: 'portrait', facebook: 'portrait', tiktok: 'story' };
   const format = platformFormats[platform] || 'square';
   const formatLabels = { portrait: '4:5', square: '1:1', story: '9:16' };
 
