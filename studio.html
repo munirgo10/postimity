@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="2.31.0">
+<meta name="app-version" content="2.33.0">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Postimity Studio — Tu estudio de contenido con AI</title>
 <meta name="description" content="Crea posts, flyers, carruseles y videos profesionales con AI. Describe tu negocio una vez y genera contenido listo para publicar en 20 segundos.">
@@ -251,7 +251,7 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
 .result-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
 /* Image panel */
 .img-panel{background:var(--w);border:1px solid var(--bor);border-radius:var(--r2);overflow:hidden;box-shadow:var(--s2)}
-.img-panel img{width:100%;aspect-ratio:1/1;object-fit:contain;background:#0f172a;display:block}
+.img-panel img{width:100%;height:auto;display:block}
 .photo-desc-bar{padding:9px 14px;background:var(--g3);font-size:12px;color:var(--g2);border-top:1px solid rgba(118,196,66,.2);display:none;line-height:1.4}
 .photo-desc-bar.show{display:block}
 .img-controls{padding:12px 14px;border-top:1px solid var(--bor)}
@@ -1758,8 +1758,8 @@ Ej: 'Wonderik es increíble. Mi hija de 3 años ya lee palabras cortas y su desa
     <!-- Results -->
     <div class="result-wrap" id="resultWrap">
       <div class="regen-btns">
-        <button class="btn-regen" id="regenImg" onclick="regenImage()">🔄 Nueva imagen</button>
-        <button class="btn-regen" id="regenText" onclick="regenText()">✍️ Nuevo texto</button>
+        <button class="btn-regen" id="regenImg" onclick="regenImage()">🔄 Nueva imagen · 1 gen</button>
+        <button class="btn-regen" id="regenText" onclick="regenText()">✍️ Nuevo texto · 1 gen</button>
         <button class="btn-regen" onclick="resetCreator()">← Crear otro</button>
       </div>
       <div class="result-grid">
@@ -1938,7 +1938,7 @@ Ej: 'Wonderik es increíble. Mi hija de 3 años ya lee palabras cortas y su desa
 // S35: había DOS constantes de versión en este archivo (POSTIMITY_VERSION y
 // APP_VERSION) sin nada que las mantuviera iguales. Ahora POSTIMITY_VERSION deriva
 // de APP_VERSION, que es la única fuente. Preflight CAT 25 lo verifica.
-const POSTIMITY_VERSION = '2.31.0'; // Aug 28 2026 — S37 L1: RD-27 escritor unico de imagen
+const POSTIMITY_VERSION = '2.33.0'; // Aug 29 2026 — S37 L2: RD-28 cobro por actionId
 console.log('Postimity Studio v' + POSTIMITY_VERSION);
 
 // ── GLOBAL ERROR HANDLER — prevents silent failures ──
@@ -1993,6 +1993,42 @@ function apiFetch(url, opts = {}) {
   }
   return fetch(url, opts);
 }
+// ═══════════════════════════════════════════════════════
+// S37/L2 · RD-28 — IDENTIDAD DE LA ACCION DEL USUARIO
+// ═══════════════════════════════════════════════════════
+// Un click en "Generar" es UNA accion aunque dispare dos llamadas. Todas las
+// llamadas de esa accion mandan el mismo actionId; el worker cobra la primera y
+// suprime las demas (max 2 supresiones, TTL 10 min).
+//
+// Sin esto: el post con foto de galeria cobraba 2 (captions + enhance), el video
+// cobraba 1 video + 1 generacion, y regenerar imagen cobraba 0.
+//
+// REGLA: newActionId() se llama UNA vez al inicio de cada accion del usuario, nunca
+// dentro de un sub-paso. Si un sub-paso lo llama, rompe la deduplicacion en silencio.
+let currentActionId = null;
+function newActionId() {
+  currentActionId = (window.crypto && crypto.randomUUID)
+    ? crypto.randomUUID()
+    : 'a' + Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
+  return currentActionId;
+}
+
+// S37/L2 · RD-6 + INV-025 — el servidor es la fuente de verdad del contador.
+// Vive fuera de showResult porque a partir de S37 refinar COBRA, y refinar no pasa
+// por showResult: el badge se quedaria mostrando un numero viejo mientras el
+// servidor ya descontó. Antes de S37 daba igual, porque refinar era gratis.
+function syncCounters(data) {
+  if (!data) return;
+  if (typeof data.genCount === 'number') {
+    localStorage.setItem(genMonthKey(), String(data.genCount));
+    genCount = data.genCount;
+  }
+  if (typeof data.videoCount === 'number') {
+    localStorage.setItem(videoMonthKey(), String(data.videoCount));
+  }
+  updateGenCounter();
+}
+
 // N2 fix (Session 19): HTML escape helper — prevents XSS in innerHTML assignments
 function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
 // ═══════════════════════════════════════════════════════
@@ -2095,12 +2131,13 @@ function persistSlides(imgs) {
 }
 
 // APP_VERSION (S34) — deploy verification. Must match worker /version and all HTML files.
-const APP_VERSION = '2.31.0';
+const APP_VERSION = '2.33.0';
 window.APP_VERSION = APP_VERSION;
 // S35: lista de fixes de este build. Permite confirmar desde la consola QUÉ está vivo,
 // no sólo el número de versión. Un deploy fallido se detecta al instante.
-window.BUILD_FIXES = ['rd29-sello-al-encuadre-final','rd30-tira-slides-unica','geometria-diagonal',
-  'rd32-formato-optimo-por-red','una-identidad-por-encuadre','rd31-reencuadre-por-perdida'];
+window.BUILD_FIXES = ['rd28-cobro-por-actionid','image-regen-cobra-y-en-medium',
+  'video-captions-no-cobra','adjust-y-flyer-captions-cobran','calidad-la-decide-el-servidor',
+  'contador-sincronizado-al-refinar','etiqueta-de-cobro-en-botones'];
 console.info('Postimity Studio v' + APP_VERSION);
 
 const GEN_LIMITS = { trial: 20, starter: 40, growth: 100, agency: 250 };
@@ -2214,7 +2251,7 @@ const T = {
     // ── Error ──
     errTitle:'Algo salió mal', errDefault:'Error inesperado. Intenta de nuevo.', errRetry:'Intentar de nuevo',
     // ── Results ──
-    regenImg:'🔄 Nueva imagen', regenText:'✍️ Nuevo texto', regenBack:'← Crear otro',
+    regenImg:'🔄 Nueva imagen · 1 gen', regenText:'✍️ Nuevo texto · 1 gen', regenBack:'← Crear otro',
     carouselSlidesLabel:'🎠 Slides del carrusel', carouselNavHint:'← → para navegar · click para previsualizar',
     carouselDlAll:'⬇️ Guardar todos los slides',
     quoteLabel:'⭐ Quote destacada del cliente',
@@ -2229,7 +2266,7 @@ const T = {
     postHintTK:'⏰ <strong>Mejor hora:</strong> 6-10pm cualquier día · Caption ideal: 50-150 caracteres con keywords de búsqueda',
     ttHookLabel:'🎬 Hook (primeros 1.5 seg)', ttScriptLabel:'📝 Script',
     // ── Adjust ──
-    adjustLabel:'✏️ Ajustar el contenido', adjustPlaceholder:'Ej: hazlo más corto · más formal · agrega urgencia · cambia el CTA', adjustBtn:'Aplicar',
+    adjustLabel:'✏️ Ajustar el contenido · 1 gen', adjustPlaceholder:'Ej: hazlo más corto · más formal · agrega urgencia · cambia el CTA', adjustBtn:'Aplicar',
     adjShorter:'Más corto', adjFormal:'Más formal', adjCloser:'Más cercano', adjUrgency:'Más urgencia', adjCTA:'Cambiar CTA', adjEmoji:'+ Emojis',
     adjShorterVal:'Hazlo más corto, máximo 3 líneas', adjFormalVal:'Tono más formal y profesional', adjCloserVal:'Tono más cercano y conversacional',
     adjImgBrighter:'Más brillante', adjImgBg:'Cambiar fondo', adjImgContrast:'Más contraste', adjImgWarm:'Más cálida', adjImgText:'Cambiar texto', adjImgSimplify:'Simplificar',
@@ -2484,7 +2521,7 @@ const T = {
     // ── Error ──
     errTitle:'Something went wrong', errDefault:'Unexpected error. Try again.', errRetry:'Try again',
     // ── Results ──
-    regenImg:'🔄 New image', regenText:'✍️ New text', regenBack:'← Create another',
+    regenImg:'🔄 New image · 1 gen', regenText:'✍️ New text · 1 gen', regenBack:'← Create another',
     carouselSlidesLabel:'🎠 Carousel slides', carouselNavHint:'← → to navigate · click to preview',
     carouselDlAll:'⬇️ Save all slides',
     quoteLabel:'⭐ Featured customer quote',
@@ -2499,7 +2536,7 @@ const T = {
     postHintTK:'⏰ <strong>Best time:</strong> 6-10pm any day · Ideal caption: 50-150 chars with search keywords',
     ttHookLabel:'🎬 Hook (first 1.5 sec)', ttScriptLabel:'📝 Script',
     // ── Adjust ──
-    adjustLabel:'✏️ Adjust the content', adjustPlaceholder:'E.g.: make it shorter · more formal · add urgency · change the CTA', adjustBtn:'Apply',
+    adjustLabel:'✏️ Adjust the content · 1 gen', adjustPlaceholder:'E.g.: make it shorter · more formal · add urgency · change the CTA', adjustBtn:'Apply',
     adjShorter:'Shorter', adjFormal:'More formal', adjCloser:'More personal', adjUrgency:'More urgency', adjCTA:'Change CTA', adjEmoji:'+ Emojis',
     adjShorterVal:'Make it shorter, max 3 lines', adjFormalVal:'More formal and professional tone', adjCloserVal:'More personal and conversational tone',
     adjUrgencyVal:'Add more urgency and call to action', adjCTAVal:'Change the CTA to a more direct one', adjEmojiVal:'Add 2-3 relevant emojis',
@@ -3960,7 +3997,7 @@ async function genCarousel(brand, bg) {
     coverPhoto = conv.b64; coverMime = 'image/png';
   }
   const res = await postWithTimeout({
-    mode: 'carousel',
+    mode: 'carousel', actionId: currentActionId,
     topic, slideCount: carouselSlides, style: carouselStyle,
     brandGuide: bg, brandData: brand, imageStyle,
     coverPhotoB64: coverPhoto, coverPhotoType: coverMime
@@ -4180,6 +4217,7 @@ async function adjustResult() {
   const btnOrig = btn ? btn.textContent : '';
   const isES = detectLanguage() === 'es';
 
+  newActionId(); // S37/L2: ajustar (texto o imagen) es una accion propia (PU-2)
   if (currentAdjustMode === 'image') {
     // ── IMAGE ADJUST: edit existing image via OpenAI Edit API ──
     const imgEl = document.getElementById('resultImg');
@@ -4191,7 +4229,7 @@ async function adjustResult() {
     if(btn) { btn.disabled = true; btn.textContent = isES ? '⏳ Editando imagen...' : '⏳ Editing image...'; }
     try {
       const res = await postWithTimeout({
-        mode: 'adjust-image',
+        mode: 'adjust-image', actionId: currentActionId,
         imageUrl,
         adjustment,
         brandData: brand
@@ -4204,7 +4242,8 @@ async function adjustResult() {
       }
       document.getElementById('adjustInput').value = '';
       showToast(isES ? '✅ Imagen ajustada' : '✅ Image adjusted');
-      updateGenCounter();
+      syncCounters(res); // S37-5: cobraba desde S23 pero el badge leia localStorage
+                         // sin sincronizar — mostraba un numero viejo tras ajustar.
     } catch(e) {
       showToast('Error: ' + e.message);
     } finally {
@@ -4218,10 +4257,13 @@ async function adjustResult() {
       const currentFB = document.getElementById('fbCap')?.textContent || '';
       const currentTT = document.getElementById('ttCap')?.textContent || '';
 
-      // S34 / INV-061: adjust no consume generación — seguro de reintentar
+      // S37/L2: adjust AHORA consume generación (PU-2). El reintento sigue siendo
+      // seguro, pero por otra razón: RD-28 deduplica por actionId, así que los dos
+      // intentos de un 429 comparten actionId y cobran una sola vez. Antes de L2
+      // esto habría cobrado doble en cada reintento.
       const res = await apiFetchRetry(WORKER,{ method:'POST', headers:{'Content-Type':'application/json'}, 
         body: JSON.stringify({
-          mode: 'adjust',
+          mode: 'adjust', actionId: currentActionId,
           adjustment,
           currentCaptions: { instagram: currentIG, facebook: currentFB, tiktok: currentTT },
           brandGuide: bg,
@@ -4237,6 +4279,7 @@ async function adjustResult() {
       if(data.facebook) document.getElementById('fbCap').textContent = data.facebook.caption || '';
       if(data.tiktok) document.getElementById('ttCap').textContent = data.tiktok.caption || '';
       document.getElementById('adjustInput').value = '';
+      syncCounters(data); // S37/L2: ajustar texto ahora cobra (PU-2)
       showToast(t('toastAdjusted'));
     } catch(e) {
       showToast('Error: ' + e.message);
@@ -4320,6 +4363,7 @@ async function generate() {
 
   showLoading(true);
   const bg=brand.brandGuide||(detectLanguage()==='en'?`Business: ${brand.name}. Differentiator: ${brand.differentiator}. Audience: ${brand.audience}.`:`Negocio: ${brand.name}. Diferenciador: ${brand.differentiator}. Audiencia: ${brand.audience}.`);
+  newActionId(); // S37/L2 · RD-28: una accion del usuario = un actionId
   lastInput={mode,platform,pillar,bg,brand,flyerMode};
 
   try {
@@ -4343,7 +4387,7 @@ async function generate() {
 // ─── POST GENERATION ─────────────────────────────────
 async function genPost(brand,bg) {
   setStep(1);
-  const capRes=await post({ mode:'captions', textInput:document.getElementById('postText').value.trim(), brandGuide:bg, brandData:brand, pillar, platform, imageStyle });
+  const capRes=await post({ mode:'captions', actionId: currentActionId, textInput:document.getElementById('postText').value.trim(), brandGuide:bg, brandData:brand, pillar, platform, imageStyle });
   setStep(2);
   setStep(3);
 
@@ -4366,7 +4410,8 @@ async function genPost(brand,bg) {
 
       // Send through enhance pipeline — keeps real photo elements, improves professionally
       const enhanceRes = await postWithTimeout({
-        mode: 'enhance',
+        mode: 'enhance', actionId: currentActionId, // MISMO actionId que captions:
+        // es el sub-paso de imagen del post, no una accion nueva. Aqui vivia el doble cobro.
         imageBase64: photoB64Raw,
         imageType: photoMime,
         brandGuide: bg,
@@ -4392,7 +4437,7 @@ async function genPost(brand,bg) {
     return;
   }
 
-  const imgRes=await post({ mode:'image', imagePrompt:capRes.imagePrompt, imageStyle, brandColors:brand.colors, brandType:brand.type });
+  const imgRes=await post({ mode:'image', actionId: currentActionId, imagePrompt:capRes.imagePrompt, imageStyle, brandColors:brand.colors, brandType:brand.type });
   setStep(4);
   showResult({ ...capRes, imageUrl:imgRes.imageUrl });
 }
@@ -4407,7 +4452,7 @@ async function genEnhance(brand,bg) {
     alert(t('alertEnhanceDescribe')); return;
   }
   const res=await postWithTimeout({
-    mode:'enhance',
+    mode:'enhance', actionId: currentActionId,
     imageBase64:enhanceB64,
     imageType:enhanceMime,
     brandGuide:bg,
@@ -4485,6 +4530,8 @@ async function generateVideo(brand) {
 
   try {
     // Step 1: Generate video prompt with Claude
+    newActionId(); // S37/L2: video-prompt, image, video-submit y video-captions
+                   // comparten actionId. El cobro ocurre una sola vez, en video-submit.
     setStep(1);
     document.getElementById('loadTitle').textContent = isES ? '🎬 Creando dirección del video...' : '🎬 Creating video direction...';
 
@@ -4495,7 +4542,7 @@ async function generateVideo(brand) {
     let videoPrompt;
     try {
       const promptData = await postWithTimeout({
-        mode: 'video-prompt',
+        mode: 'video-prompt', actionId: currentActionId,
         topic,
         brandData: { name: brand.name, type: brand.type },
         brandGuide: brand.brandGuide,
@@ -4530,7 +4577,7 @@ async function generateVideo(brand) {
       setStep(2);
       document.getElementById('loadTitle').textContent = isES ? '📸 Subiendo foto...' : '📸 Uploading photo...';
       try {
-        const uploadData = await postWithTimeout({ mode: 'image', action: 'upload-video-photo', imageData: videoPhotoB64, brandId }, 30000);
+        const uploadData = await postWithTimeout({ mode: 'image', actionId: currentActionId, action: 'upload-video-photo', imageData: videoPhotoB64, brandId }, 30000);
         if(uploadData.imageUrl) imageUrl = uploadData.imageUrl;
       } catch(upErr) { /* continue without photo */ }
     }
@@ -4541,7 +4588,7 @@ async function generateVideo(brand) {
     let submitData;
     try {
       submitData = await postWithTimeout({
-        mode: 'video-submit',
+        mode: 'video-submit', actionId: currentActionId,
         videoPrompt,
         duration: videoDuration,
         aspectRatio: videoAspectRatio,
@@ -4569,7 +4616,7 @@ async function generateVideo(brand) {
     apiFetch(WORKER, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ mode: 'captions', textInput: topic, brandGuide: brand.brandGuide, brandData: { name: brand.name, type: brand.type, whatsapp: brand.whatsapp }, platform, imageStyle: 'video', pillar }),
+      body: JSON.stringify({ mode:'video-captions', actionId: currentActionId, textInput: topic, brandGuide: brand.brandGuide, brandData: { name: brand.name, type: brand.type, whatsapp: brand.whatsapp }, platform, imageStyle: 'video', pillar }),
     }).then(r => r.json()).then(d => { if(d && d.success !== false) captionsBox.data = d; }).catch(() => {});
 
     // Step 5: Start polling
@@ -6462,9 +6509,10 @@ function applyBilingualUI() {
   const agentBarCta = document.querySelector('.agent-bar-cta'); if(agentBarCta) agentBarCta.textContent = t('agentBarCta');
   // Mode cards
   const modeData = [
-    {id:'mc1',title:'mcPost',desc:'mcPostDesc',mode:'post'},{id:'mc2',title:'mcEnhance',desc:'mcEnhanceDesc',mode:'enhance'},
-    {id:'mc3',title:'mcFlyer',desc:'mcFlyerDesc',mode:'flyer'},{id:'mc4',title:'mcTestimonial',desc:'mcTestimonialDesc',mode:'testimonial'},
-    {id:'mc5',title:'mcCarousel',desc:'mcCarouselDesc',mode:'carousel'},{id:'mc6',title:'mcVideoTitle',desc:'mcVideoDesc',mode:'video'}
+    // BL2-UI-OK — catalogo de tarjetas de modo, no llamadas a la API (ver BL-2)
+    {id:'mc1',title:'mcPost',desc:'mcPostDesc',mode:'post'},{id:'mc2',title:'mcEnhance',desc:'mcEnhanceDesc',mode:'enhance'}, // BL2-UI-OK
+    {id:'mc3',title:'mcFlyer',desc:'mcFlyerDesc',mode:'flyer'},{id:'mc4',title:'mcTestimonial',desc:'mcTestimonialDesc',mode:'testimonial'}, // BL2-UI-OK
+    {id:'mc5',title:'mcCarousel',desc:'mcCarouselDesc',mode:'carousel'},{id:'mc6',title:'mcVideoTitle',desc:'mcVideoDesc',mode:'video'} // BL2-UI-OK
   ];
   modeData.forEach(m => {
     const card = document.getElementById(m.id);
@@ -6776,7 +6824,7 @@ async function genFlyerAI(brand,bg) {
   const fd=getFlyerData();
   setStep(1);
   setStep(2);
-  const res=await postWithTimeout({ mode:'flyer', flyerData:fd, brandGuide:bg, brandData:brand, imageStyle }, 90000);
+  const res=await postWithTimeout({ mode:'flyer', actionId: currentActionId, flyerData:fd, brandGuide:bg, brandData:brand, imageStyle }, 90000);
   setStep(3); setStep(4);
   showResult(res);
 }
@@ -6784,7 +6832,7 @@ async function genFlyerPhoto(brand,bg) {
   const fd=getFlyerData();
   // CALL 1: Captions only — fast, no timeout risk
   setStep(1);
-  const capRes=await postWithTimeout({ mode:'flyer-captions', flyerData:fd, brandGuide:bg, brandData:brand }, 65000);
+  const capRes=await postWithTimeout({ mode:'flyer-captions', actionId: currentActionId, flyerData:fd, brandGuide:bg, brandData:brand }, 65000);
   setStep(2);
   // Compose flyer image client-side with Canvas — instant, no API needed
   setStep(3);
@@ -6795,7 +6843,7 @@ async function genFlyerPhoto(brand,bg) {
 // ─── TESTIMONIAL ───────────────────────────────────────
 async function genTestimonial(brand,bg) {
   setStep(1); setStep(2); setStep(3);
-  const res=await post({ mode:'testimonial', reviewText:document.getElementById('testText').value.trim(), imageBase64:testPhotoB64||undefined, imageType:testPhotoMime, brandGuide:bg, brandData:brand, pillar });
+  const res=await post({ mode:'testimonial', actionId: currentActionId, reviewText:document.getElementById('testText').value.trim(), imageBase64:testPhotoB64||undefined, imageType:testPhotoMime, brandGuide:bg, brandData:brand, pillar });
   setStep(4);
   showResult(res);
 }
@@ -6873,12 +6921,17 @@ async function regenImage() {
     alert(detectLanguage()==='en' ? 'No image prompt available to regenerate.' : 'No hay prompt de imagen disponible para regenerar.');
     return;
   }
+  newActionId(); // S37/L2: regenerar es una accion propia del usuario (PU-2)
   document.getElementById('regenImg').disabled=true;
   const regenImgBtn = document.getElementById('regenImg');
   const regenImgOrig = regenImgBtn.textContent;
   regenImgBtn.textContent = detectLanguage()==='en' ? '⏳ Generating...' : '⏳ Generando...';
   try {
-    const imgRes=await postWithTimeout({ mode:'image', imagePrompt:prompt, imageStyle, brandColors:loadBrand()?.colors, brandType:loadBrand()?.type, quality:'low' });
+    // S37/L2 · fuga S35-11: mandaba mode:'image', que es SUB-PASO del post y por eso
+    // no cobraba. 'image-regen' es accion propia (PU-2). La calidad ya no viaja en el
+    // body: la decide el servidor (MODE_QUALITY) — antes iba 'low' y ahora que cobra
+    // seria entregar a proposito menos de lo que se pago (§1.9.9).
+    const imgRes=await postWithTimeout({ mode:'image-regen', actionId: currentActionId, imagePrompt:prompt, imageStyle, brandColors:loadBrand()?.colors, brandType:loadBrand()?.type });
     if(mode === 'carousel' && lastResult?.slides && lastResult.slides.length) {
       // S37 / RD-27 + INV-082: la portada nueva entra al estado ANTES de re-renderizar.
       // Antes se escribía sólo en lastResult.coverImage mientras redrawCanvas leía
@@ -6907,6 +6960,7 @@ async function regenImage() {
       // y el historial que no guardaba la imagen regenerada.
       await setResultImage(imgRes.imageUrl, { save:true });
     }
+    syncCounters(imgRes); // S37/L2: regenerar ahora cobra — el badge debe reflejarlo
     showToast(detectLanguage()==='en' ? '✅ Image updated' : '✅ Imagen actualizada');
   } catch(e){ alert((detectLanguage()==='en'?'Error regenerating image: ':'Error al regenerar imagen: ')+e.message); }
   regenImgBtn.textContent = regenImgOrig;
@@ -6914,6 +6968,7 @@ async function regenImage() {
 }
 async function regenText() {
   if(!lastInput) return;
+  newActionId(); // S37/L2: regenerar texto es una accion propia (PU-2)
   const regenTextBtn = document.getElementById('regenText');
   regenTextBtn.disabled=true;
   const regenTextOrig = regenTextBtn.textContent;
@@ -6931,8 +6986,9 @@ async function regenText() {
     }
     else if(lastInput.mode==='testimonial') textInput = document.getElementById('testText').value||'Testimonio de cliente';
     else if(lastResult?.photoDescription) textInput = lastResult.photoDescription; // Enhance — use photo description
-    data = await postWithTimeout({ mode:'captions', textInput, brandGuide:bg, brandData:brand, pillar:lastInput.pillar, platform:lastInput.platform });
+    data = await postWithTimeout({ mode:'captions', actionId: currentActionId, textInput, brandGuide:bg, brandData:brand, pillar:lastInput.pillar, platform:lastInput.platform });
     fillCaptions(data);
+    syncCounters(data); // S37/L2: regenerar texto ahora cobra
     showToast(detectLanguage()==='en' ? '✅ Text updated' : '✅ Texto actualizado');
   } catch(e){ alert((detectLanguage()==='en'?'Error regenerating text: ':'Error al regenerar texto: ')+e.message); }
   regenTextBtn.textContent = regenTextOrig;
