@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="2.33.0">
+<meta name="app-version" content="2.34.0">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Postimity Studio — Tu estudio de contenido con AI</title>
 <meta name="description" content="Crea posts, flyers, carruseles y videos profesionales con AI. Describe tu negocio una vez y genera contenido listo para publicar en 20 segundos.">
@@ -869,7 +869,7 @@ fbq('track', 'PageView');
         <div class="gen-header">
           <span class="gen-title">📊 Generaciones este mes</span>
           <div style="text-align:right">
-            <div class="gen-count"><span id="cuentaGensUsed">0</span>/<span id="cuentaGensLimit">60</span></div>
+            <div class="gen-count"><span id="cuentaGensUsed">—</span>/<span id="cuentaGensLimit">—</span></div>
             <div class="gen-label">usadas / disponibles</div>
           </div>
         </div>
@@ -880,7 +880,7 @@ fbq('track', 'PageView');
         <div class="gen-header" style="margin-top:12px">
           <span class="gen-title">🎬 Videos este mes</span>
           <div style="text-align:right">
-            <div class="gen-count"><span id="cuentaVideosUsed">0</span>/<span id="cuentaVideosLimit">2</span></div>
+            <div class="gen-count"><span id="cuentaVideosUsed">—</span>/<span id="cuentaVideosLimit">—</span></div>
             <div class="gen-label">usados / disponibles</div>
           </div>
         </div>
@@ -1938,8 +1938,10 @@ Ej: 'Wonderik es increíble. Mi hija de 3 años ya lee palabras cortas y su desa
 // S35: había DOS constantes de versión en este archivo (POSTIMITY_VERSION y
 // APP_VERSION) sin nada que las mantuviera iguales. Ahora POSTIMITY_VERSION deriva
 // de APP_VERSION, que es la única fuente. Preflight CAT 25 lo verifica.
-const POSTIMITY_VERSION = '2.33.0'; // Aug 29 2026 — S37 L2: RD-28 cobro por actionId
-console.log('Postimity Studio v' + POSTIMITY_VERSION);
+// S38: POSTIMITY_VERSION eliminada. Era una segunda constante con el numero escrito
+// a mano que NO podia derivar de APP_VERSION porque se declaraba antes que ella.
+// El log de version vive ahora junto a APP_VERSION, su unica fuente. Preflight V7
+// ya contemplaba este caso: sin la constante duplicada, el check pasa y significa algo.
 
 // ── GLOBAL ERROR HANDLER — prevents silent failures ──
 let _loadingTimeout = null;
@@ -2131,8 +2133,9 @@ function persistSlides(imgs) {
 }
 
 // APP_VERSION (S34) — deploy verification. Must match worker /version and all HTML files.
-const APP_VERSION = '2.33.0';
+const APP_VERSION = '2.34.0'; // S38 — Ola 1 + Ola 2
 window.APP_VERSION = APP_VERSION;
+console.log('Postimity Studio v' + APP_VERSION);
 // S35: lista de fixes de este build. Permite confirmar desde la consola QUÉ está vivo,
 // no sólo el número de versión. Un deploy fallido se detecta al instante.
 window.BUILD_FIXES = ['rd28-cobro-por-actionid','image-regen-cobra-y-en-medium',
@@ -2140,7 +2143,14 @@ window.BUILD_FIXES = ['rd28-cobro-por-actionid','image-regen-cobra-y-en-medium',
   'contador-sincronizado-al-refinar','etiqueta-de-cobro-en-botones'];
 console.info('Postimity Studio v' + APP_VERSION);
 
-const GEN_LIMITS = { trial: 20, starter: 40, growth: 100, agency: 250 };
+// ── FUENTE ÚNICA DE CUOTAS (S38-4) ───────────────────────────────────────
+// Estas dos tablas son la ÚNICA definición de cuotas en el cliente. getPlanConfig()
+// deriva de aquí; antes tenía sus propios numeros escritos a mano y coincidian por
+// casualidad. El worker tiene su copia (no hay build step que las una): preflight
+// CAT 25 verifica que no divergan.
+// INV-063 (S37): trial sube de 20 a 25. Con PU-2 vigente, 20 acciones equivalen a
+// ~13 posts terminados; el trial compite contra el abandono, no contra Growth.
+const GEN_LIMITS = { trial: 25, starter: 40, growth: 100, agency: 250 };
 const VIDEO_LIMITS = { trial: 2, starter: 2, growth: 8, agency: 20 };
 
 // ── FEATURE ACCESS MAP ──────────────────────────────────────
@@ -2373,6 +2383,8 @@ const T = {
     planTrialName:'Trial Gratuito', planTrialBadge:'⭐ Trial', planTrialPrice:'Gratis 14 días',
     planTrialAllModes:'Todos los modos + 2 videos',
     planStarterUp:'🚀 Activar plan Starter — $149/mes', planGrowthUp:'⬆️ Cambiar a Growth — $349/mes', planAgencyUp:'⬆️ Cambiar a Agency — $799/mes', planAgencyMax:'✅ Plan máximo activo',
+    // S38-9: techo de Growth — captura segmentada de demanda
+    ceilingTitle:'🚀 ¿Necesitas más? Agency viene en camino', ceilingMoreQuota:'📈 Más generaciones y videos', ceilingMultibrand:'🏢 Manejar varias marcas',
     // ── Feature Gating ──
     lockBadge:'GROWTH', lockSoonBadge:'PRONTO',
     upsellTitle:'Disponible en Starter',
@@ -2643,6 +2655,7 @@ const T = {
     planTrialName:'Free Trial', planTrialBadge:'⭐ Trial', planTrialPrice:'Free for 14 days',
     planTrialAllModes:'All modes + 2 videos',
     planStarterUp:'🚀 Activate Starter — $9/mo', planGrowthUp:'⬆️ Upgrade to Growth — $19/mo', planAgencyUp:'⬆️ Upgrade to Agency — $45/mo', planAgencyMax:'✅ Top plan active',
+    ceilingTitle:'🚀 Need more? Agency is coming', ceilingMoreQuota:'📈 More generations and videos', ceilingMultibrand:'🏢 Manage several brands',
     // ── Feature Gating ──
     lockBadge:'GROWTH', lockSoonBadge:'SOON',
     upsellTitle:'Available on Starter',
@@ -2803,10 +2816,15 @@ async function verifyAuthCode() {
       const cloudBrand = await loadBrandFromCloud(brandId);
       if (cloudBrand) {
         const localBrand = loadBrand();
+        // S38-8: misma guarda que en el arranque. hasUnsyncedChanges() compara el
+        // brandId, asi que un localStorage de OTRA marca nunca gana aqui.
+        if (hasUnsyncedChanges(brandId)) {
+          await syncBrandToCloud(localBrand, brandId);
+        }
         // S38-7: la nube gana. Es lo que hace que el logo aparezca en un dispositivo
-      // donde el usuario nunca lo subio. El local queda como respaldo para marcas
-      // creadas antes de este cambio, que aun no tienen logo en R2.
-      const merged = { ...cloudBrand, logo: cloudBrand.logo || localBrand?.logo || null };
+        // donde el usuario nunca lo subio. El local queda como respaldo para marcas
+        // creadas antes de este cambio, que aun no tienen logo en R2.
+        const merged = { ...cloudBrand, logo: cloudBrand.logo || localBrand?.logo || null };
         localStorage.setItem(STORE_KEY, JSON.stringify({ ...merged, brandId }));
         applyBrand(merged);
         showCloudBar(merged.name);
@@ -3067,14 +3085,38 @@ async function syncBrandToCloud(brand, id) {
     // S38-7: TODO fallo de guardado se le dice al usuario. Antes se ignoraba y el
     // cliente creía que su marca estaba respaldada cuando no lo estaba.
     if (!res.ok) {
+      markPendingSync(true);
       showToast(failMsg, 7000);
       console.warn('save-brand falló:', res.status, data.code || data.error || '');
       return;
     }
+    markPendingSync(false);   // llegó a la nube: ya no hay nada pendiente
   } catch(e) {
+    markPendingSync(true);
     showToast(failMsg, 7000);
     console.warn('Cloud sync failed:', e.message);
   }
+}
+
+// S38-8: ¿hay cambios locales sin subir que pertenezcan A ESTA marca?
+// La comparacion de brandId NO es opcional: en la ruta de login el localStorage
+// puede pertenecer a otra marca (alguien inicia sesion con otro correo en el mismo
+// dispositivo). Sin ella, le aplicariamos a un usuario la marca de otro.
+function hasUnsyncedChanges(id) {
+  const b = loadBrand();
+  return !!(b && b.pendingSync && b.brandId === id);
+}
+
+// S38-8: una marca que no logró subir queda marcada. Sin esto, el arranque
+// sobreescribía lo local con la version vieja de la nube y los cambios del usuario
+// desaparecían — justo despues de haberle dicho "se guardó en este dispositivo".
+function markPendingSync(pending) {
+  try {
+    const b = loadBrand();
+    if (!b) return;
+    if (pending) b.pendingSync = true; else delete b.pendingSync;
+    localStorage.setItem(STORE_KEY, JSON.stringify(b));
+  } catch(e) { /* localStorage lleno o bloqueado: no hay nada que hacer aqui */ }
 }
 
 // S35 / INV-038b: un solo guardado por generación. El video tenía dos rutas
@@ -3245,10 +3287,30 @@ window.addEventListener('DOMContentLoaded', async () => {
   // Authenticated — load brand if exists
   if (auth.brandId) {
     brandId = auth.brandId;
+    // S38-8: si quedó un guardado pendiente, se reintenta ANTES de leer la nube.
+    // Reintentar elimina el conflicto en lugar de resolverlo: si funciona, nube y
+    // local coinciden y no hay que decidir que campo gana — que es exactamente la
+    // lista blanca escrita a mano que causó S38-1.
+    const pending = loadBrand();
+    if (pending?.pendingSync) {
+      await syncBrandToCloud(pending, brandId);
+    }
     const cloudBrand = await loadBrandFromCloud(brandId);
     if (cloudBrand) {
       const localBrand = loadBrand();
       // Cloud brand plan is authoritative — merge with local (keep logo only)
+      // S38-8: si el reintento de arriba tampoco logró subir, lo local sigue siendo
+      // más nuevo que la nube. Sobreescribirlo aqui borraria el trabajo del usuario.
+      if (hasUnsyncedChanges(brandId)) {
+        applyBrand(localBrand);
+        showCloudBar(localBrand.name);
+        showScreen('creatorScreen');
+        setMode('post');
+        showToast(detectLanguage() === 'es'
+          ? '⚠️ Tienes cambios sin subir a la nube. Se reintentará al guardar.'
+          : '⚠️ You have changes not yet synced. They will retry on your next save.', 7000);
+        return;
+      }
       // S38-7: la nube gana. Es lo que hace que el logo aparezca en un dispositivo
       // donde el usuario nunca lo subio. El local queda como respaldo para marcas
       // creadas antes de este cambio, que aun no tienen logo en R2.
@@ -4442,20 +4504,14 @@ async function generate() {
   }
   const brand=loadBrand();
   if(!brand){ alert(t('alertNoBrand')); return; }
-  // ── Generation limit check (Phase 2 model) ────────────────────────────
-  const plan = brand?.plan || 'trial';
-  const limit = GEN_LIMITS[plan] || GEN_LIMITS['trial'];
-  const usedThisMonth = parseInt(localStorage.getItem(genMonthKey()) || '0');
-  if (usedThisMonth >= limit) {
-    const msg = detectLanguage()==='en'
-      ? `You've reached the limit of ${limit} generations this month. Upgrade your plan to continue generating.`
-      : `Llegaste al límite de ${limit} generaciones este mes. Mejora tu plan para seguir generando.`;
-    // B3 (Session 18): Meta Pixel — upgrade intent signal
-    if(typeof fbq==='function') fbq('track', 'AddToCart', { content_name: 'upgrade_from_' + plan, value: plan === 'trial' ? 9 : 19, currency: 'USD' });
-    alert(msg);
-    showUpgradeInfo();
-    return;
-  }
+  // ── S38-2: EL CLIENTE ADVIERTE, EL SERVIDOR NIEGA ─────────────────────
+  // Aqui habia un bloqueo duro basado en el plan y el contador de localStorage.
+  // Dos problemas: (1) un plan local desactualizado le negaba el servicio a un
+  // cliente que ya habia pagado — cobro sin servicio; (2) borrar la llave del
+  // contador desde la consola lo saltaba, asi que tampoco servia como control.
+  // El worker YA valida contra KV en validateGeneration() antes de gastar un solo
+  // peso de API. Esa es la unica autoridad. El bloqueo vive en callWorker(), que
+  // reacciona al 403 del servidor, sincroniza el contador real y abre Mi Cuenta.
   // Validate inputs
   if(mode==='post'&&!document.getElementById('postText').value.trim()){ alert(t('alertPostEmpty')); return; }
   if(mode==='enhance'&&!enhanceB64){ alert(t('alertPhotoFirst')); return; }
@@ -5080,10 +5136,14 @@ function getPlanConfig() {
   const mxn = lang === 'es';
   const isES = lang === 'es';
   return {
-    trial:   { name: t('planTrialName'), badge: t('planTrialBadge'), gens: 20, videos: 2, price: t('planTrialPrice'), upgradeLabel: t('planStarterUp'), color: 'trial' },
-    starter: { name: 'Starter', badge: '💙 Starter', gens: 40, videos: 2, price: mxn?'$149 MXN/mes':'$9 USD/mo', upgradeLabel: t('planGrowthUp'), color: 'starter' },
-    growth:  { name: 'Growth',  badge: '💚 Growth',  gens: 100, videos: 8, price: mxn?'$349 MXN/mes':'$19 USD/mo', upgradeLabel: isES ? '✅ Plan máximo disponible' : '✅ Top available plan', color: 'growth', maxAvailable: true },
-    agency:  { name: 'Agency',  badge: '🏆 Agency',  gens: 250, videos: 20, price: mxn?'$799 MXN/mes':'$45 USD/mo', upgradeLabel: t('planAgencyMax'), color: 'agency' },
+    // S38-4: gens y videos DERIVAN de GEN_LIMITS/VIDEO_LIMITS. Escribirlos aqui otra
+    // vez era una segunda tabla que nadie mantenia sincronizada con la primera.
+    trial:   { name: t('planTrialName'), badge: t('planTrialBadge'), gens: GEN_LIMITS.trial, videos: VIDEO_LIMITS.trial, price: t('planTrialPrice'), upgradeLabel: t('planStarterUp'), color: 'trial' },
+    starter: { name: 'Starter', badge: '💙 Starter', gens: GEN_LIMITS.starter, videos: VIDEO_LIMITS.starter, price: mxn?'$149 MXN/mes':'$9 USD/mo', upgradeLabel: t('planGrowthUp'), color: 'starter' },
+    // S38-9: Growth ya no es un callejon sin salida. Agency existe pero esta pausado
+    // hasta que haya multimarca, asi que el techo captura demanda en vez de cerrarla.
+    growth:  { name: 'Growth',  badge: '💚 Growth',  gens: GEN_LIMITS.growth, videos: VIDEO_LIMITS.growth, price: mxn?'$349 MXN/mes':'$19 USD/mo', upgradeLabel: '', color: 'growth', maxAvailable: true },
+    agency:  { name: 'Agency',  badge: '🏆 Agency',  gens: GEN_LIMITS.agency, videos: VIDEO_LIMITS.agency, price: mxn?'$799 MXN/mes':'$45 USD/mo', upgradeLabel: t('planAgencyMax'), color: 'agency' },
   };
 }
 
@@ -5292,7 +5352,20 @@ function renderCuenta() {
       '<div class="plan-name">' + plan.name + '</div>' +
       '<div class="plan-desc">' + plan.price + (planKey === 'trial' ? ' · ' + t('planTrialAllModes') : ' · ' + limit + ' ' + t('genPerMonth') + (plan.videos > 0 ? ' + ' + plan.videos + ' videos' : '')) + '</div>' +
       (daysLeft !== null ? '<div class="plan-days">' + t('dashTrialDays').replace('{n}', daysLeft) + '</div>' : '') +
-      (planKey === 'agency' || plan.maxAvailable ? '<div style="font-size:12px;font-weight:700;color:var(--g3);text-align:center;padding:8px">' + plan.upgradeLabel + '</div>' : '<button class="plan-upgrade-btn" onclick="activatePlan(\'' + (planKey === 'trial' ? 'starter' : planKey === 'starter' ? 'growth' : 'agency') + '\')">' + plan.upgradeLabel + '</button>') +
+      // S38-10: el texto iba en var(--g3) (#EEF7E6) sobre la tarjeta verde claro de
+      // Growth. Solo se veia el emoji, que trae color propio. Ahora usa var(--g2).
+      // S38-9: Growth ya no dice "no hay nada arriba". Pregunta QUE falta, y las dos
+      // respuestas llegan separadas al correo: sirven para decidir si multimarca se
+      // construye y como se cobra. Es la investigacion de mercado mas barata que hay.
+      (plan.maxAvailable
+        ? '<div style="text-align:center;padding:10px 8px">' +
+            '<div style="font-size:12px;font-weight:700;color:var(--g2);margin-bottom:8px">' + t('ceilingTitle') + '</div>' +
+            '<button class="plan-upgrade-btn" style="margin-bottom:6px" onclick="requestUpgrade(\'more-quota\')">' + t('ceilingMoreQuota') + '</button>' +
+            '<button class="plan-upgrade-btn" onclick="requestUpgrade(\'multibrand\')">' + t('ceilingMultibrand') + '</button>' +
+          '</div>'
+        : planKey === 'agency'
+          ? '<div style="font-size:12px;font-weight:700;color:var(--g2);text-align:center;padding:8px">' + plan.upgradeLabel + '</div>'
+          : '<button class="plan-upgrade-btn" onclick="activatePlan(\'' + (planKey === 'trial' ? 'starter' : planKey === 'starter' ? 'growth' : 'agency') + '\')">' + plan.upgradeLabel + '</button>') +
     '</div>';
   }
 
@@ -7002,6 +7075,14 @@ async function postWithTimeout(body, timeoutMs=130000) {
     if (data.code === 'TRIAL_EXPIRED' || data.code === 'GEN_LIMIT' || data.code === 'VIDEO_LIMIT' || data.code === 'FEATURE_LOCKED') {
       // B3 (Session 18): Meta Pixel — upgrade intent from server-side blocks
       if(typeof fbq==='function') fbq('track', 'AddToCart', { content_name: 'server_block_' + data.code, currency: 'USD' });
+      // S38-2: el 403 trae los contadores reales de KV. Se adoptan como verdad:
+      // esto cura solo un localStorage desincronizado, en vez de dejarlo mintiendo.
+      if (typeof data.genCount === 'number') localStorage.setItem(genMonthKey(), String(data.genCount));
+      if (typeof data.videoCount === 'number') localStorage.setItem(videoMonthKey(), String(data.videoCount));
+      updateGenCounter();
+      // El "no" del servidor abre la pantalla de planes. Antes solo lanzaba un error
+      // generico y el usuario se quedaba sin saber que hacer ni donde pagar.
+      showUpgradeInfo();
       throw new Error(data.error);
     }
     if(!res.ok||!data.success) {
@@ -8327,6 +8408,28 @@ function setFbType(type) {
   // Show form section
   document.getElementById('fbFormSection').style.display = 'block';
   document.getElementById('fbFaqSection').style.display = type === 'issue' ? 'block' : 'none';
+}
+
+// S38-9: el techo de Growth entra por aqui. No inventa un canal nuevo: reusa el
+// widget de sugerencias, que ya llega al correo. La categoria distingue las dos
+// demandas, que es el dato que decide si multimarca se construye.
+function requestUpgrade(kind) {
+  const isES = detectLanguage() === 'es';
+  const panel = document.getElementById('fbPanel');
+  if (!panel) return;
+  if (!panel.classList.contains('show')) toggleFeedback();
+  setFbType('suggestion');
+  fbCategory = kind === 'multibrand' ? 'multibrand' : 'more-quota';
+  const ta = document.getElementById('fbMessage');
+  if (ta) {
+    ta.value = kind === 'multibrand'
+      ? (isES ? 'Necesito manejar varias marcas por separado. Mi caso es: '
+              : 'I need to manage several brands separately. My case is: ')
+      : (isES ? 'Necesito más generaciones y videos al mes. Publico aproximadamente: '
+              : 'I need more generations and videos per month. I publish roughly: ');
+    ta.focus();
+    ta.setSelectionRange(ta.value.length, ta.value.length);
+  }
 }
 
 function setFbCat(cat, btn) {
