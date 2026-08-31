@@ -2135,7 +2135,8 @@ function persistSlides(imgs) {
 // APP_VERSION (S34) — deploy verification. Must match worker /version and all HTML files.
 const APP_VERSION = '2.34.0'; // S38 — Ola 1 + Ola 2
 window.APP_VERSION = APP_VERSION;
-console.log('Postimity Studio v' + APP_VERSION);
+// El log de version vive unas lineas mas abajo (console.info). No agregar otro aqui:
+// S38 borro POSTIMITY_VERSION para tener un solo log y este lo volvio a duplicar.
 // S35: lista de fixes de este build. Permite confirmar desde la consola QUÉ está vivo,
 // no sólo el número de versión. Un deploy fallido se detecta al instante.
 window.BUILD_FIXES = ['rd28-cobro-por-actionid','image-regen-cobra-y-en-medium',
@@ -2384,7 +2385,7 @@ const T = {
     planTrialAllModes:'Todos los modos + 2 videos',
     planStarterUp:'🚀 Activar plan Starter — $149/mes', planGrowthUp:'⬆️ Cambiar a Growth — $349/mes', planAgencyUp:'⬆️ Cambiar a Agency — $799/mes', planAgencyMax:'✅ Plan máximo activo',
     // S38-9: techo de Growth — captura segmentada de demanda
-    ceilingTitle:'🚀 ¿Necesitas más? Agency viene en camino', ceilingMoreQuota:'📈 Más generaciones y videos', ceilingMultibrand:'🏢 Manejar varias marcas',
+    ceilingTitle:'🚀 Agency viene en camino. ¿Qué necesitas más?', ceilingMoreQuota:'📈 Más generaciones y videos', ceilingMultibrand:'🏢 Manejar varias marcas',
     // ── Feature Gating ──
     lockBadge:'GROWTH', lockSoonBadge:'PRONTO',
     upsellTitle:'Disponible en Starter',
@@ -2655,7 +2656,7 @@ const T = {
     planTrialName:'Free Trial', planTrialBadge:'⭐ Trial', planTrialPrice:'Free for 14 days',
     planTrialAllModes:'All modes + 2 videos',
     planStarterUp:'🚀 Activate Starter — $9/mo', planGrowthUp:'⬆️ Upgrade to Growth — $19/mo', planAgencyUp:'⬆️ Upgrade to Agency — $45/mo', planAgencyMax:'✅ Top plan active',
-    ceilingTitle:'🚀 Need more? Agency is coming', ceilingMoreQuota:'📈 More generations and videos', ceilingMultibrand:'🏢 Manage several brands',
+    ceilingTitle:'🚀 Agency is coming. What do you need more of?', ceilingMoreQuota:'📈 More generations and videos', ceilingMultibrand:'🏢 Manage several brands',
     // ── Feature Gating ──
     lockBadge:'GROWTH', lockSoonBadge:'SOON',
     upsellTitle:'Available on Starter',
@@ -2766,8 +2767,14 @@ async function sendAuthCode() {
     // Show code step
     document.getElementById('authStep1').style.display = 'none';
     document.getElementById('authStep2').style.display = 'block';
-    document.getElementById('authEmailDisplay').textContent = email;
-    // Dynamic subtitle based on new vs returning user
+    // S38-12 (encontrado por EX-2): aqui se escribia en #authEmailDisplay, que vive
+    // DENTRO de #authCodeSub — y tres lineas mas abajo codeSub.innerHTML lo borra.
+    // La escritura no servia de nada (el email ya va en la plantilla de abajo), pero
+    // en la SEGUNDA llamada — el boton "Reenviar codigo" invoca esta misma funcion —
+    // getElementById devolvia null, .textContent lanzaba TypeError, y el catch de
+    // abajo lo clasificaba como fallo de red por su heuristica e.name==='TypeError'.
+    // Sintoma: quien no recibia el correo pedia reenviarlo y le deciamos que revisara
+    // su conexion. En el paso de login, por donde pasa el 100% de los usuarios.
     const codeSub = document.getElementById('authCodeSub');
     if (data.hasAccount) {
       codeSub.innerHTML = '¡Bienvenido de vuelta! Código enviado a <strong>' + email + '</strong>';
@@ -4542,6 +4549,10 @@ async function generate() {
     else if(mode==='carousel') await genCarousel(brand,bg);
   } catch(err) {
     showLoading(false);
+    // S38-2: el bloqueo por plan ya se comunico con toast y ya llevo al usuario a
+    // Mi Cuenta. Pintar tambien el panel de error dejaria un mensaje viejo esperando
+    // en la pantalla del creador.
+    if (err.planBlock) return;
     document.getElementById('errWrap').classList.add('show');
     // Show step context for debugging
     const stepInfo = document.querySelector('.step-item.active')?.textContent || '';
@@ -7080,10 +7091,19 @@ async function postWithTimeout(body, timeoutMs=130000) {
       if (typeof data.genCount === 'number') localStorage.setItem(genMonthKey(), String(data.genCount));
       if (typeof data.videoCount === 'number') localStorage.setItem(videoMonthKey(), String(data.videoCount));
       updateGenCounter();
+      // El mensaje va en toast, NO en el panel de error: showUpgradeInfo() cambia de
+      // pantalla y el panel vive en la del creador, asi que el usuario nunca lo veia.
+      // El toast flota sobre cualquier pantalla y sobrevive al cambio.
+      showToast('🚫 ' + data.error, 7000);
       // El "no" del servidor abre la pantalla de planes. Antes solo lanzaba un error
       // generico y el usuario se quedaba sin saber que hacer ni donde pagar.
       showUpgradeInfo();
-      throw new Error(data.error);
+      // planBlock avisa a los catch de arriba que esto YA se comunico: sin la marca,
+      // pintan el panel de error en la pantalla que acabamos de dejar y el usuario
+      // se lo encuentra rancio al volver con "← Volver".
+      const blocked = new Error(data.error);
+      blocked.planBlock = true;
+      throw blocked;
     }
     if(!res.ok||!data.success) {
       if (data.rawDebug) console.error('AI raw response:', data.rawDebug);
