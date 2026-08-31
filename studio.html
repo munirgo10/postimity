@@ -2708,7 +2708,7 @@ function t(key) { const lang = detectLanguage(); return (T[lang] || T.es)[key] |
 let mode = 'post', platform = 'instagram', pillar = 'General', flyerMode = 'ai', imageStyle = 'illustrated';
 let brandId = null; // Phase 2: unique brand identifier for KV sync
 let genCount = 0;   // Phase 2: generation counter for plan limits
-let logoB64 = null, enhanceB64 = null, enhanceMime = 'image/jpeg';
+let logoSrc = null, enhanceB64 = null, enhanceMime = 'image/jpeg';
 let originalImageUrl = null; // S23: stores clean image URL for live preview redraws
 let flyerPhotoB64 = null, flyerPhotoMime = 'image/jpeg';
 let testPhotoB64 = null, testPhotoMime = 'image/jpeg';
@@ -2803,7 +2803,10 @@ async function verifyAuthCode() {
       const cloudBrand = await loadBrandFromCloud(brandId);
       if (cloudBrand) {
         const localBrand = loadBrand();
-        const merged = { ...cloudBrand, logo: localBrand?.logo || null };
+        // S38-7: la nube gana. Es lo que hace que el logo aparezca en un dispositivo
+      // donde el usuario nunca lo subio. El local queda como respaldo para marcas
+      // creadas antes de este cambio, que aun no tienen logo en R2.
+      const merged = { ...cloudBrand, logo: cloudBrand.logo || localBrand?.logo || null };
         localStorage.setItem(STORE_KEY, JSON.stringify({ ...merged, brandId }));
         applyBrand(merged);
         showCloudBar(merged.name);
@@ -3024,9 +3027,18 @@ function showToast(msg, duration) {
 // Sync brand to Cloudflare KV
 // ─── KV / CLOUD SYNC ──────────────────────────────────
 async function syncBrandToCloud(brand, id) {
+  const isES = detectLanguage() === 'es';
+  const failMsg = isES
+    ? '⚠️ Se guardó en este dispositivo pero NO en la nube. Revisa tu conexión y guarda de nuevo.'
+    : '⚠️ Saved on this device but NOT to the cloud. Check your connection and save again.';
   try {
-    // R14 (Session 20): attach browser fingerprint on first save to prevent trial abuse
     const brandCopy = { ...brand };
+    // INVARIANTE S38-7: ningun data URL sale del cliente dentro de brandData. Era lo
+    // que disparaba el 413 en el worker y dejaba la marca sin respaldo, sin aviso.
+    if (typeof brandCopy.logo === 'string' && brandCopy.logo.startsWith('data:')) {
+      delete brandCopy.logo;
+    }
+    // R14 (Session 20): fingerprint solo en el primer guardado real
     if (!brand.createdAt) {
       brandCopy.fingerprint = getBrowserFingerprint();
     }
@@ -3035,29 +3047,33 @@ async function syncBrandToCloud(brand, id) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ mode: 'save-brand', brandId: id, brandData: brandCopy })
     });
-    const data = await res.json();
+    const data = await res.json().catch(() => ({}));
     // Fix #20 — Trial abuse: if email already has an account, redirect to it
     if (data.error === 'EMAIL_EXISTS' && data.existingBrandId) {
-      const lang = detectLanguage();
-      const msg = lang === 'en'
-        ? 'An account with this email already exists. We\'ll load your existing studio now.'
-        : 'Ya existe una cuenta con este email. Vamos a cargar tu estudio existente.';
-      alert(msg);
-      // Clear the new brandId data and redirect to existing account
+      alert(isES
+        ? 'Ya existe una cuenta con este email. Vamos a cargar tu estudio existente.'
+        : 'An account with this email already exists. We\'ll load your existing studio now.');
       localStorage.removeItem(STORE_KEY);
       window.location.href = window.location.pathname + '?b=' + data.existingBrandId;
       return;
     }
     // R14 — Trial abuse: fingerprint detected existing trial from this browser
     if (data.error === 'TRIAL_USED') {
-      const lang = detectLanguage();
-      alert(lang === 'en'
-        ? 'A trial was already created from this device. Please log in with your original email.'
-        : 'Ya se creó una cuenta trial desde este dispositivo. Inicia sesión con tu email original.');
+      alert(isES
+        ? 'Ya se creó una cuenta trial desde este dispositivo. Inicia sesión con tu email original.'
+        : 'A trial was already created from this device. Please log in with your original email.');
+      return;
+    }
+    // S38-7: TODO fallo de guardado se le dice al usuario. Antes se ignoraba y el
+    // cliente creía que su marca estaba respaldada cuando no lo estaba.
+    if (!res.ok) {
+      showToast(failMsg, 7000);
+      console.warn('save-brand falló:', res.status, data.code || data.error || '');
       return;
     }
   } catch(e) {
-    console.warn('Cloud sync failed (non-critical):', e.message);
+    showToast(failMsg, 7000);
+    console.warn('Cloud sync failed:', e.message);
   }
 }
 
@@ -3134,13 +3150,18 @@ async function loadBrandFromCloud(id) {
       }
       // S25: Sync plan from server — critical for Stripe upgrades and admin overrides
       // Server plan ALWAYS wins over localStorage plan
+      // S38-5: aqui se llamaba saveBrand(localBrand). saveBrand NO recibe parametros:
+      // lee el formulario. Con el formulario vacio disparaba alert("ponle nombre a tu
+      // marca") al arrancar la app, y el plan del servidor no se guardaba nunca.
+      // El plan se escribe directo, igual que ya lo hace la ruta de auth mas abajo.
       if (data.brand.plan) {
         const localBrand = loadBrand();
         if (localBrand && localBrand.plan !== data.brand.plan) {
           localBrand.plan = data.brand.plan;
           if (data.brand.planChangedBy) localBrand.planChangedBy = data.brand.planChangedBy;
           if (data.brand.planSource) localBrand.planSource = data.brand.planSource;
-          saveBrand(localBrand);
+          localStorage.setItem(STORE_KEY, JSON.stringify(localBrand));
+          updateGenCounter();
         }
       }
       return data.brand;
@@ -3228,7 +3249,10 @@ window.addEventListener('DOMContentLoaded', async () => {
     if (cloudBrand) {
       const localBrand = loadBrand();
       // Cloud brand plan is authoritative — merge with local (keep logo only)
-      const merged = { ...cloudBrand, logo: localBrand?.logo || null };
+      // S38-7: la nube gana. Es lo que hace que el logo aparezca en un dispositivo
+      // donde el usuario nunca lo subio. El local queda como respaldo para marcas
+      // creadas antes de este cambio, que aun no tienen logo en R2.
+      const merged = { ...cloudBrand, logo: cloudBrand.logo || localBrand?.logo || null };
       localStorage.setItem(STORE_KEY, JSON.stringify({ ...merged, brandId }));
       applyBrand(merged);
       showCloudBar(merged.name);
@@ -3350,18 +3374,94 @@ function getLocation() {
 // ═══════════════════════════════════════════════════════
 // LOGO UPLOAD
 // ═══════════════════════════════════════════════════════
-function setupUploads() {
-  // Logo
-  document.getElementById('logoFile').addEventListener('change',e=>{
-    if(!e.target.files[0])return;
-    const reader=new FileReader();
-    reader.onload=ev=>{
-      logoB64=ev.target.result;
-      const img=document.getElementById('logoImg');
-      img.src=logoB64; img.style.display='block';
-      document.getElementById('logoPlus').style.display='none';
+function readFileAsDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = ev => resolve(ev.target.result);
+    r.onerror = () => reject(new Error('read failed'));
+    r.readAsDataURL(file);
+  });
+}
+
+// S38-7: el logo conserva su proporcion. convertToPNG NO sirve aqui: recorta al
+// centro en cuadrado y destruye cualquier logo horizontal, que es la forma normal
+// de un logo. PNG para no perder la transparencia.
+function resizeLogo(dataUrl, maxSide = 512) {
+  return new Promise((resolve, reject) => {
+    const im = new Image();
+    im.onload = () => {
+      const scale = Math.min(1, maxSide / Math.max(im.width, im.height));
+      const w = Math.max(1, Math.round(im.width * scale));
+      const h = Math.max(1, Math.round(im.height * scale));
+      const c = document.createElement('canvas');
+      c.width = w; c.height = h;
+      c.getContext('2d').drawImage(im, 0, 0, w, h);
+      resolve(c.toDataURL('image/png'));
     };
-    reader.readAsDataURL(e.target.files[0]);
+    im.onerror = () => reject(new Error('decode failed'));
+    im.src = dataUrl;
+  });
+}
+
+// Devuelve la URL de R2, o null si fallo. Nunca lanza.
+async function uploadLogo(dataUrl) {
+  // El logo necesita una clave estable. saveBrand genera el brandId mas tarde, asi
+  // que si aun no existe se genera aqui — es la misma linea que corre saveBrand.
+  if (!brandId) brandId = generateBrandId();
+  try {
+    const res = await apiFetch(WORKER, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mode: 'upload-logo', imageData: dataUrl, brandId })
+    });
+    const data = await res.json().catch(() => ({}));
+    return (res.ok && data.logoUrl) ? data.logoUrl : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+function setupUploads() {
+  // Logo — S38-7: se redimensiona y se sube a R2 ANTES de poder guardar.
+  // El base64 crudo nunca vuelve a entrar en la marca.
+  document.getElementById('logoFile').addEventListener('change', async e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const isES = detectLanguage() === 'es';
+    const img = document.getElementById('logoImg');
+    const plus = document.getElementById('logoPlus');
+    const btn = document.getElementById('btnSave');
+    const prevSrc = logoSrc;              // si algo falla, se restaura lo que habia
+    const wasDisabled = btn ? btn.disabled : true;
+    try {
+      const raw = await readFileAsDataUrl(file);
+      const resized = await resizeLogo(raw, 512);
+      img.src = resized; img.style.display = 'block';
+      if (plus) plus.style.display = 'none';
+      // Guardar queda bloqueado hasta que el logo exista en R2. Sin esto, guardar
+      // rapido dejaria un data URL en la marca y volveria el 413.
+      if (btn) btn.disabled = true;
+      showToast(isES ? '⏳ Subiendo logo...' : '⏳ Uploading logo...', 8000);
+      const url = await uploadLogo(resized);
+      if (url) {
+        logoSrc = url;
+        img.src = url;
+        showToast(isES ? '✅ Logo listo' : '✅ Logo ready');
+      } else {
+        logoSrc = prevSrc;
+        if (prevSrc) { img.src = prevSrc; }
+        else { img.style.display = 'none'; if (plus) plus.style.display = ''; }
+        showToast(isES
+          ? '❌ No se pudo subir el logo. Revisa tu conexión o prueba otra imagen.'
+          : '❌ Could not upload the logo. Check your connection or try another image.', 6000);
+      }
+    } catch (err) {
+      logoSrc = prevSrc;
+      showToast(isES ? '❌ No se pudo leer esa imagen.' : '❌ Could not read that image.');
+    } finally {
+      if (btn) btn.disabled = wasDisabled;
+      e.target.value = '';   // permite reintentar con el MISMO archivo
+    }
   });
   // Enhance
   setupDropzone('carouselCoverZone','carouselCoverFile','carouselCoverPrev','carouselCoverTitle','carouselCoverName', async (b64,mime)=>{
@@ -3491,7 +3591,16 @@ function saveBrand() {
     alert(t('alertNoLocation'));
     return;
   }
+  // ── S38-1 / RD-33 ────────────────────────────────────────────────────────
+  // Aqui se reconstruia la marca desde cero. Enumerar campos es una lista blanca
+  // escrita a mano, y se olvido de `plan`, `createdAt`, `planExpiresAt` y los campos
+  // de Stripe: cada guardado degradaba a trial a un cliente que ya habia pagado.
+  // Este objeto contiene EXCLUSIVAMENTE lo que el formulario edita. Todo lo demas
+  // sobrevive por el spread. Si manana se agrega un campo que el formulario no toca,
+  // sobrevive solo, sin que nadie tenga que acordarse de anadirlo aqui.
+  const prev = loadBrand() || {};
   const brand={
+    ...prev,
     name: bNameVal,
     type: bTypeVal,
     whatsapp: bWaVal,
@@ -3524,7 +3633,9 @@ function saveBrand() {
       if(!p.length) p = window._pillars||[];
       return p.slice(0,4); // Max 4 custom pillars
     })(),
-    logo:logoB64
+    // Un logo nuevo gana; si no hay, se conserva el que ya existia. Nunca se borra
+    // por el simple hecho de entrar a esta pantalla sin pasar por goToEdit().
+    logo: logoSrc || prev.logo || null
   };
   // Generate brandId if first time
   if (!brandId) brandId = generateBrandId();
@@ -3596,7 +3707,7 @@ function goToEdit() {
     if(b.country){ const cEl=document.getElementById('bCountry'); if(cEl){ cEl.value=b.country; updateStates(); } setTimeout(()=>{ const sEl=document.getElementById('bState'); if(sEl&&b.state) sEl.value=b.state; },100); }
     const bCityEl=document.getElementById('bCity'); if(bCityEl) bCityEl.value=b.city||'';
     if(b.colors){ document.getElementById('bC1').value=b.colors.primary; document.getElementById('bC2').value=b.colors.secondary; document.getElementById('bC3').value=b.colors.accent; }
-    if(b.logo){ logoB64=b.logo; const img=document.getElementById('logoImg'); img.src=b.logo; img.style.display='block'; document.getElementById('logoPlus').style.display='none'; }
+    if(b.logo){ logoSrc=b.logo; const img=document.getElementById('logoImg'); img.src=b.logo; img.style.display='block'; document.getElementById('logoPlus').style.display='none'; }
     if(b.brandGuide){
       document.getElementById('bgText').value=b.brandGuide;
       document.getElementById('bgSection').classList.add('show');
@@ -5677,9 +5788,12 @@ async function postJSON(body) {
 }
 
 function showUpgradeInfo() {
-  // S25: Navigate to dashboard which has plan upgrade buttons
-  const dashEl = document.getElementById('cuentaScreen');
-  if(dashEl) { showScreen('cuentaScreen'); loadDashboard(); }
+  // S38-3: aqui se llamaba loadDashboard(), que NO EXISTE en el archivo. Reventaba
+  // justo en el momento de conversion: al tocar el limite, el usuario llegaba a una
+  // pantalla en blanco con "loadDashboard is not defined" en consola.
+  // showCuentaScreen() es la funcion real: activa la pantalla, renderiza, y ademas
+  // sincroniza contra el servidor antes de re-renderizar.
+  showCuentaScreen();
 }
 
 async function activatePlan(planKey) {
@@ -7623,7 +7737,7 @@ let _logoWarnShown = false;
 // Único lugar donde se decide el origen del logo. Respeta el toggle.
 function resolveLogoSrc() {
   if (document.getElementById('logoToggle')?.checked === false) return null;
-  return logoB64 || loadBrand()?.logo || null;
+  return logoSrc || loadBrand()?.logo || null;
 }
 
 // El logo se dibuja SIEMPRE desde dataURL. Dos motivos:
