@@ -449,11 +449,22 @@ function renderFb(){
   const filtered=fbFilterType==='all'?fbData:fbData.filter(f=>f.type===fbFilterType);
   document.getElementById('fbCount').textContent='('+fbData.length+')';
   const wrap=document.getElementById('fbListWrap');
-  const empty=document.getElementById('fbEmpty');
-  if(filtered.length===0){empty.style.display='block';empty.textContent=fbFilterType==='all'?'No feedback yet':'No '+fbFilterType+'s yet';wrap.querySelectorAll('.fb-card').forEach(c=>c.remove());return;}
-  empty.style.display='none';
+  // S38-11: fbEmpty vivia DENTRO de fbListWrap y mas abajo se hace wrap.innerHTML=...,
+  // que borra a todos sus hijos — incluido fbEmpty. La funcion destruia el elemento
+  // del que dependia, asi que el SEGUNDO render tronaba con "reading 'style' of null".
+  // Latente mientras no hubo feedback: sin datos nunca se ejecutaba la rama que borra.
+  // Es decir, el panel se rompia justo cuando dejaba de estar vacio. Ahora el estado
+  // vacio se pinta como contenido de wrap, no como un elemento aparte que sobreviva.
+  if(filtered.length===0){
+    wrap.innerHTML='<div style="text-align:center;padding:20px;color:var(--t3);font-size:12px" id="fbEmpty">'+
+      (fbFilterType==='all'?'No feedback yet':'No '+fbFilterType+'s yet')+'</div>';
+    return;
+  }
   const typeIcon={suggestion:'💡',issue:'🛠️'};
-  const catColors={'new-feature':'#7C4DFF','mode-request':'#2979FF',improvement:'#76C442',bug:'#E53935',ux:'#F9A825',quality:'#FF6D00',billing:'#1565C0',other:'#6B7280'};
+  // S38-9: 'multibrand' y 'more-quota' llegan del techo de Growth. Sin color propio
+  // se confundian con el resto: son las dos respuestas que deciden si multimarca se
+  // construye, asi que tienen que saltar a la vista en este panel.
+  const catColors={'new-feature':'#7C4DFF','mode-request':'#2979FF',improvement:'#76C442',bug:'#E53935',ux:'#F9A825',quality:'#FF6D00',billing:'#1565C0',other:'#6B7280','multibrand':'#00897B','more-quota':'#F4511E'};
   wrap.innerHTML=filtered.map(f=>{
     const date=new Date(f.createdAt).toLocaleDateString()+' '+new Date(f.createdAt).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
     return '<div class="fb-card" style="border:1px solid var(--bor);border-radius:10px;padding:12px;margin-bottom:8px">'+
