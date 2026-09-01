@@ -2883,6 +2883,25 @@ function showAuthError(step, msg) {
 function hideAuthError(step) {
   document.getElementById('authError' + step).style.display = 'none';
 }
+// ── S39-4 · PUNTO UNICO DEL ESTADO DE LA PANTALLA DE ACCESO ──────────────
+// El arranque oculta authStep1/authStep2 y muestra authLoading. Si HAY sesion
+// se va directo a la app y nunca los repone: quedan congelados en "Verificando..."
+// toda la sesion. Al cerrar sesion, authScreen volvia a mostrarse asi, con el
+// spinner eterno. El bug existia desde siempre; S39-1 solo lo hizo visible al
+// arreglar que el logout llegara a mostrar esa pantalla.
+// Ademas showCloudBar() nunca tuvo contraparte y brandChip nunca se ocultaba:
+// tras el logout seguian mostrando nombre de marca, cuota y enlace de acceso.
+// Esta funcion es el UNICO lugar que deja la pantalla de acceso lista para usar.
+function resetAuthScreen() {
+  document.getElementById('authLoading').style.display = 'none';
+  document.getElementById('authStep2').style.display = 'none';
+  document.getElementById('authStep1').style.display = 'block';
+  document.getElementById('authCode').value = '';
+  hideAuthError(1);
+  hideAuthError(2);
+  document.getElementById('cloudBar').classList.remove('show');
+  document.getElementById('brandChip').style.display = 'none';
+}
 
 async function checkAuth() {
   try {
@@ -2912,6 +2931,7 @@ async function doLogout() {
   brandId = null;
   clearAuthToken();
   localStorage.removeItem(STORE_KEY);
+  resetAuthScreen();   // S39-4: sin esto authScreen aparece congelada en "Verificando..."
   showScreen('authScreen');
 }
 
@@ -3272,8 +3292,8 @@ window.addEventListener('DOMContentLoaded', async () => {
 
   if (!auth) {
     // Not authenticated — reveal login form (authScreen already active)
-    document.getElementById('authLoading').style.display = 'none';
-    document.getElementById('authStep1').style.display = 'block';
+    // S39-4: reponer a mano aqui era la mitad duplicada del estado. Un solo punto.
+    resetAuthScreen();
     applyBilingualUI();
     updateLangToggleUI(detectLanguage());
     return;
