@@ -2751,8 +2751,16 @@ async function sendAuthCode() {
     return;
   }
   authEmail = email;
-  hideAuthError(1);
-  const btn = document.getElementById('authSendBtn');
+  // S39-2: "Reenviar codigo" invoca esta misma funcion desde el paso 2. Reportar
+  // siempre al paso 1 mandaba errores y estado del boton a elementos que viven
+  // DENTRO de #authStep1, que esta en display:none mientras se pide el codigo.
+  // El 429 del worker (5 codigos por email por hora) caia en ese div oculto:
+  // el usuario pulsaba "Reenviar" y no veia absolutamente nada, ni exito ni error.
+  const onStep2 = document.getElementById('authStep2').style.display === 'block';
+  const step = onStep2 ? 2 : 1;
+  hideAuthError(step);
+  const btn = document.getElementById(onStep2 ? 'authResendBtn' : 'authSendBtn');
+  const btnText = btn.textContent;  // el HTML dice "Continuar", no "Enviar codigo"
   btn.disabled = true;
   btn.textContent = 'Enviando...';
   try {
@@ -2783,6 +2791,9 @@ async function sendAuthCode() {
     }
     document.getElementById('authCode').value = '';
     document.getElementById('authCode').focus();
+    // S39-2: el exito reescribe authCodeSub con texto identico al que ya estaba.
+    // Sin esto, un reenvio que funciono es indistinguible de uno que no hizo nada.
+    if (onStep2) showToast(detectLanguage()==='en' ? '✅ Code resent' : '✅ Código reenviado');
   } catch(e) {
     const isNet = e.message === 'Load failed' || e.message === 'Failed to fetch' || e.name === 'TypeError';
     if (isNet) {
@@ -2790,10 +2801,10 @@ async function sendAuthCode() {
       const w = document.getElementById('inAppWarning');
       if (w) { w.style.display = 'block'; document.getElementById('inAppOpenBtn').href = window.location.href; }
     }
-    showAuthError(1, isNet ? (detectLanguage()==='en' ? 'Connection error. Try opening in Safari or Chrome.' : 'Error de conexión. Intenta abrir en Safari o Chrome.') : e.message);
+    showAuthError(step, isNet ? (detectLanguage()==='en' ? 'Connection error. Try opening in Safari or Chrome.' : 'Error de conexión. Intenta abrir en Safari o Chrome.') : e.message);
   } finally {
     btn.disabled = false;
-    btn.textContent = 'Enviar código';
+    btn.textContent = btnText;  // el literal 'Enviar código' renombraba "Continuar" para siempre
   }
 }
 
@@ -3364,7 +3375,13 @@ window.addEventListener('DOMContentLoaded', async () => {
 });
 
 function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  // S39-1: cuenta/historial/agent se muestran con style.display='block' INLINE.
+  // Quitar solo la clase .active no las oculta: el inline gana sobre
+  // .screen{display:none}. Al no limpiarlo, "Cerrar sesion" corria entero
+  // (el token si se borraba) pero la pantalla vieja seguia encima; lo unico
+  // visible era el scrollTo(0,0) de tres lineas mas abajo.
+  // Limpiar AMBOS mecanismos aqui hace de showScreen el unico punto de verdad.
+  document.querySelectorAll('.screen').forEach(s=>{ s.classList.remove('active'); s.style.display=''; });
   document.getElementById(id).classList.add('active');
   window.scrollTo(0,0);
   // Auto-fill email from auth when entering setup (Session 15)
@@ -8467,7 +8484,13 @@ async function submitFeedback() {
   btn.disabled = true;
   btn.textContent = detectLanguage() === 'es' ? 'Enviando...' : 'Sending...';
   try {
-    await apiFetch(WORKER, {
+    // S39-3: apiFetch es fetch pelado (return fetch(url,opts)). fetch NO lanza con
+    // 401/400/429/500, solo con fallo de red. Sin comprobar res.ok, el widget
+    // pintaba la pantalla de exito ante cualquier rechazo del servidor: el usuario
+    // veia la palomita y el mensaje nunca se guardaba en KV. Y submit-feedback va
+    // detras de authenticateRequest, asi que una sesion caida basta para perderlo.
+    // Este es el canal que decide si multimarca se construye y el precio de Agency.
+    const res = await apiFetch(WORKER, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -8481,6 +8504,8 @@ async function submitFeedback() {
         plan: brand?.plan || 'trial',
       }),
     });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.success) throw new Error(data.error || 'No se pudo enviar');
     // Show success
     document.getElementById('fbFormView').style.display = 'none';
     document.getElementById('fbSuccessView').style.display = 'block';
