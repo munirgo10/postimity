@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="2.34.0">
+<meta name="app-version" content="2.36.0">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Postimity Studio — Tu estudio de contenido con AI</title>
 <meta name="description" content="Crea posts, flyers, carruseles y videos profesionales con AI. Describe tu negocio una vez y genera contenido listo para publicar en 20 segundos.">
@@ -2053,6 +2053,23 @@ function capLeft(counter) {
 function updateCapLabels() {
   const es = detectLanguage() === 'es';
   const ma = capLeft('magen');
+  // Un boton habilitado sobre una bolsa vacia es una promesa falsa: el usuario hace
+  // clic y recibe un alert. Se deshabilita con el motivo a la vista (patron RD-22).
+  const maBtn = document.getElementById('btnGenAgent');
+  if (maBtn && ma !== null) {
+    const sinSaldo = ma === 0;
+    maBtn.disabled = sinSaldo;
+    maBtn.style.opacity = sinSaldo ? '.45' : '';
+    maBtn.style.cursor = sinSaldo ? 'not-allowed' : '';
+  }
+  const bgBtn = document.getElementById('btnGenBG');
+  const bgLeft = capLeft('bguide');
+  if (bgBtn && bgLeft !== null) {
+    const sinSaldo = bgLeft === 0;
+    bgBtn.disabled = sinSaldo;
+    bgBtn.style.opacity = sinSaldo ? '.45' : '';
+    bgBtn.style.cursor = sinSaldo ? 'not-allowed' : '';
+  }
   const maEl = document.getElementById('agentCapNote');
   if (maEl) {
     if (ma === null) { maEl.textContent = ''; }
@@ -2182,7 +2199,7 @@ function persistSlides(imgs) {
 }
 
 // APP_VERSION (S34) — deploy verification. Must match worker /version and all HTML files.
-const APP_VERSION = '2.34.0'; // S38 — Ola 1 + Ola 2
+const APP_VERSION = '2.36.0'; // S40 (2 sep 2026) — Ola 4 + Fase 1: costo de video por duracion, topes de Agent y Brand Guide visibles, 7/semana desde Growth
 window.APP_VERSION = APP_VERSION;
 // El log de version vive unas lineas mas abajo (console.info). No agregar otro aqui:
 // S38 borro POSTIMITY_VERSION para tener un solo log y este lo volvio a duplicar.
@@ -3373,6 +3390,14 @@ window.addEventListener('DOMContentLoaded', async () => {
     const vk = videoMonthKey();
     localStorage.setItem(vk, String(auth.videoCount));
   }
+  // Los topes llegan en la MISMA respuesta de check-auth, pero este bloque lee campo
+  // por campo y `caps` no estaba en la lista: se descartaba. Las etiquetas quedaban en
+  // blanco hasta que el usuario hiciera una llamada, o sea justo hasta despues de
+  // gastar — que es exactamente cuando ya no sirven.
+  if (auth.caps && typeof auth.caps === 'object') {
+    capsState = auth.caps;
+  }
+  try { updateCapLabels(); applyAgentFreqGate(); } catch(e) {}
 
   // Authenticated — load brand if exists
   if (auth.brandId) {
