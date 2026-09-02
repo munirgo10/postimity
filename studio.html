@@ -1050,7 +1050,7 @@ fbq('track', 'PageView');
           <div class="agent-freq-btns">
             <button class="agent-freq-btn" data-freq="3" onclick="setAgentFreq(this)">3/semana<br><span style="font-size:10px;opacity:.7">~12 posts</span></button>
             <button class="agent-freq-btn active" data-freq="5" onclick="setAgentFreq(this)">5/semana<br><span style="font-size:10px;opacity:.7">~20 posts</span></button>
-            <button class="agent-freq-btn" data-freq="7" onclick="setAgentFreq(this)">7/semana<br><span style="font-size:10px;opacity:.7">~28 posts</span></button>
+            <button class="agent-freq-btn" data-freq="7" onclick="setAgentFreq(this)" id="agentFreq7">7/semana<br><span style="font-size:10px;opacity:.7" id="agentFreq7Sub">~28 posts</span></button>
           </div>
           <div class="ic-label">Plataformas</div>
           <div class="agent-plat-btns">
@@ -1058,12 +1058,13 @@ fbq('track', 'PageView');
             <button class="agent-plat-btn active" data-plat="facebook" onclick="toggleAgentPlat(this)">👥 Facebook</button>
             <button class="agent-plat-btn" data-plat="tiktok" onclick="toggleAgentPlat(this)">🎵 TikTok</button>
           </div>
-          <div id="agentConfigNote" style="font-size:12px;color:var(--t3);margin-bottom:14px;line-height:1.5">Las plataformas se distribuyen inteligentemente según tu audiencia del Brand Guide.</div>
+          <div id="agentConfigNote" style="font-size:12px;color:var(--t3);margin-bottom:8px;line-height:1.5">Las plataformas se distribuyen inteligentemente según tu audiencia del Brand Guide.</div>
+          <div id="agentCapNote" style="font-size:12px;color:var(--t3);margin-bottom:14px;line-height:1.5"></div>
           <button class="btn btn-primary btn-full" id="btnGenAgent" onclick="generateAgentPlan()" style="font-size:14px;font-weight:700;padding:14px;border-radius:12px">
             ✨ Generar plan de <span id="agentMonthLabel">este mes</span>
           </button>
           <div id="agentLoadNote" style="display:none;text-align:center;padding:12px;font-size:12px;color:var(--t3)">
-            ☕ Generando tu plan mensual... puede tomar hasta 30 segundos
+            ☕ Generando tu plan mensual... puede tomar hasta 3 minutos. No cierres esta pestaña.
           </div>
         </div>
       </div>
@@ -1338,6 +1339,7 @@ fbq('track', 'PageView');
       <div class="scard-title">🤖 Brand Guide con AI</div>
       <p style="font-size:13px;color:var(--t3);margin-bottom:14px;line-height:1.6">La AI analizará tu negocio y generará la estrategia de contenido completa: pilares, voz de marca, estrategia por plataforma y hashtags. Puedes editarlo antes de guardar.</p>
       <button class="btn btn-primary btn-full" id="btnGenBG" onclick="generateBrandGuide()">✨ Generar Brand Guide con AI</button>
+      <div id="bguideCapNote" style="font-size:12px;color:var(--t3);margin-top:8px;line-height:1.5;text-align:center"></div>
       <div class="bg-section" id="bgSection">
         <div class="bg-label" style="margin-top:14px">📋 Brand Guide generado — puedes editarlo</div>
         <textarea class="bg-area" id="bgText" rows="12"></textarea>
@@ -2020,8 +2022,17 @@ function newActionId() {
 // Vive fuera de showResult porque a partir de S37 refinar COBRA, y refinar no pasa
 // por showResult: el badge se quedaria mostrando un numero viejo mientras el
 // servidor ya descontó. Antes de S37 daba igual, porque refinar era gratis.
+// Topes de modos no contables (Marketing Agent, Brand Guide). Los escribe el worker
+// en cada respuesta; el cliente nunca los incrementa por su cuenta. Un contador que
+// el cliente calcula es un contador que miente en cuanto hay dos pestañas abiertas.
+let capsState = {};
+
 function syncCounters(data) {
   if (!data) return;
+  if (data.caps && typeof data.caps === 'object') {
+    capsState = data.caps;
+    updateCapLabels();
+  }
   if (typeof data.genCount === 'number') {
     localStorage.setItem(genMonthKey(), String(data.genCount));
     genCount = data.genCount;
@@ -2030,6 +2041,43 @@ function syncCounters(data) {
     localStorage.setItem(videoMonthKey(), String(data.videoCount));
   }
   updateGenCounter();
+}
+
+// Un tope invisible es indistinguible de una falla cuando te choca con el. Estas
+// etiquetas existen para que el usuario sepa cuanto le queda ANTES de gastarlo.
+function capLeft(counter) {
+  const c = capsState[counter];
+  if (!c || typeof c.limit !== 'number') return null;
+  return Math.max(0, c.limit - (c.used || 0));
+}
+function updateCapLabels() {
+  const es = detectLanguage() === 'es';
+  const ma = capLeft('magen');
+  const maEl = document.getElementById('agentCapNote');
+  if (maEl) {
+    if (ma === null) { maEl.textContent = ''; }
+    else if (ma === 0) {
+      maEl.textContent = es ? '⛔ Sin planes disponibles este mes. No consume tus generaciones.'
+                            : '⛔ No plans left this month. This does not use your generations.';
+    } else {
+      const lim = capsState.magen.limit;
+      maEl.textContent = es ? `📋 Te quedan ${ma} de ${lim} planes este mes. No consume tus generaciones.`
+                            : `📋 ${ma} of ${lim} plans left this month. This does not use your generations.`;
+    }
+  }
+  const bg = capLeft('bguide');
+  const bgEl = document.getElementById('bguideCapNote');
+  if (bgEl) {
+    if (bg === null) { bgEl.textContent = ''; }
+    else if (bg === 0) {
+      bgEl.textContent = es ? '⛔ Sin cambios disponibles este mes. Tu Brand Guide actual sigue activo.'
+                            : '⛔ No changes left this month. Your current Brand Guide stays active.';
+    } else {
+      const lim = capsState.bguide.limit;
+      bgEl.textContent = es ? `🎨 Te quedan ${bg} de ${lim} cambios a tu Brand Guide este mes. No consume tus generaciones.`
+                            : `🎨 ${bg} of ${lim} Brand Guide changes left this month. This does not use your generations.`;
+    }
+  }
 }
 
 // N2 fix (Session 19): HTML escape helper — prevents XSS in innerHTML assignments
@@ -2321,7 +2369,7 @@ const T = {
     agentConfigTitle:'⚙️ Configura tu plan mensual',
     agentFreqLabel:'Posts por semana', agentPlatsLabel:'Plataformas',
     agentPlatNote:'Las plataformas se distribuyen inteligentemente según tu audiencia del Brand Guide.',
-    agentGenBtn:'✨ Generar plan de {month}', agentGenLoading:'☕ Generando tu plan mensual... puede tomar hasta 30 segundos',
+    agentGenBtn:'✨ Generar plan de {month}', agentGenLoading:'☕ Generando tu plan mensual... puede tomar hasta 3 minutos. No cierres esta pestaña.',
     agentRegenPlan:'↺ Regenerar plan',
     agentGenerating:'⏳ Generando plan...',
     agentPlannedSub:'{n} posts planificados para {month}',
@@ -2594,7 +2642,7 @@ const T = {
     agentConfigTitle:'⚙️ Set up your monthly plan',
     agentFreqLabel:'Posts per week', agentPlatsLabel:'Platforms',
     agentPlatNote:'Platforms are intelligently distributed based on your Brand Guide audience.',
-    agentGenBtn:'✨ Generate plan for {month}', agentGenLoading:'☕ Generating your monthly plan... may take up to 30 seconds',
+    agentGenBtn:'✨ Generate plan for {month}', agentGenLoading:'☕ Generating your monthly plan... may take up to 3 minutes. Do not close this tab.',
     agentRegenPlan:'↺ Regenerate plan',
     agentGenerating:'⏳ Generating plan...',
     agentPlannedSub:'{n} posts planned for {month}',
@@ -3625,6 +3673,14 @@ async function generateBrandGuide() {
     alert(t('alertNoName'));
     return;
   }
+  // Compuerta del cliente sobre el tope. El worker sigue siendo la autoridad; esto
+  // existe para no hacer esperar un minuto a alguien que ya sabemos que no puede.
+  if(capLeft('bguide') === 0) {
+    alert(detectLanguage()==='en'
+      ? 'You have used all your Brand Guide changes this month. Your current Brand Guide stays active.'
+      : 'Ya usaste todos tus cambios al Brand Guide este mes. Tu Brand Guide actual sigue activo.');
+    return;
+  }
   const btn=document.getElementById('btnGenBG');
   btn.innerHTML='<div class="spin-sm"></div> ' + t('bgGenerating'); btn.disabled=true;
   const timeNote = document.createElement('p');
@@ -3648,6 +3704,7 @@ async function generateBrandGuide() {
       }})
     });
     const data=await res.json();
+    syncCounters(data); // refresca el tope de Brand Guide con el numero del servidor
     if(!data.success) throw new Error(data.error||'Error');
     document.getElementById('bgText').value=data.brandGuide;
     document.getElementById('bgSection').classList.add('show');
@@ -6229,6 +6286,7 @@ function getMonthLabel(monthStr) {
 }
 
 function showAgentScreen() {
+  try { applyAgentFreqGate(); updateCapLabels(); } catch(e) {}
   const month = getCurrentMonth();
   const label = getMonthLabel(month);
   const el = document.getElementById('agentMonthLabel');
@@ -6273,13 +6331,43 @@ function showCreatorFromAgent() {
 
 function showAgentConfig() {
   document.getElementById('agentConfigWrap').style.display = 'block';
+  applyAgentFreqGate();
+  updateCapLabels();
   document.getElementById('agentPlanWrap').style.display = 'none';
 }
 
 function setAgentFreq(btn) {
+  if(btn.disabled) return;
   document.querySelectorAll('.agent-freq-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   agentFreq = parseInt(btn.dataset.freq);
+}
+
+// 7/semana son 28 posts, y ejecutarlos cuesta 28 generaciones. En trial (25) es
+// matematicamente imposible y en Starter (40) se come el 70% del mes: le entregabamos
+// al usuario un plan que su propio plan no le deja ejecutar. Se muestra deshabilitado
+// con el motivo, no oculto — mismo criterio que el toggle de firma (RD-22).
+const AGENT_FREQ_MAX_BY_PLAN = { trial: 5, starter: 5, growth: 7, agency: 7 };
+function applyAgentFreqGate() {
+  const plan = loadBrand()?.plan || 'trial';
+  const maxF = AGENT_FREQ_MAX_BY_PLAN[plan] || 5;
+  const es = detectLanguage() === 'es';
+  document.querySelectorAll('.agent-freq-btn').forEach(b => {
+    const f = parseInt(b.dataset.freq);
+    const blocked = f > maxF;
+    b.disabled = blocked;
+    b.style.opacity = blocked ? '.45' : '';
+    b.style.cursor = blocked ? 'not-allowed' : '';
+    if(blocked && b.classList.contains('active')) {
+      b.classList.remove('active');
+      const fallback = document.querySelector('.agent-freq-btn[data-freq="5"]');
+      if(fallback) { fallback.classList.add('active'); agentFreq = 5; }
+    }
+  });
+  const sub = document.getElementById('agentFreq7Sub');
+  if(sub) sub.textContent = (7 > maxF)
+    ? (es ? '~28 posts · Growth' : '~28 posts · Growth')
+    : '~28 posts';
 }
 
 function toggleAgentPlat(btn) {
@@ -6299,6 +6387,12 @@ async function generateAgentPlan() {
   if(!bg) { alert(t('alertNoBG')); return; }
   if(agentPlats.length === 0) { alert(t('alertNoPlats')); return; }
 
+  if(capLeft('magen') === 0) {
+    alert(detectLanguage()==='en'
+      ? 'You have used all your content plans this month. This does not use your generations — they are separate counters.'
+      : 'Ya usaste todos tus planes de contenido este mes. No consume tus generaciones: son contadores distintos.');
+    return;
+  }
   const btn = document.getElementById('btnGenAgent');
   const note = document.getElementById('agentLoadNote');
   btn.disabled = true;
@@ -6322,6 +6416,7 @@ async function generateAgentPlan() {
       })
     });
     const data = await res.json();
+    syncCounters(data); // refresca el tope de planes con el numero del servidor
     if(!data.success) {
       // S26: Log full server response for debugging
       console.error('MA server response:', data);
