@@ -3456,6 +3456,10 @@ function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s=>{ s.classList.remove('active'); s.style.display=''; });
   document.getElementById(id).classList.add('active');
   window.scrollTo(0,0);
+  // showScreen es el unico punto de verdad de que pantalla esta visible, asi que es
+  // tambien el unico lugar donde las etiquetas de tope se pueden refrescar sin que
+  // haya que acordarse de hacerlo pantalla por pantalla.
+  try { updateCapLabels(); } catch(e) {}
   // Auto-fill email from auth when entering setup (Session 15)
   if (id === 'setupScreen' && authEmail) {
     const emailField = document.getElementById('bEmail');
