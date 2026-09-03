@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="2.36.0">
+<meta name="app-version" content="2.37.0">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Postimity Studio — Tu estudio de contenido con AI</title>
 <meta name="description" content="Crea posts, flyers, carruseles y videos profesionales con AI. Describe tu negocio una vez y genera contenido listo para publicar en 20 segundos.">
@@ -435,6 +435,22 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
 .cs-preview .cs-dl{position:absolute;bottom:5px;right:5px;background:var(--b);color:#fff;border:none;border-radius:5px;font-size:11px;padding:4px 8px;cursor:pointer;opacity:0;transition:.15s;font-family:inherit}
 .cs-preview:hover .cs-dl{opacity:1}
 .cs-preview.active{border-color:var(--b);box-shadow:0 0 0 3px rgba(41,121,255,.2)}
+/* ═══ VISOR DE SLIDES DEL HISTORIAL (S40-2) ═══════════════════════════════
+   Prefijo hs-* DELIBERADAMENTE distinto de cs-*. La tira del creador es un
+   EDITOR: updateCarouselDots hace querySelectorAll('.cs-preview') y llama a
+   setResultImage sobre el estado vivo. Si el visor reusara esas clases, un
+   clic en el historial mutaria la imagen que el usuario tiene en pantalla.
+   El aislamiento no es cosmetico: es la garantia de que el visor no escribe.
+   .hs-dl NO usa opacity:0 + :hover — en iPhone no hay hover y el boton
+   quedaria inalcanzable (defecto vivo hoy en .cs-dl, linea ~435). */
+.hs-strip{display:flex;gap:8px;overflow-x:auto;padding:6px 2px 8px;margin-bottom:10px;scroll-snap-type:x mandatory}
+.hs-strip::-webkit-scrollbar{height:5px}
+.hs-strip::-webkit-scrollbar-thumb{background:var(--bor);border-radius:3px}
+.hs-slide{flex-shrink:0;width:104px;height:104px;border-radius:9px;overflow:hidden;border:1.5px solid var(--bor);position:relative;scroll-snap-align:start;background:var(--bg)}
+.hs-slide img{width:100%;height:100%;object-fit:cover;display:block}
+.hs-num{position:absolute;top:4px;left:4px;background:rgba(0,0,0,.65);color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px}
+.hs-dl{position:absolute;bottom:4px;right:4px;background:var(--b);color:#fff;border:none;border-radius:5px;font-size:11px;padding:4px 8px;cursor:pointer;font-family:inherit;line-height:1}
+.hs-label{font-size:11px;font-weight:700;color:var(--t2);margin-bottom:5px}
 .cs-dots{display:flex;gap:5px;justify-content:center;margin-top:6px}
 .cs-dot{width:6px;height:6px;border-radius:50%;background:var(--bor);cursor:pointer;transition:.15s}
 .cs-dot.active{background:var(--b);width:18px;border-radius:3px}
@@ -1019,6 +1035,13 @@ fbq('track', 'PageView');
         <button class="hist-detail-close" onclick="closeHistDetail()">✕</button>
         <div style="font-size:11px;color:var(--t3);margin-bottom:4px" id="histDetailMeta"></div>
         <div style="font-size:14px;font-weight:700;color:var(--t1);margin-bottom:8px" id="histDetailPilar"></div>
+        <!-- S40-2: los N slides del carrusel. El worker ya los persistia en R2
+             (handleSavePost -> carouselImages); nadie los leia de vuelta. -->
+        <div id="histDetailSlidesWrap" style="display:none">
+          <div class="hs-label" id="histDetailSlidesLabel"></div>
+          <div class="hs-strip" id="histDetailSlides"></div>
+          <button class="btn" id="histDlAllBtn" style="width:100%;padding:9px;font-size:12px;border-radius:8px;background:var(--bg);color:var(--t2);border:.5px solid var(--bor);margin-bottom:10px;font-family:inherit;cursor:pointer" onclick="downloadHistAllSlides()"></button>
+        </div>
         <div class="hist-detail-caption" id="histDetailCaption"></div>
         <div class="hist-detail-btns">
           <button class="btn btn-primary" style="flex:1;padding:10px;font-size:12px;border-radius:8px" onclick="reuseHistPost()">↺ Usar este modo y pilar</button>
@@ -2199,7 +2222,7 @@ function persistSlides(imgs) {
 }
 
 // APP_VERSION (S34) — deploy verification. Must match worker /version and all HTML files.
-const APP_VERSION = '2.36.0'; // S40 (2 sep 2026) — Ola 4 + Fase 1: costo de video por duracion, topes de Agent y Brand Guide visibles, 7/semana desde Growth
+const APP_VERSION = '2.37.0'; // S40 (2 sep 2026) — Ola 4 + Fase 1: costo de video por duracion, topes de Agent y Brand Guide visibles, 7/semana desde Growth
 window.APP_VERSION = APP_VERSION;
 // El log de version vive unas lineas mas abajo (console.info). No agregar otro aqui:
 // S38 borro POSTIMITY_VERSION para tener un solo log y este lo volvio a duplicar.
@@ -2380,6 +2403,13 @@ const T = {
     histEmptyFilter:'No hay posts en este filtro', histEmptyFilterSub:'Genera contenido y aparecerá aquí',
     histReuse:'↺ Usar este modo y pilar', histCopyCaption:'📋 Copiar caption', histNoCaption:'Sin caption guardado',
     histDlSlide:'Descargar slide',
+    errGalleryPhoto:'No pudimos cargar tu foto de la galeria. No se descontó ninguna generación. Revisa tu conexión e intenta de nuevo.',
+    photoOriginalNoEnhance:'Tu foto original (la mejora con AI no estuvo disponible)',
+    toastEnhanceFailed:'⚠️ Te entregamos los textos y tu foto original. La mejora con AI falló esta vez.',
+    histSlidesLabel:'🎠 Slides de este carrusel',
+    histDlAll:'⬇️ Guardar todos los slides',
+    histSlidePrep:'Preparando slides...',
+    histSlideErr:'No pudimos descargar ese slide. Intenta de nuevo.',
     // ── Agent screen ──
     agentBack:'← Volver', agentTitle:'🤖 Marketing Agent',
     agentBarSub:'Genera tu plan de contenido mensual', agentBarCta:'Ver plan →',
@@ -2653,6 +2683,13 @@ const T = {
     histEmptyFilter:'No posts in this filter', histEmptyFilterSub:'Generate content and it will appear here',
     histReuse:'↺ Use this mode and pillar', histCopyCaption:'📋 Copy caption', histNoCaption:'No saved caption',
     histDlSlide:'Download slide',
+    errGalleryPhoto:'We could not load your gallery photo. No generation was charged. Check your connection and try again.',
+    photoOriginalNoEnhance:'Your original photo (AI enhancement unavailable)',
+    toastEnhanceFailed:'⚠️ We delivered your captions and original photo. The AI enhancement failed this time.',
+    histSlidesLabel:'🎠 Slides in this carousel',
+    histDlAll:'⬇️ Save all slides',
+    histSlidePrep:'Preparing slides...',
+    histSlideErr:'We could not download that slide. Try again.',
     // ── Agent screen ──
     agentBack:'← Back', agentTitle:'🤖 Marketing Agent',
     agentBarSub:'Generate your monthly content plan', agentBarCta:'View plan →',
@@ -4283,21 +4320,17 @@ async function genCarousel(brand, bg) {
   // Determine cover photo source: gallery > manual upload > AI
   let coverPhoto = null, coverMime = null;
   if (usingGalleryPhoto) {
-    // Fetch gallery photo and convert to base64 for cover
+    // S40-1: mismo defecto de cache que genPost. Aqui el fetch SI ocurre antes del
+    // cobro (la llamada 'carousel' viene despues), asi que no se pierde dinero —
+    // pero la degradacion era muda: el usuario pedia su foto de portada y recibia
+    // una de IA sin enterarse. Se aborta en vez de sustituir en silencio.
     try {
-      const photoResp = await fetch(gallerySelectedPhoto.url);
-      const photoBlob = await photoResp.blob();
-      const photoB64 = await new Promise((resolve, reject) => {
-        const r = new FileReader();
-        r.onload = () => resolve(r.result);
-        r.onerror = () => reject(new Error('Read failed'));
-        r.readAsDataURL(photoBlob);
-      });
-      const raw = photoB64.split(',')[1];
-      const conv = await convertToPNG(raw, 'image/png', 1024);
+      const photo = await photoUrlToBase64(gallerySelectedPhoto.url);
+      const conv = await convertToPNG(photo.raw, 'image/png', 1024);
       coverPhoto = conv.b64; coverMime = 'image/png';
     } catch(e) {
-      console.warn('Gallery photo fetch failed, falling back to AI cover:', e);
+      console.warn('Gallery photo fetch failed (pre-cobro, sin cargo):', e.message);
+      throw new Error(t('errGalleryPhoto'));
     }
   } else if(carouselCoverMode==='photo' && carouselCoverB64) {
     const conv = await convertToPNG(carouselCoverB64, carouselCoverMime, 1024);
@@ -4691,28 +4724,41 @@ async function generate() {
 
 // ─── POST GENERATION ─────────────────────────────────
 async function genPost(brand,bg) {
+  // ═══════════════════════════════════════════════════════════════════
+  // S40-1 [INV-124]: CUALQUIER INSUMO FALIBLE SE OBTIENE ANTES DEL PRIMER COBRO
+  // ═══════════════════════════════════════════════════════════════════
+  // Antes: captions cobraba primero y la foto se traia despues. Si el fetch de la
+  // foto fallaba, el catch pintaba un resultado "exitoso" con la url que acababa
+  // de tronar — el usuario pagaba una generacion, no recibia su foto, y ademas
+  // veia "Algo salio mal (load failed)". Se cobraba por una entrega imposible.
+  //
+  // Ahora la foto se obtiene ARRIBA. Si falla, no se ha llamado a captions: no hay
+  // nada que reembolsar porque no se cobro nada. El invariante generaliza mas alla
+  // de este bug: ningun insumo falible va despues del primer cobro.
+  const galleryToggle = document.getElementById('galleryToggle');
+  const usingGalleryPhoto = !!(galleryToggle && galleryToggle.checked && gallerySelectedPhoto);
+  let galleryPhoto = null;
+  if (usingGalleryPhoto) {
+    setStep(1);
+    try {
+      galleryPhoto = await photoUrlToBase64(gallerySelectedPhoto.url);
+    } catch(e) {
+      console.warn('Gallery photo fetch failed (pre-cobro, sin cargo):', e.message);
+      // Se lanza para que el catch de generate() lo pinte en el panel de error.
+      // No se degrada a imagen de IA en silencio: el usuario pidio SU foto.
+      throw new Error(t('errGalleryPhoto'));
+    }
+  }
+
   setStep(1);
   const capRes=await post({ mode:'captions', actionId: currentActionId, textInput:document.getElementById('postText').value.trim(), brandGuide:bg, brandData:brand, pillar, platform, imageStyle });
   setStep(2);
   setStep(3);
 
-  // Gallery integration: if toggle ON and photo selected, enhance the real photo
-  const galleryToggle = document.getElementById('galleryToggle');
-  if (galleryToggle && galleryToggle.checked && gallerySelectedPhoto) {
-    // Fetch gallery photo and convert to base64 for enhance pipeline
+  if (usingGalleryPhoto) {
+    const photoMime = galleryPhoto.mime;
+    const photoB64Raw = galleryPhoto.raw;
     try {
-      const photoResp = await fetch(gallerySelectedPhoto.url);
-      const photoBlob = await photoResp.blob();
-      const photoB64 = await new Promise((resolve, reject) => {
-        const r = new FileReader();
-        r.onload = () => resolve(r.result);
-        r.onerror = () => reject(new Error('Read failed'));
-        r.readAsDataURL(photoBlob);
-      });
-      const mimeMatch = photoB64.match(/^data:(image\/\w+);base64,/);
-      const photoMime = mimeMatch ? mimeMatch[1] : 'image/jpeg';
-      const photoB64Raw = photoB64.split(',')[1]; // Strip data URI prefix — worker expects raw base64
-
       // Send through enhance pipeline — keeps real photo elements, improves professionally
       const enhanceRes = await postWithTimeout({
         mode: 'enhance', actionId: currentActionId, // MISMO actionId que captions:
@@ -4732,12 +4778,26 @@ async function genPost(brand,bg) {
       showResult({
         ...capRes,
         imageUrl: enhanceRes.imageUrl || gallerySelectedPhoto.url,
-        photoDescription: detectLanguage() === 'es' ? '📷 Tu foto mejorada con AI' : '📷 Your photo enhanced with AI'
+        // S40-6: el dato NO lleva decoracion. La vista (photoDescBar, linea ~7476) es
+        // la unica que antepone el icono. Con el emoji aqui salia duplicado, y ademas
+        // se colaba dentro del prompt de regeneracion (regenImage lee este mismo campo).
+        photoDescription: detectLanguage() === 'es' ? 'Tu foto mejorada con AI' : 'Your photo enhanced with AI'
       });
     } catch(enhErr) {
-      console.warn('Gallery enhance failed, using original:', enhErr);
+      // S40-1: aqui captions YA cobro, asi que abortar le quitaria al usuario una
+      // generacion sin darle nada. Se entrega lo que si existe (captions + su foto
+      // original) pero se DICE que la mejora fallo. Antes esta rama pintaba
+      // "Tu foto real" como si fuera lo pedido: una degradacion silenciosa.
+      console.warn('Gallery enhance failed, entregando foto original:', enhErr);
       setStep(4);
-      showResult({ ...capRes, imageUrl: gallerySelectedPhoto.url, photoDescription: detectLanguage() === 'es' ? '📷 Tu foto real' : '📷 Your real photo' });
+      showResult({
+        ...capRes,
+        // El dataURL, no gallerySelectedPhoto.url: la imagen ya esta en memoria y
+        // no depende de una segunda carga de red que puede volver a fallar.
+        imageUrl: galleryPhoto.dataUrl,
+        photoDescription: t('photoOriginalNoEnhance')
+      });
+      showToast(t('toastEnhanceFailed'), 6000);
     }
     return;
   }
@@ -5660,7 +5720,11 @@ function renderGalleryGrid() {
 
   grid.innerHTML = galleryData.map(photo =>
     '<div class="gallery-item" onclick="showGalleryPhotoDetail(\'' + photo.id + '\')">' +
-      '<img src="' + photo.url + '" alt="" loading="lazy">' +
+      // S40-1: crossorigin OBLIGATORIO. Sin el, esta <img> guarda en la cache HTTP
+      // una respuesta sin cabeceras CORS, y el fetch posterior de la MISMA url
+      // (al generar un post con esta foto) reusa esa entrada y truena con
+      // "Load failed". La galeria se envenenaba a si misma: pintar, luego pedir.
+      '<img src="' + photo.url + '" crossorigin="anonymous" alt="" loading="lazy">' +
       '<div class="gi-tags">' + photo.tags.map(t => '<span class="gi-tag">' + (labels[t] || t) + '</span>').join('') + '</div>' +
       '<button class="gi-del" onclick="event.stopPropagation();deleteGalleryPhoto(\'' + photo.id + '\')" title="' + (isES ? 'Eliminar' : 'Delete') + '">✕</button>' +
     '</div>'
@@ -5984,7 +6048,11 @@ function showGalleryPhotoSelector(filterTag) {
 
   photosWrap.innerHTML = photos.map((photo, i) =>
     '<div class="gs-photo' + (i === 0 ? ' selected' : '') + '" onclick="selectGalleryPhoto(\'' + photo.id + '\',this)">' +
-      '<img src="' + photo.url + '" alt="" loading="lazy">' +
+      // S40-1: crossorigin OBLIGATORIO. Sin el, esta <img> guarda en la cache HTTP
+      // una respuesta sin cabeceras CORS, y el fetch posterior de la MISMA url
+      // (al generar un post con esta foto) reusa esa entrada y truena con
+      // "Load failed". La galeria se envenenaba a si misma: pintar, luego pedir.
+      '<img src="' + photo.url + '" crossorigin="anonymous" alt="" loading="lazy">' +
     '</div>'
   ).join('');
 
@@ -6268,7 +6336,142 @@ function openHistDetail(idx) {
   meta.textContent = (modeLabels[histCurrentPost.mode] || '✍️ Post') + ' · ' + date.toLocaleDateString(detectLanguage()==='en'?'en-US':'es-MX', {day:'numeric',month:'long',year:'numeric'}) + ' · ' + platLabel;
   pilar.textContent = histCurrentPost.pillar || 'General';
   cap.textContent = histCurrentPost.caption || histCurrentPost.captionSnippet || t('histNoCaption');
+  // S40-2: los slides del carrusel. renderHistSlides se llama SIEMPRE (no solo
+  // cuando hay slides): si no se invocara en los posts sin carrusel, la tira del
+  // carrusel anterior seguiria pintada al abrir el siguiente. Es el defecto que
+  // EX-2 vigila — una funcion que depende de que otra la limpie.
+  renderHistSlides(isVideo ? null : histCurrentPost.carouselImages);
   if(modal) modal.style.display = 'flex';
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// VISOR DE SLIDES DEL HISTORIAL (S40-2)
+// ═══════════════════════════════════════════════════════════════════
+// El worker SIEMPRE persistio los N slides (handleSavePost sube cada uno a R2 y
+// guarda las URLs en post.carouselImages). openHistDetail nunca leyo ese campo:
+// pintaba solo post.imageUrl, la portada. Los slides no se perdian — quedaban
+// inalcanzables. Por eso este fix recupera retroactivamente todo carrusel ya
+// guardado, sin migracion de datos.
+//
+// Es un VISOR, no la tira del creador. Tres reglas que lo mantienen inofensivo:
+//   1. Clases hs-* propias: el querySelectorAll('.cs-preview') de
+//      updateCarouselDots no puede alcanzarlo.
+//   2. Nunca escribe estado: ni carouselResults, ni setResultImage, ni redibujo.
+//   3. Nunca interpola en innerHTML (ver histSlideImg).
+function renderHistSlides(images) {
+  const wrap  = document.getElementById('histDetailSlidesWrap');
+  const strip = document.getElementById('histDetailSlides');
+  const label = document.getElementById('histDetailSlidesLabel');
+  const dlAll = document.getElementById('histDlAllBtn');
+  if (!wrap || !strip) return;
+  strip.innerHTML = '';
+  const list = Array.isArray(images) ? images.filter(u => typeof u === 'string' && u) : [];
+  if (list.length < 2) { wrap.style.display = 'none'; return; }   // 1 sola imagen = no es tira
+  if (label) label.textContent = t('histSlidesLabel') + ' (' + list.length + ')';
+  if (dlAll) dlAll.textContent = t('histDlAll');
+
+  list.forEach(function(url, i) {
+    const cell = document.createElement('div');
+    cell.className = 'hs-slide';
+
+    // XSS: la URL NUNCA se concatena dentro de innerHTML. handleSavePost recibe
+    // las URLs del cliente; una con comillas escapaba del atributo src y quedaba
+    // guardada en KV, ejecutandose al abrir el historial. setAttribute trata el
+    // valor como dato, no como marcado. El worker ademas valida el origen.
+    const img = document.createElement('img');
+    img.setAttribute('alt', 'Slide ' + (i + 1));
+    img.setAttribute('loading', 'lazy');
+    // crossorigin obligatorio: sin el, esta <img> envenena la cache HTTP con una
+    // respuesta no-CORS y el fetch de la descarga truena despues con "Load failed".
+    // Es la misma causa raiz de S40-1.
+    img.setAttribute('crossorigin', 'anonymous');
+    img.setAttribute('src', url);
+    cell.appendChild(img);
+
+    const num = document.createElement('span');
+    num.className = 'hs-num';
+    num.textContent = String(i + 1);
+    cell.appendChild(num);
+
+    const btn = document.createElement('button');
+    btn.className = 'hs-dl';           // visible siempre: en iPhone no hay :hover
+    btn.type = 'button';
+    btn.textContent = '⬇';
+    btn.title = t('histDlSlide');
+    btn.onclick = function(ev) { ev.stopPropagation(); downloadHistSlide(i); };
+    cell.appendChild(btn);
+
+    strip.appendChild(cell);
+  });
+  wrap.style.display = 'block';
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// FUENTE UNICA: traer una imagen de R2 como blob (RD-16)
+// ═══════════════════════════════════════════════════════════════════
+// El patron fetch->blob estaba copiado en genPost, genCarousel y el visor del
+// historial, cada copia con su propio manejo de error. Aqui vive una sola vez.
+//
+// El sufijo anti-cache es la defensa contra la causa raiz de S40-1: una <img>
+// pintada SIN crossorigin guarda en la cache HTTP una respuesta opaca, sin
+// cabeceras CORS. Un fetch posterior de esa misma URL reusa esa entrada y truena
+// — en Safari con el mensaje "Load failed". La galeria pintaba las miniaturas
+// primero y hacia fetch despues: se envenenaba a si misma.
+// Se arregla en dos frentes: crossorigin en las <img> (que la cache quede limpia)
+// y este parametro (que aunque este sucia, no se reuse).
+async function fetchImageBlobNoCache(url) {
+  const bust = url + (url.indexOf('?') === -1 ? '?' : '&') + 'd=' + Date.now();
+  const res = await fetch(bust, { cache: 'no-store' });
+  // fetch no lanza con 4xx/5xx: sin este guard, un 404 seguia como blob de HTML.
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  return await res.blob();
+}
+
+// Devuelve { raw, mime } listos para el worker, que espera base64 sin prefijo.
+async function photoUrlToBase64(url) {
+  const blob = await fetchImageBlobNoCache(url);
+  const dataUrl = await new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload  = () => resolve(r.result);
+    r.onerror = () => reject(new Error('Read failed'));
+    r.readAsDataURL(blob);
+  });
+  const m = dataUrl.match(/^data:(image\/\w+);base64,/);
+  return { raw: dataUrl.split(',')[1], mime: m ? m[1] : 'image/jpeg', dataUrl };
+}
+
+function histSlideName(idx) {
+  const brand = loadBrand();
+  const slug = (brand?.name || 'postimity').toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 20);
+  return slug + '-slide-' + (idx + 1) + '-' + Date.now() + '.jpg';
+}
+
+async function downloadHistSlide(idx) {
+  const imgs = histCurrentPost?.carouselImages;
+  if (!Array.isArray(imgs) || !imgs[idx]) { showToast(t('histSlideErr')); return; }
+  try {
+    await universalSave(await fetchImageBlobNoCache(imgs[idx]), histSlideName(idx));
+  } catch(e) {
+    // RD-10: un fallo de descarga se dice, no se traga. El toast de exito lo
+    // pinta universalSave solo si llego hasta alla.
+    console.warn('downloadHistSlide failed:', e.message);
+    showToast(t('histSlideErr'));
+  }
+}
+
+async function downloadHistAllSlides() {
+  const imgs = histCurrentPost?.carouselImages;
+  if (!Array.isArray(imgs) || !imgs.length) { showToast(t('histSlideErr')); return; }
+  showToast(t('histSlidePrep'));
+  const blobs = [], names = [];
+  for (let i = 0; i < imgs.length; i++) {
+    try { blobs.push(await fetchImageBlobNoCache(imgs[i])); names.push(histSlideName(i)); }
+    catch(e) { console.warn('slide ' + i + ' failed:', e.message); }
+  }
+  // Parcial es mejor que nada, pero el usuario tiene que saber que fue parcial.
+  if (!blobs.length) { showToast(t('histSlideErr')); return; }
+  await universalSaveMultiple(blobs, names, 'slides-' + Date.now() + '.zip');
+  if (blobs.length < imgs.length) showToast(blobs.length + '/' + imgs.length + ' — ' + t('histSlideErr'), 5000);
 }
 
 function closeHistDetail(event) {
@@ -6276,6 +6479,12 @@ function closeHistDetail(event) {
   // Clean up video player on close
   const videoEl = document.getElementById('histDetailVideo');
   if(videoEl) { videoEl.pause(); videoEl.remove(); }
+  // S40-2: soltar las miniaturas al cerrar. Un carrusel de 10 slides deja 10
+  // imagenes de R2 vivas en memoria; abrir varios seguidos las acumula.
+  const slidesWrap = document.getElementById('histDetailSlidesWrap');
+  const slidesStrip = document.getElementById('histDetailSlides');
+  if(slidesStrip) slidesStrip.innerHTML = '';
+  if(slidesWrap) slidesWrap.style.display = 'none';
   if(modal) modal.style.display = 'none';
 }
 
