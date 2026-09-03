@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="2.37.0">
+<meta name="app-version" content="2.37.3">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Postimity Studio — Tu estudio de contenido con AI</title>
 <meta name="description" content="Crea posts, flyers, carruseles y videos profesionales con AI. Describe tu negocio una vez y genera contenido listo para publicar en 20 segundos.">
@@ -1983,9 +1983,25 @@ window.onerror = function(msg, src, line) {
 };
 
 function cancelGeneration() {
+  // ═══════════════════════════════════════════════════════════════════
+  // S41-4: CANCELAR DE VERDAD (hasta donde el navegador puede)
+  // ═══════════════════════════════════════════════════════════════════
+  // Esta funcion solo escondia el spinner y mostraba "Generación cancelada".
+  // La peticion seguia corriendo: el worker la completaba, cobraba la generacion,
+  // y el .then podia repintar el resultado sobre la pantalla a la que el usuario
+  // ya habia vuelto. Era una promesa que el producto no cumplia.
+  //
+  // LIMITE HONESTO: abortar aqui corta la ESPERA y el resultado fantasma, pero NO
+  // detiene al worker. Si la generacion ya arranco en el servidor, el cobro ya
+  // ocurrio y esto no lo revierte. Devolver la unidad exige un endpoint de
+  // reverso por actionId — diseno propio, no un parche. Por eso el mensaje lo
+  // dice en vez de fingir. Mentirle al usuario sobre su saldo es peor que el bug.
+  _genCancelled = true;
+  _inFlight.forEach(c => { try { c.abort(); } catch(e) {} });
+  _inFlight.clear();
   showLoading(false);
   if (_loadingTimeout) { clearTimeout(_loadingTimeout); _loadingTimeout = null; }
-  showToast(t('toastCancelGen'));
+  showToast(t('toastCancelGenHonest'), 7000);
 }
 
 // WORKER already defined above
@@ -2222,7 +2238,7 @@ function persistSlides(imgs) {
 }
 
 // APP_VERSION (S34) — deploy verification. Must match worker /version and all HTML files.
-const APP_VERSION = '2.37.0'; // S40 (2 sep 2026) — Ola 4 + Fase 1: costo de video por duracion, topes de Agent y Brand Guide visibles, 7/semana desde Growth
+const APP_VERSION = '2.37.3'; // S40 (2 sep 2026) — Ola 4 + Fase 1: costo de video por duracion, topes de Agent y Brand Guide visibles, 7/semana desde Growth
 window.APP_VERSION = APP_VERSION;
 // El log de version vive unas lineas mas abajo (console.info). No agregar otro aqui:
 // S38 borro POSTIMITY_VERSION para tener un solo log y este lo volvio a duplicar.
@@ -2403,12 +2419,15 @@ const T = {
     histEmptyFilter:'No hay posts en este filtro', histEmptyFilterSub:'Genera contenido y aparecerá aquí',
     histReuse:'↺ Usar este modo y pilar', histCopyCaption:'📋 Copiar caption', histNoCaption:'Sin caption guardado',
     histDlSlide:'Descargar slide',
+    toastGalleryReset:'⚠️ Se apagó \'Usar mis fotos\' al cambiar de modo. Vuelve a activarlo y elige tu foto.',
     errGalleryPhoto:'No pudimos cargar tu foto de la galeria. No se descontó ninguna generación. Revisa tu conexión e intenta de nuevo.',
     photoOriginalNoEnhance:'Tu foto original (la mejora con AI no estuvo disponible)',
     toastEnhanceFailed:'⚠️ Te entregamos los textos y tu foto original. La mejora con AI falló esta vez.',
     histSlidesLabel:'🎠 Slides de este carrusel',
     histDlAll:'⬇️ Guardar todos los slides',
     histSlidePrep:'Preparando slides...',
+    histSlidesSaved:'✅ {n} slides guardados',
+    histSlidesOpened:'📷 Guarda los {n} slides desde las pestañas',
     histSlideErr:'No pudimos descargar ese slide. Intenta de nuevo.',
     // ── Agent screen ──
     agentBack:'← Volver', agentTitle:'🤖 Marketing Agent',
@@ -2447,7 +2466,9 @@ const T = {
     loadTestS1:'Analizando la reseña del cliente', loadTestS2:'Generando captions auténticos', loadTestS3:'Creando imagen de fondo', loadTestS4:'Preparando resultado',
     // ── Toasts/alerts ──
     toastSaved:'✅ Post guardado en historial', toastCopied:'✓ ¡Copiado!', toastCopyLink:'📋 Copiar link',
-    toastCancelGen:'Generación cancelada', toastBGReady:'🎉 ¡Tu Brand Guide está listo! Postimity ya conoce tu negocio. Genera tu primer post 👇',
+    alertGalleryNoPhoto:'Tienes activado \'Usar mis fotos\' pero no hay ninguna foto seleccionada. Elige una abajo y genera de nuevo. No se descontó ninguna generación.',
+    toastCancelGen:'Generación cancelada',
+    toastCancelGenHonest:'Generación cancelada. Si ya había empezado en el servidor, es posible que haya consumido una unidad — revisa tu contador.', toastBGReady:'🎉 ¡Tu Brand Guide está listo! Postimity ya conoce tu negocio. Genera tu primer post 👇',
     toastAdjusted:'✅ Contenido ajustado', toastCaptionCopied:'📋 Caption copiado', toastCopyError:'Error al copiar',
     toastPromptCopied:'📋 Prompt copiado', toastPostNotFound:'Error: post no encontrado',
     toastRemindersOn:'🔔 Recordatorios activados para {month}', toastRemindersOff:'Recordatorios desactivados',
@@ -2683,12 +2704,15 @@ const T = {
     histEmptyFilter:'No posts in this filter', histEmptyFilterSub:'Generate content and it will appear here',
     histReuse:'↺ Use this mode and pillar', histCopyCaption:'📋 Copy caption', histNoCaption:'No saved caption',
     histDlSlide:'Download slide',
+    toastGalleryReset:'⚠️ \'Use my photos\' turned off when you switched modes. Enable it again and pick your photo.',
     errGalleryPhoto:'We could not load your gallery photo. No generation was charged. Check your connection and try again.',
     photoOriginalNoEnhance:'Your original photo (AI enhancement unavailable)',
     toastEnhanceFailed:'⚠️ We delivered your captions and original photo. The AI enhancement failed this time.',
     histSlidesLabel:'🎠 Slides in this carousel',
     histDlAll:'⬇️ Save all slides',
     histSlidePrep:'Preparing slides...',
+    histSlidesSaved:'✅ {n} slides saved',
+    histSlidesOpened:'📷 Save the {n} slides from the tabs',
     histSlideErr:'We could not download that slide. Try again.',
     // ── Agent screen ──
     agentBack:'← Back', agentTitle:'🤖 Marketing Agent',
@@ -2727,7 +2751,9 @@ const T = {
     loadTestS1:'Analyzing customer review', loadTestS2:'Generating authentic captions', loadTestS3:'Creating background image', loadTestS4:'Preparing result',
     // ── Toasts/alerts ──
     toastSaved:'✅ Post saved to history', toastCopied:'✓ Copied!', toastCopyLink:'📋 Copy link',
-    toastCancelGen:'Generation cancelled', toastBGReady:'🎉 Your Brand Guide is ready! Postimity now knows your business. Generate your first post 👇',
+    alertGalleryNoPhoto:'\'Use my photos\' is on but no photo is selected. Pick one below and generate again. No generation was charged.',
+    toastCancelGen:'Generation cancelled',
+    toastCancelGenHonest:'Generation cancelled. If it had already started on the server it may have used one unit — check your counter.', toastBGReady:'🎉 Your Brand Guide is ready! Postimity now knows your business. Generate your first post 👇',
     toastAdjusted:'✅ Content adjusted', toastCaptionCopied:'📋 Caption copied', toastCopyError:'Copy error',
     toastPromptCopied:'📋 Prompt copied', toastPostNotFound:'Error: post not found',
     toastRemindersOn:'🔔 Reminders activated for {month}', toastRemindersOff:'Reminders deactivated',
@@ -4096,9 +4122,17 @@ function setMode(m) {
   // Reset gallery selector when switching modes
   const gSel = document.getElementById('gallerySelector');
   if(gSel) gSel.classList.remove('show');
-  gallerySelectedPhoto = null;
+  // S41-2: cambiar de modo apaga "Usar mis fotos" y borra la foto elegida. La
+  // conducta se conserva (evita arrastrar una foto entre modos), pero era MUDA:
+  // el usuario la activaba, cambiaba de modo, generaba esperando su foto y
+  // recibia una de IA — gastando una generacion sin entender por que.
+  // No se cambia el reseteo, se anuncia. Preservar la seleccion entre modos
+  // compatibles es rediseno y va a Ola 5-B con su check.
   const gToggle = document.getElementById('galleryToggle');
+  const eraGaleria = !!(gToggle && gToggle.checked && gallerySelectedPhoto);
+  gallerySelectedPhoto = null;
   if(gToggle) gToggle.checked = false;
+  if(eraGaleria) showToast(t('toastGalleryReset'), 5000);
   // S25: Clear video results when switching AWAY from video mode to prevent cross-mode contamination
   if(m !== 'video') {
     const vp = document.getElementById('videoPlayerWrap');
@@ -4326,8 +4360,14 @@ async function genCarousel(brand, bg) {
     // una de IA sin enterarse. Se aborta en vez de sustituir en silencio.
     try {
       const photo = await photoUrlToBase64(gallerySelectedPhoto.url);
-      const conv = await convertToPNG(photo.raw, 'image/png', 1024);
-      coverPhoto = conv.b64; coverMime = 'image/png';
+      // S41-3: el mime REAL, no un literal. Antes se declaraba 'image/png' sobre
+      // bytes JPEG: el data URL podia no decodificar (y convertToPNG devolvia el
+      // original sin convertir por su rama onerror), y aun decodificando el worker
+      // recibia coverPhotoType mentido y editRealPhoto lo rechazaba.
+      const conv = await convertToPNG(photo.raw, photo.mime, 1024);
+      // conv.mimeType, no un literal: convertToPNG tiene una rama onerror que
+      // devuelve el original SIN convertir. Fijar 'image/png' ahi volvia a mentir.
+      coverPhoto = conv.b64; coverMime = conv.mimeType || photo.mime;
     } catch(e) {
       console.warn('Gallery photo fetch failed (pre-cobro, sin cargo):', e.message);
       throw new Error(t('errGalleryPhoto'));
@@ -4685,6 +4725,21 @@ async function generate() {
   if(mode==='flyer'&&flyerMode==='ai'&&!document.getElementById('flyerTitle2')?.value.trim()){ alert(t('alertFlyerTitle')); return; }
   if(mode==='flyer'&&flyerMode==='photo'&&!flyerPhotoB64){ alert(t('alertFlyerPhoto')); return; }
   if(mode==='carousel'&&!document.getElementById('carouselTopic')?.value.trim()){ alert(t('alertCarouselTopic')); return; }
+  // ═══════════════════════════════════════════════════════════════════
+  // S41-5 [POKA-YOKE]: toggle encendido SIN foto seleccionada
+  // ═══════════════════════════════════════════════════════════════════
+  // Todas las rutas evaluan `toggle.checked && gallerySelectedPhoto`. Si el
+  // toggle esta encendido pero la seleccion se perdio, la condicion da falso y el
+  // producto genera con IA EN SILENCIO: el usuario pidio su foto, pago una
+  // generacion y recibio una imagen inventada sin ningun aviso. Es un fallo mudo
+  // que ademas nos impedia diagnosticarlo, porque no dejaba rastro.
+  // Se convierte en un bloqueo explicito ANTES de cobrar nada.
+  const _gt = document.getElementById('galleryToggle');
+  if (_gt && _gt.checked && !gallerySelectedPhoto) {
+    alert(t('alertGalleryNoPhoto'));
+    showGalleryPhotoSelector();   // reabre el selector para que elija
+    return;
+  }
   if(mode==='testimonial'&&!document.getElementById('testText').value.trim()&&!testPhotoB64){
     alert(t('alertTestimonial')); return;
   }
@@ -4696,6 +4751,7 @@ async function generate() {
   if(mode==='video') { generateVideo(brand); return; }
 
   showLoading(true);
+  _genCancelled = false;   // S41-4: cada generacion nueva parte de cero
   const bg=brand.brandGuide||(detectLanguage()==='en'?`Business: ${brand.name}. Differentiator: ${brand.differentiator}. Audience: ${brand.audience}.`:`Negocio: ${brand.name}. Diferenciador: ${brand.differentiator}. Audiencia: ${brand.audience}.`);
   newActionId(); // S37/L2 · RD-28: una accion del usuario = un actionId
   lastInput={mode,platform,pillar,bg,brand,flyerMode};
@@ -4713,6 +4769,9 @@ async function generate() {
     // Mi Cuenta. Pintar tambien el panel de error dejaria un mensaje viejo esperando
     // en la pantalla del creador.
     if (err.planBlock) return;
+    // S41-4: cancelar ya mostro su propio aviso. Pintar ademas el panel de error
+    // dejaria "fallo" en pantalla sobre una accion deliberada del usuario.
+    if (_genCancelled) return;
     document.getElementById('errWrap').classList.add('show');
     // Show step context for debugging
     const stepInfo = document.querySelector('.step-item.active')?.textContent || '';
@@ -6404,6 +6463,8 @@ function renderHistSlides(images) {
     strip.appendChild(cell);
   });
   wrap.style.display = 'block';
+  // La red arranca AQUI, al abrir el modal, no en el clic del boton.
+  prefetchHistSlides(images);
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -6446,32 +6507,83 @@ function histSlideName(idx) {
   return slug + '-slide-' + (idx + 1) + '-' + Date.now() + '.jpg';
 }
 
+// ═══════════════════════════════════════════════════════════════════
+// S41-1: PRECARGA DE SLIDES — la activacion de usuario no sobrevive a la red
+// ═══════════════════════════════════════════════════════════════════
+// iOS Safari exige activacion de usuario TRANSITORIA para navigator.share().
+// La primera version traia los N slides con await dentro del onclick y compartia
+// despues: cada await de red consumia la activacion, iOS lanzaba NotAllowedError
+// y el boton no hacia absolutamente nada.
+//
+// La version del creador (downloadAllSlides) funciona porque sus slides ya estan
+// en memoria como dataURL y dataUrlToBlob es SINCRONO: cero await antes de
+// compartir. Aqui son URLs de R2, asi que la red es inevitable — pero se mueve
+// fuera del clic. Se precargan al abrir el modal; al hacer clic ya estan listos.
+let histSlideBlobs = [];      // blobs precargados, mismo indice que carouselImages
+let histSlidesReady = false;
+
+async function prefetchHistSlides(urls) {
+  histSlideBlobs = []; histSlidesReady = false;
+  const btn = document.getElementById('histDlAllBtn');
+  if (btn) { btn.disabled = true; btn.textContent = t('histSlidePrep'); }
+  const out = new Array(urls.length).fill(null);
+  for (let i = 0; i < urls.length; i++) {
+    try { out[i] = await fetchImageBlobNoCache(urls[i]); }
+    catch(e) { console.warn('prefetch slide ' + i + ':', e.message); }
+  }
+  // Guarda contra carreras: si el usuario cerro el modal o abrio otro post
+  // mientras descargabamos, esta precarga ya no corresponde a lo que se ve.
+  if (!histCurrentPost || histCurrentPost.carouselImages !== urls) return;
+  histSlideBlobs = out;
+  histSlidesReady = out.some(b => b);
+  if (btn) {
+    btn.disabled = !histSlidesReady;
+    btn.textContent = histSlidesReady ? t('histDlAll') : t('histSlideErr');
+  }
+}
+
 async function downloadHistSlide(idx) {
-  const imgs = histCurrentPost?.carouselImages;
-  if (!Array.isArray(imgs) || !imgs[idx]) { showToast(t('histSlideErr')); return; }
+  // Sirve del cache si esta caliente: sin await, la activacion sobrevive.
+  const cached = histSlideBlobs[idx];
   try {
-    await universalSave(await fetchImageBlobNoCache(imgs[idx]), histSlideName(idx));
+    const blob = cached || await fetchImageBlobNoCache(histCurrentPost?.carouselImages?.[idx]);
+    if (!blob) throw new Error('sin blob');
+    await universalSave(blob, histSlideName(idx));
   } catch(e) {
-    // RD-10: un fallo de descarga se dice, no se traga. El toast de exito lo
-    // pinta universalSave solo si llego hasta alla.
+    // RD-10: un fallo de descarga se dice, no se traga.
     console.warn('downloadHistSlide failed:', e.message);
     showToast(t('histSlideErr'));
   }
 }
 
 async function downloadHistAllSlides() {
-  const imgs = histCurrentPost?.carouselImages;
-  if (!Array.isArray(imgs) || !imgs.length) { showToast(t('histSlideErr')); return; }
-  showToast(t('histSlidePrep'));
+  // CERO await antes de universalSaveMultiple: los blobs ya vienen de la precarga.
+  // Cualquier await que se agregue arriba de esta linea vuelve a romper el boton
+  // en iOS sin dar error visible. Es la razon de que exista prefetchHistSlides.
+  if (!histSlidesReady) { showToast(t('histSlidePrep')); return; }
+  const brand = loadBrand();
+  const slug = (brand?.name || 'postimity').toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 20);
+  const ts = Date.now();
   const blobs = [], names = [];
-  for (let i = 0; i < imgs.length; i++) {
-    try { blobs.push(await fetchImageBlobNoCache(imgs[i])); names.push(histSlideName(i)); }
-    catch(e) { console.warn('slide ' + i + ' failed:', e.message); }
-  }
-  // Parcial es mejor que nada, pero el usuario tiene que saber que fue parcial.
+  histSlideBlobs.forEach(function(b, i) {
+    if (b) { blobs.push(b); names.push(slug + '-slide-' + (i+1) + '-' + ts + '.jpg'); }
+  });
   if (!blobs.length) { showToast(t('histSlideErr')); return; }
-  await universalSaveMultiple(blobs, names, 'slides-' + Date.now() + '.zip');
-  if (blobs.length < imgs.length) showToast(blobs.length + '/' + imgs.length + ' — ' + t('histSlideErr'), 5000);
+
+  const result = await universalSaveMultiple(blobs, names, slug + '-carousel-' + ts + '.zip');
+
+  // El silencio era el otro defecto: la version anterior ignoraba el retorno, asi
+  // que un fallo de compartir en iOS no producia ni exito ni error. Se refleja
+  // cada desenlace, igual que downloadAllSlides en el creador.
+  const n = blobs.length;
+  if (result === 'shared')          showToast(t('histSlidesSaved').replace('{n}', n));
+  else if (result === 'opened')     showToast(t('histSlidesOpened').replace('{n}', n), 5000);
+  else if (result === 'downloaded') showToast(t('histSlidesSaved').replace('{n}', n));
+  else if (result === false)        { /* el usuario cancelo el share: no es error */ }
+  else                              showToast(t('histSlideErr'), 5000);
+
+  const total = histSlideBlobs.length;
+  if (n < total) showToast(n + '/' + total + ' — ' + t('histSlideErr'), 5000);
 }
 
 function closeHistDetail(event) {
@@ -6485,6 +6597,8 @@ function closeHistDetail(event) {
   const slidesStrip = document.getElementById('histDetailSlides');
   if(slidesStrip) slidesStrip.innerHTML = '';
   if(slidesWrap) slidesWrap.style.display = 'none';
+  // Soltar los blobs precargados: 10 slides son varios MB retenidos.
+  histSlideBlobs = []; histSlidesReady = false;
   if(modal) modal.style.display = 'none';
 }
 
@@ -7450,10 +7564,18 @@ function getFlyerData() {
 async function post(body) {
   return postWithTimeout(body);
 }
+// S41-4: registro de peticiones en vuelo, para que cancelGeneration pueda abortar
+// de verdad. Antes cancelGeneration solo escondia el spinner: la peticion seguia
+// viva, el worker terminaba, cobraba la generacion y el .then podia repintar el
+// resultado encima de la pantalla a la que el usuario ya habia vuelto.
+let _inFlight = new Set();
+let _genCancelled = false;
+
 async function postWithTimeout(body, timeoutMs=130000) {
   // Always inject brandId for server-side validation (Fix #1, #2)
   if (brandId && !body.brandId) body.brandId = brandId;
   const controller = new AbortController();
+  _inFlight.add(controller);
   const timer = setTimeout(()=>controller.abort(), timeoutMs);
   try {
     const res = await apiFetch(WORKER, {
@@ -7499,8 +7621,13 @@ async function postWithTimeout(body, timeoutMs=130000) {
     return data;
   } catch(e) {
     clearTimeout(timer);
-    if(e.name==='AbortError') throw new Error('La solicitud tardó demasiado. Intenta de nuevo — las imágenes AI pueden tardar hasta 90 seg.');
+    // Distinguir las dos causas de abort: el timeout y el usuario. Antes toda
+    // AbortError se reportaba como "tardo demasiado", asi que una cancelacion
+    // deliberada aparecia como fallo de red.
+    if(e.name==='AbortError') throw new Error(_genCancelled ? t('toastCancelGen') : t('loadTimeout'));
     throw e;
+  } finally {
+    _inFlight.delete(controller);
   }
 }
 
@@ -7622,6 +7749,11 @@ async function regenText() {
 // ═══════════════════════════════════════════════════════
 // ─── RESULT DISPLAY ──────────────────────────────────
 function showResult(data) {
+  // S41-4: guarda del resultado fantasma. Aunque abortemos las peticiones, una que
+  // ya haya respondido puede seguir su camino hasta aqui y repintar el resultado
+  // sobre la pantalla a la que el usuario volvio al cancelar. Este es el ultimo
+  // punto por el que pasan TODOS los modos, asi que la guarda vive aqui una vez.
+  if (_genCancelled) { console.warn('showResult ignorado: generacion cancelada'); return; }
   lastResult=data;
   lastGeneratedData=data;
   // S37 / RD-27: el enganche de overlays al onload vivía aquí y otra copia vivía
