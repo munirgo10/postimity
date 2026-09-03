@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="2.37.4">
+<meta name="app-version" content="2.37.5">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Postimity Studio — Tu estudio de contenido con AI</title>
 <meta name="description" content="Crea posts, flyers, carruseles y videos profesionales con AI. Describe tu negocio una vez y genera contenido listo para publicar en 20 segundos.">
@@ -407,7 +407,15 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
 .modal-sub{font-size:13px;color:var(--t3);margin-bottom:16px;line-height:1.5}
 .modal-actions{display:flex;gap:8px;margin-top:14px}
 /* Post saved toast */
-.toast{position:fixed;bottom:24px;right:24px;left:24px;background:var(--t1);color:#fff;padding:12px 16px;border-radius:10px;font-size:13px;font-weight:600;z-index:999;transform:translateY(80px);transition:transform .3s;box-shadow:var(--s2);line-height:1.5;text-align:left;max-width:420px;margin-left:auto}
+/* S41-8: dos defectos en la regla anterior.
+   (1) transform:translateY(80px) era un desplazamiento FIJO. Un toast de 1 linea mide
+       ~45px y se escondia; uno de 3 lineas mide ~90px y 80px NO alcanzaba: quedaba un
+       sliver pegado en pantalla. Era el "toast que no desaparece del todo" — no lo
+       causaba el temporizador. calc(100% + 40px) se adapta a la altura real.
+   (2) bottom:24px se mide contra el viewport de layout, que en iOS Safari se extiende
+       POR DETRAS de la barra inferior del navegador: el texto salia cortado.
+       env(safe-area-inset-bottom) lo levanta sobre esa barra. */
+.toast{position:fixed;bottom:calc(24px + env(safe-area-inset-bottom, 0px));right:24px;left:24px;background:var(--t1);color:#fff;padding:12px 16px;border-radius:10px;font-size:13px;font-weight:600;z-index:999;transform:translateY(calc(100% + 40px));transition:transform .3s;box-shadow:var(--s2);line-height:1.5;text-align:left;max-width:420px;margin-left:auto;overflow-wrap:break-word}
 .toast.show{transform:translateY(0)}
 /* Offline banner */
 .offline-banner{position:fixed;top:0;left:0;right:0;background:#E74C3C;color:#fff;text-align:center;padding:10px 16px;font-size:13px;font-weight:700;z-index:10000;transform:translateY(-100%);transition:transform .3s}
@@ -2238,7 +2246,7 @@ function persistSlides(imgs) {
 }
 
 // APP_VERSION (S34) — deploy verification. Must match worker /version and all HTML files.
-const APP_VERSION = '2.37.4'; // S40 (2 sep 2026) — Ola 4 + Fase 1: costo de video por duracion, topes de Agent y Brand Guide visibles, 7/semana desde Growth
+const APP_VERSION = '2.37.5'; // S40 (2 sep 2026) — Ola 4 + Fase 1: costo de video por duracion, topes de Agent y Brand Guide visibles, 7/semana desde Growth
 window.APP_VERSION = APP_VERSION;
 // El log de version vive unas lineas mas abajo (console.info). No agregar otro aqui:
 // S38 borro POSTIMITY_VERSION para tener un solo log y este lo volvio a duplicar.
