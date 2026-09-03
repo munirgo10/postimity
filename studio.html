@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="2.37.3">
+<meta name="app-version" content="2.37.4">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Postimity Studio — Tu estudio de contenido con AI</title>
 <meta name="description" content="Crea posts, flyers, carruseles y videos profesionales con AI. Describe tu negocio una vez y genera contenido listo para publicar en 20 segundos.">
@@ -2238,7 +2238,7 @@ function persistSlides(imgs) {
 }
 
 // APP_VERSION (S34) — deploy verification. Must match worker /version and all HTML files.
-const APP_VERSION = '2.37.3'; // S40 (2 sep 2026) — Ola 4 + Fase 1: costo de video por duracion, topes de Agent y Brand Guide visibles, 7/semana desde Growth
+const APP_VERSION = '2.37.4'; // S40 (2 sep 2026) — Ola 4 + Fase 1: costo de video por duracion, topes de Agent y Brand Guide visibles, 7/semana desde Growth
 window.APP_VERSION = APP_VERSION;
 // El log de version vive unas lineas mas abajo (console.info). No agregar otro aqui:
 // S38 borro POSTIMITY_VERSION para tener un solo log y este lo volvio a duplicar.
@@ -2468,7 +2468,7 @@ const T = {
     toastSaved:'✅ Post guardado en historial', toastCopied:'✓ ¡Copiado!', toastCopyLink:'📋 Copiar link',
     alertGalleryNoPhoto:'Tienes activado \'Usar mis fotos\' pero no hay ninguna foto seleccionada. Elige una abajo y genera de nuevo. No se descontó ninguna generación.',
     toastCancelGen:'Generación cancelada',
-    toastCancelGenHonest:'Generación cancelada. Si ya había empezado en el servidor, es posible que haya consumido una unidad — revisa tu contador.', toastBGReady:'🎉 ¡Tu Brand Guide está listo! Postimity ya conoce tu negocio. Genera tu primer post 👇',
+    toastCancelGenHonest:'Cancelado. Si ya había arrancado, pudo consumir 1 unidad.', toastBGReady:'🎉 ¡Tu Brand Guide está listo! Postimity ya conoce tu negocio. Genera tu primer post 👇',
     toastAdjusted:'✅ Contenido ajustado', toastCaptionCopied:'📋 Caption copiado', toastCopyError:'Error al copiar',
     toastPromptCopied:'📋 Prompt copiado', toastPostNotFound:'Error: post no encontrado',
     toastRemindersOn:'🔔 Recordatorios activados para {month}', toastRemindersOff:'Recordatorios desactivados',
@@ -2753,7 +2753,7 @@ const T = {
     toastSaved:'✅ Post saved to history', toastCopied:'✓ Copied!', toastCopyLink:'📋 Copy link',
     alertGalleryNoPhoto:'\'Use my photos\' is on but no photo is selected. Pick one below and generate again. No generation was charged.',
     toastCancelGen:'Generation cancelled',
-    toastCancelGenHonest:'Generation cancelled. If it had already started on the server it may have used one unit — check your counter.', toastBGReady:'🎉 Your Brand Guide is ready! Postimity now knows your business. Generate your first post 👇',
+    toastCancelGenHonest:'Cancelled. If it had already started, it may have used 1 unit.', toastBGReady:'🎉 Your Brand Guide is ready! Postimity now knows your business. Generate your first post 👇',
     toastAdjusted:'✅ Content adjusted', toastCaptionCopied:'📋 Caption copied', toastCopyError:'Copy error',
     toastPromptCopied:'📋 Prompt copied', toastPostNotFound:'Error: post not found',
     toastRemindersOn:'🔔 Reminders activated for {month}', toastRemindersOff:'Reminders deactivated',
@@ -3202,14 +3202,19 @@ function updateGenCounter() {
   }
 }
 // ─── UTILITIES ───────────────────────────────────────
+let _toastTimer = null;
 function showToast(msg, duration) {
   const t = document.getElementById('toast');
   // S29: support \n in messages by converting to <br>
   const safeMsg = (msg || T[detectLanguage()]?.toastSaved || '✅ Post saved')
     .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+  // S41-6: cada llamada agendaba su propio cierre sin cancelar el anterior. Con dos
+  // toasts seguidos de duracion distinta, el temporizador del primero cerraba el
+  // segundo a destiempo — o lo dejaba a medias. Un solo temporizador vivo.
+  if (_toastTimer) { clearTimeout(_toastTimer); _toastTimer = null; }
   t.innerHTML = safeMsg;
   t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), duration || 3000);
+  _toastTimer = setTimeout(() => { t.classList.remove('show'); _toastTimer = null; }, duration || 3000);
 }
 
 // Sync brand to Cloudflare KV
