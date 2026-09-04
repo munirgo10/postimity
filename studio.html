@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="2.37.5">
+<meta name="app-version" content="2.38.0">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Postimity Studio — Tu estudio de contenido con AI</title>
 <meta name="description" content="Crea posts, flyers, carruseles y videos profesionales con AI. Describe tu negocio una vez y genera contenido listo para publicar en 20 segundos.">
@@ -559,6 +559,12 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
 .rem-ch-btn{flex:1;padding:8px;border-radius:9px;border:1.5px solid var(--bor);background:var(--w);font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;color:var(--t2);transition:all .15s;text-align:center}
 .rem-ch-btn:hover{border-color:var(--b);color:var(--b)}
 .rem-ch-btn.active{background:var(--b);border-color:var(--b);color:#fff}
+/* S42: canal anunciado pero no disponible. Visible y evidentemente inerte —
+   RD-22: no se oculta una capacidad futura, se marca. Pero tampoco se deja
+   pulsar: un chip que acepta el clic y no hace nada es INV-127 otra vez. */
+.rem-ch-btn.soon{opacity:.45;cursor:not-allowed;background:var(--bg)}
+.rem-ch-btn.soon:hover{border-color:var(--bor);color:var(--t2)}
+.rem-soon-tag{display:block;font-size:9px;font-weight:600;opacity:.8;margin-top:1px}
 .rem-save-btn{width:100%;padding:10px;border-radius:9px;border:none;background:var(--b);color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:4px;transition:.15s}
 .rem-save-btn:hover{background:var(--b2)}
 
@@ -2246,7 +2252,7 @@ function persistSlides(imgs) {
 }
 
 // APP_VERSION (S34) — deploy verification. Must match worker /version and all HTML files.
-const APP_VERSION = '2.37.5'; // S40 (2 sep 2026) — Ola 4 + Fase 1: costo de video por duracion, topes de Agent y Brand Guide visibles, 7/semana desde Growth
+const APP_VERSION = '2.38.0'; // S42 (3 sep 2026) — S41-G: recordatorios honestos. Twilio eliminado, WhatsApp a Proximamente, estado reconciliado contra KV
 window.APP_VERSION = APP_VERSION;
 // El log de version vive unas lineas mas abajo (console.info). No agregar otro aqui:
 // S38 borro POSTIMITY_VERSION para tener un solo log y este lo volvio a duplicar.
@@ -2457,6 +2463,8 @@ const T = {
     remActiveTitle:'Recordatorios activos — {month}', remActiveSub:'Recibirás un aviso cada mañana antes de tu post del día',
     remActiveBtn:'✓ Activo', remEmailLabel:'📧 Email para recordatorios', remWALabel:'📱 WhatsApp personal (opcional)',
     remChannelLabel:'Canal de notificación', remBoth:'Ambos', remActivate:'🔔 Activar recordatorios',
+    remSoon:'Próximamente', remWASoon:'Recordatorios por WhatsApp: en camino. Por ahora llegan a tu correo.',
+    toastRemFail:'No pudimos activar los recordatorios. Revisa tu conexión e intenta de nuevo.',
     // ── PLT_INFO ──
     pltIG:'📸 <strong>Instagram 2026:</strong> Keywords en caption, hook primera línea, 3-5 hashtags. Meta: Guardados + DMs.',
     pltFB:'👥 <strong>Facebook 2026:</strong> Preguntas y conversación, CTAs de comentarios. Meta: Respuestas y conversaciones.',
@@ -2742,6 +2750,8 @@ const T = {
     remActiveTitle:'Reminders active — {month}', remActiveSub:"You'll receive a reminder every morning before your daily post",
     remActiveBtn:'✓ Active', remEmailLabel:'📧 Reminder email', remWALabel:'📱 Personal WhatsApp (optional)',
     remChannelLabel:'Notification channel', remBoth:'Both', remActivate:'🔔 Activate reminders',
+    remSoon:'Coming soon', remWASoon:'WhatsApp reminders are on the way. For now they arrive by email.',
+    toastRemFail:"We couldn't turn on reminders. Check your connection and try again.",
     // ── PLT_INFO ──
     pltIG:'📸 <strong>Instagram 2026:</strong> Keywords in caption, hook on first line, 3-5 hashtags. Goal: Saves + DMs.',
     pltFB:'👥 <strong>Facebook 2026:</strong> Questions & conversation, comment CTAs. Goal: Replies & conversations.',
@@ -6841,6 +6851,13 @@ function renderAgentPlan(plan) {
   const brandForReminder = loadBrand();
   const remActive = localStorage.getItem('postimity_reminders_' + getCurrentMonth()) === 'on';
   container.innerHTML = renderReminderCard(remActive, brandForReminder);
+  // S42 / INV-129 — localStorage pinta rapido, pero NO es la fuente de verdad: quien
+  // envia es el worker leyendo KV. Los dos se separan al borrar datos del sitio (la
+  // instruccion post-deploy de S41-A), al cambiar de dispositivo o de navegador, y la
+  // tarjeta quedaba apagada mientras seguian llegando correos, sin boton para pararlos.
+  // Se reconcilia contra KV sin bloquear el render. Si el fetch falla, se queda lo
+  // pintado: degradar a lo local es peor que no degradar nada.
+  reconcileReminderState(brandForReminder);
 
   const monthNames = t('months');
 
@@ -6977,13 +6994,52 @@ function setPlatformByName(platName) {
   });
 }
 
+// S42 / INV-129 — el estado que el worker ejecuta de forma autonoma se lee del worker.
+async function reconcileReminderState(brand) {
+  if(!brandId) return;
+  try {
+    const res = await apiFetch(WORKER,{ method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ mode:'get-reminders', brandId })
+    });
+    const data = await res.json().catch(() => null);
+    if(!res.ok || !data) return;                       // sin respuesta util: no tocar nada
+    const month = getCurrentMonth();
+    const rem = data.reminder;
+    // El worker solo envia si active y el mes coincide (ver handleScheduled). La tarjeta
+    // debe reflejar exactamente esa condicion, no una aproximacion.
+    const serverOn = !!(data.success && rem && rem.active && (!rem.month || rem.month === month));
+    const localOn = localStorage.getItem('postimity_reminders_' + month) === 'on';
+    if(serverOn === localOn) return;
+    if(serverOn) {
+      localStorage.setItem('postimity_reminders_' + month, 'on');
+      if(rem.email) localStorage.setItem('postimity_rem_email_' + (brandId||''), rem.email);
+    } else {
+      localStorage.removeItem('postimity_reminders_' + month);
+    }
+    const card = document.getElementById('reminderCard');
+    if(card) card.outerHTML = renderReminderCard(serverOn, brand || loadBrand());
+  } catch(e) {
+    // INV-076: nunca en silencio absoluto. Pero tampoco un toast: el usuario no pidio
+    // esto, corre solo al abrir el panel. Queda en consola para el recorrido en device.
+    console.warn('reconcileReminderState: no se pudo leer el estado del worker', e && e.message);
+  }
+}
+
 function renderReminderCard(active, brand) {
   const month = getCurrentMonth();
   const monthLabel = getMonthLabel(month);
   const bizName = brand?.name || '';
   const savedEmail = localStorage.getItem('postimity_rem_email_' + (brandId||'')) || (brand?.email||'');
-  const savedWA = localStorage.getItem('postimity_rem_wa_' + (brandId||'')) || (brand?.whatsapp||'');
-  const savedCh = localStorage.getItem('postimity_rem_ch_' + (brandId||'')) || 'email';
+  // S42 — canal unico: email. Si este dispositivo guardo 'whatsapp' o 'both' en una
+  // version anterior, se normaliza en silencio: el usuario no eligio mal, la app le
+  // ofrecio algo que no existia. El servidor tambien lo normaliza (handleSaveReminders),
+  // asi que ambos lados coinciden aunque el studio venga cacheado.
+  const savedCh = 'email';
+  try {
+    const legacyCh = localStorage.getItem('postimity_rem_ch_' + (brandId||''));
+    if (legacyCh && legacyCh !== 'email') localStorage.setItem('postimity_rem_ch_' + (brandId||''), 'email');
+    localStorage.removeItem('postimity_rem_wa_' + (brandId||''));
+  } catch(e) { console.warn('renderReminderCard: limpieza de canal heredado falló', e && e.message); }
 
   if(active) {
     return '<div class="reminder-card active" id="reminderCard" style="flex-direction:column;align-items:flex-start">' +
@@ -6991,11 +7047,10 @@ function renderReminderCard(active, brand) {
         '<span class="reminder-icon">🔔</span>' +
         '<div class="reminder-info"><div class="reminder-title">' + t('remActiveTitle').replace('{month}', monthLabel) + '</div>' +
         '<div class="reminder-sub" style="color:#1a8a4a">' + t('remActiveSub') + '</div></div>' +
-        '<button class="reminder-btn on" onclick="toggleReminders(false)" style="flex-shrink:0">' + t('remActiveBtn') + '</button>' +
+        '<button class="reminder-btn on" onclick="toggleReminders()" style="flex-shrink:0">' + t('remActiveBtn') + '</button>' +
       '</div>' +
       '<div style="font-size:11px;color:#1a8a4a;background:rgba(37,211,102,.08);border-radius:8px;padding:8px 10px;width:100%">' +
-        (savedCh==='email'||savedCh==='both' ? '📧 ' + esc(savedEmail) + '  ' : '') +
-        (savedCh==='whatsapp'||savedCh==='both' ? '📱 ' + esc(savedWA) : '') +
+        '📧 ' + esc(savedEmail) +
       '</div>' +
     '</div>';
   }
@@ -7009,14 +7064,16 @@ function renderReminderCard(active, brand) {
     '<div class="rem-fields">' +
       '<div><div class="rem-field-label">' + t('remEmailLabel') + '</div>' +
       '<input class="rem-field-input" id="remEmail" type="email" value="' + savedEmail + '" placeholder="' + t('phEmail') + '"></div>' +
-      '<div><div class="rem-field-label">' + t('remWALabel') + '</div>' +
-      '<input class="rem-field-input" id="remWA" type="tel" value="' + savedWA + '" placeholder="' + t('phWA') + '"></div>' +
+      // S42 — el campo de WhatsApp se retiro junto con el canal. Un input que pide un
+      // telefono que nadie va a usar no es inofensivo: recoge dato personal sin
+      // finalidad (LFPDPPP art. 11) y refuerza la promesa que el chip ya desmiente.
       '<div><div class="rem-field-label">' + t('remChannelLabel') + '</div>' +
       '<div class="rem-channel-btns">' +
-        '<button class="rem-ch-btn' + (savedCh==='email'?' active':'') + '" data-ch="email" onclick="setRemChannel(this)">📧 Email</button>' +
-        '<button class="rem-ch-btn' + (savedCh==='whatsapp'?' active':'') + '" data-ch="whatsapp" onclick="setRemChannel(this)">📱 WhatsApp</button>' +
-        '<button class="rem-ch-btn' + (savedCh==='both'?' active':'') + '" data-ch="both" onclick="setRemChannel(this)">' + t('remBoth') + '</button>' +
-      '</div></div>' +
+        '<button class="rem-ch-btn active" data-ch="email" onclick="setRemChannel(this)">📧 Email</button>' +
+        '<button class="rem-ch-btn soon" data-ch="whatsapp" disabled aria-disabled="true">📱 WhatsApp' +
+          '<span class="rem-soon-tag">' + t('remSoon') + '</span></button>' +
+      '</div>' +
+      '<div style="font-size:11px;color:var(--t3);line-height:1.5;margin-top:7px">' + t('remWASoon') + '</div></div>' +
       '<button class="rem-save-btn" onclick="activateReminders()">' + t('remActivate') + '</button>' +
     '</div>' +
   '</div>';
@@ -7029,63 +7086,79 @@ function setRemChannel(btn) {
 
 async function activateReminders() {
   const email = document.getElementById('remEmail')?.value.trim();
-  const wa = document.getElementById('remWA')?.value.trim();
-  const chBtn = document.querySelector('.rem-ch-btn.active');
-  const ch = chBtn?.dataset.ch || 'email';
-
-  if((ch === 'email' || ch === 'both') && !email) { showToast(t('toastEmailReminder')); return; }
-  if(ch === 'whatsapp' && !wa) { showToast(t('toastWAReminder')); return; }
+  if(!email) { showToast(t('toastEmailReminder')); return; }
 
   const brand = loadBrand();
   const month = getCurrentMonth();
   const lang = detectLanguage();
 
-  // Save locally
-  localStorage.setItem('postimity_rem_email_' + (brandId||''), email || '');
-  localStorage.setItem('postimity_rem_wa_' + (brandId||''), wa || '');
-  localStorage.setItem('postimity_rem_ch_' + (brandId||''), ch);
-  localStorage.setItem('postimity_reminders_' + month, 'on');
-
-  // Save to KV
+  // S42 / G2 — quien envia los recordatorios es el WORKER, leyendo KV. localStorage solo
+  // pinta la tarjeta. Escribir primero en local y pintar exito pase lo que pase dejaba al
+  // usuario viendo "✓ Activo" con el servidor vacio: misma familia que S40-1 (catch que
+  // pintaba exito con la URL que acababa de fallar) y S41-1 (retorno ignorado). El KV
+  // manda: si no confirma, no se toca el estado local y no se pinta activo.
+  let saved = false;
   try {
-    await apiFetch(WORKER,{ method:'POST', headers:{'Content-Type':'application/json'}, 
+    const res = await apiFetch(WORKER,{ method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({ mode:'save-reminders', brandId, reminder: {
-        active: true, channel: ch, email, whatsappPersonal: wa,
+        active: true, channel: 'email', email,
         month, language: lang, businessName: brand?.name || ''
       }})
     });
-  } catch(e) { console.warn('KV reminder save failed:', e.message); }
+    const data = await res.json().catch(() => null);
+    saved = !!(res.ok && data && data.success);
+    if(!saved) console.warn('activateReminders: worker no confirmó', res.status, data);
+  } catch(e) {
+    console.warn('activateReminders: KV save failed:', e && e.message);
+  }
 
-  // Update card in place
+  if(!saved) { showToast(t('toastRemFail')); return; }
+
+  // Solo despues de la confirmacion del servidor.
+  localStorage.setItem('postimity_rem_email_' + (brandId||''), email);
+  localStorage.setItem('postimity_rem_ch_' + (brandId||''), 'email');
+  localStorage.setItem('postimity_reminders_' + month, 'on');
+
   const card = document.getElementById('reminderCard');
   if(card) card.outerHTML = renderReminderCard(true, brand);
   showToast(t('toastRemindersOn').replace('{month}', getMonthLabel(month)));
 }
 
-function toggleReminders(activate) {
+// S42 / G7 — la rama `activate=true` se elimino. No la llamaba nadie (unico llamador:
+// el boton "✓ Activo" con false) y ademas encendia SOLO en localStorage, sin escribir en
+// KV: si alguien la hubiera cableado, habria reintroducido el desfase pantalla/servidor.
+// Encender pasa por activateReminders, que exige confirmacion del worker. Esta funcion
+// solo apaga.
+async function toggleReminders() {
   const month = getCurrentMonth();
   const brand = loadBrand();
 
-  if(activate) {
-    localStorage.setItem('postimity_reminders_' + month, 'on');
-    const card = document.getElementById('reminderCard');
-    if(card) card.outerHTML = renderReminderCard(true, brand);
-    const monthLabel = getMonthLabel(month);
-    showToast(t('toastRemindersOn').replace('{month}', monthLabel));
-    setTimeout(() => {
-      alert(t('remConfirmTitle').replace('{month}', monthLabel));
-    }, 500);
-  } else {
-    localStorage.removeItem('postimity_reminders_' + month);
-    if(brandId) {
-      apiFetch(WORKER,{ method:'POST', headers:{'Content-Type':'application/json'}, 
+  // S42 — el fallo al APAGAR es el caro. Si el KV no confirma, el worker sigue enviando
+  // y el usuario ya no ve el boton para detenerlo (la tarjeta se pintaria apagada).
+  // Por eso aqui el orden es al reves que en activar: primero el servidor, y el estado
+  // local solo se limpia si confirmo. Antes era `.catch(()=>{})` — baja silenciosa que
+  // no bajaba nada.
+  let off = false;
+  if(brandId) {
+    try {
+      const res = await apiFetch(WORKER,{ method:'POST', headers:{'Content-Type':'application/json'},
         body: JSON.stringify({ mode:'save-reminders', brandId, reminder: { active: false, month } })
-      }).catch(()=>{});
-    }
-    const card = document.getElementById('reminderCard');
-    if(card) card.outerHTML = renderReminderCard(false, brand);
-    showToast(t('toastRemindersOff'));
+      });
+      const data = await res.json().catch(() => null);
+      off = !!(res.ok && data && data.success);
+      if(!off) console.warn('toggleReminders: worker no confirmó la baja', res.status, data);
+    } catch(e) { console.warn('toggleReminders: KV off failed:', e && e.message); }
+  } else {
+    // Sin brandId no hay registro en KV que apagar: la baja local es suficiente.
+    off = true;
   }
+
+  if(!off) { showToast(t('toastRemFail')); return; }
+
+  localStorage.removeItem('postimity_reminders_' + month);
+  const card = document.getElementById('reminderCard');
+  if(card) card.outerHTML = renderReminderCard(false, brand);
+  showToast(t('toastRemindersOff'));
 }
 
 function copyPrompt(idx) {
