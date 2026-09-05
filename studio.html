@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="2.38.0">
+<meta name="app-version" content="2.38.1">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Postimity Studio — Tu estudio de contenido con AI</title>
 <meta name="description" content="Crea posts, flyers, carruseles y videos profesionales con AI. Describe tu negocio una vez y genera contenido listo para publicar en 20 segundos.">
@@ -2252,7 +2252,7 @@ function persistSlides(imgs) {
 }
 
 // APP_VERSION (S34) — deploy verification. Must match worker /version and all HTML files.
-const APP_VERSION = '2.38.0'; // S42 (3 sep 2026) — S41-G: recordatorios honestos. Twilio eliminado, WhatsApp a Proximamente, estado reconciliado contra KV
+const APP_VERSION = '2.38.1'; // S42 (4 sep 2026) — S42-4: selector de estilo se sincroniza en showScreen, no solo en setMode
 window.APP_VERSION = APP_VERSION;
 // El log de version vive unas lineas mas abajo (console.info). No agregar otro aqui:
 // S38 borro POSTIMITY_VERSION para tener un solo log y este lo volvio a duplicar.
@@ -3571,6 +3571,29 @@ function showScreen(id) {
   // tambien el unico lugar donde las etiquetas de tope se pueden refrescar sin que
   // haya que acordarse de hacerlo pantalla por pantalla.
   try { updateCapLabels(); } catch(e) {}
+  // S42-4 — las tarjetas Fotorrealista/Ilustrado/Abstracto no aparecian al entrar al
+  // creador. `.style-sel-wrap` nace en display:none y solo `updateStyleSelector()` le
+  // pone `.show`; esa funcion vivia unicamente dentro de `setMode()`, y `setMode()`
+  // faltaba en 5 de las entradas al creador — incluida `verifyAuthCode`, o sea el login.
+  // Parecia un bug de Safari y no lo era: en Chrome habia sesion activa (ruta de
+  // arranque, que si llama setMode) y en Safari se entraba con codigo. Lo que cambiaba
+  // era la ruta, no el navegador. Verificado en ambos (V-114).
+  //
+  // NO se llama `setMode(mode)` aqui, aunque fue lo primero que se propuso: setMode
+  // ademas RESETEA — pone gallerySelectedPhoto en null, apaga el toggle de galeria y
+  // lanza un toast. Las entradas 'showCreatorFrom*' son rutas de REGRESO: resetear ahi
+  // le borraria al usuario la foto que eligio, cada vez. Se separa pintar de resetear y
+  // aqui solo va lo que pinta: ambas funciones derivan su salida de `mode`, asi que son
+  // idempotentes y llamarlas de mas no cambia nada.
+  //
+  // Va en showScreen, no en las 5 llamadas, porque parchar las llamadas deja viva la
+  // sexta que alguien escriba maniana. showScreen ya es el unico punto de verdad de que
+  // pantalla esta visible (ver S39-1 arriba) y ya sincroniza updateCapLabels por esta
+  // misma razon.
+  if (id === 'creatorScreen') {
+    try { updateStyleSelector(); } catch(e) { console.warn('showScreen: updateStyleSelector falló', e && e.message); }
+    try { updateGalleryToggle(); } catch(e) { console.warn('showScreen: updateGalleryToggle falló', e && e.message); }
+  }
   // Auto-fill email from auth when entering setup (Session 15)
   if (id === 'setupScreen' && authEmail) {
     const emailField = document.getElementById('bEmail');
