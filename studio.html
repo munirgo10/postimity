@@ -6256,7 +6256,15 @@ async function activatePlan(planKey) {
     const data = await res.json();
     if (data.checkoutUrl) {
       // S28: Meta Pixel — InitiateCheckout
-      track('track', 'InitiateCheckout', { content_name: plan, currency: currency.toUpperCase() });
+      // FB-45 (S46) — decia `plan`, y en esta funcion la variable se llama `planKey`.
+      // ReferenceError al EVALUAR el argumento: el catch del checkout lo atrapaba y
+      // mostraba "error de conexion" con la sesion de Stripe ya creada. Nadie podia
+      // pagar, por ningun metodo, y el mensaje mandaba a mirar la red.
+      //
+      // El envoltorio track() NO basta contra esto: el fallo ocurre al construir los
+      // argumentos, antes de entrar en la funcion. Envolver la llamada no protege de
+      // un argumento roto. Las dos cosas hacen falta.
+      track('track', 'InitiateCheckout', { content_name: planKey, currency: currency.toUpperCase() });
       // Redirect to Stripe Checkout
       window.location.href = data.checkoutUrl;
     } else {
