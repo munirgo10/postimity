@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="2.39.0">
+<meta name="app-version" content="2.40.0">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Postimity Studio — Tu estudio de contenido con AI</title>
 <meta name="description" content="Crea posts, flyers, carruseles y videos profesionales con AI. Describe tu negocio una vez y genera contenido listo para publicar en 20 segundos.">
@@ -1296,14 +1296,15 @@ fbq('track', 'PageView');
         </div>
         <div class="fg-item">
           <div class="fg-label">Estado / Provincia <span style="color:var(--pk)">*</span></div>
-          <select id="bState" disabled>
+          <select id="bState" disabled onchange="updateCities()">
             <option value="">— Selecciona país primero —</option>
           </select>
           <input type="text" id="bStateText" placeholder="Estado / Provincia" class="states-hidden" style="margin-top:6px">
         </div>
         <div class="fg-item span2">
           <div class="fg-label">Ciudad</div>
-          <input type="text" id="bCity" placeholder="Ej: Aguascalientes, Houston, Bogotá...">
+          <input type="text" id="bCity" list="cityList" placeholder="Ej: Aguascalientes, Houston, Bogotá...">
+          <datalist id="cityList"></datalist>
         </div>
       </div>
     </div>
@@ -1371,15 +1372,37 @@ fbq('track', 'PageView');
       </div>
     </div>
 
+    <!-- Consentimiento ANTES de la guia (S46, FB-50).
+         Orden anterior: guia -> consentimiento -> guardar. Eso obligaba a generar
+         la guia sin brandId, porque la marca aun no existia, y validateGeneration
+         la rechazaba: el alta estaba rota para todo usuario nuevo.
+         Guardar antes de la guia exige tener el consentimiento antes de guardar,
+         asi que las dos cosas se mueven juntas. No es reordenar por estetica. -->
+    <!-- Legal consent checkboxes -->
+    <div style="margin:16px 0 12px;padding:14px;background:var(--bg2);border:1px solid var(--bor);border-radius:12px">
+      <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;margin-bottom:10px">
+        <input type="checkbox" id="chkTerms" style="margin-top:3px;flex-shrink:0;width:16px;height:16px;accent-color:var(--b)">
+        <span style="font-size:12px;color:var(--t2);line-height:1.5">He leído y acepto los <a href="terms.html" target="_blank" style="color:var(--b);font-weight:600">Términos y Condiciones</a> y el <a href="privacy.html" target="_blank" style="color:var(--b);font-weight:600">Aviso de Privacidad</a> de Postimity.</span>
+      </label>
+      <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer">
+        <input type="checkbox" id="chkComms" checked style="margin-top:3px;flex-shrink:0;width:16px;height:16px;accent-color:var(--b)">
+        <span style="font-size:12px;color:var(--t3);line-height:1.5">Acepto recibir recordatorios y tips por email. Puedes desuscribirte en cualquier momento.</span>
+      </label>
+    </div>
+
     <!-- Card 5: Brand Guide -->
     <div class="scard">
       <div class="scard-title">🤖 Brand Guide con AI</div>
       <p style="font-size:13px;color:var(--t3);margin-bottom:14px;line-height:1.6">La AI analizará tu negocio y generará la estrategia de contenido completa: pilares, voz de marca, estrategia por plataforma y hashtags. Puedes editarlo antes de guardar.</p>
-      <button class="btn btn-primary btn-full" id="btnGenBG" onclick="generateBrandGuide()">✨ Generar Brand Guide con AI</button>
+      <button class="btn btn-primary btn-full" id="btnGenBG" onclick="ensureBrandThenGuide()">✨ Generar Brand Guide con AI</button>
       <div id="bguideCapNote" style="font-size:12px;color:var(--t3);margin-top:8px;line-height:1.5;text-align:center"></div>
       <div class="bg-section" id="bgSection">
         <div class="bg-label" style="margin-top:14px">📋 Brand Guide generado — puedes editarlo</div>
         <textarea class="bg-area" id="bgText" rows="12"></textarea>
+        <div id="bgAIDisclaimer" style="font-size:12px;line-height:1.55;margin-top:8px;padding:10px 12px;background:var(--bg2);border:1px solid var(--bor);border-left:3px solid var(--pk);border-radius:8px;color:var(--t2)">
+          ⚠️ <strong>Revisa esta guía antes de guardarla.</strong> La AI la redacta a partir de lo que escribiste y <strong>puede afirmar cosas que no son ciertas de tu negocio</strong>.
+          Presta atención a frases como «somos los únicos» o «los mejores»: ese tipo de afirmación está regulada en publicidad y respondes tú por ella.
+        </div>
         <p style="font-size:11px;color:var(--t3);margin-top:5px">Este texto guía a la AI en cada post. Edita cualquier cosa que quieras ajustar.</p>
         <!-- Editing guide + AI update -->
         <div class="bg-edit-guide" id="bgEditGuide" style="display:none">
@@ -1402,17 +1425,6 @@ fbq('track', 'PageView');
       </div>
     </div>
 
-    <!-- Legal consent checkboxes -->
-    <div style="margin:16px 0 12px;padding:14px;background:var(--bg2);border:1px solid var(--bor);border-radius:12px">
-      <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;margin-bottom:10px">
-        <input type="checkbox" id="chkTerms" style="margin-top:3px;flex-shrink:0;width:16px;height:16px;accent-color:var(--b)">
-        <span style="font-size:12px;color:var(--t2);line-height:1.5">He leído y acepto los <a href="terms.html" target="_blank" style="color:var(--b);font-weight:600">Términos y Condiciones</a> y el <a href="privacy.html" target="_blank" style="color:var(--b);font-weight:600">Aviso de Privacidad</a> de Postimity.</span>
-      </label>
-      <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer">
-        <input type="checkbox" id="chkComms" checked style="margin-top:3px;flex-shrink:0;width:16px;height:16px;accent-color:var(--b)">
-        <span style="font-size:12px;color:var(--t3);line-height:1.5">Acepto recibir recordatorios y tips por email. Puedes desuscribirte en cualquier momento.</span>
-      </label>
-    </div>
 
     <button class="btn btn-primary btn-full" id="btnSave" onclick="saveBrand()" disabled style="padding:14px;font-size:14px">
       Guardar y empezar a crear →
@@ -1797,6 +1809,12 @@ Ej: 'Wonderik es increíble. Mi hija de 3 años ya lee palabras cortas y su desa
 
     <!-- Results -->
     <div class="result-wrap" id="resultWrap">
+      <!-- PR-204 (S46) — el aviso va donde el usuario mira antes de publicar, no
+           escondido en los terminos. Breve a proposito: el largo esta en la guia de
+           marca, que es donde nacen las afirmaciones sobre el negocio. -->
+      <div style="font-size:12px;color:var(--t3);padding:8px 12px;border-bottom:1px solid var(--bor);line-height:1.5">
+        ⚠️ Contenido generado por AI — <strong>revísalo antes de publicar</strong>. Puede contener datos o afirmaciones que no sean exactas.
+      </div>
       <div class="regen-btns">
         <button class="btn-regen" id="regenImg" onclick="regenImage()">🔄 Nueva imagen · 1 gen</button>
         <button class="btn-regen" id="regenText" onclick="regenText()">✍️ Nuevo texto · 1 gen</button>
@@ -2268,7 +2286,7 @@ function persistSlides(imgs) {
 }
 
 // APP_VERSION (S34) — deploy verification. Must match worker /version and all HTML files.
-const APP_VERSION = '2.39.0'; // S42 (4 sep 2026) — S42-4: selector de estilo se sincroniza en showScreen, no solo en setMode
+const APP_VERSION = '2.40.0'; // S42 (4 sep 2026) — S42-4: selector de estilo se sincroniza en showScreen, no solo en setMode
 window.APP_VERSION = APP_VERSION;
 // El log de version vive unas lineas mas abajo (console.info). No agregar otro aqui:
 // S38 borro POSTIMITY_VERSION para tener un solo log y este lo volvio a duplicar.
@@ -3673,7 +3691,67 @@ function updateStates() {
     sel.disabled = true; sel.style.display = 'none';
     txt.style.display = ''; txt.value = '';
   }
+  updateCities();   // S46 — el pais cambia el estado, y el estado cambia las ciudades
 }
+// ═══════════════════════════════════════
+// CITIES CASCADE (S46)
+// ═══════════════════════════════════════
+// Nace de un dato observado: un alta tenia Estado "Campeche" y Ciudad "Quintana
+// Roo" — que es otro estado, no una ciudad. Un campo libre acepta cualquier cosa
+// y esa ubicacion incoherente acaba dentro de los prompts de generacion.
+//
+// Se sugiere, NO se obliga: <input list> deja escribir cualquier ciudad, porque
+// ninguna lista cubre los 2.469 municipios de Mexico ni sirve a un usuario de un
+// pueblo pequeno. El campo sigue sin asterisco: es opcional.
+//
+// Nota para quien audite: este es el PRIMER datalist del estudio. Hasta S46 no
+// habia ninguno, y esa ausencia se uso para descartar que unas sugerencias vistas
+// en un campo fueran del producto (eran autocompletado del navegador). Si se
+// vuelve a hacer esa comprobacion, ya no basta con contar datalists.
+const CITIES_BY_STATE = {
+  'Aguascalientes':['Aguascalientes','Jesús María','Calvillo','Rincón de Romos','Pabellón de Arteaga'],
+  'Baja California':['Tijuana','Mexicali','Ensenada','Rosarito','Tecate'],
+  'Baja California Sur':['La Paz','Los Cabos','Cabo San Lucas','San José del Cabo','Loreto'],
+  'Campeche':['San Francisco de Campeche','Ciudad del Carmen','Champotón','Escárcega'],
+  'Chiapas':['Tuxtla Gutiérrez','Tapachula','San Cristóbal de las Casas','Comitán','Palenque'],
+  'Chihuahua':['Chihuahua','Ciudad Juárez','Delicias','Cuauhtémoc','Parral'],
+  'Ciudad de México':['Ciudad de México','Coyoacán','Benito Juárez','Miguel Hidalgo','Álvaro Obregón','Cuauhtémoc','Iztapalapa'],
+  'Coahuila':['Saltillo','Torreón','Monclova','Piedras Negras','Acuña'],
+  'Colima':['Colima','Manzanillo','Villa de Álvarez','Tecomán'],
+  'Durango':['Durango','Gómez Palacio','Lerdo'],
+  'Estado de México':['Toluca','Ecatepec','Naucalpan','Nezahualcóyotl','Tlalnepantla','Metepec','Atizapán'],
+  'Guanajuato':['León','Irapuato','Celaya','Guanajuato','Salamanca','San Miguel de Allende'],
+  'Guerrero':['Acapulco','Chilpancingo','Iguala','Zihuatanejo','Taxco'],
+  'Hidalgo':['Pachuca','Tulancingo','Tula','Huejutla'],
+  'Jalisco':['Guadalajara','Zapopan','Tlaquepaque','Tonalá','Puerto Vallarta','Tlajomulco','Chapala'],
+  'Michoacán':['Morelia','Uruapan','Zamora','Lázaro Cárdenas','Apatzingán'],
+  'Morelos':['Cuernavaca','Jiutepec','Cuautla','Temixco'],
+  'Nayarit':['Tepic','Bahía de Banderas','Nuevo Vallarta','Compostela'],
+  'Nuevo León':['Monterrey','San Pedro Garza García','Guadalupe','San Nicolás','Apodaca','Santa Catarina','Escobedo'],
+  'Oaxaca':['Oaxaca de Juárez','Salina Cruz','Tuxtepec','Huatulco','Puerto Escondido'],
+  'Puebla':['Puebla','Tehuacán','Cholula','Atlixco','San Martín Texmelucan'],
+  'Querétaro':['Querétaro','San Juan del Río','El Marqués','Corregidora'],
+  'Quintana Roo':['Cancún','Playa del Carmen','Chetumal','Cozumel','Tulum','Puerto Morelos'],
+  'San Luis Potosí':['San Luis Potosí','Soledad','Ciudad Valles','Matehuala'],
+  'Sinaloa':['Culiacán','Mazatlán','Los Mochis','Guasave'],
+  'Sonora':['Hermosillo','Ciudad Obregón','Nogales','Navojoa','Guaymas','San Luis Río Colorado'],
+  'Tabasco':['Villahermosa','Cárdenas','Comalcalco'],
+  'Tamaulipas':['Reynosa','Matamoros','Nuevo Laredo','Tampico','Ciudad Victoria','Altamira'],
+  'Tlaxcala':['Tlaxcala','Apizaco','Huamantla'],
+  'Veracruz':['Veracruz','Xalapa','Coatzacoalcos','Córdoba','Orizaba','Poza Rica','Boca del Río'],
+  'Yucatán':['Mérida','Valladolid','Progreso','Tizimín'],
+  'Zacatecas':['Zacatecas','Fresnillo','Guadalupe','Jerez'],
+};
+
+function updateCities() {
+  const dl = document.getElementById('cityList');
+  if (!dl) return;
+  const sel = document.getElementById('bState');
+  const state = (sel && sel.style.display !== 'none') ? sel.value : '';
+  const list = CITIES_BY_STATE[state] || [];
+  dl.innerHTML = list.map(c => '<option value="' + c + '"></option>').join('');
+}
+
 function getLocation() {
   const c = document.getElementById('bCountry')?.value || '';
   const s = (document.getElementById('bState')?.style.display !== 'none'
@@ -3816,6 +3894,47 @@ function handleDrop(file, zone, prevId, titleId, nameId, cb) {
 // ╔═══════════════════════════════════════════════════╗
 // ║  BRAND SETUP                                     ║
 // ╚═══════════════════════════════════════════════════╝
+// FB-50 (S46) — la marca existe ANTES de generar la guia.
+//
+// generateBrandGuide llamaba al modo 'brand-guide' sin brandId, y el worker lo
+// exige desde que ese modo pasó a tener tope: validateGeneration rechazaba con
+// "brandId requerido" y el alta quedaba rota para todo usuario nuevo. Nadie lo
+// notó porque las marcas existentes ya tenían su guía hecha.
+//
+// No se arregla mandando la variable global: en una sesion arrastrada puede
+// llevar el identificador de OTRA marca, y entonces se escribiria su guia y se
+// consumiria SU contador. Verificado en produccion: una URL con ?b= de una marca
+// anterior mientras se daba de alta otra.
+//
+// Por eso el orden nuevo: consentimiento -> guardar -> generar. Y por eso el
+// consentimiento subio en el formulario: guardar antes exige haberlo aceptado
+// antes (Contrato 11.2).
+async function ensureBrandThenGuide() {
+  const isES = detectLanguage() === 'es';
+  if (!brandId) {
+    const chk = document.getElementById('chkTerms');
+    if (chk && !chk.checked) {
+      alert(isES ? 'Acepta los Términos y el Aviso de Privacidad para continuar.'
+                 : 'Please accept the Terms and Privacy Notice to continue.');
+      chk?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+    // saveBrand() genera el brandId en el cliente (generateBrandId) de forma
+    // SINCRONA y sube la marca en segundo plano, asi que al volver de aqui la
+    // variable ya tiene valor. No se espera a la nube a proposito: el worker solo
+    // exige que brandId no este vacio, y si la marca aun no esta en el almacen su
+    // contador arranca en cero, que es lo correcto para una marca nueva.
+    // Tambien valida los campos obligatorios y avisa por su cuenta si faltan.
+    saveBrand();
+    if (!brandId) {
+      alert(isES ? 'No se pudo crear tu marca. Revisa los campos obligatorios.'
+                 : 'Could not create your brand. Check the required fields.');
+      return;
+    }
+  }
+  return generateBrandGuide();
+}
+
 async function generateBrandGuide() {
   const name = document.getElementById('bName')?.value.trim() || '';
   const bType = document.getElementById('bType')?.value.trim() || '';
@@ -3845,7 +3964,7 @@ async function generateBrandGuide() {
   try {
     // S34 / INV-061: brand-guide es idempotente — seguro de reintentar ante 429/5xx
     const res=await apiFetchRetry(WORKER,{ method:'POST', headers:{'Content-Type':'application/json'}, 
-      body:JSON.stringify({ mode:'brand-guide', brandData:{
+      body:JSON.stringify({ mode:'brand-guide', brandId, brandData:{
         name: name,
         type: bType,
         location: getLocation(),
@@ -4134,7 +4253,7 @@ async function aiUpdateBrandGuide() {
   const btn = document.getElementById('btnAIUpdate');
   btn.textContent = detectLanguage()==='en' ? '⏳ Updating...' : '⏳ Actualizando...'; btn.disabled = true;
   try {
-    const res = await postWithTimeout({ mode:'brand-guide-update', currentBrandGuide:currentBG, instruction:instr });
+    const res = await postWithTimeout({ mode:'brand-guide-update', brandId, currentBrandGuide:currentBG, instruction:instr });
     document.getElementById('bgText').value = res.brandGuide;
     if(res.pillars && res.pillars.length) window._pillars = res.pillars;
     document.getElementById('bgUpdateInstr').value = '';
