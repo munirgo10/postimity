@@ -1381,7 +1381,7 @@ fbq('track', 'PageView');
     <!-- Legal consent checkboxes -->
     <div style="margin:16px 0 12px;padding:14px;background:var(--bg2);border:1px solid var(--bor);border-radius:12px">
       <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;margin-bottom:10px">
-        <input type="checkbox" id="chkTerms" style="margin-top:3px;flex-shrink:0;width:16px;height:16px;accent-color:var(--b)">
+        <input type="checkbox" id="chkTerms" onchange="syncGateButtons()" style="margin-top:3px;flex-shrink:0;width:16px;height:16px;accent-color:var(--b)">
         <span style="font-size:12px;color:var(--t2);line-height:1.5">He leído y acepto los <a href="terms.html" target="_blank" style="color:var(--b);font-weight:600">Términos y Condiciones</a> y el <a href="privacy.html" target="_blank" style="color:var(--b);font-weight:600">Aviso de Privacidad</a> de Postimity.</span>
       </label>
       <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer">
@@ -1394,7 +1394,10 @@ fbq('track', 'PageView');
     <div class="scard">
       <div class="scard-title">🤖 Brand Guide con AI</div>
       <p style="font-size:13px;color:var(--t3);margin-bottom:14px;line-height:1.6">La AI analizará tu negocio y generará la estrategia de contenido completa: pilares, voz de marca, estrategia por plataforma y hashtags. Puedes editarlo antes de guardar.</p>
-      <button class="btn btn-primary btn-full" id="btnGenBG" onclick="ensureBrandThenGuide()">✨ Generar Brand Guide con AI</button>
+      <button class="btn btn-primary btn-full" id="btnGenBG" onclick="ensureBrandThenGuide()" disabled>✨ Generar Brand Guide con AI</button>
+      <div id="bgNeedsSave" style="font-size:12px;color:var(--t3);margin-top:8px;text-align:center;line-height:1.5">
+        🔒 Acepta los Términos y el Aviso de Privacidad para generar tu Brand Guide.
+      </div>
       <div id="bguideCapNote" style="font-size:12px;color:var(--t3);margin-top:8px;line-height:1.5;text-align:center"></div>
       <div class="bg-section" id="bgSection">
         <div class="bg-label" style="margin-top:14px">📋 Brand Guide generado — puedes editarlo</div>
@@ -3909,23 +3912,48 @@ function handleDrop(file, zone, prevId, titleId, nameId, cb) {
 // Por eso el orden nuevo: consentimiento -> guardar -> generar. Y por eso el
 // consentimiento subio en el formulario: guardar antes exige haberlo aceptado
 // antes (Contrato 11.2).
+// FB-50 (S46) — la puerta del alta, en UNA funcion.
+//
+// Regla: aceptar los terminos habilita GUARDAR; guardar habilita la GUIA. En ese
+// orden y no en otro, porque guardar almacena datos personales y eso exige el
+// consentimiento antes (Contrato 11.2), y la guia exige que la marca exista para
+// tener brandId (validateGeneration). Las dos dependencias son reales, no de
+// interfaz: por eso los botones las reflejan en vez de dejar al usuario chocar
+// contra un error.
+function syncGateButtons() {
+  const acepto = !!document.getElementById('chkTerms')?.checked;
+  const save = document.getElementById('btnSave');
+  const gen  = document.getElementById('btnGenBG');
+  const note = document.getElementById('bgNeedsSave');
+  // Las DOS puertas cuelgan del consentimiento, no de que exista brandId.
+  //
+  // Guardar la marca antes de generar la guia es necesario —hace falta brandId—
+  // pero NO es una decision del usuario: es fontaneria nuestra. Pedirle un
+  // "Guardar" intermedio le obliga a elegir entre guardar y generar, una pregunta
+  // que no le aporta nada y que ademas deja dos botones con la palabra "Guardar"
+  // haciendo cosas distintas. Se guarda por dentro, en el mismo clic.
+  //
+  // El consentimiento si es fricción legítima: sin el no se puede almacenar nada
+  // (Contrato 11.2). Esa es la unica puerta que el usuario debe ver.
+  if (save) save.disabled = !acepto;
+  if (gen)  gen.disabled  = !acepto;
+  if (note) note.style.display = acepto ? 'none' : '';
+}
+
 async function ensureBrandThenGuide() {
   const isES = detectLanguage() === 'es';
   if (!brandId) {
-    const chk = document.getElementById('chkTerms');
-    if (chk && !chk.checked) {
-      alert(isES ? 'Acepta los Términos y el Aviso de Privacidad para continuar.'
-                 : 'Please accept the Terms and Privacy Notice to continue.');
-      chk?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      return;
-    }
+    // Sin consentimiento no se llega aqui: el boton esta deshabilitado y el motivo
+    // escrito debajo. La comprobacion se queda como red, no como via principal.
+    if (!document.getElementById('chkTerms')?.checked) { syncGateButtons(); return; }
     // saveBrand() genera el brandId en el cliente (generateBrandId) de forma
     // SINCRONA y sube la marca en segundo plano, asi que al volver de aqui la
     // variable ya tiene valor. No se espera a la nube a proposito: el worker solo
     // exige que brandId no este vacio, y si la marca aun no esta en el almacen su
     // contador arranca en cero, que es lo correcto para una marca nueva.
     // Tambien valida los campos obligatorios y avisa por su cuenta si faltan.
-    saveBrand();
+    window._savingForGuide = true;
+    try { saveBrand(); } finally { window._savingForGuide = false; }
     if (!brandId) {
       alert(isES ? 'No se pudo crear tu marca. Revisa los campos obligatorios.'
                  : 'Could not create your brand. Check the required fields.');
@@ -4088,6 +4116,32 @@ function saveBrand() {
   updateUrl(brandId);
   showCloudBar(brand.name);
   applyBrand(brand);
+
+  // S46 — el PRIMER guardado no navega.
+  //
+  // saveBrand terminaba siempre en showScreen('creatorScreen'), asi que al guardar
+  // el usuario salia del formulario y no volvia a ver el boton de la guia: la
+  // puerta "guardar habilita la guia" habria dejado esa funcion inalcanzable en el
+  // alta. Se queda aqui una vez, con la guia ya habilitada y el boton renombrado.
+  // El segundo clic si navega, para quien no quiera guia.
+  // S46 — el primer guardado NO navega, y cuando lo dispara la guia tampoco avisa.
+  //
+  // saveBrand terminaba siempre en showScreen('creatorScreen'). Con el flujo nuevo
+  // eso sacaria al usuario del formulario justo cuando va a ver su guia.
+  //
+  // Y el aviso se calla si el guardado viene de generar la guia: el usuario pidio
+  // una guia, no guardar. Un toast de "marca guardada" ahi le informa de algo que
+  // no pidio y le hace dudar de si funciono lo que si pidio.
+  const btnS = document.getElementById('btnSave');
+  if (btnS && !btnS.dataset.saved) {
+    btnS.dataset.saved = '1';
+    btnS.textContent = detectLanguage()==='en' ? 'Start creating →' : 'Empezar a crear →';
+    syncGateButtons();
+    if (!window._savingForGuide) {
+      showToast(detectLanguage()==='en' ? '✅ Brand saved' : '✅ Marca guardada');
+    }
+    return;
+  }
   showScreen('creatorScreen');
   // First-time celebration
   const firstBrandKey = 'postimity_first_brand_' + brandId;
@@ -4152,6 +4206,7 @@ function goToEdit() {
       document.getElementById('bgText').value=b.brandGuide;
       document.getElementById('bgSection').classList.add('show');
       document.getElementById('btnSave').disabled=false;
+      syncGateButtons();  // S46 — marca ya existente: la guia queda habilitada
       // Re-parse pillars fresh from the text
       const txt = b.brandGuide;
       let pp = [];
