@@ -250,6 +250,14 @@ t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
 document,'script','https://connect.facebook.net/en_US/fbevents.js');
 fbq('init', '2023730118261258');
 fbq('track', 'PageView');
+// FB-45 (S46) — la analitica NUNCA aborta una accion del usuario. Un fbq crudo en
+// un handler puede lanzar si un bloqueador lo intercepta, y esa excepcion sube
+// hasta el catch que envuelve la accion. En studio.html eso impedia PAGAR: la
+// sesion de Stripe estaba creada y el usuario veia "error de conexion".
+// Mismo envoltorio aqui que alli, para que el check no admita dos formas.
+function track(...args) {
+  try { if (typeof fbq === 'function') fbq(...args); } catch(e) { /* la analitica nunca bloquea */ }
+}
 </script>
 <noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=2023730118261258&ev=PageView&noscript=1"/></noscript>
 </head>
@@ -526,7 +534,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   applyLang(detectLang());
   // Meta Pixel: track CTA clicks to studio
   document.querySelectorAll('a[href="studio.html"]').forEach(a=>{
-    a.addEventListener('click',()=>{ if(typeof fbq==='function') fbq('track','InitiateCheckout',{content_name:'CTA to Studio'}); });
+    a.addEventListener('click',()=>{ track('track','InitiateCheckout',{content_name:'CTA to Studio'}); });
   });
 });
 </script>
