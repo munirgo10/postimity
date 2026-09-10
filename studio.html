@@ -2037,6 +2037,22 @@ const STORE_KEY = 'postimity_brand_v1';
 function getAuthToken() { return localStorage.getItem('postimity_auth_token'); }
 function setAuthToken(t) { if(t) localStorage.setItem('postimity_auth_token', t); }
 function clearAuthToken() { localStorage.removeItem('postimity_auth_token'); }
+// FB-45 (S46) — la analitica NUNCA puede abortar una accion del usuario.
+//
+// El checkout hacia fbq('track','InitiateCheckout') DENTRO del try, justo antes
+// de redirigir a Stripe. Si un bloqueador de anuncios o una extension intercepta
+// fbq, esa llamada lanza, el catch la atrapa y muestra "Error de conexion" — con
+// la conexion funcionando y la sesion de pago YA CREADA en Stripe. El usuario no
+// puede pagar y el mensaje culpa a la red.
+//
+// Peor que el fallo: el mensaje MIENTE. Un catch que convierte un exito en un
+// error de conexion es RD-10 al reves.
+//
+// track() traga cualquier fallo de la analitica. Toda llamada a fbq pasa por aqui.
+function track(...args) {
+  try { if (typeof fbq === 'function') fbq(...args); } catch(e) { /* la analitica nunca bloquea */ }
+}
+
 function apiFetch(url, opts = {}) {
   // S30: Inject auth token into the request BODY (not as header).
   // Headers like Authorization trigger CORS preflight which in-app browsers block.
@@ -3003,7 +3019,7 @@ async function verifyAuthCode() {
       }
     } else {
       // New user — go to brand setup
-      if(typeof fbq==='function') fbq('track', 'CompleteRegistration', { content_name: authEmail });
+      track('track', 'CompleteRegistration', { content_name: authEmail });
       showScreen('setupScreen');
     }
     applyBilingualUI();
@@ -3960,7 +3976,7 @@ function saveBrand() {
     localStorage.setItem(firstBrandKey, '1');
     setTimeout(() => showToast(t('toastBGReady')), 600);
     // Meta Pixel: Lead event on first brand creation
-    if(typeof fbq==='function') fbq('track', 'Lead', { content_name: brand.name, content_category: brand.type });
+    track('track', 'Lead', { content_name: brand.name, content_category: brand.type });
   }
 }
 
@@ -4983,7 +4999,7 @@ async function generateVideo(brand) {
     const msg = detectLanguage()==='en'
       ? `You've reached your limit of ${videoLimit} videos this month.`
       : `Llegaste al límite de ${videoLimit} videos este mes.`;
-    if(typeof fbq==='function') fbq('track', 'AddToCart', { content_name: 'upgrade_video_' + plan, value: plan === 'trial' ? 9 : 19, currency: 'USD' });
+    track('track', 'AddToCart', { content_name: 'upgrade_video_' + plan, value: plan === 'trial' ? 9 : 19, currency: 'USD' });
     alert(msg); return;
   }
   // Tiene saldo pero no el suficiente para ESTA duracion. Mensaje distinto del de
@@ -5189,8 +5205,8 @@ function showVideoResult(videoUrl, topic, captionsData) {
   if(loadWrap) loadWrap.classList.remove('show');
   // B3 (Session 18): Meta Pixel — track video generation
   if(typeof fbq==='function') {
-    fbq('track', 'ViewContent', { content_name: 'video', content_category: pillar, content_type: 'video' });
-    fbq('trackCustom', 'Generate', { mode: 'video', pillar, platform, plan: loadBrand()?.plan || 'trial' });
+    track('track', 'ViewContent', { content_name: 'video', content_category: pillar, content_type: 'video' });
+    track('trackCustom', 'Generate', { mode: 'video', pillar, platform, plan: loadBrand()?.plan || 'trial' });
   }
   // Restore mode cards, style selector & input card (same as showLoading(false) does for other modes)
   const inputCard = document.getElementById('inputCard');
@@ -6240,14 +6256,18 @@ async function activatePlan(planKey) {
     const data = await res.json();
     if (data.checkoutUrl) {
       // S28: Meta Pixel — InitiateCheckout
-      if(typeof fbq==='function') fbq('track', 'InitiateCheckout', { content_name: plan, currency: currency.toUpperCase() });
+      track('track', 'InitiateCheckout', { content_name: plan, currency: currency.toUpperCase() });
       // Redirect to Stripe Checkout
       window.location.href = data.checkoutUrl;
     } else {
       showToast(isES ? '❌ Error: ' + (data.error || 'No se pudo crear la sesión de pago') : '❌ Error: ' + (data.error || 'Could not create checkout session'));
     }
   } catch(e) {
-    showToast(isES ? '❌ Error de conexión. Intenta de nuevo.' : '❌ Connection error. Please try again.');
+    // S46 — el mensaje decia "error de conexion" ante CUALQUIER excepcion, incluida
+    // una de la analitica con la sesion de pago ya creada. Ahora nombra lo que pasa.
+    console.error('Checkout: fallo tras la respuesta del worker', e);
+    showToast(isES ? '❌ No se pudo abrir el pago. Intenta de nuevo o desactiva el bloqueador de anuncios.'
+                   : '❌ Could not open payment. Try again or disable your ad blocker.');
   }
 }
 
@@ -6281,7 +6301,7 @@ function handleStripeRedirect() {
     const isES = detectLanguage() === 'es';
     // S28: Meta Pixel — Purchase event
     const planValues = { starter: 9, growth: 19, agency: 45 };
-    if(typeof fbq==='function') fbq('track', 'Purchase', { content_name: plan, value: planValues[plan] || 9, currency: 'USD' });
+    track('track', 'Purchase', { content_name: plan, value: planValues[plan] || 9, currency: 'USD' });
     setTimeout(() => {
       showToast(isES ? '🎉 ¡Pago exitoso! Tu plan ' + plan.charAt(0).toUpperCase() + plan.slice(1) + ' está activo.' : '🎉 Payment successful! Your ' + plan.charAt(0).toUpperCase() + plan.slice(1) + ' plan is now active.', 8000);
     }, 1500);
@@ -7587,7 +7607,7 @@ function showFirstPostCelebration() {
     showToast(t('toastFirstPost'));
   }, 1200);
   // Meta Pixel: StartTrial on first generation
-  if(typeof fbq==='function') fbq('track', 'StartTrial', { content_name: 'First Generation' });
+  track('track', 'StartTrial', { content_name: 'First Generation' });
 }
 
 // ── Deep-link pre-fill from URL params ────────────────────────────────────
@@ -7703,7 +7723,7 @@ async function postWithTimeout(body, timeoutMs=130000) {
     }
     if (data.code === 'TRIAL_EXPIRED' || data.code === 'GEN_LIMIT' || data.code === 'VIDEO_LIMIT' || data.code === 'FEATURE_LOCKED') {
       // B3 (Session 18): Meta Pixel — upgrade intent from server-side blocks
-      if(typeof fbq==='function') fbq('track', 'AddToCart', { content_name: 'server_block_' + data.code, currency: 'USD' });
+      track('track', 'AddToCart', { content_name: 'server_block_' + data.code, currency: 'USD' });
       // S38-2: el 403 trae los contadores reales de KV. Se adoptan como verdad:
       // esto cura solo un localStorage desincronizado, en vez de dejarlo mintiendo.
       if (typeof data.genCount === 'number') localStorage.setItem(genMonthKey(), String(data.genCount));
@@ -7877,8 +7897,8 @@ function showResult(data) {
   showLoading(false);
   // B3 (Session 18): Meta Pixel — track content generation as ViewContent + custom Generate
   if(typeof fbq==='function') {
-    fbq('track', 'ViewContent', { content_name: mode, content_category: pillar, content_type: imageStyle });
-    fbq('trackCustom', 'Generate', { mode, pillar, platform, imageStyle, plan: loadBrand()?.plan || 'trial' });
+    track('track', 'ViewContent', { content_name: mode, content_category: pillar, content_type: imageStyle });
+    track('trackCustom', 'Generate', { mode, pillar, platform, imageStyle, plan: loadBrand()?.plan || 'trial' });
   }
   // Watermark toggle: only Growth+ can disable it
   const srBrand = loadBrand();
