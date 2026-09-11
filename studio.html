@@ -3303,14 +3303,14 @@ async function syncBrandToCloud(brand, id) {
         : 'An account with this email already exists. We\'ll load your existing studio now.');
       localStorage.removeItem(STORE_KEY);
       window.location.href = window.location.pathname + '?b=' + data.existingBrandId;
-      return;
+      return false;   // S46 — no llego a la nube como marca nueva
     }
     // R14 — Trial abuse: fingerprint detected existing trial from this browser
     if (data.error === 'TRIAL_USED') {
       alert(isES
         ? 'Ya se creó una cuenta trial desde este dispositivo. Inicia sesión con tu email original.'
         : 'A trial was already created from this device. Please log in with your original email.');
-      return;
+      return false;   // S46 — rechazada por la proteccion anti-abuso
     }
     // S38-7: TODO fallo de guardado se le dice al usuario. Antes se ignoraba y el
     // cliente creía que su marca estaba respaldada cuando no lo estaba.
@@ -3318,13 +3318,19 @@ async function syncBrandToCloud(brand, id) {
       markPendingSync(true);
       showToast(failMsg, 7000);
       console.warn('save-brand falló:', res.status, data.code || data.error || '');
-      return;
+      return false;
     }
     markPendingSync(false);   // llegó a la nube: ya no hay nada pendiente
+    // S46 — el resultado se DEVUELVE. Antes los cuatro caminos volvian undefined,
+    // asi que quien llamaba no podia distinguir "guardado" de "rechazado". Generar
+    // la guia sobre una marca que no llego al almacen da "Marca no encontrada", y
+    // el usuario ve dos errores seguidos sin relacion aparente entre ellos.
+    return true;
   } catch(e) {
     markPendingSync(true);
     showToast(failMsg, 7000);
     console.warn('Cloud sync failed:', e.message);
+    return false;
   }
 }
 
@@ -3952,8 +3958,27 @@ async function ensureBrandThenGuide() {
     // exige que brandId no este vacio, y si la marca aun no esta en el almacen su
     // contador arranca en cero, que es lo correcto para una marca nueva.
     // Tambien valida los campos obligatorios y avisa por su cuenta si faltan.
+    const btn = document.getElementById('btnGenBG');
+    const prev = btn ? btn.textContent : '';
+    if (btn) { btn.disabled = true; btn.textContent = isES ? '⏳ Guardando tu marca...' : '⏳ Saving your brand...'; }
     window._savingForGuide = true;
     try { saveBrand(); } finally { window._savingForGuide = false; }
+
+    // S46 — se ESPERA a que la marca este en la nube antes de generar.
+    //
+    // El worker busca brand:<brandId> en el almacen y responde "Marca no
+    // encontrada" si no esta. Tener brandId no basta: la marca tiene que existir.
+    // Y si el guardado remoto falla —conexion, o la proteccion anti-abuso de
+    // trials repetidos desde un mismo dispositivo— no se genera nada: se dice.
+    let syncOk = true;
+    try { syncOk = (await window._brandSync) === true; }
+    catch(e) { console.error('ensureBrandThenGuide: fallo el guardado en la nube', e); syncOk = false; }
+    if (btn) { btn.disabled = false; btn.textContent = prev; }
+    if (!syncOk) {
+      alert(isES ? 'Tu marca no se pudo guardar en la nube, así que aún no se puede generar la guía. Revisa el aviso anterior e inténtalo de nuevo.'
+                 : 'Your brand could not be saved to the cloud, so the guide cannot be generated yet. Check the previous message and try again.');
+      return;
+    }
     if (!brandId) {
       alert(isES ? 'No se pudo crear tu marca. Revisa los campos obligatorios.'
                  : 'Could not create your brand. Check the required fields.');
@@ -4111,7 +4136,11 @@ function saveBrand() {
 
   localStorage.setItem(STORE_KEY,JSON.stringify(brand));
   // Sync to Cloudflare KV (non-blocking)
-  syncBrandToCloud(brand, brandId);
+  // S46 — se expone la promesa para que quien necesite la marca YA EN LA NUBE
+  // pueda esperarla. Antes se disparaba y se olvidaba, y generar la guia justo
+  // despues buscaba en el almacen una marca que aun no habia llegado: "Marca no
+  // encontrada". El guardado local es inmediato; el remoto no.
+  window._brandSync = syncBrandToCloud(brand, brandId);
   // Update URL with brandId
   updateUrl(brandId);
   showCloudBar(brand.name);
