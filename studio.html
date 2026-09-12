@@ -3100,6 +3100,9 @@ async function checkAuth() {
       body: JSON.stringify({ mode: 'check-auth' })
     });
     const data = await res.json();
+    // S46 — los topes efectivos del servidor mandan sobre las tablas locales del
+    // estudio, que no conocen el estado "sin prueba" del Contrato 4.4.
+    if (data && data.limits) window._srvLimits = data.limits;
     return data.authenticated ? data : null;
   } catch(e) {
     console.warn('Auth check failed:', e.message);
@@ -3241,12 +3244,22 @@ function detectLanguage() {
 function updateGenCounter() {
   const brand = loadBrand();
   const plan = brand?.plan || 'trial';
-  const limit = GEN_LIMITS[plan] || GEN_LIMITS['trial'];
+  // S46 — los topes efectivos vienen del SERVIDOR (check-auth → limits).
+  //
+  // Resolver GEN_LIMITS[plan] aqui basta mientras el plan determine el tope, y
+  // dejo de bastar con el estado "sin prueba" del Contrato 4.4: la cuenta tiene
+  // cero cuota y esta barra mostraba "25 gen · 2 videos restantes". El usuario se
+  // enteraba chocando contra el error, que es lo que PR-147 y PR-171 prohiben.
+  //
+  // Las tablas locales quedan como respaldo para cuando aun no ha llegado la
+  // respuesta del servidor, no como fuente.
+  const srv = window._srvLimits;
+  const limit = (srv && typeof srv.gens === 'number') ? srv.gens : (GEN_LIMITS[plan] || GEN_LIMITS['trial']);
   const used = parseInt(localStorage.getItem(genMonthKey()) || '0');
   const remaining = Math.max(0, limit - used);
   // Video counter
   const videosUsed = parseInt(localStorage.getItem(videoMonthKey()) || '0');
-  const videoLimit = VIDEO_LIMITS[plan] || 2;
+  const videoLimit = (srv && typeof srv.vgens === 'number') ? srv.vgens : (VIDEO_LIMITS[plan] || VIDEO_LIMITS.trial);
   const videosRemaining = Math.max(0, videoLimit - videosUsed);
   const el = document.getElementById('genCounterBadge');
   if (el) {
@@ -5194,7 +5207,7 @@ async function generateVideo(brand) {
   // elegida, no contra 1. Sin esto el cliente dejaba pasar un clip de 10 s con una
   // sola unidad libre y el usuario esperaba ~25 s para que el worker lo rechazara.
   const plan = brand?.plan || 'trial';
-  const videoLimit = VIDEO_LIMITS[plan] || 2;
+  const videoLimit = VIDEO_LIMITS[plan] || VIDEO_LIMITS.trial;   // S46 — RD-46
   const videosUsed = parseInt(localStorage.getItem(videoMonthKey()) || '0');
   const videoCost = VIDEO_COST[String(videoDuration)];
   if(!videoCost) { alert(detectLanguage()==='en' ? 'Invalid video duration.' : 'Duración de video no válida.'); return; }
@@ -5873,7 +5886,7 @@ function renderCuenta() {
   const brand = loadBrand();
   const planKey = brand?.plan || 'trial';
   const pc = getPlanConfig(); const plan = pc[planKey] || pc.trial;
-  const limit = GEN_LIMITS[planKey] || 20;
+  const limit = GEN_LIMITS[planKey] || GEN_LIMITS.trial;   // S46 — decia ||20 y el trial son 25 (RD-46)
   const used = parseInt(localStorage.getItem(genMonthKey()) || '0');
   const pct = Math.min(100, Math.round((used / limit) * 100));
   const barColor = pct >= 90 ? '#C0392B' : pct >= 70 ? '#E8961A' : '#2979FF';
@@ -5915,7 +5928,7 @@ function renderCuenta() {
   if(renewEl) renewEl.textContent = t('dashRenewal').replace('{date}', getNextRenewalDate());
 
   // Video counter
-  const videoLimit = VIDEO_LIMITS[planKey] || 2;
+  const videoLimit = VIDEO_LIMITS[planKey] || VIDEO_LIMITS.trial;   // S46 — RD-46
   const videosUsed = parseInt(localStorage.getItem(videoMonthKey()) || '0');
   const videoPct = Math.min(100, Math.round((videosUsed / videoLimit) * 100));
   const videoBarColor = videoPct >= 90 ? '#C0392B' : videoPct >= 70 ? '#E8961A' : '#7C4DFF';
@@ -6979,7 +6992,7 @@ function setAgentFreq(btn) {
 const AGENT_FREQ_MAX_BY_PLAN = { trial: 5, starter: 5, growth: 7, agency: 7 };
 function applyAgentFreqGate() {
   const plan = loadBrand()?.plan || 'trial';
-  const maxF = AGENT_FREQ_MAX_BY_PLAN[plan] || 5;
+  const maxF = AGENT_FREQ_MAX_BY_PLAN[plan] || AGENT_FREQ_MAX_BY_PLAN.trial;   // S46 — RD-46
   const es = detectLanguage() === 'es';
   document.querySelectorAll('.agent-freq-btn').forEach(b => {
     const f = parseInt(b.dataset.freq);
