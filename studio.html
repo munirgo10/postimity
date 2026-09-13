@@ -3090,6 +3090,35 @@ function resetAuthScreen() {
   document.getElementById('brandChip').style.display = 'none';
 }
 
+// refreshServerState — S46. Pregunta al servidor Y APLICA lo que responde.
+//
+// checkAuth() solo devolvia datos: quien los aplicaba —capsState, los topes, las
+// etiquetas— era un bloque dentro del arranque. Asi que el setTimeout de despues
+// del pago volvia a preguntar y NADIE usaba la respuesta: el usuario acababa de
+// pagar, el plan ya estaba activo en el servidor, y el producto le seguia
+// mostrando cero generaciones y el Agente bloqueado hasta que recargaba a mano.
+//
+// Es el peor momento posible para que el producto no refleje la realidad: el
+// usuario acaba de dar dinero.
+//
+// Ademas reintenta: el plan lo activa el WEBHOOK de Stripe, que tarda lo que
+// tarda. Un unico sondeo a los 2 segundos es una apuesta, no una comprobacion.
+async function refreshServerState({ esperarCambioDePlan = false, planPrevio = null } = {}) {
+  const esperas = esperarCambioDePlan ? [0, 1500, 3000, 5000, 8000] : [0];
+  let auth = null;
+  for (const ms of esperas) {
+    if (ms) await new Promise(r => setTimeout(r, ms));
+    auth = await checkAuth();
+    if (!auth) continue;
+    if (auth.caps && typeof auth.caps === 'object') capsState = auth.caps;
+    if (auth.limits) window._srvLimits = auth.limits;
+    try { updateCapLabels(); applyAgentFreqGate(); updateGenCounter(); } catch(e) {}
+    if (!esperarCambioDePlan) break;
+    if (auth.plan && auth.plan !== planPrevio) break;   // el webhook ya aplico el plan
+  }
+  return auth;
+}
+
 async function checkAuth() {
   try {
     // S30: Changed from GET to POST so apiFetch can inject _authToken in body
@@ -6542,8 +6571,10 @@ function handleStripeRedirect() {
     }, 1500);
     // Clean URL
     window.history.replaceState({}, '', window.location.pathname + '?b=' + (params.get('b') || brandId || ''));
-    // Refresh brand data to get updated plan
-    setTimeout(() => { checkAuth(); }, 2000);
+    // S46 — se espera al CAMBIO de plan, no a un reloj. Antes era un unico
+    // checkAuth() a los 2 s cuyo resultado ademas nadie aplicaba.
+    const planPrevio = (loadBrand() || {}).plan || 'trial';
+    refreshServerState({ esperarCambioDePlan: true, planPrevio });
   } else if (payment === 'cancelled') {
     const isES = detectLanguage() === 'es';
     setTimeout(() => {
@@ -6551,7 +6582,7 @@ function handleStripeRedirect() {
     }, 1500);
     window.history.replaceState({}, '', window.location.pathname + '?b=' + (params.get('b') || brandId || ''));
   } else if (portal === 'returned') {
-    setTimeout(() => { checkAuth(); }, 1000);
+    refreshServerState();   // S46 — vuelta del portal: aplicar, no solo preguntar
     window.history.replaceState({}, '', window.location.pathname + '?b=' + (params.get('b') || brandId || ''));
   }
 }
