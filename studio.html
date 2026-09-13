@@ -3102,7 +3102,18 @@ async function checkAuth() {
     const data = await res.json();
     // S46 — los topes efectivos del servidor mandan sobre las tablas locales del
     // estudio, que no conocen el estado "sin prueba" del Contrato 4.4.
-    if (data && data.limits) window._srvLimits = data.limits;
+    //
+    // Y se REPINTA al recibirlos. Asignar la variable no basta: la barra ya se
+    // dibujo con las tablas locales antes de que llegara esta respuesta. En un
+    // navegador con datos previos algo la repintaba mas tarde y disimulaba el
+    // fallo; en incognito la primera pintada se quedaba, y una cuenta con cuota
+    // cero mostraba "25 gen · 2 videos restantes" hasta que el usuario chocaba
+    // con el bloqueo. El sintoma solo aparecia en incognito, que es justo donde
+    // nadie prueba.
+    if (data && data.limits) {
+      window._srvLimits = data.limits;
+      try { if (typeof updateGenCounter === 'function') updateGenCounter(); } catch(e) {}
+    }
     return data.authenticated ? data : null;
   } catch(e) {
     console.warn('Auth check failed:', e.message);
