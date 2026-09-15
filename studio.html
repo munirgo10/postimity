@@ -1603,7 +1603,8 @@ Ej: &quot;Hazla blanco y negro estilo editorial de revista&quot;"></textarea>
               <span class="ep-ex" onclick="setEnhanceExample(this)">Estilo editorial</span>
               <span class="ep-ex" onclick="setEnhanceExample(this)">Colores vibrantes</span>
               <span class="ep-ex" onclick="setEnhanceExample(this)">Blanco y negro</span>
-              <span class="ep-ex" onclick="setEnhanceExample(this)">Estilo flyer</span>
+              <!-- S46 — retirado: "Estilo flyer" ofrecia en Estudio Pro un estilo que pertenece al modo Flyer.
+           Un atajo que lleva a otro modo desde dentro de este confunde sobre que hace cada uno. -->
             </div>
             <p class="ep-hint">💡 Sé específico — la AI seguirá tus instrucciones exactas. Cuanto más detalle, mejor resultado.</p>
           </div>
@@ -1859,7 +1860,7 @@ Ej: 'Wonderik es increíble. Mi hija de 3 años ya lee palabras cortas y su desa
             <div class="wm-toggle-row" id="wmToggleRow">
               <span class="wm-label">✦ Watermark Postimity <span class="wm-lock" id="wmLockBadge">Growth+ para quitar</span></span>
               <label class="lt-switch" id="wmToggleWrap" style="display:none">
-                <input type="checkbox" id="wmToggle" checked onchange="redrawCanvas()">
+                <input type="checkbox" id="wmToggle" checked onchange="onWmToggleChange(this.checked)">
                 <span class="lt-slider"></span>
               </label>
             </div>
@@ -8174,7 +8175,14 @@ function showResult(data) {
   const wmInput = document.getElementById('wmToggle');
   if(['growth','agency'].includes(srPlan)) {
     if(wmWrap) { wmWrap.style.display = 'flex'; wmWrap.style.opacity = ''; wmWrap.style.cursor = ''; }
-    if(wmInput) wmInput.disabled = false;
+    // S49 · FB-27 / PR-080 — el contrato 2.3 fija el default en SIN firma: es la
+    // razon de compra de Growth, no una preferencia. El valor inicial del HTML es
+    // 'checked' porque trial y starter son el caso mayoritario; aqui se corrige.
+    // Se consulta _wmUserChoice para no pisar a quien SI la quiere puesta (PR-079).
+    if(wmInput) {
+      wmInput.disabled = false;
+      wmInput.checked = (_wmUserChoice === null) ? false : _wmUserChoice;
+    }
     if(wmBadge) wmBadge.style.display = 'none';
   } else {
     // RD-22 (Ola 4): la firma no esta ausente por naturaleza del modo — la bloquea el
@@ -8823,6 +8831,15 @@ async function logoAsDataUrl(src) {
     _logoDataUrlCache = { src, data };
     return data;
   } catch (e) { console.warn('logoAsDataUrl failed:', e.message); return null; }
+}
+
+// S49 · FB-27 / PR-080. null = el usuario no ha decidido en esta sesion.
+// La eleccion NO puede vivir solo en el DOM: showResult corre en cada generacion
+// y repondria el default encima de lo que el cliente eligio (PR-079).
+let _wmUserChoice = null;
+function onWmToggleChange(checked) {
+  _wmUserChoice = checked;
+  redrawCanvas();
 }
 
 // Sólo Growth y Agency pueden apagar el watermark.
