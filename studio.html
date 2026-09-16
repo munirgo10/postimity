@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="2.40.0">
+<meta name="app-version" content="2.42.0">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Postimity Studio — Tu estudio de contenido con AI</title>
 <meta name="description" content="Crea posts, flyers, carruseles y videos profesionales con AI. Describe tu negocio una vez y genera contenido listo para publicar en 20 segundos.">
@@ -2290,15 +2290,17 @@ function persistSlides(imgs) {
 }
 
 // APP_VERSION (S34) — deploy verification. Must match worker /version and all HTML files.
-const APP_VERSION = '2.40.0'; // S42 (4 sep 2026) — S42-4: selector de estilo se sincroniza en showScreen, no solo en setMode
+const APP_VERSION = '2.42.0'; // S50 (15 sep 2026) — FB-56 tarjetas del Agente + FB-57 copiar + FB-58 instrumento (sin reintento: va en la version siguiente)
 window.APP_VERSION = APP_VERSION;
 // El log de version vive unas lineas mas abajo (console.info). No agregar otro aqui:
 // S38 borro POSTIMITY_VERSION para tener un solo log y este lo volvio a duplicar.
 // S35: lista de fixes de este build. Permite confirmar desde la consola QUÉ está vivo,
 // no sólo el número de versión. Un deploy fallido se detecta al instante.
-window.BUILD_FIXES = ['rd28-cobro-por-actionid','image-regen-cobra-y-en-medium',
+window.BUILD_FIXES = ['s50-agente-abre-lo-que-anuncia','s50-copiar-no-miente','s50-traza-load-failed','rd28-cobro-por-actionid','image-regen-cobra-y-en-medium',
   'video-captions-no-cobra','adjust-y-flyer-captions-cobran','calidad-la-decide-el-servidor',
-  'contador-sincronizado-al-refinar','etiqueta-de-cobro-en-botones'];
+  'contador-sincronizado-al-refinar','etiqueta-de-cobro-en-botones',
+  'fb27-growth-entra-sin-firma','fb27-la-eleccion-del-usuario-manda',
+  's41b-galeria-oculta-y-desarmada-en-flyer-y-testimonio'];
 console.info('Postimity Studio v' + APP_VERSION);
 
 // ── FUENTE ÚNICA DE CUOTAS (S38-4) ───────────────────────────────────────
@@ -5093,8 +5095,10 @@ async function generate() {
     if (_genCancelled) return;
     document.getElementById('errWrap').classList.add('show');
     // Show step context for debugging
-    const stepInfo = document.querySelector('.step-item.active')?.textContent || '';
-    const debugHint = stepInfo ? ` [${mode}→${stepInfo.trim()}]` : ` [${mode}]`;
+    // S50 · FB-58 — el paso activo es .ls.on (setStep). .step-item.active no existio nunca.
+    const stepInfo = document.querySelector('.ls.on')?.textContent || '';
+    const trace = genTraceSummary(currentActionId);
+    const debugHint = ' [' + mode + (stepInfo ? '→' + stepInfo.trim() : '') + (trace ? ' · ' + trace : '') + ']';
     document.getElementById('errMsg').textContent = err.message + debugHint;
     console.warn('Generation error:', mode, err);
   }
@@ -6345,16 +6349,30 @@ function showGalleryPhotoDetail(photoId) {
 }
 
 // ── Gallery toggle in generation flow ─────────────────
+// S49 · S41-B — LA lista de modos que consumen la galeria. Vive aqui, fuera de
+// updateGalleryToggle, porque goCreatePost tambien la necesita: una segunda lista
+// copiada en el Agent es exactamente como nacio este defecto.
+// Flyer y Testimonio salen en S49: MOSTRABAN el control sin leerlo, y con foto
+// elegida cobraban una imagen inventada. Se reabren cuando cierre el motor del
+// Lote B (S43-1 y S40-3 en verde), no antes: conectar la galeria a un composer
+// que recorta a cuadrado y desborda el texto entrega la foto del cliente rota.
+const showForModes = ['post', 'video', 'carousel'];
 function updateGalleryToggle() {
   const wrap = document.getElementById('galleryToggleWrap');
   if (!wrap) return;
   const hasPhotos = galleryData.length > 0;
   const isES = detectLanguage() === 'es';
 
-  // Show toggle for post, flyer, testimonial, video, carousel modes (not enhance — has its own photo flow)
-  const showForModes = ['post', 'flyer', 'testimonial', 'video', 'carousel'];
   if (!showForModes.includes(mode)) {
     wrap.style.display = 'none';
+    // S49 · MC-4 — ocultar no es desarmar. La casilla sobrevivia encendida detras
+    // de la fila oculta, la guardia previa leia `checked`, la dejaba pasar y el
+    // generador ignoraba la foto: se cobraba una imagen inventada en silencio.
+    const gt = document.getElementById('galleryToggle');
+    if (gt) gt.checked = false;
+    gallerySelectedPhoto = null;
+    const sel = document.getElementById('gallerySelector');
+    if (sel) sel.classList.remove('show');
     return;
   }
 
@@ -7134,6 +7152,16 @@ async function generateAgentPlan() {
   }
 }
 
+// S50 · FB-56 / MC-5 — UNA sola fuente decide el modo de una tarjeta del Agente.
+// Antes la etiqueta salia de suggestedMode y la ruta de userAction: con
+// userAction='photo' la tarjeta decia Post y abria Estudio Pro sin el prompt.
+// userAction NO decide el modo: solo decide si se muestra el actionHint, que el
+// propio prompt del worker define como sugerencia que el usuario puede ignorar.
+function agentTargetMode(post) {
+  const m = post && post.suggestedMode;
+  return ['carousel', 'video', 'testimonial'].includes(m) ? m : 'post';
+}
+
 function renderAgentPlan(plan) {
   document.getElementById('agentConfigWrap').style.display = 'none';
   document.getElementById('agentPlanWrap').style.display = 'block';
@@ -7191,9 +7219,9 @@ function renderAgentPlan(plan) {
       card.className = 'agent-post-card' + (post.festivity ? ' festivity' : '');
       const platClass = post.platform || 'instagram';
       const platLabel = post.platform === 'instagram' ? '📸 Instagram' : post.platform === 'facebook' ? '👥 Facebook' : '🎵 TikTok';
-      const modeLabel = post.suggestedMode === 'video' ? t('agentModeVideo') : post.suggestedMode === 'carousel' ? t('agentModeCarousel') : post.suggestedMode === 'testimonial' ? (detectLanguage()==='es'?'💬 Testimonio':'💬 Testimonial') : t('agentModePost');
-      const modeClass = post.suggestedMode === 'video' ? 'video' : post.suggestedMode === 'carousel' ? 'carousel' : post.suggestedMode === 'testimonial' ? 'testimonial' : 'post';
-      const styleLabel = post.suggestedMode === 'video' ? '🎬 Video AI' : post.suggestedStyle === 'photo' ? t('agentStylePhoto') : post.suggestedStyle === 'abstract' ? t('agentStyleAbstract') : t('agentStyleIllus');
+      const modeClass = agentTargetMode(post);
+      const modeLabel = modeClass === 'video' ? t('agentModeVideo') : modeClass === 'carousel' ? t('agentModeCarousel') : modeClass === 'testimonial' ? (detectLanguage()==='es'?'💬 Testimonio':'💬 Testimonial') : t('agentModePost');
+      const styleLabel = modeClass === 'video' ? '🎬 Video AI' : post.suggestedStyle === 'photo' ? t('agentStylePhoto') : post.suggestedStyle === 'abstract' ? t('agentStyleAbstract') : t('agentStyleIllus');
       const postIdx = agentPostsCache.indexOf(post);
       card.innerHTML = '<div class="apc-meta">' +
         '<span class="apc-date">' + (post.dayName||'') + ' ' + (post.dateShort||post.date) + '</span>' +
@@ -7208,7 +7236,7 @@ function renderAgentPlan(plan) {
         '<div class="apc-prompt">' + (post.prompt||'') + '</div>' +
         (post.actionHint && post.userAction !== 'none' ? '<div class="apc-hint">💡 ' + post.actionHint + '</div>' : '') +
         '<div class="apc-btns">' +
-        '<button class="apc-btn create" onclick="goCreatePost(' + postIdx + ')">' + (post.suggestedMode === 'video' ? t('agentCreateVideo') : post.suggestedMode === 'carousel' ? t('agentCreateCarousel') : post.suggestedMode === 'testimonial' ? (detectLanguage()==='es'?'→ Crear testimonio':'→ Create testimonial') : t('agentCreatePost')) + '</button>' +
+        '<button class="apc-btn create" onclick="goCreatePost(' + postIdx + ')">' + (modeClass === 'video' ? t('agentCreateVideo') : modeClass === 'carousel' ? t('agentCreateCarousel') : modeClass === 'testimonial' ? (detectLanguage()==='es'?'→ Crear testimonio':'→ Create testimonial') : t('agentCreatePost')) + '</button>' +
         '<button class="apc-btn copy" onclick="copyPrompt(' + postIdx + ')">' + t('agentCopyPrompt') + '</button>' +
 
         '</div>';
@@ -7221,20 +7249,8 @@ function renderAgentPlan(plan) {
 function goCreatePost(idx) {
   const post = agentPostsCache[idx];
   if(!post) { showToast(t('toastPostNotFound')); return; }
-  // Route to the correct mode — testimonial goes to testimonial, photo-action to enhance, rest as before
-  let targetMode;
-  if (post.suggestedMode === 'testimonial') {
-    targetMode = 'testimonial';
-  } else if (post.suggestedMode === 'carousel') {
-    targetMode = 'carousel';
-  } else if (post.suggestedMode === 'video') {
-    targetMode = 'video';
-  } else if (post.userAction === 'photo') {
-    // Posts that suggest a real photo → route to Studio Pro (enhance) where they can upload
-    targetMode = 'enhance';
-  } else {
-    targetMode = 'post';
-  }
+  // S50 · FB-56 — el mismo helper que pinta la tarjeta: se llega a lo que se anuncia.
+  const targetMode = agentTargetMode(post);
   setMode(targetMode);
   // Pre-fill prompt in the correct textarea
   if(targetMode === 'video') {
@@ -7244,12 +7260,11 @@ function goCreatePost(idx) {
     const ta = document.getElementById('carouselTopic');
     if(ta) ta.value = post.prompt || post.topic || '';
   } else if(targetMode === 'testimonial') {
-    // For testimonial mode, pre-fill the review text area with the topic as guidance
-    const ta = document.getElementById('reviewText');
+    // S50 · FB-56 — el campo real es testText (el que lee genTestimonial); reviewText
+    // no existe. La guia va como PLACEHOLDER a proposito: el valor es la resena real
+    // del cliente, y rellenarlo con texto del Agente fabricaria un testimonio.
+    const ta = document.getElementById('testText');
     if(ta) ta.setAttribute('placeholder', post.actionHint || post.prompt || '');
-  } else if(targetMode === 'enhance') {
-    // For enhance (photo-action), show the actionHint as guidance toast
-    if(post.actionHint) showToast('📸 ' + post.actionHint, 6000);
   } else {
     const ta = document.getElementById('postText');
     if(ta) ta.value = post.prompt || '';
@@ -7262,8 +7277,13 @@ function goCreatePost(idx) {
   }
   if(post.pilar) setPillarByName(post.pilar);
   if(post.platform) setPlatformByName(post.platform);
+  // S50 · FB-56 — la pista viaja en cualquier modo; antes solo en Estudio Pro.
+  const hintToast = (post.actionHint && post.userAction !== 'none') ? post.actionHint : '';
   // Gallery integration: if agent assigned a photoStrategy with gallery photo, activate toggle and pre-select
-  if (post.photoStrategy && post.photoStrategy !== 'ai-generated' && galleryData.length > 0) {
+  // S49 · MC-4 — showForModes, no una lista propia: si el modo no consume la
+  // galeria, encender la casilla aqui reintroduce la sustitucion muda.
+  if (post.photoStrategy && post.photoStrategy !== 'ai-generated' && galleryData.length > 0
+      && showForModes.includes(targetMode)) {
     const gToggle = document.getElementById('galleryToggle');
     if (gToggle) {
       gToggle.checked = true;
@@ -7277,9 +7297,12 @@ function goCreatePost(idx) {
   showScreen('creatorScreen');
   const modeLabel = targetMode === 'video' ? t('mcVideoTitle') : targetMode === 'carousel' ? t('mcCarousel') : targetMode === 'testimonial' ? t('mcTestimonial') : targetMode === 'enhance' ? t('mcEnhance') : t('mcPost');
   const styleLabel = targetMode === 'video' ? '🎬 Video AI' : post.suggestedStyle === 'photo' ? t('agentStylePhoto') : post.suggestedStyle === 'abstract' ? t('agentStyleAbstract') : t('agentStyleIllus');
-  showToast(t('toastPreloaded').replace('{mode}', modeLabel).replace('{style}', styleLabel));
+  // S50 · FB-56 — la pista sustituye al aviso generico: dos toasts seguidos se pisan.
+  if (hintToast) showToast('💡 ' + hintToast, 6000);
+  else showToast(t('toastPreloaded').replace('{mode}', modeLabel).replace('{style}', styleLabel));
   setTimeout(() => {
-    const input = targetMode === 'video' ? document.getElementById('videoTopic') : targetMode === 'carousel' ? document.getElementById('carouselTopic') : document.getElementById('postText');
+    const focusId = { video:'videoTopic', carousel:'carouselTopic', testimonial:'testText' }[targetMode] || 'postText';
+    const input = document.getElementById(focusId);
     input?.focus(); input?.scrollIntoView({behavior:'smooth', block:'center'});
   }, 350);
 }
@@ -7475,14 +7498,23 @@ function copyPrompt(idx) {
   const post = agentPostsCache[idx];
   if(!post) { showToast(t('toastPostNotFound')); return; }
   const text = post.prompt || '';
-  navigator.clipboard.writeText(text)
-    .then(() => showToast(t('toastPromptCopied')))
-    .catch(() => {
+  // S50 · FB-57 / MC-6 — «copiado» solo cuando se copio de verdad.
+  if (!text) { showToast(t('toastCopyError')); return; }
+  const respaldo = () => {
+    let ok = false;
+    try {
       const ta = document.createElement('textarea');
       ta.value = text; document.body.appendChild(ta); ta.select();
-      document.execCommand('copy'); document.body.removeChild(ta);
-      showToast(t('toastPromptCopied'));
-    });
+      ok = document.execCommand('copy') === true;
+      document.body.removeChild(ta);
+    } catch (e) { ok = false; }
+    showToast(t(ok ? 'toastPromptCopied' : 'toastCopyError'));
+  };
+  // Sin API (webview, http) se va directo al respaldo: antes reventaba aqui.
+  if (!(navigator.clipboard && navigator.clipboard.writeText)) { respaldo(); return; }
+  navigator.clipboard.writeText(text)
+    .then(() => showToast(t('toastPromptCopied')))
+    .catch(respaldo);
 }
 
 // ╔═══════════════════════════════════════════════════╗
@@ -7967,12 +7999,39 @@ async function post(body) {
 let _inFlight = new Set();
 let _genCancelled = false;
 
+// S50 · FB-58 — INSTRUMENTO, no arreglo. `Load failed` llega sin dato: no se sabe en
+// que llamada muere, cuanto tardo ni que forma traia la respuesta. Tres formas posibles
+// de imageUrl: 'propia' (nuestro almacen), 'embebida' (data: de megabytes, si fallo el
+// guardado) y 'externa' (URL que caduca). Los nombres son neutros A PROPOSITO: la traza
+// sale en el mensaje de error y PR-157 prohibe nombrar proveedores en pantalla.
+// Condicion de retiro: FB-58 cerrado con dato de dispositivo.
+const _genTrace = [];
+function genTraceShape(url) {
+  if (typeof url !== 'string' || !url) return 'sin-imagen';
+  if (url.startsWith('data:')) return 'embebida';
+  if (url.indexOf('/r2/') !== -1) return 'propia';
+  return 'externa';
+}
+function genTraceAdd(e) {
+  _genTrace.push(e);
+  if (_genTrace.length > 20) _genTrace.shift();
+  console.info('[gen-trace]', JSON.stringify(e));
+}
+function genTraceSummary(actionId) {
+  if (!actionId) return '';
+  return _genTrace.filter(e => e.a === actionId).map(e =>
+    e.mode + ' ' + (e.ms / 1000).toFixed(1) + 's ' +
+    (e.ok ? e.shape + (e.kb ? ' ' + e.kb + 'KB' : '') : '✖ ' + e.err)
+  ).join(' · ');
+}
+
 async function postWithTimeout(body, timeoutMs=130000) {
   // Always inject brandId for server-side validation (Fix #1, #2)
   if (brandId && !body.brandId) body.brandId = brandId;
   const controller = new AbortController();
   _inFlight.add(controller);
   const timer = setTimeout(()=>controller.abort(), timeoutMs);
+  const _tr = { mode: body.mode, a: body.actionId || null, t0: Date.now(), ok: false };
   try {
     const res = await apiFetch(WORKER, {
       method:'POST',
@@ -7982,6 +8041,9 @@ async function postWithTimeout(body, timeoutMs=130000) {
     });
     clearTimeout(timer);
     const data = await res.json();
+    _tr.st = res.status;
+    _tr.shape = genTraceShape(data && data.imageUrl);
+    if (_tr.shape === 'embebida') _tr.kb = Math.round(data.imageUrl.length * 0.75 / 1024);
     // Handle server-side validation errors (plan/limit/trial)
     if (data.code === 'AUTH_REQUIRED') {
       clearAuthToken(); // S29: clear expired token from localStorage
@@ -8014,9 +8076,11 @@ async function postWithTimeout(body, timeoutMs=130000) {
       if (data.rawDebug) console.error('AI raw response:', data.rawDebug);
       throw new Error(data.error||'Error del servidor');
     }
+    _tr.ok = true;
     return data;
   } catch(e) {
     clearTimeout(timer);
+    _tr.err = String((e && (e.name === 'AbortError' ? 'abort' : e.message)) || 'error').slice(0, 40);
     // Distinguir las dos causas de abort: el timeout y el usuario. Antes toda
     // AbortError se reportaba como "tardo demasiado", asi que una cancelacion
     // deliberada aparecia como fallo de red.
@@ -8024,6 +8088,8 @@ async function postWithTimeout(body, timeoutMs=130000) {
     throw e;
   } finally {
     _inFlight.delete(controller);
+    _tr.ms = Date.now() - _tr.t0; delete _tr.t0;
+    genTraceAdd(_tr);
   }
 }
 
