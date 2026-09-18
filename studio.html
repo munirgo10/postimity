@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="2.43.0">
+<meta name="app-version" content="2.44.0">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Postimity Studio — Tu estudio de contenido con AI</title>
 <meta name="description" content="Crea posts, flyers, carruseles y videos profesionales con AI. Describe tu negocio una vez y genera contenido listo para publicar en 20 segundos.">
@@ -1807,8 +1807,10 @@ Ej: 'Wonderik es increíble. Mi hija de 3 años ya lee palabras cortas y su desa
     <div class="err-wrap" id="errWrap">
       <div style="font-size:32px;margin-bottom:8px">⚠️</div>
       <div style="font-size:14px;font-weight:700;color:#C0392B;margin-bottom:5px">Algo salió mal</div>
-      <div style="font-size:13px;color:var(--t3);margin-bottom:14px" id="errMsg">Error inesperado. Intenta de nuevo.</div>
-      <button class="btn btn-outline" onclick="resetCreator()">Intentar de nuevo</button>
+      <div style="font-size:13px;color:var(--t3);margin-bottom:14px" id="errMsg">Error inesperado.</div>
+      <button class="btn btn-primary" id="errRetryBtn" onclick="retryLastAction()" style="display:none;margin-bottom:6px">Reintentar</button>
+      <div style="font-size:11px;color:var(--t3);margin-bottom:12px;display:none" id="errRetryHint">Es la misma solicitud: no se descuenta otra generación.</div>
+      <button class="btn btn-outline" id="errBackBtn" onclick="resetCreator()">Volver</button>
     </div>
 
     <!-- Results -->
@@ -2109,6 +2111,35 @@ function newActionId() {
   return currentActionId;
 }
 
+// S52b · FB-58 — UN REINTENTO NO ES UNA ACCION NUEVA (PU-9, PR-110).
+// El panel de error llamaba a resetCreator(): borraba el texto, el usuario volvia a
+// pulsar Generar y nacia otro actionId -> segundo cobro por un corte de red (V-S50-4).
+// beginAction decide: se conserva el actionId SOLO si es reintento, de LA MISMA
+// accion (misma firma de entrada) y dentro de la ventana. La ventana es menor que
+// CHARGE_DEDUP_TTL del worker (600 s): pasado ese plazo el servidor ya olvido la
+// accion y conservar el id no protege nada. Cualquier otro caso es accion nueva.
+const RETRY_WINDOW_MS = 480000;
+let _actionSig = null;
+let _actionT0 = 0;
+function beginAction(sig, retry) {
+  if (retry && currentActionId && sig === _actionSig && (Date.now() - _actionT0) < RETRY_WINDOW_MS) {
+    return currentActionId;
+  }
+  _actionSig = sig;
+  _actionT0 = Date.now();
+  return newActionId();
+}
+function puedeReintentar() {
+  return !!currentActionId && (Date.now() - _actionT0) < RETRY_WINDOW_MS;
+}
+function retryLastAction() {
+  // Sin red, el panel se queda: si se cerrara, el usuario volveria a Generar y
+  // nacería una accion nueva — exactamente el doble cobro que esto evita.
+  if (!navigator.onLine) { showToast(t('toastStillOffline'), 5000); return; }
+  const w = document.getElementById('errWrap'); if (w) w.classList.remove('show');
+  generate({ retry: true });
+}
+
 // S37/L2 · RD-6 + INV-025 — el servidor es la fuente de verdad del contador.
 // Vive fuera de showResult porque a partir de S37 refinar COBRA, y refinar no pasa
 // por showResult: el badge se quedaria mostrando un numero viejo mientras el
@@ -2290,7 +2321,7 @@ function persistSlides(imgs) {
 }
 
 // APP_VERSION (S34) — deploy verification. Must match worker /version and all HTML files.
-const APP_VERSION = '2.43.0'; // S51 (17 sep 2026) — precios 199/399/899 y trial de 7 dias con 20/2/2/3. Sin cambios de logica.
+const APP_VERSION = '2.44.0'; // S52b (18 sep 2026) — FB-58 reintento en el error con el mismo actionId, FB-61 textos honestos, FB-57 copiar que devuelve si copio.
 window.APP_VERSION = APP_VERSION;
 // El log de version vive unas lineas mas abajo (console.info). No agregar otro aqui:
 // S38 borro POSTIMITY_VERSION para tener un solo log y este lo volvio a duplicar.
@@ -2418,9 +2449,9 @@ const T = {
     btnGenerate:'✨ Generar contenido con AI',
     // ── Loading ──
     loadDefault:'Creando tu contenido...', loadHint:'15–45 segundos · Imágenes de alta calidad toman más',
-    loadCancel:'✕ Cancelar y volver', loadTimeout:'La solicitud tardó demasiado. Intenta de nuevo — si el problema persiste, prueba con un texto más corto.',
+    loadCancel:'✕ Cancelar y volver', loadTimeout:'La solicitud tardó demasiado. Pudo haberse descontado 1 generación: revisa tu contador.', errNetUncertain:'Se perdió la conexión. Pudo haberse descontado 1 generación: revisa tu contador.', errRetryHint:'Es la misma solicitud: no se descuenta otra generación.', errBack:'Volver', toastStillOffline:'Sigues sin conexión. Cuando vuelva, toca Reintentar aquí mismo.', manualCopyTitle:'No se pudo copiar el texto. Mantenlo presionado para copiarlo:', manualCopyDone:'Listo', capCopied:'Caption copiado ✓', capNotCopied:'Caption: cópialo abajo',
     // ── Error ──
-    errTitle:'Algo salió mal', errDefault:'Error inesperado. Intenta de nuevo.', errRetry:'Intentar de nuevo',
+    errTitle:'Algo salió mal', errDefault:'Error inesperado.', errRetry:'Reintentar',
     // ── Results ──
     regenImg:'🔄 Nueva imagen · 1 gen', regenText:'✍️ Nuevo texto · 1 gen', regenBack:'← Crear otro',
     carouselSlidesLabel:'🎠 Slides del carrusel', carouselNavHint:'← → para navegar · click para previsualizar',
@@ -2705,9 +2736,9 @@ const T = {
     btnGenerate:'✨ Generate content with AI',
     // ── Loading ──
     loadDefault:'Creating your content...', loadHint:'15–45 seconds · High quality images take longer',
-    loadCancel:'✕ Cancel and go back', loadTimeout:'The request took too long. Try again — if the problem persists, try a shorter text.',
+    loadCancel:'✕ Cancel and go back', loadTimeout:'The request took too long. It may have used 1 generation: check your counter.', errNetUncertain:'The connection was lost. It may have used 1 generation: check your counter.', errRetryHint:'It is the same request: it does not use another generation.', errBack:'Back', toastStillOffline:'You are still offline. When it comes back, tap Retry right here.', manualCopyTitle:'The text could not be copied. Press and hold to copy it:', manualCopyDone:'Done', capCopied:'Caption copied ✓', capNotCopied:'Caption: copy it below',
     // ── Error ──
-    errTitle:'Something went wrong', errDefault:'Unexpected error. Try again.', errRetry:'Try again',
+    errTitle:'Something went wrong', errDefault:'Unexpected error.', errRetry:'Retry',
     // ── Results ──
     regenImg:'🔄 New image · 1 gen', regenText:'✍️ New text · 1 gen', regenBack:'← Create another',
     carouselSlidesLabel:'🎠 Carousel slides', carouselNavHint:'← → to navigate · click to preview',
@@ -5026,7 +5057,7 @@ function setFlyerMode(m) {
 // ═══════════════════════════════════════════════════════
 // GENERATE
 // ═══════════════════════════════════════════════════════
-async function generate() {
+async function generate(opts = {}) {
   // Offline check (Fix #6)
   if (!navigator.onLine) {
     alert(detectLanguage() === 'es' ? 'Sin conexión a internet. Verifica tu conexión e intenta de nuevo.' : 'No internet connection. Check your connection and try again.');
@@ -5076,7 +5107,11 @@ async function generate() {
   showLoading(true);
   _genCancelled = false;   // S41-4: cada generacion nueva parte de cero
   const bg=brand.brandGuide||(detectLanguage()==='en'?`Business: ${brand.name}. Differentiator: ${brand.differentiator}. Audience: ${brand.audience}.`:`Negocio: ${brand.name}. Diferenciador: ${brand.differentiator}. Audiencia: ${brand.audience}.`);
-  newActionId(); // S37/L2 · RD-28: una accion del usuario = un actionId
+  // S37/L2 · RD-28: una accion del usuario = un actionId. S52b: un reintento desde el
+  // panel de error conserva el suyo si la entrada no cambio (beginAction).
+  const _v = (id) => (document.getElementById(id)?.value || '').trim();
+  const _sig = [mode, flyerMode, platform, pillar, enhanceMode, _v('postText'), _v('testText'), _v('enhancePrompt'), _v('carouselTopic')].join('|');
+  beginAction(_sig, opts.retry === true);
   lastInput={mode,platform,pillar,bg,brand,flyerMode};
 
   try {
@@ -5102,6 +5137,7 @@ async function generate() {
     const trace = genTraceSummary(currentActionId);
     const debugHint = ' [' + mode + (stepInfo ? '→' + stepInfo.trim() : '') + (trace ? ' · ' + trace : '') + ']';
     document.getElementById('errMsg').textContent = err.message + debugHint;
+    mostrarReintento(puedeReintentar());
     console.warn('Generation error:', mode, err);
   }
 }
@@ -5639,7 +5675,9 @@ async function shareVideoToSocial(platform) {
   const videoEl = document.querySelector('#videoPlayerWrap video');
 
   // 1. Copy caption FIRST (RD-4)
-  await copyToClipboard(caption);
+  const copied = await copyToClipboard(caption);
+  // S52b · INV-176: el aviso dice lo que paso con el texto, no lo que se esperaba
+  const capMsg = t(copied ? 'capCopied' : 'capNotCopied');
 
   // 2. Save video using universalSave (S33)
   let result = false;
@@ -5659,19 +5697,20 @@ async function shareVideoToSocial(platform) {
     let msg;
     if (result === 'shared') {
       msg = isES
-        ? '✅ Video guardado · Caption copiado ✓\n→ Abre ' + pName + ', selecciona el video y pega'
-        : '✅ Video saved · Caption copied ✓\n→ Open ' + pName + ', select the video and paste';
+        ? '✅ Video guardado · ' + capMsg + '\n→ Abre ' + pName + ', selecciona el video y pega'
+        : '✅ Video saved · ' + capMsg + '\n→ Open ' + pName + ', select the video and paste';
     } else if (result === 'opened') {
       msg = isES
-        ? '📋 Caption copiado ✓\n🎬 Guarda el video desde la pestaña\n→ Abre ' + pName + ', selecciona el video y pega'
-        : '📋 Caption copied ✓\n🎬 Save the video from the tab\n→ Open ' + pName + ', select the video and paste';
+        ? '📋 ' + capMsg + '\n🎬 Guarda el video desde la pestaña\n→ Abre ' + pName + ', selecciona el video y pega'
+        : '📋 ' + capMsg + '\n🎬 Save the video from the tab\n→ Open ' + pName + ', select the video and paste';
     } else {
       msg = isES
-        ? '🎬 Video descargado · Caption copiado ✓\n→ Abre ' + pName + ' y pega el caption'
-        : '🎬 Video downloaded · Caption copied ✓\n→ Open ' + pName + ' and paste the caption';
+        ? '🎬 Video descargado · ' + capMsg + '\n→ Abre ' + pName + ' y pega el caption'
+        : '🎬 Video downloaded · ' + capMsg + '\n→ Open ' + pName + ' and paste the caption';
     }
     showToast(msg, 6000);
   }
+  if (!copied) showManualCopy(caption);
 }
 
 async function saveVideoToHistory(videoUrl, topic) {
@@ -7504,21 +7543,11 @@ function copyPrompt(idx) {
   const text = post.prompt || '';
   // S50 · FB-57 / MC-6 — «copiado» solo cuando se copio de verdad.
   if (!text) { showToast(t('toastCopyError')); return; }
-  const respaldo = () => {
-    let ok = false;
-    try {
-      const ta = document.createElement('textarea');
-      ta.value = text; document.body.appendChild(ta); ta.select();
-      ok = document.execCommand('copy') === true;
-      document.body.removeChild(ta);
-    } catch (e) { ok = false; }
+  // S52b · D4: la unica funcion de copiar decide; aqui solo se dice lo que paso.
+  copyToClipboard(text).then(ok => {
     showToast(t(ok ? 'toastPromptCopied' : 'toastCopyError'));
-  };
-  // Sin API (webview, http) se va directo al respaldo: antes reventaba aqui.
-  if (!(navigator.clipboard && navigator.clipboard.writeText)) { respaldo(); return; }
-  navigator.clipboard.writeText(text)
-    .then(() => showToast(t('toastPromptCopied')))
-    .catch(respaldo);
+    if (!ok && typeof showManualCopy === 'function') showManualCopy(text);
+  });
 }
 
 // ╔═══════════════════════════════════════════════════╗
@@ -7731,7 +7760,9 @@ function applyBilingualUI() {
   // Error
   const errTitleEl = document.querySelector('#errWrap > div:nth-child(2)'); if(errTitleEl) errTitleEl.textContent = t('errTitle');
   st('errMsg','errDefault');
-  const errBtn = document.querySelector('#errWrap .btn'); if(errBtn) errBtn.textContent = t('errRetry');
+  const errBtn = document.getElementById('errRetryBtn'); if(errBtn) errBtn.textContent = t('errRetry');
+  const errBack = document.getElementById('errBackBtn'); if(errBack) errBack.textContent = t('errBack');
+  const errHint = document.getElementById('errRetryHint'); if(errHint) errHint.textContent = t('errRetryHint');
   // Result buttons
   st('regenImg','regenImg'); st('regenText','regenText');
   const regenBackBtn = document.querySelector('.regen-btns .btn-regen:last-child'); if(regenBackBtn) regenBackBtn.textContent = t('regenBack');
@@ -8029,22 +8060,55 @@ function genTraceSummary(actionId) {
   ).join(' · ');
 }
 
+const NET_RETRY = { attempts: 2, waitMs: 1500 };
+// Espera a que la pagina vuelva a estar visible, con tope: no se cuelga para siempre.
+function esperarVisible() {
+  if (typeof document === 'undefined' || document.visibilityState !== 'hidden' || !document.addEventListener) return Promise.resolve();
+  return new Promise(r => {
+    const fin = () => { document.removeEventListener('visibilitychange', fin); clearTimeout(tope); r(); };
+    const tope = setTimeout(fin, 30000);
+    document.addEventListener('visibilitychange', fin);
+  });
+}
+
 async function postWithTimeout(body, timeoutMs=130000) {
   // Always inject brandId for server-side validation (Fix #1, #2)
   if (brandId && !body.brandId) body.brandId = brandId;
   const controller = new AbortController();
   _inFlight.add(controller);
   const timer = setTimeout(()=>controller.abort(), timeoutMs);
-  const _tr = { mode: body.mode, a: body.actionId || null, t0: Date.now(), ok: false };
+  const _tr = { mode: body.mode, a: body.actionId || null, t0: Date.now(), ok: false, n: 0 };
   try {
-    const res = await apiFetch(WORKER, {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify(body),
-      signal: controller.signal
-    });
+    // S52b · FB-58 / INV-172 — un corte de red (Load failed / Failed to fetch, ambos
+    // TypeError) se reintenta UNA vez, con el MISMO body y por tanto el mismo actionId.
+    // Es seguro porque el worker devuelve lo ya entregado (replay, INV-180) y suprime
+    // el cobro (RD-28). Nunca tras cancelar o agotar tiempo (AbortError), nunca un
+    // 4xx de negocio (ya respondio: no es TypeError) y nunca sin actionId: sin
+    // identidad de accion cada intento cobra. Si la pagina esta oculta se espera a que
+    // vuelva: Safari mata el fetch lanzado en segundo plano (hipotesis A de §3.0.1c).
+    let res, data;
+    for (;;) {
+      _tr.n++;
+      try {
+        res = await apiFetch(WORKER, {
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify(body),
+          signal: controller.signal
+        });
+        data = await res.json();
+        break;
+      } catch (netErr) {
+        const esRed = netErr && netErr.name === 'TypeError';
+        if (!esRed || !body.actionId || _genCancelled || controller.signal.aborted || _tr.n >= NET_RETRY.attempts) {
+          if (esRed) { const e2 = new Error(t('errNetUncertain')); e2.netFail = true; e2.raw = netErr.message; throw e2; }
+          throw netErr;
+        }
+        await esperarVisible();
+        await new Promise(r => setTimeout(r, NET_RETRY.waitMs));
+      }
+    }
     clearTimeout(timer);
-    const data = await res.json();
     _tr.st = res.status;
     _tr.shape = genTraceShape(data && data.imageUrl);
     if (_tr.shape === 'embebida') _tr.kb = Math.round(data.imageUrl.length * 0.75 / 1024);
@@ -8084,11 +8148,15 @@ async function postWithTimeout(body, timeoutMs=130000) {
     return data;
   } catch(e) {
     clearTimeout(timer);
-    _tr.err = String((e && (e.name === 'AbortError' ? 'abort' : e.message)) || 'error').slice(0, 40);
+    _tr.err = String((e && (e.name === 'AbortError' ? 'abort' : (e.raw ? 'red: ' + e.raw : e.message))) || 'error').slice(0, 40);
     // Distinguir las dos causas de abort: el timeout y el usuario. Antes toda
     // AbortError se reportaba como "tardo demasiado", asi que una cancelacion
     // deliberada aparecia como fallo de red.
-    if(e.name==='AbortError') throw new Error(_genCancelled ? t('toastCancelGen') : t('loadTimeout'));
+    if(e.name==='AbortError') {
+      const eA = new Error(_genCancelled ? t('toastCancelGen') : t('loadTimeout'));
+      if (!_genCancelled) eA.timeout = true;
+      throw eA;
+    }
     throw e;
   } finally {
     _inFlight.delete(controller);
@@ -8568,12 +8636,45 @@ function getCaptionForPlatform(platform) {
 }
 
 // ─── HELPER: Copy to clipboard ──────────────────────────────────
-async function copyToClipboard(text) {
-  try { await navigator.clipboard.writeText(text); } catch (e) {
-    const ta = document.createElement('textarea');
-    ta.value = text; document.body.appendChild(ta); ta.select();
-    document.execCommand('copy'); document.body.removeChild(ta);
-  }
+// S52b · FB-57 / D4 / INV-176 — UNA funcion de copiar, y DEVUELVE si copio.
+// Antes se tragaba el fallo del respaldo (execCommand devuelve false en iOS a menudo)
+// y los llamadores anunciaban «Caption copiado ✓» siempre. writeText se llama sin
+// espera previa: en iOS el permiso solo vive durante el gesto (RD-4).
+function copyToClipboard(text) {
+  const respaldo = () => {
+    let ok = false;
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = text; document.body.appendChild(ta); ta.select();
+      ok = document.execCommand('copy') === true;
+      document.body.removeChild(ta);
+    } catch (e) { ok = false; }
+    return ok;
+  };
+  if (!(navigator.clipboard && navigator.clipboard.writeText)) { return Promise.resolve(respaldo()); }
+  return navigator.clipboard.writeText(text).then(() => true, () => respaldo());
+}
+
+// FC-4, estado de falla: si el texto no se pudo copiar, se muestra para copiarlo a mano.
+function showManualCopy(text) {
+  const prev = document.getElementById('manualCopy'); if (prev) prev.remove();
+  const w = document.createElement('div');
+  w.id = 'manualCopy'; w.setAttribute('role', 'dialog');
+  w.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:10000;display:flex;align-items:flex-end;justify-content:center;padding:16px';
+  const card = document.createElement('div');
+  card.style.cssText = 'background:var(--w,#fff);color:var(--t1,#111);border-radius:14px;padding:16px;width:100%;max-width:520px;box-sizing:border-box';
+  const p = document.createElement('div');
+  p.textContent = t('manualCopyTitle');
+  p.style.cssText = 'font-size:13px;font-weight:600;margin-bottom:8px';
+  const ta = document.createElement('textarea');
+  ta.readOnly = true; ta.value = text || '';
+  ta.style.cssText = 'width:100%;min-height:160px;font-size:14px;padding:10px;border-radius:8px;border:1px solid var(--bor,#ccc);box-sizing:border-box';
+  const b = document.createElement('button');
+  b.className = 'btn btn-primary'; b.textContent = t('manualCopyDone'); b.style.marginTop = '10px';
+  b.onclick = () => w.remove();
+  card.appendChild(p); card.appendChild(ta); card.appendChild(b);
+  w.appendChild(card); document.body.appendChild(w);
+  setTimeout(() => { try { ta.focus(); ta.select(); } catch (e) {} }, 50);
 }
 
 // ─── S31: Ensure resultImg is a usable data URL for canvas/sharing ──
@@ -8740,7 +8841,9 @@ async function openInSocial(platform) {
   const formatLabels = { portrait: '4:5', square: '1:1', story: '9:16' };
 
   // 1. Copy caption FIRST (must be first await — iOS clipboard requirement, RD-4)
-  await copyToClipboard(caption);
+  const copied = await copyToClipboard(caption);
+  // S52b · INV-176: el aviso dice lo que paso con el texto, no lo que se esperaba
+  const capMsg = t(copied ? 'capCopied' : 'capNotCopied');
 
   // 2. Save image(s) using universalSave
   let result = false;
@@ -8766,19 +8869,20 @@ async function openInSocial(platform) {
     let msg;
     if (result === 'shared') {
       msg = isES
-        ? '✅ ' + (isCarouselMode ? 'Slides guardados' : 'Imagen ' + fmtInfo + ' guardada') + ' · Caption copiado ✓\n→ Abre ' + pName + ', selecciona ' + (isCarouselMode ? 'las fotos' : 'la foto') + ' y pega'
-        : '✅ ' + (isCarouselMode ? 'Slides saved' : 'Image ' + fmtInfo + ' saved') + ' · Caption copied ✓\n→ Open ' + pName + ', select ' + (isCarouselMode ? 'the photos' : 'the photo') + ' and paste';
+        ? '✅ ' + (isCarouselMode ? 'Slides guardados' : 'Imagen ' + fmtInfo + ' guardada') + ' · ' + capMsg + '\n→ Abre ' + pName + ', selecciona ' + (isCarouselMode ? 'las fotos' : 'la foto') + ' y pega'
+        : '✅ ' + (isCarouselMode ? 'Slides saved' : 'Image ' + fmtInfo + ' saved') + ' · ' + capMsg + '\n→ Open ' + pName + ', select ' + (isCarouselMode ? 'the photos' : 'the photo') + ' and paste';
     } else if (result === 'opened') {
       msg = isES
-        ? '📋 Caption copiado ✓\n📷 ' + (isCarouselMode ? 'Guarda los slides desde las pestañas' : 'Guarda la imagen ' + fmtInfo + ' desde la pestaña') + '\n→ Abre ' + pName + ', selecciona ' + (isCarouselMode ? 'las fotos' : 'la foto') + ' y pega'
-        : '📋 Caption copied ✓\n📷 ' + (isCarouselMode ? 'Save the slides from the tabs' : 'Save the image ' + fmtInfo + ' from the tab') + '\n→ Open ' + pName + ', select ' + (isCarouselMode ? 'the photos' : 'the photo') + ' and paste';
+        ? '📋 ' + capMsg + '\n📷 ' + (isCarouselMode ? 'Guarda los slides desde las pestañas' : 'Guarda la imagen ' + fmtInfo + ' desde la pestaña') + '\n→ Abre ' + pName + ', selecciona ' + (isCarouselMode ? 'las fotos' : 'la foto') + ' y pega'
+        : '📋 ' + capMsg + '\n📷 ' + (isCarouselMode ? 'Save the slides from the tabs' : 'Save the image ' + fmtInfo + ' from the tab') + '\n→ Open ' + pName + ', select ' + (isCarouselMode ? 'the photos' : 'the photo') + ' and paste';
     } else {
       msg = isES
-        ? '📸 ' + (isCarouselMode ? carouselResults.length + ' slides descargados' : 'Imagen ' + fmtInfo + ' descargada') + ' · Caption copiado ✓\n→ Abre ' + pName + ' y pega el caption'
-        : '📸 ' + (isCarouselMode ? carouselResults.length + ' slides downloaded' : 'Image ' + fmtInfo + ' downloaded') + ' · Caption copied ✓\n→ Open ' + pName + ' and paste the caption';
+        ? '📸 ' + (isCarouselMode ? carouselResults.length + ' slides descargados' : 'Imagen ' + fmtInfo + ' descargada') + ' · ' + capMsg + '\n→ Abre ' + pName + ' y pega el caption'
+        : '📸 ' + (isCarouselMode ? carouselResults.length + ' slides downloaded' : 'Image ' + fmtInfo + ' downloaded') + ' · ' + capMsg + '\n→ Open ' + pName + ' and paste the caption';
     }
     showToast(msg, 6000);
   }
+  if (!copied) showManualCopy(caption);
 }
 
 
@@ -9292,6 +9396,13 @@ function getModeLoading() {
     testimonial: { title:t('loadTestTitle'), time:t('loadTestTime'), steps:[t('loadTestS1'),t('loadTestS2'),t('loadTestS3'),t('loadTestS4')] }
   };
 }
+// S52b · FB-58: el reintento se ofrece EN el error, mientras el worker recuerde la accion.
+function mostrarReintento(on) {
+  const b = document.getElementById('errRetryBtn'), h = document.getElementById('errRetryHint');
+  if (b) b.style.display = on ? 'inline-flex' : 'none';
+  if (h) h.style.display = on ? 'block' : 'none';
+}
+
 function showLoading(on) {
   document.getElementById('inputCard').style.display=on?'none':'block';
   document.querySelector('.mode-cards').style.display=on?'none':'grid';
@@ -9300,6 +9411,7 @@ function showLoading(on) {
   document.getElementById('loadWrap').classList.toggle('show',on);
   document.getElementById('resultWrap').classList.remove('show');
   document.getElementById('errWrap').classList.remove('show');
+  mostrarReintento(false); // cada error decide de nuevo; ningun boton queda rancio
   const cancelBtn = document.getElementById('loadCancelBtn');
   if(on){
     const ml = getModeLoading(); const cfg = ml[mode] || ml.post;
@@ -9315,6 +9427,7 @@ function showLoading(on) {
         showLoading(false);
         document.getElementById('errWrap').classList.add('show');
         document.getElementById('errMsg').textContent = t('loadTimeout');
+        mostrarReintento(mode !== 'video' && puedeReintentar());
       }
     }, 90000);
   } else {
