@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="2.44.0">
+<meta name="app-version" content="2.45.0">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Postimity Studio — Tu estudio de contenido con AI</title>
 <meta name="description" content="Crea posts, flyers, carruseles y videos profesionales con AI. Describe tu negocio una vez y genera contenido listo para publicar en 20 segundos.">
@@ -1809,7 +1809,7 @@ Ej: 'Wonderik es increíble. Mi hija de 3 años ya lee palabras cortas y su desa
       <div style="font-size:14px;font-weight:700;color:#C0392B;margin-bottom:5px">Algo salió mal</div>
       <div style="font-size:13px;color:var(--t3);margin-bottom:14px" id="errMsg">Error inesperado.</div>
       <button class="btn btn-primary" id="errRetryBtn" onclick="retryLastAction()" style="display:none;margin-bottom:6px">Reintentar</button>
-      <div style="font-size:11px;color:var(--t3);margin-bottom:12px;display:none" id="errRetryHint">Es la misma solicitud: no se descuenta otra generación.</div>
+      <div style="font-size:11px;color:var(--t3);margin-bottom:12px;display:none" id="errRetryHint">Retoma la misma solicitud desde el paso en que se cortó.</div>
       <button class="btn btn-outline" id="errBackBtn" onclick="resetCreator()">Volver</button>
     </div>
 
@@ -2321,7 +2321,7 @@ function persistSlides(imgs) {
 }
 
 // APP_VERSION (S34) — deploy verification. Must match worker /version and all HTML files.
-const APP_VERSION = '2.44.0'; // S52b (18 sep 2026) — FB-58 reintento en el error con el mismo actionId, FB-61 textos honestos, FB-57 copiar que devuelve si copio.
+const APP_VERSION = '2.45.0'; // S53 (19 sep 2026) — FB-66/D33 galeria en una llamada y foto original si la mejora falla, FB-67 hashtags una vez, FB-68 barra fuera de Estudio Pro, D31 reintento desde el paso que fallo, D32 texto honesto ·· S52b — FB-58 reintento en el error con el mismo actionId, FB-61 textos honestos, FB-57 copiar que devuelve si copio.
 window.APP_VERSION = APP_VERSION;
 // El log de version vive unas lineas mas abajo (console.info). No agregar otro aqui:
 // S38 borro POSTIMITY_VERSION para tener un solo log y este lo volvio a duplicar.
@@ -2449,7 +2449,7 @@ const T = {
     btnGenerate:'✨ Generar contenido con AI',
     // ── Loading ──
     loadDefault:'Creando tu contenido...', loadHint:'15–45 segundos · Imágenes de alta calidad toman más',
-    loadCancel:'✕ Cancelar y volver', loadTimeout:'La solicitud tardó demasiado. Pudo haberse descontado 1 generación: revisa tu contador.', errNetUncertain:'Se perdió la conexión. Pudo haberse descontado 1 generación: revisa tu contador.', errRetryHint:'Es la misma solicitud: no se descuenta otra generación.', errBack:'Volver', toastStillOffline:'Sigues sin conexión. Cuando vuelva, toca Reintentar aquí mismo.', manualCopyTitle:'No se pudo copiar el texto. Mantenlo presionado para copiarlo:', manualCopyDone:'Listo', capCopied:'Caption copiado ✓', capNotCopied:'Caption: cópialo abajo',
+    loadCancel:'✕ Cancelar y volver', loadTimeout:'La solicitud tardó demasiado. Pudo haberse descontado 1 generación: revisa tu contador.', errNetUncertain:'Se perdió la conexión. Pudo haberse descontado 1 generación: revisa tu contador.', errRetryHint:'Retoma la misma solicitud desde el paso en que se cortó.', errBack:'Volver', toastStillOffline:'Sigues sin conexión. Cuando vuelva, toca Reintentar aquí mismo.', manualCopyTitle:'No se pudo copiar el texto. Mantenlo presionado para copiarlo:', manualCopyDone:'Listo', capCopied:'Caption copiado ✓', capNotCopied:'Caption: cópialo abajo',
     // ── Error ──
     errTitle:'Algo salió mal', errDefault:'Error inesperado.', errRetry:'Reintentar',
     // ── Results ──
@@ -2507,7 +2507,7 @@ const T = {
     toastGalleryReset:'⚠️ Se apagó \'Usar mis fotos\' al cambiar de modo. Vuelve a activarlo y elige tu foto.',
     errGalleryPhoto:'No pudimos cargar tu foto de la galeria. No se descontó ninguna generación. Revisa tu conexión e intenta de nuevo.',
     photoOriginalNoEnhance:'Tu foto original (la mejora con AI no estuvo disponible)',
-    toastEnhanceFailed:'⚠️ Te entregamos los textos y tu foto original. La mejora con AI falló esta vez.',
+    toastEnhanceFailed:'⚠️ La mejora con AI falló: te entregamos los textos con tu foto original y no se descontó esta generación.', toastEnhanceFailedPro:'⚠️ La mejora con AI falló: esta es tu foto original y no se descontó esta generación.',
     histSlidesLabel:'🎠 Slides de este carrusel',
     histDlAll:'⬇️ Guardar todos los slides',
     histSlidePrep:'Preparando slides...',
@@ -2736,7 +2736,7 @@ const T = {
     btnGenerate:'✨ Generate content with AI',
     // ── Loading ──
     loadDefault:'Creating your content...', loadHint:'15–45 seconds · High quality images take longer',
-    loadCancel:'✕ Cancel and go back', loadTimeout:'The request took too long. It may have used 1 generation: check your counter.', errNetUncertain:'The connection was lost. It may have used 1 generation: check your counter.', errRetryHint:'It is the same request: it does not use another generation.', errBack:'Back', toastStillOffline:'You are still offline. When it comes back, tap Retry right here.', manualCopyTitle:'The text could not be copied. Press and hold to copy it:', manualCopyDone:'Done', capCopied:'Caption copied ✓', capNotCopied:'Caption: copy it below',
+    loadCancel:'✕ Cancel and go back', loadTimeout:'The request took too long. It may have used 1 generation: check your counter.', errNetUncertain:'The connection was lost. It may have used 1 generation: check your counter.', errRetryHint:'Resumes the same request from the step where it stopped.', errBack:'Back', toastStillOffline:'You are still offline. When it comes back, tap Retry right here.', manualCopyTitle:'The text could not be copied. Press and hold to copy it:', manualCopyDone:'Done', capCopied:'Caption copied ✓', capNotCopied:'Caption: copy it below',
     // ── Error ──
     errTitle:'Something went wrong', errDefault:'Unexpected error.', errRetry:'Retry',
     // ── Results ──
@@ -2794,7 +2794,7 @@ const T = {
     toastGalleryReset:'⚠️ \'Use my photos\' turned off when you switched modes. Enable it again and pick your photo.',
     errGalleryPhoto:'We could not load your gallery photo. No generation was charged. Check your connection and try again.',
     photoOriginalNoEnhance:'Your original photo (AI enhancement unavailable)',
-    toastEnhanceFailed:'⚠️ We delivered your captions and original photo. The AI enhancement failed this time.',
+    toastEnhanceFailed:'⚠️ The AI enhancement failed: here are your captions with your original photo, and this generation was not used.', toastEnhanceFailedPro:'⚠️ The AI enhancement failed: this is your original photo, and this generation was not used.',
     histSlidesLabel:'🎠 Slides in this carousel',
     histDlAll:'⬇️ Save all slides',
     histSlidePrep:'Preparing slides...',
@@ -5143,6 +5143,21 @@ async function generate(opts = {}) {
 }
 
 // ─── POST GENERATION ─────────────────────────────────
+// S53 · D31 / INV-184 — el reintento retoma desde el paso que fallo.
+// V-S52b-1: corte en la imagen, Reintentar, y captions se volvia a pedir: cobraba otra
+// vez porque la deduplicacion vive en KV y KV cachea la ausencia (FB-60). Lo ya
+// entregado DENTRO de la accion se guarda en memoria por actionId: el reintento
+// (mismo actionId, beginAction) no lo vuelve a pedir y no toca ninguna llave de
+// cobro. Una accion nueva trae actionId nuevo y empieza de cero. Solo en memoria:
+// recargar la pagina lo pierde, y entonces rige la supresion del servidor.
+let _pasos = { aid: null, r: {} };
+async function paso(modo, fn) {
+  if (_pasos.aid !== currentActionId) _pasos = { aid: currentActionId, r: {} };
+  if (_pasos.r[modo]) return _pasos.r[modo];
+  const r = await fn();
+  _pasos.r[modo] = r;
+  return r;
+}
 async function genPost(brand,bg) {
   // ═══════════════════════════════════════════════════════════════════
   // S40-1 [INV-124]: CUALQUIER INSUMO FALIBLE SE OBTIENE ANTES DEL PRIMER COBRO
@@ -5170,57 +5185,44 @@ async function genPost(brand,bg) {
     }
   }
 
-  setStep(1);
-  const capRes=await post({ mode:'captions', actionId: currentActionId, textInput:document.getElementById('postText').value.trim(), brandGuide:bg, brandData:brand, pillar, platform, imageStyle });
-  setStep(2);
-  setStep(3);
-
   if (usingGalleryPhoto) {
-    const photoMime = galleryPhoto.mime;
-    const photoB64Raw = galleryPhoto.raw;
-    try {
-      // Send through enhance pipeline — keeps real photo elements, improves professionally
-      const enhanceRes = await postWithTimeout({
-        mode: 'enhance', actionId: currentActionId, // MISMO actionId que captions:
-        // es el sub-paso de imagen del post, no una accion nueva. Aqui vivia el doble cobro.
-        imageBase64: photoB64Raw,
-        imageType: photoMime,
-        brandGuide: bg,
-        brandData: brand,
-        pillar,
-        enhanceMode: 'custom',
-        customPrompt: capRes.imagePrompt || (detectLanguage() === 'es'
-          ? 'Mejorar esta foto para publicación profesional en redes sociales. Mantener TODOS los elementos originales de la foto. Mejorar iluminación, colores y composición.'
-          : 'Enhance this photo for professional social media publishing. Keep ALL original photo elements. Improve lighting, colors and composition.'),
-      }, 55000);
-
-      setStep(4);
-      showResult({
-        ...capRes,
-        imageUrl: enhanceRes.imageUrl || gallerySelectedPhoto.url,
-        // S40-6: el dato NO lleva decoracion. La vista (photoDescBar, linea ~7476) es
-        // la unica que antepone el icono. Con el emoji aqui salia duplicado, y ademas
-        // se colaba dentro del prompt de regeneracion (regenImage lee este mismo campo).
-        photoDescription: detectLanguage() === 'es' ? 'Tu foto mejorada con AI' : 'Your photo enhanced with AI'
-      });
-    } catch(enhErr) {
-      // S40-1: aqui captions YA cobro, asi que abortar le quitaria al usuario una
-      // generacion sin darle nada. Se entrega lo que si existe (captions + su foto
-      // original) pero se DICE que la mejora fallo. Antes esta rama pintaba
-      // "Tu foto real" como si fuera lo pedido: una degradacion silenciosa.
-      console.warn('Gallery enhance failed, entregando foto original:', enhErr);
-      setStep(4);
-      showResult({
-        ...capRes,
-        // El dataURL, no gallerySelectedPhoto.url: la imagen ya esta en memoria y
-        // no depende de una segunda carga de red que puede volver a fallar.
-        imageUrl: galleryPhoto.dataUrl,
-        photoDescription: t('photoOriginalNoEnhance')
-      });
+    // ═══════════════════════════════════════════════════════════════════
+    // S53 · D33 / FB-66 / INV-181: el post con foto de galeria es UNA llamada.
+    // ═══════════════════════════════════════════════════════════════════
+    // Antes: captions COBRABA primero y luego se pedia la mejora (INV-124 roto: el
+    // insumo falible iba despues del cobro), y al editor se le mandaba la ESCENA que
+    // captions escribe para generar desde cero: repintaba en vez de mejorar. Si la
+    // edicion fallaba, el worker inventaba otra imagen y aqui se rotulaba «mejorada».
+    // Ahora enhance redacta los textos con el tema del usuario y mejora la foto; si
+    // la mejora falla responde degradado, NO cobra (RD-24, D32) y se entrega la foto
+    // original diciendolo.
+    setStep(1);
+    const enhanceRes = await postWithTimeout({
+      mode: 'enhance', actionId: currentActionId,
+      imageBase64: galleryPhoto.raw,
+      imageType: galleryPhoto.mime,
+      textInput: document.getElementById('postText').value.trim(),
+      brandGuide: bg,
+      brandData: brand,
+      pillar,
+      enhanceMode: 'auto',
+    }, 55000);
+    setStep(2); setStep(3); setStep(4);
+    if (enhanceRes.degraded || !enhanceRes.imageUrl) {
+      console.warn('Gallery enhance degradado, entregando foto original sin cobro:', enhanceRes.degradedReason);
+      showResult({ ...enhanceRes, imageUrl: galleryPhoto.dataUrl, photoDescription: t('photoOriginalNoEnhance') });
       showToast(t('toastEnhanceFailed'), 6000);
+      return;
     }
+    // S40-6: el dato NO lleva decoracion; la vista (photoDescBar) antepone el icono.
+    showResult({ ...enhanceRes, photoDescription: detectLanguage() === 'es' ? 'Tu foto mejorada con AI' : 'Your photo enhanced with AI' });
     return;
   }
+
+  setStep(1);
+  const capRes=await paso('captions', () => post({ mode:'captions', actionId: currentActionId, textInput:document.getElementById('postText').value.trim(), brandGuide:bg, brandData:brand, pillar, platform, imageStyle }));
+  setStep(2);
+  setStep(3);
 
   const imgRes=await post({ mode:'image', actionId: currentActionId, imagePrompt:capRes.imagePrompt, imageStyle, brandColors:brand.colors, brandType:brand.type });
   setStep(4);
@@ -5247,6 +5249,12 @@ async function genEnhance(brand,bg) {
     customPrompt
   }, 55000);
   setStep(3); setStep(4);
+  // S53 · FB-66: si la mejora fallo, el cliente recibe SU foto y se le dice. No se cobro.
+  if (res.degraded || !res.imageUrl) {
+    showResult({ ...res, imageUrl: 'data:' + enhanceMime + ';base64,' + enhanceB64 });
+    showToast(t('toastEnhanceFailedPro'), 6000);
+    return;
+  }
   showResult(res);
 }
 
@@ -8355,7 +8363,7 @@ function showResult(data) {
     resultImg.onerror = null;
   };
   const pd=document.getElementById('photoDescBar');
-  if(data.photoDescription){ pd.textContent='📷 '+data.photoDescription; pd.classList.add('show'); } else pd.classList.remove('show');
+  if(photoDescVisible(data, mode)){ pd.textContent='📷 '+data.photoDescription; pd.classList.add('show'); } else pd.classList.remove('show');
   // Show adjust + publish for ALL modes (including carousel)
   const adjWrap = document.getElementById('adjustWrap');
   if(adjWrap) adjWrap.style.display = 'block';
@@ -8449,22 +8457,47 @@ function showResult(data) {
 }
 
 // ─── CAPTIONS ────────────────────────────────────────
+// S53 · FB-67 / INV-182 — cada hashtag sale UNA vez en lo que se copia.
+// RULES_PLATFORM pide «3-5 hashtags al final» del caption Y un campo hashtags aparte:
+// el modelo obedece las dos. Este es el unico escritor de los textos en pantalla y
+// todas las rutas de copiar leen de ahi. Un bloque final de solo hashtags sale del
+// caption; del bloque se quita lo que ya dice la prosa. Sin distinguir mayusculas.
+function splitHashtags(caption, hashtags) {
+  const TAG = /#[\w\u00C0-\u017F]+/g;
+  const lines = String(caption || '').replace(/\s+$/, '').split('\n');
+  const tail = [];
+  while (lines.length && /^\s*(#[\w\u00C0-\u017F]+\s*)+$/.test(lines[lines.length - 1])) tail.unshift(...lines.pop().match(TAG));
+  const prose = lines.join('\n').replace(/\s+$/, '');
+  const seen = new Set((prose.match(TAG) || []).map(x => x.toLowerCase()));
+  const out = [];
+  for (const h of [...tail, ...(String(hashtags || '').match(TAG) || [])]) {
+    const k = h.toLowerCase(); if (seen.has(k)) continue; seen.add(k); out.push(h);
+  }
+  return { caption: prose, hashtags: out.join(' ') };
+}
 function fillCaptions(data) {
   const ig=data.instagram||{}, fb=data.facebook||{}, tt=data.tiktok||{};
-  set('igCap', ig.caption||'');
-  set('igHash', ig.hashtags||'');
+  const igS=splitHashtags(ig.caption, ig.hashtags), fbS=splitHashtags(fb.caption, fb.hashtags), ttS=splitHashtags(tt.caption, tt.hashtags);
+  set('igCap', igS.caption);
+  set('igHash', igS.hashtags);
   document.getElementById('igCta').textContent=ig.cta||'';
-  set('fbCap', fb.caption||'');
-  set('fbHash', fb.hashtags||'');
+  set('fbCap', fbS.caption);
+  set('fbHash', fbS.hashtags);
   document.getElementById('fbCta').textContent=fb.cta||'';
-  set('ttCap', tt.caption||'');
-  set('ttHash', tt.hashtags||'');
+  set('ttCap', ttS.caption);
+  set('ttHash', ttS.hashtags);
   updateTTCounter();
   set('ttHook', tt.hook||'');
   set('ttScript', tt.script||'');
 }
 function set(id,val){ const el=document.getElementById(id); if(el) el.textContent=val; }
 
+// S53 · FB-68 / INV-183: en Estudio Pro la barra mostraba la descripcion que la IA hace
+// de la foto; parece un caption y puede ser falsa («sudadera» de un polo). Se oculta
+// solo en la vista: el dato se queda, porque regenImage lo usa de guarda (S37-6).
+function photoDescVisible(data, m) {
+  return !!(data && data.photoDescription) && m !== 'enhance';
+}
 function fillAdBrief(ab) {
   const w=document.getElementById('adBriefWrap'); w.style.display='block';
   document.getElementById('abAudience').textContent=ab.audience||'—';
