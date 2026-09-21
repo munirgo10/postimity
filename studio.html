@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="2.45.0">
+<meta name="app-version" content="2.46.2">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Postimity Studio — Tu estudio de contenido con AI</title>
 <meta name="description" content="Crea posts, flyers, carruseles y videos profesionales con AI. Describe tu negocio una vez y genera contenido listo para publicar en 20 segundos.">
@@ -690,6 +690,7 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
 /* Gallery toggle in generation flow */
 .gallery-toggle-wrap{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bg);border-radius:10px;margin-bottom:10px;border:1px solid var(--bor)}
 .gallery-toggle-wrap.disabled{opacity:.5;pointer-events:none}
+.gallery-toggle-wrap.gt-retry{cursor:pointer}.gallery-toggle-wrap.gt-retry .gt-switch{opacity:.4}
 .gt-switch{position:relative;width:36px;height:20px;flex-shrink:0}
 .gt-switch input{opacity:0;width:100%;height:100%;position:absolute;cursor:pointer;margin:0;z-index:1}
 .gt-track{position:absolute;inset:0;background:var(--bor);border-radius:10px;transition:.2s}
@@ -698,6 +699,8 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
 .gt-switch input:checked ~ .gt-knob{left:18px}
 .gt-label{font-size:12px;font-weight:600;color:var(--t2);flex:1}
 .gt-hint{font-size:10px;color:var(--t3)}
+.fit-notice{font-size:11px;line-height:1.45;color:#7A5200;background:#FFF7E6;border:1px solid #F5D9A0;border-radius:10px;padding:8px 10px;margin-bottom:10px}
+.frame-ctl{display:none;align-items:center;gap:10px;margin:6px 0 10px;font-size:11px;color:var(--t3)}
 /* Gallery photo selector in generation */
 .gallery-selector{background:var(--bg);border-radius:10px;padding:12px;margin-bottom:10px;border:1px solid var(--bor);display:none}
 .gallery-selector.show{display:block}
@@ -1778,9 +1781,10 @@ Ej: 'Wonderik es increíble. Mi hija de 3 años ya lee palabras cortas y su desa
         </div>
         <div>
           <div class="gt-label" id="gtLabel">Usar mis fotos</div>
-          <div class="gt-hint" id="gtHint">Sube fotos en Mi Cuenta para activar</div>
+          <div class="gt-hint" id="gtHint">Cargando tus fotos…</div>
         </div>
       </div>
+      <div class="fit-notice" id="fitNotice" style="display:none"></div>
       <div class="gallery-selector" id="gallerySelector">
         <div class="gs-title" id="gsTitle">📷 Foto sugerida — toca para cambiar</div>
         <div class="gs-photos" id="gsPhotos"></div>
@@ -1879,6 +1883,10 @@ Ej: 'Wonderik es increíble. Mi hija de 3 años ya lee palabras cortas y su desa
                 <button class="pub-btn tk" onclick="openInSocial('tiktok')">
                   🎵 TikTok<br><span class="fmt-lbl" id="fmtTk" style="font-size:9px;font-weight:400">9:16 · Guardar + Copiar</span>
                 </button>
+              </div>
+              <div class="frame-ctl" id="frameCtl" style="display:none">
+                <span id="frameCtlLabel">Mover encuadre</span>
+                <input type="range" id="frameRange" min="0" max="100" value="33" step="1" style="flex:1" oninput="setFrameAnchor(this.value)">
               </div>
               <div class="pub-hint" id="pubHint">💡 Guarda la imagen en el formato ideal y copia el caption — luego abre la app y pega</div>
             </div>
@@ -2321,7 +2329,7 @@ function persistSlides(imgs) {
 }
 
 // APP_VERSION (S34) — deploy verification. Must match worker /version and all HTML files.
-const APP_VERSION = '2.45.0'; // S53 (19 sep 2026) — FB-66/D33 galeria en una llamada y foto original si la mejora falla, FB-67 hashtags una vez, FB-68 barra fuera de Estudio Pro, D31 reintento desde el paso que fallo, D32 texto honesto ·· S52b — FB-58 reintento en el error con el mismo actionId, FB-61 textos honestos, FB-57 copiar que devuelve si copio.
+const APP_VERSION = '2.46.2'; // 21 sep 2026 — FB-74: el control de encuadre mueve el eje que se recorta (de lado en fotos horizontales) · FB-73 sube con el worker (AR-13) ·· S53b (20 sep 2026) — motor de composicion: D35 normalizacion unica al subir, D34 tamanio del editor segun la forma de la foto, D36 encuadre anclado sin relleno difuminado y con aviso antes de gastar, D37 ancla por etiqueta con el dedo del cliente por encima, S35-14 el flyer IA compone su texto en canvas, D19 vista previa = entregable, FB-69 el toggle de galeria ya no miente ·· S53 — FB-66/D33 galeria en una llamada y foto original si la mejora falla, FB-67 hashtags una vez, FB-68 barra fuera de Estudio Pro, D31 reintento desde el paso que fallo, D32 texto honesto ·· S52b — FB-58 reintento en el error con el mismo actionId, FB-61 textos honestos, FB-57 copiar que devuelve si copio.
 window.APP_VERSION = APP_VERSION;
 // El log de version vive unas lineas mas abajo (console.info). No agregar otro aqui:
 // S38 borro POSTIMITY_VERSION para tener un solo log y este lo volvio a duplicar.
@@ -2627,6 +2635,13 @@ const T = {
     galleryDelConfirm:'¿Eliminar esta foto de tu galería?',
     galleryFullToast:'Tu galería está llena. Elimina fotos o mejora tu plan.',
     gtLabel:'Usar mis fotos', gtHintEmpty:'Sube fotos en Mi Cuenta para activar',
+    gtHintLoading:'Cargando tus fotos…', gtHintError:'No se pudieron cargar tus fotos · toca para reintentar',
+    errPhotoUnreadable:'No pudimos leer esa imagen. Si viene de un iPhone en formato HEIC, ábrela y guárdala como JPG.',
+    photoSmallWarn:'⚠️ Esa foto tiene poca resolución: puede verse borrosa al publicarla.',
+    fitCrop:'Esta foto se recortará {p}% para salir en {f}. Al ver el resultado puedes mover el encuadre o elegir otra red.',
+    fitSmall:'Tiene poca resolución: puede verse borrosa.',
+    fitReady:'Listo', fitAdapted:'Adaptada · se recorta {p}%',
+    frameCtlLabel:'Mover encuadre', frameCtlLabelX:'Mover encuadre ← →', frameCtlLabelY:'Mover encuadre ↑ ↓', flyerTextFail:'No pudimos componer los textos del flyer. Vuelve a intentarlo.',
     gtHintAvailable:'{n} foto(s) disponible(s)',
     gsTitle:'📷 Foto sugerida — toca para cambiar',
     galleryPhotoLabel:'📷 Tu foto real',
@@ -2913,6 +2928,13 @@ const T = {
     galleryDelConfirm:'Delete this photo from your gallery?',
     galleryFullToast:'Your gallery is full. Delete photos or upgrade your plan.',
     gtLabel:'Use my photos', gtHintEmpty:'Upload photos in My Account to enable',
+    gtHintLoading:'Loading your photos…', gtHintError:'Could not load your photos · tap to retry',
+    errPhotoUnreadable:'We could not read that image. If it is an iPhone HEIC file, open it and save it as JPG.',
+    photoSmallWarn:'⚠️ That photo is low resolution: it may look blurry when published.',
+    fitCrop:'This photo will be cropped {p}% to fit {f}. On the result you can move the framing or pick another network.',
+    fitSmall:'Low resolution: it may look blurry.',
+    fitReady:'Ready', fitAdapted:'Adapted · {p}% cropped',
+    frameCtlLabel:'Move framing', frameCtlLabelX:'Move framing ← →', frameCtlLabelY:'Move framing ↑ ↓', flyerTextFail:'We could not compose the flyer text. Please try again.',
     gtHintAvailable:'{n} photo(s) available',
     gsTitle:'📷 Suggested photo — tap to change',
     galleryPhotoLabel:'📷 Your real photo',
@@ -3537,26 +3559,34 @@ async function loadBrandFromCloud(id) {
 }
 
 // ═══════════════════════════════════════════════════════
-// PNG CONVERSION (for OpenAI Edit API)
+// D35 · NORMALIZACION UNICA DE LA FOTO DEL CLIENTE — S53b
 // ═══════════════════════════════════════════════════════
-function convertToPNG(base64, mimeType, maxSize=1024) {
-  return new Promise(resolve => {
-    const img = new Image();
-    img.onload = () => {
-      const size = Math.min(Math.min(img.width, img.height), maxSize);
-      const canvas = document.createElement('canvas');
-      canvas.width = canvas.height = size;
-      const ctx = canvas.getContext('2d');
-      // Center crop to square
-      const sx = (img.width - size) / 2;
-      const sy = (img.height - size) / 2;
-      ctx.drawImage(img, sx, sy, size, size, 0, 0, size, size);
-      const pngB64 = canvas.toDataURL('image/png').split(',')[1];
-      resolve({ b64: pngB64, mimeType: 'image/png' });
-    };
-    img.onerror = () => resolve({ b64: base64, mimeType }); // fallback to original
-    img.src = `data:${mimeType};base64,${base64}`;
-  });
+// Sustituye a convertToPNG, que hacia tres cosas mal a la vez (S41-E):
+//   1. recortaba a CUADRADO antes de que la foto saliera del telefono,
+//   2. reconvertia a PNG — una foto pesa 5-10x mas en PNG que en JPEG,
+//   3. su rama de error devolvia el original y el llamador anunciaba 'image/png'.
+// Ahora: lado largo <= UPLOAD_MAX_SIDE, sin recortar, sin ampliar, JPEG, y el tipo
+// que se devuelve es el que REALMENTE se produjo. Lo que no se puede decodificar
+// (HEIC de iPhone) se rechaza con mensaje, en vez de guardarse para fallar despues.
+const UPLOAD_MAX_SIDE = 2048;   // D35: 2048 evita ampliar una foto horizontal llevada a 9:16
+const UPLOAD_MIN_SIDE = 1080;   // por debajo se AVISA, no se bloquea (FB-64 e)
+const UPLOAD_JPEG_Q   = 0.85;
+async function normalizeUpload(base64, mimeType) {
+  const src = String(base64).startsWith('data:') ? String(base64) : 'data:' + (mimeType || 'image/jpeg') + ';base64,' + base64;
+  const img = await loadImg(src);
+  if (!img) throw new Error(t('errPhotoUnreadable'));
+  const sw = img.naturalWidth || img.width, sh = img.naturalHeight || img.height;
+  if (!sw || !sh) throw new Error(t('errPhotoUnreadable'));
+  const k = Math.min(1, UPLOAD_MAX_SIDE / Math.max(sw, sh));   // nunca amplia
+  const w = Math.max(1, Math.round(sw * k)), h = Math.max(1, Math.round(sh * k));
+  const canvas = document.createElement('canvas');
+  canvas.width = w; canvas.height = h;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(img, 0, 0, sw, sh, 0, 0, w, h);               // proporcion intacta
+  const url = canvas.toDataURL('image/jpeg', UPLOAD_JPEG_Q);
+  const m = url.match(/^data:(image\/[a-z]+);base64,/);
+  return { b64: url.split(',')[1], mimeType: m ? m[1] : 'image/jpeg', width: w, height: h,
+           small: Math.min(w, h) < UPLOAD_MIN_SIDE, dataUrl: url };
 }
 
 // ╔═══════════════════════════════════════════════════╗
@@ -3952,13 +3982,15 @@ function setupUploads() {
   });
   // Enhance
   setupDropzone('carouselCoverZone','carouselCoverFile','carouselCoverPrev','carouselCoverTitle','carouselCoverName', async (b64,mime)=>{
-    const conv = await convertToPNG(b64, mime, 1024);
-    carouselCoverB64 = conv.b64; carouselCoverMime = 'image/png';
+    const n = await normalizeUpload(b64, mime);
+    carouselCoverB64 = n.b64; carouselCoverMime = n.mimeType; carouselCoverDims = n;
+    updateFitNotice();
   });
   setupDropzone('enhanceZone','enhanceFile','enhancePrev','enhanceTitle','enhanceName', async (b64,mime)=>{
-    // Convert to PNG for OpenAI Edit API compatibility
-    const converted = await convertToPNG(b64, mime, 1024);
-    enhanceB64 = converted.b64; enhanceMime = 'image/png';
+    const n = await normalizeUpload(b64, mime);
+    enhanceB64 = n.b64; enhanceMime = n.mimeType; enhanceDims = n;
+    framePhotoTags = []; frameAnchorManual = null;
+    updateFitNotice();
   });
   // Flyer
   setupDropzone('flyerZone','flyerFile','flyerPrev','flyerTitle','flyerName', (b64,mime)=>{ flyerPhotoB64=b64; flyerPhotoMime=mime; });
@@ -4473,6 +4505,7 @@ function setMode(m) {
   if(btn) btn.textContent = m === 'video' ? '🎬 ' + t('videoGenBtn') : '✨ ' + t('genBtn');
   // Update gallery toggle visibility per mode
   updateGalleryToggle();
+  updateFitNotice();
   // Reset gallery selector when switching modes
   const gSel = document.getElementById('gallerySelector');
   if(gSel) gSel.classList.remove('show');
@@ -4584,6 +4617,10 @@ function setPlatform(btn) {
   document.querySelectorAll('.plt-tab').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active'); platform=btn.dataset.plt;
   document.getElementById('pltInfo').innerHTML=getPltInfo()[platform];
+  // S53b · FB-64: cambiar de red recompone la vista previa con el formato de esa red.
+  // NO regenera ni cobra (D19): es el mismo composer sobre la misma base limpia.
+  updateFitNotice();
+  if (originalImageUrl && mode !== 'carousel' && mode !== 'video') redrawCanvas();
   // Auto-switch caption tab
   const tabMap={instagram:'ig',facebook:'fb',tiktok:'tt'};
   showCapTabById(tabMap[platform]);
@@ -4718,17 +4755,15 @@ async function genCarousel(brand, bg) {
       // bytes JPEG: el data URL podia no decodificar (y convertToPNG devolvia el
       // original sin convertir por su rama onerror), y aun decodificando el worker
       // recibia coverPhotoType mentido y editRealPhoto lo rechazaba.
-      const conv = await convertToPNG(photo.raw, photo.mime, 1024);
-      // conv.mimeType, no un literal: convertToPNG tiene una rama onerror que
-      // devuelve el original SIN convertir. Fijar 'image/png' ahi volvia a mentir.
+      const conv = await normalizeUpload(photo.raw, photo.mime);
+      // conv.mimeType, no un literal: el tipo que se anuncia es el que se produjo.
       coverPhoto = conv.b64; coverMime = conv.mimeType || photo.mime;
     } catch(e) {
       console.warn('Gallery photo fetch failed (pre-cobro, sin cargo):', e.message);
       throw new Error(t('errGalleryPhoto'));
     }
   } else if(carouselCoverMode==='photo' && carouselCoverB64) {
-    const conv = await convertToPNG(carouselCoverB64, carouselCoverMime, 1024);
-    coverPhoto = conv.b64; coverMime = 'image/png';
+    coverPhoto = carouselCoverB64; coverMime = carouselCoverMime;   // ya normalizada al subir
   }
   const res = await postWithTimeout({
     mode: 'carousel', actionId: currentActionId,
@@ -6105,19 +6140,38 @@ let galleryTagSummary = {};
 let galleryPendingFiles = [];
 let galleryPendingTags = [];
 let gallerySelectedPhoto = null; // photo selected for current generation
+// S53b · FB-69 / INV-185 — `galleryData = []` significaba a la vez «no tiene fotos» y
+// «no se sabe»: la carga corria una vez al arrancar, un fallo lo tragaba el catch y el
+// toggle pintaba ese [] como hecho. Ahora el estado de la carga es un dato, y SOLO
+// 'ok' permite afirmar que no hay fotos (RD-10: un catch nunca devuelve exito).
+let galleryState = 'idle';      // idle (no ha corrido) · loading · ok · error
+let _galleryInFlight = null;
 
-async function loadGallery() {
-  if (!brandId) return;
-  try {
-    const data = await postJSON({ mode: 'gallery-list', brandId });
-    if (data.success) {
+function loadGallery() {
+  if (!brandId) return Promise.resolve();
+  if (_galleryInFlight) return _galleryInFlight;   // arranque y entrada no piden dos veces
+  galleryState = 'loading';
+  _galleryInFlight = (async () => {
+    try {
+      const data = await postJSON({ mode: 'gallery-list', brandId });
+      if (!data || !data.success) throw new Error((data && data.error) || 'gallery-list sin exito');
       galleryData = data.gallery || [];
       galleryLimit = data.limit || 5;
       galleryTagSummary = data.tagSummary || {};
-      renderGalleryGrid();
-      updateGalleryToggle();
+      galleryState = 'ok';
+    } catch(e) {
+      galleryState = 'error';
+      console.warn('Gallery load failed:', e && e.message);
+    } finally {
+      _galleryInFlight = null;
+      // La rejilla de Mi cuenta es otra pantalla: si falla al pintar, la carga sigue siendo buena.
+      if (galleryState === 'ok') { try { renderGalleryGrid(); } catch(e) { console.warn('renderGalleryGrid:', e && e.message); } }
+      // Pinta, no reintenta: el reintento vive en updateGalleryToggle y lo dispara
+      // una ENTRADA del usuario. Reintentar desde aqui seria un bucle con la red caida.
+      paintGalleryToggle();
     }
-  } catch(e) { console.warn('Gallery load failed:', e); }
+  })();
+  return _galleryInFlight;
 }
 
 function renderGalleryGrid() {
@@ -6329,14 +6383,21 @@ async function confirmGalleryUpload() {
   if (btn) { btn.textContent = isES ? 'Subiendo...' : 'Uploading...'; btn.style.pointerEvents = 'none'; }
 
   try {
-    const b64 = await fileToBase64(file);
+    // D35: se normaliza ANTES de salir del telefono. Una foto de 5 MB se va en ~600 KB,
+    // el worker deja de decodificar megabytes con 10 ms de CPU (FB-62) y guardamos
+    // ancho y alto, que es lo que permite avisar antes de gastar una generacion.
+    const raw = await fileToBase64(file);
+    const norm = await normalizeUpload(raw, file.type);
     const data = await postJSON({
       mode: 'gallery-upload',
       brandId,
-      imageData: b64,
+      imageData: norm.dataUrl,
+      width: norm.width,
+      height: norm.height,
       tags: galleryPendingTags,
       fileName: file.name,
     });
+    if (norm.small) showToast(t('photoSmallWarn'), 6000);
     if (data.success) {
       galleryData.push(data.photo);
       renderGalleryGrid();
@@ -6408,7 +6469,13 @@ function showGalleryPhotoDetail(photoId) {
 // Lote B (S43-1 y S40-3 en verde), no antes: conectar la galeria a un composer
 // que recorta a cuadrado y desborda el texto entrega la foto del cliente rota.
 const showForModes = ['post', 'video', 'carousel'];
+// Punto unico de entrada: lo llaman showScreen('creatorScreen') y setMode, o sea toda
+// entrada a un modo que muestra el toggle. Si la galeria no cargo bien, se vuelve a pedir.
 function updateGalleryToggle() {
+  if (showForModes.includes(mode) && (galleryState === 'idle' || galleryState === 'error')) loadGallery();
+  paintGalleryToggle();
+}
+function paintGalleryToggle() {
   const wrap = document.getElementById('galleryToggleWrap');
   if (!wrap) return;
   const hasPhotos = galleryData.length > 0;
@@ -6428,20 +6495,34 @@ function updateGalleryToggle() {
   }
 
   wrap.style.display = 'flex';
+  const gt = document.getElementById('galleryToggle');
+  const hint = document.getElementById('gtHint');
+  wrap.onclick = null;
+  wrap.classList.remove('gt-retry');
+  if (gt) gt.disabled = false;
 
   if (hasPhotos) {
+    // Hay fotos conocidas (aunque una recarga posterior falle): se pueden usar.
     wrap.classList.remove('disabled');
-    document.getElementById('gtHint').textContent = isES
-      ? galleryData.length + ' foto(s) disponible(s)'
-      : galleryData.length + ' photo(s) available';
+    hint.textContent = t('gtHintAvailable').replace('{n}', galleryData.length);
+  } else if (galleryState === 'ok') {
+    // Unico caso en que se sabe que no hay fotos.
+    wrap.classList.add('disabled');
+    if (gt) gt.checked = false;
+    hint.textContent = t('gtHintEmpty');
+  } else if (galleryState === 'error') {
+    // No se sabe. Se dice, y tocar reintenta (el toggle no se puede encender).
+    wrap.classList.remove('disabled');
+    wrap.classList.add('gt-retry');
+    if (gt) { gt.checked = false; gt.disabled = true; }
+    hint.textContent = t('gtHintError');
+    wrap.onclick = function(){ loadGallery(); paintGalleryToggle(); };
   } else {
     wrap.classList.add('disabled');
-    document.getElementById('galleryToggle').checked = false;
-    document.getElementById('gtHint').textContent = isES
-      ? 'Sube fotos en Mi Cuenta para activar'
-      : 'Upload photos in My Account to enable';
+    if (gt) gt.checked = false;
+    hint.textContent = t('gtHintLoading');
   }
-  document.getElementById('gtLabel').textContent = isES ? 'Usar mis fotos' : 'Use my photos';
+  document.getElementById('gtLabel').textContent = t('gtLabel');
 }
 
 function onGalleryToggleChange(checked) {
@@ -6461,6 +6542,8 @@ function onGalleryToggleChange(checked) {
   } else {
     selector.classList.remove('show');
     gallerySelectedPhoto = null;
+    framePhotoTags = [];
+    updateFitNotice();
     // In carousel mode, restore cover photo controls
     if (mode === 'carousel') {
       const coverBtns = document.getElementById('cvrAI')?.parentElement;
@@ -6504,6 +6587,9 @@ function showGalleryPhotoSelector(filterTag) {
   ).join('');
 
   gallerySelectedPhoto = photos[0];
+  framePhotoTags = (photos[0] && photos[0].tags) || [];
+  frameAnchorManual = null;
+  updateFitNotice();
   selector.classList.add('show');
 }
 
@@ -6511,6 +6597,9 @@ function selectGalleryPhoto(photoId, el) {
   const photo = galleryData.find(p => p.id === photoId);
   if (!photo) return;
   gallerySelectedPhoto = photo;
+  framePhotoTags = photo.tags || [];   // D37: la etiqueta decide el ancla
+  frameAnchorManual = null;
+  updateFitNotice();
   // Update selection visual
   document.querySelectorAll('#gsPhotos .gs-photo').forEach(p => p.classList.remove('selected'));
   if (el) el.classList.add('selected');
@@ -7995,8 +8084,19 @@ async function genFlyerAI(brand,bg) {
   setStep(1);
   setStep(2);
   const res=await postWithTimeout({ mode:'flyer', actionId: currentActionId, flyerData:fd, brandGuide:bg, brandData:brand, imageStyle }, 90000);
-  setStep(3); setStep(4);
-  showResult(res);
+  setStep(3);
+  // S53b · S35-14 / MC-1: el modelo de imagen ya no escribe el texto —lo ignora o lo
+  // deforma—. El servidor devuelve el FONDO y los campos los compone el mismo motor de
+  // canvas que usa el flyer con foto: un solo composer para las dos rutas (RD-30).
+  let imageUrl = res.imageUrl;
+  try {
+    if (imageUrl) imageUrl = await composeFlyerCanvas(res.imageUrl, fd, brand);
+  } catch(e) {
+    console.warn('composeFlyerCanvas (IA) fallo:', e && e.message);
+    showToast(t('flyerTextFail'), 6000);
+  }
+  setStep(4);
+  showResult({ ...res, imageUrl, postType: fd.type });
 }
 async function genFlyerPhoto(brand,bg) {
   const fd=getFlyerData();
@@ -8006,7 +8106,7 @@ async function genFlyerPhoto(brand,bg) {
   setStep(2);
   // Compose flyer image client-side with Canvas — instant, no API needed
   setStep(3);
-  const imageUrl=await composeFlyerCanvas(flyerPhotoB64, flyerPhotoMime, fd, brand);
+  const imageUrl=await composeFlyerCanvas('data:'+(flyerPhotoMime||'image/jpeg')+';base64,'+flyerPhotoB64, fd, brand);
   setStep(4);
   showResult({ ...capRes, imageUrl, postType:fd.type });
 }
@@ -8643,8 +8743,9 @@ async function getCanvasBlob(format) {
   // drawCover. El gate `if (!imgEl.dataset.ovBaked)` que vivia aqui hacia que la
   // exportacion reutilizara un sello pintado a otro aspecto. ovBaked sigue existiendo
   // pero solo gobierna el preview; ninguna ruta de exportacion lo consulta.
-  const ovRes = await applyBrandOverlays(ctx, canvas.width, canvas.height);
+  const ovRes = await applyBrandOverlays(ctx, canvas.width, canvas.height, format);
   warnIfLogoFailed(ovRes);
+  _lastFrameKeep = frameKeepFor(img, format);
   return new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.93));
 }
 
@@ -8869,8 +8970,7 @@ async function openInSocial(platform) {
   // imagen y sin recortar nada (una fuente 2:3 conserva 83% en 4:5 y solo 67% en 1:1).
   // El 1:1 sigue disponible en "Descargar imagen", que es donde de verdad se usa:
   // WhatsApp y correo. Un cambio aqui obliga a mover fmtIg/fmtFb/fmtTk y pubFormats.
-  const platformFormats = { instagram: 'portrait', facebook: 'portrait', tiktok: 'story' };
-  const format = platformFormats[platform] || 'square';
+  const format = formatForPlatform(platform);
   const formatLabels = { portrait: '4:5', square: '1:1', story: '9:16' };
 
   // 1. Copy caption FIRST (must be first await — iOS clipboard requirement, RD-4)
@@ -8922,59 +9022,21 @@ async function openInSocial(platform) {
 
 // ─── DOWNLOAD ─────────────────────────────────────────
 async function downloadImg(format) {
-  const imgEl=document.getElementById('resultImg');
-  if(!imgEl.src||imgEl.src===window.location.href) return;
-  const brand=loadBrand();
-  const primary=brand?.colors?.primary||'#2979FF';
-  const canvas=document.createElement('canvas');
-  const ctx=canvas.getContext('2d');
-  // S30: Try originalImageUrl (clean, for adding fresh overlay), fallback to
-  // resultImg.src (data URL, already has overlay from redrawCanvas) if CORS blocks canvas
-  let img = await loadImg(originalImageUrl);
-  let imgFromDataUrl = false;
-  if (!img) {
-    img = await loadImg(imgEl.src); // data URL from redrawCanvas — never taints
-    imgFromDataUrl = true;
-  }
-  if(!img) { showToast(detectLanguage()==='es'?'Error cargando imagen':'Error loading image'); return; }
-  // S35: showLogo/logoSrc eliminados — la decisión vive en resolveLogoSrc()
-
-  // S29: drawCover center-crops the image preserving aspect ratio (no stretching)
-  if(format==='square'){ canvas.width=canvas.height=1080; drawCover(ctx,img,0,0,1080,1080); }
-  else if(format==='portrait'){
-    canvas.width=1080; canvas.height=1350;
-    ctx.fillStyle=primary; ctx.fillRect(0,0,1080,1350);
-    drawCover(ctx,img,0,0,1080,1350);
-  } else {
-    canvas.width=1080; canvas.height=1920;
-    const grad=ctx.createLinearGradient(0,0,0,1920);
-    grad.addColorStop(0,primary); grad.addColorStop(1,darken(primary,50));
-    ctx.fillStyle=grad; ctx.fillRect(0,0,1080,1920);
-    drawCover(ctx,img,0,0,1080,1920);
-    if(brand?.name){ ctx.fillStyle='rgba(255,255,255,.85)'; ctx.font='bold 32px Plus Jakarta Sans,sans-serif'; ctx.textAlign='center'; ctx.fillText(brand.name,540,1680); }
-  }
-
-  // Only add logo/watermark if using clean originalImageUrl (not data URL which already has overlay)
-  // S35 / RD-25: overlays centralizados. Este bloque tenía su propia copia del
-  // dibujo, con logoSrc resuelto SIN gate del toggle y cargando el logo por http
-  // con crossOrigin — si el logo no traía cabecera CORS, loadImg devolvía null y
-  // el logo se saltaba en silencio mientras el watermark sí se dibujaba.
-  if (!imgFromDataUrl) {
-    const ovRes = await applyBrandOverlays(ctx, canvas.width, canvas.height);
-    warnIfLogoFailed(ovRes);
-  }
-
-  // S33: Use universalSave — works on iOS (was broken with bare <a download>, RD-3)
-  const dlBlob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.93));
-  if (dlBlob) {
-    const brd = loadBrand();
-    const sl = (brd?.name||'postimity').toLowerCase().replace(/[^a-z0-9]+/g,'-').slice(0,20);
-    const result = await universalSave(dlBlob, sl + '-' + format + '-' + Date.now() + '.jpg');
-    const isES = detectLanguage() === 'es';
-    if (result === 'shared') showToast(isES ? '✅ Imagen guardada en carrete' : '✅ Image saved to camera roll');
-    else if (result === 'opened') showToast(isES ? '📷 Mantén presionado para guardar la imagen' : '📷 Long-press to save the image', 5000);
-    else if (result === 'downloaded') showToast(isES ? '✅ Imagen descargada' : '✅ Image downloaded');
-  }
+  const imgEl = document.getElementById('resultImg');
+  if (!imgEl.src || imgEl.src === window.location.href) return;
+  // S53b · D19 / RD-30 / S37-L1-13: descargar deja de tener composer propio. Tenia DOS
+  // diferencias fatales con compartir: drawCover sin ancla (recorte central duro) y un
+  // gate `if(!imgFromDataUrl)` que, cuando la base limpia no cargaba, entregaba la imagen
+  // SIN sello ni firma (PR-078) y ademas reencuadraba un sello ya horneado (RD-29).
+  const dlBlob = await getCanvasBlob(format);
+  if (!dlBlob) { showToast(detectLanguage() === 'es' ? 'Error cargando imagen' : 'Error loading image'); return; }
+  const brd = loadBrand();
+  const sl = (brd?.name || 'postimity').toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 20);
+  const result = await universalSave(dlBlob, sl + '-' + format + '-' + Date.now() + '.jpg');
+  const isES = detectLanguage() === 'es';
+  if (result === 'shared') showToast(isES ? '✅ Imagen guardada en carrete' : '✅ Image saved to camera roll');
+  else if (result === 'opened') showToast(isES ? '📷 Mantén presionado para guardar la imagen' : '📷 Long-press to save the image', 5000);
+  else if (result === 'downloaded') showToast(isES ? '✅ Imagen descargada' : '✅ Image downloaded');
 }
 
 // ═══════════════════════════════════════════════════════
@@ -9057,20 +9119,27 @@ function shouldShowWatermark() {
 }
 
 // Dibuja logo + watermark sobre un contexto ya pintado.
-async function applyBrandOverlays(ctx, w, h) {
+async function applyBrandOverlays(ctx, w, h, format) {
   const out = { logoDrawn: false, logoFailed: false, wmDrawn: false };
+  // S53b · D36: logo y firma dentro de la zona que la red NO tapa. Numeros de Meta
+  // (Stories y Reels unificados): 14% arriba, 35% abajo, 6% por lado. En feed el
+  // recorte es minimo y basta un margen de 4%.
+  const SZ = SAFE_ZONE[format === 'story' ? 'story' : 'feed'];
   // S37/L1b: geometria en diagonal. Antes logo y firma compartian la esquina
   // inferior derecha y se encimaban. Tamanos y margenes proporcionales a min(w,h),
   // no en pixeles fijos: la misma marca debe verse igual en 1:1, 4:5 y 9:16.
   const SIDE = Math.min(w, h);
   const PAD  = Math.round(SIDE * 0.035);
+  const PADX = Math.max(PAD, Math.round(w * SZ.side));
+  const PADT = Math.max(PAD, Math.round(h * SZ.top));
+  const PADB = Math.max(PAD, Math.round(h * SZ.bottom));
   const rawLogo = resolveLogoSrc();
   if (rawLogo) {
     const src = await logoAsDataUrl(rawLogo);
     const logo = src ? await loadImg(src) : null;
     if (logo) {
       const sz = Math.round(SIDE * 0.09);
-      const x = PAD, y = PAD;                       // arriba-izquierda
+      const x = PADX, y = PADT;                     // arriba-izquierda, zona segura
       ctx.save();
       // Sombra suave en vez del disco blanco: legible sobre foto sin parecer calcomania.
       ctx.shadowColor = 'rgba(0,0,0,0.35)';
@@ -9092,7 +9161,7 @@ async function applyBrandOverlays(ctx, w, h) {
     ctx.font = '600 ' + wfs + 'px -apple-system,sans-serif';
     const wtw = ctx.measureText(wmText).width;
     const wpw = wtw + wfs, wph = Math.round(wfs * 1.7);
-    const wpx = w - wpw - PAD, wpy = h - wph - PAD;   // abajo-derecha
+    const wpx = w - wpw - PADX, wpy = h - wph - PADB; // abajo-derecha, zona segura
     ctx.fillStyle = 'rgba(15,23,42,0.72)'; ctx.beginPath();
     if (ctx.roundRect) ctx.roundRect(wpx, wpy, wpw, wph, 6); else ctx.rect(wpx, wpy, wpw, wph);
     ctx.fill();
@@ -9205,75 +9274,62 @@ async function redrawCanvas() {
   const resultImg = document.getElementById('resultImg');
   if (!resultImg) return;
 
-  // S35 / RD-25: usa la fuente única. Antes tenía su propia copia del dibujo,
-  // distinta a la de downloadImg y a la de getCanvasBlob.
-  if (!resolveLogoSrc() && !shouldShowWatermark()) {
-    resultImg.src = originalImageUrl;
-    delete resultImg.dataset.ovBaked;
-    return;
-  }
-
+  // ═══ S53b · D19 / FB-64(f) / INV-082 ═══
+  // La vista previa deja de ser «la imagen original con el sello encima, al aspecto que
+  // haya salido del modelo» y pasa a ser EXACTAMENTE los bytes que se entregan a la red
+  // elegida: mismo composer, mismo encuadre, mismo sello. No es que coincida: es el mismo
+  // archivo. Asi el WYSIWYG deja de ser una promesa verificable y pasa a ser imposible de
+  // fallar (D19). La rama que devolvia la imagen cruda cuando no habia logo ni firma se
+  // retira: era justo la que mostraba un encuadre que no existia.
   try {
-    // S35: si originalImageUrl es cross-origin sin CORS, loadImg devuelve null y el
-    // toggle no hacía nada visible. Se convierte a dataURL y se reintenta — misma
-    // técnica que el logo. Un dataURL nunca mancha el canvas.
-    let img = await loadImg(originalImageUrl);
-    if (!img) {
-      const asData = await toDataUrlCached(originalImageUrl);
-      if (asData) img = await loadImg(asData);
-    }
-    if (!img) {
-      showToast(detectLanguage() === 'es'
-        ? '⚠️ No pudimos aplicar el logo a esta imagen'
-        : '⚠️ We could not apply the logo to this image');
-      return;
-    }
-    const canvas = document.createElement('canvas');
-    canvas.width = img.naturalWidth || img.width;
-    canvas.height = img.naturalHeight || img.height;
-    const ctx = canvas.getContext('2d');
-    ctx.drawImage(img, 0, 0);
-
-    const ovRes = await applyBrandOverlays(ctx, canvas.width, canvas.height);
-    warnIfLogoFailed(ovRes);
-    // S37/L1: la bandera se marca DESPUES de toDataURL. Antes se marcaba antes, asi que
-    // si toDataURL lanzaba, quedaba en '1' sobre una imagen SIN overlays y getCanvasBlob
-    // la leia como "ya horneada": la descarga salia sin logo y sin avisar.
-    const baked = canvas.toDataURL('image/jpeg', 0.92);
-    resultImg.src = baked;
+    const blob = await getCanvasBlob(formatForPlatform(platform));
+    if (!blob) throw new Error('sin lienzo');
+    resultImg.src = await blobToDataUrl(blob);
     resultImg.dataset.ovBaked = '1';
+    updateFitLabels();
+    updateFrameControl();
   } catch(e) {
-    // INV-076: nunca en silencio. El catch mudo que vivia aqui costo tres ciclos de
-    // diagnostico a ciegas en S37.
+    // INV-076: nunca en silencio.
     console.error('redrawCanvas fallo:', e);
     showToast(detectLanguage() === 'es'
-      ? '\u26a0\ufe0f No pudimos aplicar logo/firma a esta imagen'
-      : '\u26a0\ufe0f We could not apply logo/signature to this image');
+      ? '\u26a0\ufe0f No pudimos preparar la vista previa de esta imagen'
+      : '\u26a0\ufe0f We could not prepare the preview for this image');
   }
 }
 
-async function composeFlyerCanvas(photoB64, photoMime, fd, brand) {
+function blobToDataUrl(blob) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result);
+    r.onerror = () => rej(new Error('read failed'));
+    r.readAsDataURL(blob);
+  });
+}
+
+async function composeFlyerCanvas(photoSrc, fd, brand) {
   const W=1080, H=1080;
   const canvas=document.createElement('canvas');
   canvas.width=W; canvas.height=H;
   const ctx=canvas.getContext('2d');
   const primary=brand?.colors?.primary||'#2979FF';
   const accent=brand?.colors?.accent||'#E91E8C';
-  // S35: logoSrc eliminado — la decisión vive en resolveLogoSrc()
 
-  // 1. Draw real photo filling the entire canvas (center crop to square)
-  const photo=await loadImg('data:'+photoMime+';base64,'+photoB64);
+  // 1. Foto de fondo. S53b · S43-1/D36/D37: se encuadra con drawFramed —recorte anclado
+  //    al sujeto— en vez del recorte a cuadrado escrito a mano (Math.min(w,h) centrado),
+  //    que le cortaba la cabeza a cualquier foto vertical de telefono.
+  let photo = await loadImg(photoSrc);
+  if (!photo) { const d = await toDataUrlCached(photoSrc); if (d) photo = await loadImg(d); }
   if(!photo) { ctx.fillStyle=primary; ctx.fillRect(0,0,W,H); }
-  else { const ps=Math.min(photo.width,photo.height); const psx=(photo.width-ps)/2, psy=(photo.height-ps)/2; ctx.drawImage(photo,psx,psy,ps,ps,0,0,W,H); }
+  else drawFramed(ctx, photo, W, H, function(){ ctx.fillStyle=primary; ctx.fillRect(0,0,W,H); });
 
-  // 2. Gradient overlay — dark at bottom for text readability
+  // 2. Degradado para que el texto se lea sobre la foto
   const grad=ctx.createLinearGradient(0,250,0,H);
   grad.addColorStop(0,'rgba(0,0,0,0)');
   grad.addColorStop(0.35,'rgba(0,0,0,0.45)');
   grad.addColorStop(1,hexToRgba(primary,0.92));
   ctx.fillStyle=grad; ctx.fillRect(0,0,W,H);
 
-  // 3. Top band — business name + type badge
+  // 3. Banda superior — nombre del negocio + tipo
   ctx.fillStyle=hexToRgba(primary,0.85); ctx.fillRect(0,0,W,90);
   ctx.fillStyle='rgba(255,255,255,0.95)';
   ctx.font='bold 28px sans-serif'; ctx.textAlign='left';
@@ -9285,50 +9341,85 @@ async function composeFlyerCanvas(photoB64, photoMime, fd, brand) {
     ctx.fillText(fd.type.slice(0,18),W-105,44);
   }
 
-  // 4. Main title — large, centered, lower area
-  ctx.textAlign='center'; ctx.fillStyle='#fff';
-  const title=fd.title||'';
-  ctx.font='bold 62px sans-serif';
-  const maxW=W-80;
-  const words=title.split(' '); let line=''; let y=670;
-  for(const w of words){
-    const test=line?line+' '+w:w;
-    if(ctx.measureText(test).width>maxW&&line){ ctx.fillText(line,W/2,y); line=w; y+=72; }
-    else line=test;
-  }
-  if(line) ctx.fillText(line,W/2,y); y+=72;
-
-  // 5. Subtitle
-  if(fd.subtitle){
-    ctx.font='32px sans-serif'; ctx.fillStyle='rgba(255,255,255,0.88)';
-    ctx.fillText(fd.subtitle.slice(0,50),W/2,y); y+=46;
-  }
-  if(fd.tagline){
-    ctx.font='italic 26px sans-serif'; ctx.fillStyle='rgba(255,255,255,0.72)';
-    ctx.fillText(fd.tagline.slice(0,50),W/2,y); y+=40;
-  }
-
-  // 6. Info row — dates, price, schedule
+  // ═══ 4. MOTOR DE TEXTO CON PRESUPUESTO VERTICAL — S53b · S40-3 / S41-D ═══
+  // Antes el titulo arrancaba en y=670 fijo y CRECIA HACIA ABAJO sin medir: con cuatro
+  // lineas el subtitulo, el tag y la fila de info se pintaban por debajo del borde —
+  // existian y no se veian, y el sintoma dependia del largo del titulo. Ahora los bloques
+  // se miden, se escalan a la vez y se anclan ABAJO: si no caben, se reduce la letra y
+  // en el limite se corta con «…» (visible), nunca en silencio.
+  const M = 40, MAXW = W - 2*M, GAP = 14;
+  const TOP_LIMIT = 110;                      // debajo de la banda superior
+  const BOTTOM = H - Math.round(H*0.055);     // margen inferior
   const infoItems=[fd.dates,fd.price,fd.schedule].filter(Boolean);
-  if(infoItems.length){
-    y=Math.max(y+10,890);
-    // Pill background
-    ctx.fillStyle='rgba(255,255,255,0.18)';
-    ctx.beginPath(); ctx.roundRect(40,y-36,W-80,52,26); ctx.fill();
-    ctx.font='bold 26px sans-serif'; ctx.fillStyle='#fff';
-    ctx.fillText(infoItems.join('  ·  ').slice(0,60),W/2,y);
-    y+=56;
+  const bloques = [
+    { txt:(fd.title||'').trim(),     px:62, font:'bold {px}px sans-serif',   color:'#fff',                    lh:1.16, min:34, maxLines:4 },
+    { txt:(fd.subtitle||'').trim(),  px:32, font:'{px}px sans-serif',        color:'rgba(255,255,255,0.88)',  lh:1.28, min:20, maxLines:2 },
+    { txt:(fd.tagline||'').trim(),   px:26, font:'italic {px}px sans-serif', color:'rgba(255,255,255,0.72)',  lh:1.28, min:17, maxLines:2 },
+    { txt:infoItems.join('  ·  '),   px:26, font:'bold {px}px sans-serif',   color:'#fff',                    lh:1.30, min:17, maxLines:2, pill:true },
+    { txt:(fd.extraInfo||'').trim(), px:22, font:'{px}px sans-serif',        color:'rgba(255,255,255,0.78)',  lh:1.28, min:15, maxLines:2 }
+  ].filter(b => b.txt);
+
+  const wrap = (txt, px, fontTpl) => {
+    ctx.font = fontTpl.replace('{px}', px);
+    const out = [];
+    let line = '';
+    for (const w of txt.split(/\s+/)) {
+      const test = line ? line + ' ' + w : w;
+      if (ctx.measureText(test).width > MAXW && line) { out.push(line); line = w; }
+      else line = test;
+    }
+    if (line) out.push(line);
+    return out;
+  };
+  const recortar = (lineas, px, fontTpl, max) => {
+    if (lineas.length <= max) return { lineas, cortado:false };
+    const keep = lineas.slice(0, max);
+    let last = keep[max-1];
+    ctx.font = fontTpl.replace('{px}', px);
+    while (last.length > 1 && ctx.measureText(last + '…').width > MAXW) last = last.slice(0, -1);
+    keep[max-1] = last.replace(/\s+$/, '') + '…';
+    return { lineas: keep, cortado:true };
+  };
+  const medir = (k, maxLinesK) => {
+    let alto = 0; const plan = [];
+    for (const b of bloques) {
+      const px = Math.max(b.min, Math.round(b.px * k));
+      const cap = Math.max(1, Math.min(b.maxLines, maxLinesK(b)));
+      const r = recortar(wrap(b.txt, px, b.font), px, b.font, cap);
+      const h = r.lineas.length * px * b.lh + (b.pill ? 18 : 0);
+      plan.push({ b, px, lineas:r.lineas, h });
+      alto += h + GAP;
+    }
+    return { plan, alto: Math.max(0, alto - GAP) };
+  };
+  const disponible = BOTTOM - TOP_LIMIT;
+  let r = null;
+  for (let k = 1; k >= 0.52; k -= 0.04) {
+    r = medir(k, b => b.maxLines);
+    if (r.alto <= disponible) break;
+  }
+  if (r.alto > disponible) {                 // ultimo recurso: se corta, y se nota
+    for (let cap = 3; cap >= 1 && r.alto > disponible; cap--) r = medir(0.52, () => cap);
   }
 
-  // 7. Extra info
-  if(fd.extraInfo){
-    ctx.font='22px sans-serif'; ctx.fillStyle='rgba(255,255,255,0.78)';
-    ctx.fillText(fd.extraInfo.slice(0,55),W/2,Math.min(y,1040));
+  let y = BOTTOM - r.alto;
+  for (const it of r.plan) {
+    const { b, px, lineas } = it;
+    if (b.pill) {
+      const alto = lineas.length * px * b.lh;
+      ctx.fillStyle='rgba(255,255,255,0.18)';
+      ctx.beginPath(); ctx.roundRect(M, y, MAXW, alto + 18, 26); ctx.fill();
+      y += 9;
+    }
+    ctx.font = b.font.replace('{px}', px);
+    ctx.fillStyle = b.color; ctx.textAlign = 'center';
+    for (const ln of lineas) { y += px * b.lh; ctx.fillText(ln, W/2, y - px * 0.24); }
+    if (b.pill) y += 9;
+    y += GAP;
   }
 
-  // 8. S37/L1b · RD-29: el composer NO sella. Devuelve el flyer limpio; el sello lo
-  // aplica redrawCanvas para el preview y getCanvasBlob para cada exportacion, ya
-  // sobre el encuadre final. Sellar aqui obligaba a reencuadrar un sello pintado.
+  // 5. S37/L1b · RD-29: el composer NO sella. Devuelve el flyer limpio; el sello lo
+  // aplica getCanvasBlob sobre el encuadre final, que es tambien la vista previa (D19).
 
   return new Promise(res=>canvas.toBlob(blob=>{
     const reader=new FileReader();
@@ -9353,51 +9444,135 @@ function hexToRgba(hex,alpha){
 // La regla se evalua contra la imagen REAL, no contra una lista de formatos,
 // porque en Estudio Pro la foto la sube el usuario y puede venir horizontal.
 // Umbral: por debajo de 75% conservado se usa contain con fondo.
-const FRAME_KEEP_MIN = 0.75;
+// ═══ S53b · D36 / D37 — EL ENCUADRE SE ANCLA AL SUJETO Y LA PERDIDA SE AVISA ═══
+// D36: se retira el relleno con fondo difuminado. Rellenar en silencio decide por el
+// cliente y en feed se lee como error de exportacion. El umbral deja de disparar
+// relleno y pasa a disparar el AVISO, antes de gastar una generacion (updateFitNotice)
+// y el rotulo en la entrega (updateFitLabels).
+const FRAME_KEEP_MIN = 0.90;
+// D37: el ancla sale de la etiqueta que el cliente YA puso al subir la foto; si la IA
+// ve el sujeto, manda sobre la etiqueta; y el dedo del cliente manda sobre las dos.
+// 0 = conservar todo lo de arriba · 1 = conservar todo lo de abajo.
+const CROP_ANCHOR_DEFAULT = 0.33;   // tercio superior: donde viven las caras
+const CROP_ANCHOR_BY_TAG = { equipo:0.30, cliente:0.30, evento:0.38, producto:0.50, resultado:0.50, proceso:0.50, local:0.50, ambiente:0.50 };
+// Zonas seguras de Meta (Stories y Reels unificados): 14% arriba, 35% abajo, 6% por lado.
+const SAFE_ZONE = { story:{ top:0.14, bottom:0.35, side:0.06 }, feed:{ top:0.04, bottom:0.04, side:0.04 } };
+// Fuente unica del formato por red (antes vivia dentro de openInSocial).
+const PLATFORM_FORMAT = { instagram:'portrait', facebook:'portrait', tiktok:'story' };
+function formatForPlatform(p) { return PLATFORM_FORMAT[p] || 'square'; }
+let frameAnchorManual = null;   // el dedo del cliente
+let frameSubjectY = null;       // lo que la IA vio
+let framePhotoTags = [];        // la etiqueta de la foto en uso
+let enhanceDims = null, carouselCoverDims = null;
+const FORMAT_SIZE = { square:[1080,1080], portrait:[1080,1350], story:[1080,1920] };
+let _lastFrameKeep = 1, _lastBaseDims = null;
+function frameKeepFor(img, format) {
+  const sw = img && (img.naturalWidth || img.width), sh = img && (img.naturalHeight || img.height);
+  _lastBaseDims = (sw && sh) ? { width: sw, height: sh } : null;
+  if (!sw || !sh) return 1;
+  const d = FORMAT_SIZE[format] || FORMAT_SIZE.square;
+  return coverKeepRatio(sw, sh, d[0], d[1]);
+}
+// Lo que NO controlamos (que trae la foto) se dice ANTES de gastar una generacion.
+function currentPhotoDims() {
+  if (mode === 'enhance' && enhanceDims) return enhanceDims;
+  if (mode === 'carousel' && carouselCoverDims) return carouselCoverDims;
+  const gt = document.getElementById('galleryToggle');
+  if (gt && gt.checked && gallerySelectedPhoto && gallerySelectedPhoto.width) return gallerySelectedPhoto;
+  return null;
+}
+function updateFitNotice() {
+  const el = document.getElementById('fitNotice');
+  if (!el) return;
+  const d = currentPhotoDims();
+  if (!d || !d.width || !d.height) { el.style.display = 'none'; return; }
+  const fmt = formatForPlatform(platform);
+  const sz = FORMAT_SIZE[fmt] || FORMAT_SIZE.square;
+  const keep = coverKeepRatio(d.width, d.height, sz[0], sz[1]);
+  const msgs = [];
+  if (keep < FRAME_KEEP_MIN) msgs.push(t('fitCrop').replace('{p}', Math.round((1 - keep) * 100)).replace('{f}', fmt === 'story' ? '9:16' : '4:5'));
+  if (Math.min(d.width, d.height) < UPLOAD_MIN_SIDE) msgs.push(t('fitSmall'));
+  if (!msgs.length) { el.style.display = 'none'; return; }
+  el.textContent = '⚠️ ' + msgs.join(' · ');
+  el.style.display = 'block';
+}
+// Y en la entrega, cada boton dice lo que de verdad pasa con ESTA imagen.
+function updateFitLabels() {
+  const d = _lastBaseDims;
+  if (!d) return;
+  [['fmtIg','portrait'], ['fmtFb','portrait'], ['fmtTk','story'], ['fmtDl','square']].forEach(function(par) {
+    const el = document.getElementById(par[0]);
+    if (!el) return;
+    const base = (el.textContent || '').split(' — ')[0];
+    const sz = FORMAT_SIZE[par[1]] || FORMAT_SIZE.square;
+    const keep = coverKeepRatio(d.width, d.height, sz[0], sz[1]);
+    const suf = keep >= 0.999 ? ' — ' + t('fitReady')
+      : keep >= FRAME_KEEP_MIN ? ''
+      : ' — ' + t('fitAdapted').replace('{p}', Math.round((1 - keep) * 100));
+    el.textContent = base + suf;
+  });
+}
+function updateFrameControl() {
+  const el = document.getElementById('frameCtl');
+  if (!el) return;
+  el.style.display = _lastFrameKeep < 0.999 ? 'flex' : 'none';
+  // El control describe el eje que ESTA imagen recorta en el formato que se ve.
+  const d = _lastBaseDims, sz = FORMAT_SIZE[formatForPlatform(platform)] || FORMAT_SIZE.square;
+  const deLado = !!(d && d.width / d.height > sz[0] / sz[1]);
+  const pos = deLado ? (typeof frameAnchorManual === 'number' ? frameAnchorManual : 0.5) : currentAnchorY();
+  const inp = document.getElementById('frameRange');
+  if (inp) inp.value = Math.round(pos * 100);
+  const lab = document.getElementById('frameCtlLabel');
+  if (lab) lab.textContent = t(deLado ? 'frameCtlLabelX' : 'frameCtlLabelY');
+}
+// D37, tercer nivel: el dedo del cliente manda sobre la etiqueta y sobre la IA.
+function setFrameAnchor(v) {
+  frameAnchorManual = Math.min(1, Math.max(0, Number(v) / 100));
+  redrawCanvas();
+}
+function currentAnchorY() {
+  if (typeof frameAnchorManual === 'number') return Math.min(1, Math.max(0, frameAnchorManual));
+  if (typeof frameSubjectY === 'number') return Math.min(1, Math.max(0, frameSubjectY));
+  for (const tg of (framePhotoTags || [])) if (CROP_ANCHOR_BY_TAG[tg] != null) return CROP_ANCHOR_BY_TAG[tg];
+  return CROP_ANCHOR_DEFAULT;
+}
 
 function coverKeepRatio(sw, sh, dw, dh) {
   const sr = sw / sh, dr = dw / dh;
   return sr > dr ? (dr / sr) : (sr / dr);
 }
 
-// paintFallback: fondo de marca si el navegador no soporta ctx.filter (Safari viejo).
-function drawFramed(ctx, img, dw, dh, paintFallback) {
+// paintFallback: fondo de marca si la imagen no trae medidas utilizables.
+// S53b · D36: el reencuadre es SIEMPRE recorte anclado al sujeto. La rama de relleno
+// difuminado se retiro: en feed se lee como relleno y en publicidad penaliza. Lo que
+// antes se tapaba con desenfoque ahora se dice antes de gastar (updateFitNotice).
+function drawFramed(ctx, img, dw, dh, paintFallback, opts) {
   const sw = img.naturalWidth || img.width;
   const sh = img.naturalHeight || img.height;
-  if (!sw || !sh) { drawCover(ctx, img, 0, 0, dw, dh); return 'cover'; }
-  if (coverKeepRatio(sw, sh, dw, dh) >= FRAME_KEEP_MIN) {
-    drawCover(ctx, img, 0, 0, dw, dh);
-    return 'cover';
-  }
-  // Fondo: la propia imagen desenfocada. Las barras de color plano se leen como
-  // error de exportacion; el desenfoque se lee como intencion.
-  let painted = false;
-  try {
-    if (typeof ctx.filter === 'string') {
-      ctx.save();
-      ctx.filter = 'blur(' + Math.round(Math.min(dw, dh) * 0.05) + 'px) brightness(0.72)';
-      drawCover(ctx, img, 0, 0, dw, dh);
-      ctx.restore();
-      painted = true;
-    }
-  } catch(e) { painted = false; }
-  if (!painted && typeof paintFallback === 'function') paintFallback();
-  const sc = Math.min(dw / sw, dh / sh);
-  const w = Math.round(sw * sc), h = Math.round(sh * sc);
-  ctx.drawImage(img, Math.round((dw - w) / 2), Math.round((dh - h) / 2), w, h);
-  return 'contain';
+  if (!sw || !sh) { if (typeof paintFallback === 'function') paintFallback(); return 'cover'; }
+  drawCover(ctx, img, 0, 0, dw, dh, (opts && typeof opts.anchorY === 'number') ? opts.anchorY : currentAnchorY());
+  return 'cover';
 }
 
-function drawCover(ctx, img, dx, dy, dw, dh) {
-  const sr = img.naturalWidth / img.naturalHeight; // source ratio
-  const dr = dw / dh; // destination ratio
+// ay: que parte de lo que se pierde se quita de ARRIBA. 0.33 conserva la cabeza y
+// sacrifica los pies, que es lo correcto en fotos de personas (D37).
+function drawCover(ctx, img, dx, dy, dw, dh, ay) {
+  const W = img.naturalWidth || img.width, H = img.naturalHeight || img.height;
+  const sr = W / H;          // source ratio
+  const dr = dw / dh;        // destination ratio
+  const a = (typeof ay === 'number') ? Math.min(1, Math.max(0, ay)) : currentAnchorY();
   let sx, sy, sw, sh;
   if (sr > dr) { // source wider → crop sides
-    sh = img.naturalHeight; sw = sh * dr;
-    sx = (img.naturalWidth - sw) / 2; sy = 0;
-  } else { // source taller → crop top/bottom
-    sw = img.naturalWidth; sh = sw / dr;
-    sx = 0; sy = (img.naturalHeight - sh) / 2;
+    // FB-74 (D37): el dedo del cliente manda TAMBIEN de lado. Antes el recorte lateral
+    // quedaba siempre centrado y el deslizador solo movia arriba/abajo: en una foto
+    // horizontal llevada a vertical —el caso que mas pierde— no habia salida.
+    // Las anclas por etiqueta son verticales (caras arriba); de lado, sin dedo, centro.
+    const ax = (typeof frameAnchorManual === 'number') ? Math.min(1, Math.max(0, frameAnchorManual)) : 0.5;
+    sh = H; sw = sh * dr;
+    sx = (W - sw) * ax; sy = 0;
+  } else { // source taller → crop top/bottom, anclado al sujeto
+    sw = W; sh = sw / dr;
+    sx = 0; sy = (H - sh) * a;
   }
   ctx.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh);
 }
