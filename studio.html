@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="2.46.2">
+<meta name="app-version" content="2.47.0">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Postimity Studio — Tu estudio de contenido con AI</title>
 <meta name="description" content="Crea posts, flyers, carruseles y videos profesionales con AI. Describe tu negocio una vez y genera contenido listo para publicar en 20 segundos.">
@@ -1784,7 +1784,6 @@ Ej: 'Wonderik es increíble. Mi hija de 3 años ya lee palabras cortas y su desa
           <div class="gt-hint" id="gtHint">Cargando tus fotos…</div>
         </div>
       </div>
-      <div class="fit-notice" id="fitNotice" style="display:none"></div>
       <div class="gallery-selector" id="gallerySelector">
         <div class="gs-title" id="gsTitle">📷 Foto sugerida — toca para cambiar</div>
         <div class="gs-photos" id="gsPhotos"></div>
@@ -1884,14 +1883,10 @@ Ej: 'Wonderik es increíble. Mi hija de 3 años ya lee palabras cortas y su desa
                   🎵 TikTok<br><span class="fmt-lbl" id="fmtTk" style="font-size:9px;font-weight:400">9:16 · Guardar + Copiar</span>
                 </button>
               </div>
-              <div class="frame-ctl" id="frameCtl" style="display:none">
-                <span id="frameCtlLabel">Mover encuadre</span>
-                <input type="range" id="frameRange" min="0" max="100" value="33" step="1" style="flex:1" oninput="setFrameAnchor(this.value)">
-              </div>
               <div class="pub-hint" id="pubHint">💡 Guarda la imagen en el formato ideal y copia el caption — luego abre la app y pega</div>
             </div>
             <div class="dl-btns" style="justify-content:center">
-              <button class="btn-dl" onclick="downloadImg('square')" style="flex:1;max-width:200px">⬇ Descargar imagen<br><span class="fmt-lbl" id="fmtDl" style="font-size:9px;font-weight:400">1:1 · Para WhatsApp, email, etc.</span></button>
+              <button class="btn-dl" onclick="downloadImg(pieceFormat)" style="flex:1;max-width:200px">⬇ Descargar imagen<br><span class="fmt-lbl" id="fmtDl" style="font-size:9px;font-weight:400">4:5 · Descargar</span></button>
             </div>
           </div>
         </div>
@@ -2240,18 +2235,21 @@ function updateShareLabels(mode) {
   const set = (id, txt) => { const el = document.getElementById(id); if (el) el.textContent = txt; };
   const es = detectLanguage() === 'es';
   const save = es ? 'Guardar + Copiar' : 'Save + Copy';
+  // D42 · FB-78: una sola linea por boton. Lista si la pieza es de ese formato; si no, como obtenerla.
+  const pf = (typeof pieceFormat === 'string') ? pieceFormat : 'portrait';
+  const lab = pf === 'story' ? '9:16' : '4:5';
+  const listo = function(fmt) { return fmt === pf ? (fmt === 'story' ? '9:16' : '4:5') + ' ✓' : (es ? 'genera para esta red' : 'generate for this network'); };
   if (mode === 'carousel') {
-    const n = es ? 'slides · óptimo IG/FB' : 'slides · best for IG/FB';
-    set('fmtIg', '4:5 ' + n); set('fmtFb', '4:5 ' + n); set('fmtTk', '4:5 ' + n);
-    set('fmtDl', es ? '4:5 · todas las slides' : '4:5 · all slides');
+    set('fmtIg', listo('portrait')); set('fmtFb', listo('portrait')); set('fmtTk', listo('story'));
+    set('fmtDl', lab + (es ? ' · todas las slides' : ' · all slides'));
   } else if (mode === 'video') {
     const ar = (window.videoAspectRatio === '16:9') ? '16:9' : '9:16';
     const g = es ? 'formato elegido' : 'chosen format';
     set('fmtIg', ar + ' · ' + g); set('fmtFb', ar + ' · ' + g); set('fmtTk', ar + ' · ' + g);
     set('fmtDl', ar + ' · ' + (es ? 'video' : 'video'));
   } else {
-    set('fmtIg', '4:5 · ' + save); set('fmtFb', '4:5 · ' + save); set('fmtTk', '9:16 · ' + save);
-    set('fmtDl', es ? '1:1 · Para WhatsApp, email, etc.' : '1:1 · For WhatsApp, email, etc.');
+    set('fmtIg', listo('portrait')); set('fmtFb', listo('portrait')); set('fmtTk', listo('story'));
+    set('fmtDl', lab + ' · ' + (es ? 'Descargar' : 'Download'));
   }
 }
 
@@ -2329,7 +2327,7 @@ function persistSlides(imgs) {
 }
 
 // APP_VERSION (S34) — deploy verification. Must match worker /version and all HTML files.
-const APP_VERSION = '2.46.2'; // 21 sep 2026 — FB-74: el control de encuadre mueve el eje que se recorta (de lado en fotos horizontales) · FB-73 sube con el worker (AR-13) ·· S53b (20 sep 2026) — motor de composicion: D35 normalizacion unica al subir, D34 tamanio del editor segun la forma de la foto, D36 encuadre anclado sin relleno difuminado y con aviso antes de gastar, D37 ancla por etiqueta con el dedo del cliente por encima, S35-14 el flyer IA compone su texto en canvas, D19 vista previa = entregable, FB-69 el toggle de galeria ya no miente ·· S53 — FB-66/D33 galeria en una llamada y foto original si la mejora falla, FB-67 hashtags una vez, FB-68 barra fuera de Estudio Pro, D31 reintento desde el paso que fallo, D32 texto honesto ·· S52b — FB-58 reintento en el error con el mismo actionId, FB-61 textos honestos, FB-57 copiar que devuelve si copio.
+const APP_VERSION = '2.47.0'; // 22 sep 2026 — S54: D38 la IA en el formato exacto de la red (tabla en el servidor), D41 la foto la encuadra el cliente al subirla (cuadricula estilo Instagram, sin relleno ni fondo extendido), D42 todo en 4:5 o 9:16 incluido el carrusel (sin 1:1), D40 sin nombre en 9:16 y firma arriba a la derecha, flyer compuesto en su formato (FB-76) y achicar antes de cortar (AR-28) ·· 21 sep 2026 — FB-74: el control de encuadre mueve el eje que se recorta (de lado en fotos horizontales) · FB-73 sube con el worker (AR-13) ·· S53b (20 sep 2026) — motor de composicion: D35 normalizacion unica al subir, D34 tamanio del editor segun la forma de la foto, D36 encuadre anclado sin relleno difuminado y con aviso antes de gastar, D37 ancla por etiqueta con el dedo del cliente por encima, S35-14 el flyer IA compone su texto en canvas, D19 vista previa = entregable, FB-69 el toggle de galeria ya no miente ·· S53 — FB-66/D33 galeria en una llamada y foto original si la mejora falla, FB-67 hashtags una vez, FB-68 barra fuera de Estudio Pro, D31 reintento desde el paso que fallo, D32 texto honesto ·· S52b — FB-58 reintento en el error con el mismo actionId, FB-61 textos honestos, FB-57 copiar que devuelve si copio.
 window.APP_VERSION = APP_VERSION;
 // El log de version vive unas lineas mas abajo (console.info). No agregar otro aqui:
 // S38 borro POSTIMITY_VERSION para tener un solo log y este lo volvio a duplicar.
@@ -2641,7 +2639,7 @@ const T = {
     fitCrop:'Esta foto se recortará {p}% para salir en {f}. Al ver el resultado puedes mover el encuadre o elegir otra red.',
     fitSmall:'Tiene poca resolución: puede verse borrosa.',
     fitReady:'Listo', fitAdapted:'Adaptada · se recorta {p}%',
-    frameCtlLabel:'Mover encuadre', frameCtlLabelX:'Mover encuadre ← →', frameCtlLabelY:'Mover encuadre ↑ ↓', flyerTextFail:'No pudimos componer los textos del flyer. Vuelve a intentarlo.',
+    cropTitle:'Encuadra tu foto · {f}', cropHint:'Arrastra para mover · pellizca o usa la barra para acercar', cropSmall:'Así queda chica (menos de 1080 px): se verá borrosa. Aleja el zoom o usa otra foto.', cropOk:'Usar este encuadre', cropCancel:'Cancelar', cropCancelled:'Cancelaste el encuadre. No se descontó nada: vuelve a generar cuando quieras.', otherFmtTiktok:'Esta pieza está en 4:5. Para TikTok (9:16) elige TikTok arriba y genera de nuevo.', otherFmtFeed:'Esta pieza está en 9:16. Para Instagram o Facebook (4:5) elige esa red arriba y genera de nuevo.', frameCtlLabel:'Mover encuadre', frameCtlLabelX:'Mover encuadre ← →', frameCtlLabelY:'Mover encuadre ↑ ↓', flyerTextFail:'No pudimos componer los textos del flyer. Vuelve a intentarlo.',
     gtHintAvailable:'{n} foto(s) disponible(s)',
     gsTitle:'📷 Foto sugerida — toca para cambiar',
     galleryPhotoLabel:'📷 Tu foto real',
@@ -2934,7 +2932,7 @@ const T = {
     fitCrop:'This photo will be cropped {p}% to fit {f}. On the result you can move the framing or pick another network.',
     fitSmall:'Low resolution: it may look blurry.',
     fitReady:'Ready', fitAdapted:'Adapted · {p}% cropped',
-    frameCtlLabel:'Move framing', frameCtlLabelX:'Move framing ← →', frameCtlLabelY:'Move framing ↑ ↓', flyerTextFail:'We could not compose the flyer text. Please try again.',
+    cropTitle:'Frame your photo · {f}', cropHint:'Drag to move · pinch or use the slider to zoom', cropSmall:'This is small (under 1080 px): it will look blurry. Zoom out or use another photo.', cropOk:'Use this framing', cropCancel:'Cancel', cropCancelled:'You cancelled the framing. Nothing was deducted: generate again whenever you like.', otherFmtTiktok:'This piece is 4:5. For TikTok (9:16), choose TikTok above and generate again.', otherFmtFeed:'This piece is 9:16. For Instagram or Facebook (4:5), choose that network above and generate again.', frameCtlLabel:'Move framing', frameCtlLabelX:'Move framing ← →', frameCtlLabelY:'Move framing ↑ ↓', flyerTextFail:'We could not compose the flyer text. Please try again.',
     gtHintAvailable:'{n} photo(s) available',
     gsTitle:'📷 Suggested photo — tap to change',
     galleryPhotoLabel:'📷 Your real photo',
@@ -3589,6 +3587,153 @@ async function normalizeUpload(base64, mimeType) {
            small: Math.min(w, h) < UPLOAD_MIN_SIDE, dataUrl: url };
 }
 
+// ═══════════════════════════════════════════════════════
+// D41 · S54 — LA FOTO LA ENCUADRA EL CLIENTE, AL SUBIRLA (como Instagram)
+// ═══════════════════════════════════════════════════════
+// Sustituye a D36/D37: el producto ya no adivina que conservar ni avisa porcentajes.
+// El cliente arrastra y acerca la foto dentro de un marco del formato elegido; lo que
+// queda dentro es lo que se mejora y se publica. Nunca se rellena, difumina ni extiende
+// el fondo: si no cabe lo que quiere, toma o sube otra foto (decision del operador).
+// zoom >= 1 · px/py: 0 = borde izquierdo/superior, 1 = derecho/inferior.
+function cropRect(sw, sh, fmt, zoom, px, py) {
+  const d = FORMAT_SIZE[fmt] || FORMAT_SIZE.portrait, r = d[0] / d[1];
+  let w, h;
+  if (sw / sh > r) { h = sh; w = h * r; } else { w = sw; h = w / r; }
+  const z = Math.min(8, Math.max(1, isFinite(zoom) ? Number(zoom) : 1));
+  w = Math.max(16, w / z); h = w / r;
+  const cx = Math.min(1, Math.max(0, isFinite(px) ? Number(px) : 0.5));
+  const cy = Math.min(1, Math.max(0, isFinite(py) ? Number(py) : 0.5));
+  return { sx: (sw - w) * cx, sy: (sh - h) * cy, sw: w, sh: h };
+}
+// Proporcion EXACTA: el ancho es multiplo de la unidad del formato (4:5 -> 4, 9:16 -> 9).
+const FORMAT_UNIT = { portrait:[4,5], story:[9,16], square:[1,1] };
+async function cropToFormat(src, fmt, rect) {
+  const img = await loadImg(src);
+  if (!img) throw new Error(t('errPhotoUnreadable'));
+  const u = FORMAT_UNIT[fmt] || FORMAT_UNIT.portrait;
+  const k = Math.min(1, UPLOAD_MAX_SIDE / Math.max(rect.sw, rect.sh));   // nunca amplia
+  const n = Math.max(1, Math.floor(rect.sw * k / u[0]));
+  const w = n * u[0], h = n * u[1];
+  const canvas = document.createElement('canvas');
+  canvas.width = w; canvas.height = h;
+  canvas.getContext('2d').drawImage(img, rect.sx, rect.sy, rect.sw, rect.sh, 0, 0, w, h);
+  const url = canvas.toDataURL('image/jpeg', UPLOAD_JPEG_Q);
+  const m = url.match(/^data:(image\/[a-z]+);base64,/);
+  return { b64: url.split(',')[1], mimeType: m ? m[1] : 'image/jpeg', width: w, height: h,
+           small: Math.min(w, h) < UPLOAD_MIN_SIDE, dataUrl: url, fmt: fmt };
+}
+function currentFormat() { return formatForPlatform(platform); }
+// La cuadricula. Devuelve la foto recortada o null si el cliente cancela.
+function openCropper(src, fmt) {
+  return new Promise(async function(resolve) {
+    const img = await loadImg(src);
+    if (!img) { showToast(t('errPhotoUnreadable')); resolve(null); return; }
+    const sw = img.naturalWidth || img.width, sh = img.naturalHeight || img.height;
+    const d = FORMAT_SIZE[fmt] || FORMAT_SIZE.portrait;
+    if (!document.getElementById('cropCss')) {
+      const st = document.createElement('style'); st.id = 'cropCss';
+      st.textContent = '.crop-ov{position:fixed;inset:0;z-index:9999;background:rgba(10,14,25,.92);display:flex;align-items:center;justify-content:center;padding:16px;touch-action:none}'
+        + '.crop-box{background:#111827;border-radius:16px;padding:16px;max-width:420px;width:100%;color:#fff;font-family:inherit;text-align:center}'
+        + '.crop-frame{position:relative;margin:10px auto;border-radius:6px;overflow:hidden;touch-action:none;cursor:grab}'
+        + '.crop-frame canvas{display:block;width:100%;height:100%}'
+        + '.crop-grid{position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,.35) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.35) 1px,transparent 1px);background-size:33.34% 33.34%;border:1px solid rgba(255,255,255,.6)}'
+        + '.crop-title{font-weight:700;font-size:15px}.crop-hint{font-size:12px;opacity:.75}.crop-warn{font-size:12px;color:#FBBF24;min-height:16px;margin-top:6px}'
+        + '.crop-zoom{width:100%;margin-top:8px}.crop-btns{display:flex;gap:10px;margin-top:12px}.crop-btns button{flex:1;padding:12px;border-radius:10px;border:0;font-weight:700;font-size:15px}'
+        + '.crop-ok{background:#2979FF;color:#fff}.crop-cancel{background:#374151;color:#fff}';
+      document.head.appendChild(st);
+    }
+    const ov = document.createElement('div'); ov.className = 'crop-ov';
+    const lbl = fmt === 'story' ? '9:16 · TikTok' : '4:5 · Instagram / Facebook';
+    ov.innerHTML = '<div class="crop-box"><div class="crop-title"></div><div class="crop-frame"><canvas></canvas><div class="crop-grid"></div></div>'
+      + '<div class="crop-hint"></div><input type="range" class="crop-zoom" min="100" max="400" value="100"><div class="crop-warn"></div>'
+      + '<div class="crop-btns"><button class="crop-cancel"></button><button class="crop-ok"></button></div></div>';
+    ov.querySelector('.crop-title').textContent = t('cropTitle').replace('{f}', lbl);
+    ov.querySelector('.crop-hint').textContent = t('cropHint');
+    ov.querySelector('.crop-cancel').textContent = t('cropCancel');
+    ov.querySelector('.crop-ok').textContent = t('cropOk');
+    document.body.appendChild(ov);
+    const frame = ov.querySelector('.crop-frame'), cv = ov.querySelector('canvas'), warn = ov.querySelector('.crop-warn');
+    const maxW = Math.min(380, window.innerWidth - 64), maxH = Math.round(window.innerHeight * 0.55);
+    let fw = maxW, fh = Math.round(fw * d[1] / d[0]);
+    if (fh > maxH) { fh = maxH; fw = Math.round(fh * d[0] / d[1]); }
+    frame.style.width = fw + 'px'; frame.style.height = fh + 'px';
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    cv.width = Math.round(fw * dpr); cv.height = Math.round(fh * dpr);
+    const ctx = cv.getContext('2d');
+    let zoom = 1, px = 0.5, py = 0.5;
+    function draw() {
+      const r = cropRect(sw, sh, fmt, zoom, px, py);
+      ctx.drawImage(img, r.sx, r.sy, r.sw, r.sh, 0, 0, cv.width, cv.height);
+      const k = Math.min(1, UPLOAD_MAX_SIDE / Math.max(r.sw, r.sh));
+      warn.textContent = Math.min(r.sw * k, r.sh * k) < UPLOAD_MIN_SIDE ? t('cropSmall') : '';
+    }
+    draw();
+    const pts = new Map(); let pinch0 = 0, zoom0 = 1;
+    frame.addEventListener('pointerdown', function(e) { frame.setPointerCapture(e.pointerId); pts.set(e.pointerId, { x:e.clientX, y:e.clientY });
+      if (pts.size === 2) { const a = Array.from(pts.values()); pinch0 = Math.hypot(a[0].x - a[1].x, a[0].y - a[1].y); zoom0 = zoom; } });
+    frame.addEventListener('pointermove', function(e) {
+      const prev = pts.get(e.pointerId); if (!prev) return;
+      const cur = { x:e.clientX, y:e.clientY }; pts.set(e.pointerId, cur);
+      if (pts.size >= 2) { const a = Array.from(pts.values()); const dd = Math.hypot(a[0].x - a[1].x, a[0].y - a[1].y);
+        if (pinch0 > 0) { zoom = Math.min(4, Math.max(1, zoom0 * dd / pinch0)); ov.querySelector('.crop-zoom').value = Math.round(zoom * 100); } }
+      else { const r = cropRect(sw, sh, fmt, zoom, px, py);
+        const esc = r.sw / fw;   // pixeles de foto por pixel de pantalla
+        if (sw - r.sw > 0.5) px = Math.min(1, Math.max(0, px - (cur.x - prev.x) * esc / (sw - r.sw)));
+        if (sh - r.sh > 0.5) py = Math.min(1, Math.max(0, py - (cur.y - prev.y) * esc / (sh - r.sh))); }
+      draw(); });
+    const fin = function(e) { pts.delete(e.pointerId); if (pts.size < 2) pinch0 = 0; };
+    frame.addEventListener('pointerup', fin); frame.addEventListener('pointercancel', fin);
+    ov.querySelector('.crop-zoom').addEventListener('input', function(e) { zoom = Number(e.target.value) / 100; draw(); });
+    ov.querySelector('.crop-cancel').onclick = function() { ov.remove(); resolve(null); };
+    ov.querySelector('.crop-ok').onclick = async function() {
+      try { const out = await cropToFormat(src, fmt, cropRect(sw, sh, fmt, zoom, px, py)); ov.remove(); resolve(out); }
+      catch (err) { ov.remove(); showToast(t('errPhotoUnreadable')); resolve(null); }
+    };
+  });
+}
+// Cada zona de subida guarda la ORIGINAL para volver a encuadrar si el cliente cambia de red.
+const cropSrc = {};
+const CROP_SLOTS = {
+  enhance: { prev:'enhancePrev', set: function(c) { enhanceB64 = c ? c.b64 : null; enhanceMime = c ? c.mimeType : null; enhanceDims = c; } },
+  flyer:   { prev:'flyerPrev',   set: function(c) { flyerPhotoB64 = c ? c.b64 : null; flyerPhotoMime = c ? c.mimeType : null; } },
+  test:    { prev:'testPrev',    set: function(c) { testPhotoB64 = c ? c.b64 : null; testPhotoMime = c ? c.mimeType : null; } },
+  cover:   { prev:'carouselCoverPrev', set: function(c) { carouselCoverB64 = c ? c.b64 : null; carouselCoverMime = c ? c.mimeType : null; carouselCoverDims = c; } }
+};
+async function cropInto(slot, b64, mime) {
+  const n = await normalizeUpload(b64, mime);
+  const c = await openCropper(n.dataUrl, currentFormat());
+  const S = CROP_SLOTS[slot], prev = document.getElementById(S.prev);
+  if (!c) { S.set(null); delete cropSrc[slot]; if (prev) { prev.src = ''; prev.classList.remove('show'); } return null; }
+  cropSrc[slot] = { src: n.dataUrl, fmt: c.fmt };
+  S.set(c);
+  if (prev) { prev.src = c.dataUrl; prev.classList.add('show'); }
+  if (c.small) showToast(t('photoSmallWarn'), 6000);
+  return c;
+}
+// Cambiar de red con una foto ya encuadrada: se vuelve a encuadrar desde la original.
+async function recropForFormat() {
+  const slot = { enhance:'enhance', flyer:'flyer', testimonial:'test', carousel:'cover' }[mode];
+  const s = slot && cropSrc[slot];
+  if (!s || s.fmt === currentFormat()) return;
+  const c = await openCropper(s.src, currentFormat());
+  const S = CROP_SLOTS[slot], prev = document.getElementById(S.prev);
+  if (!c) { S.set(null); delete cropSrc[slot]; if (prev) { prev.src = ''; prev.classList.remove('show'); } return; }
+  cropSrc[slot] = { src: s.src, fmt: c.fmt }; S.set(c);
+  if (prev) { prev.src = c.dataUrl; prev.classList.add('show'); }
+}
+// La foto de galeria se encuadra al usarla, ANTES del primer cobro. Un reintento no vuelve a preguntar.
+const _galleryCrop = {};
+async function cropGalleryPhoto(photo, id) {
+  const fmt = currentFormat(), key = String(id) + '|' + fmt;
+  if (_galleryCrop[key]) return _galleryCrop[key];
+  const n = await normalizeUpload(photo.raw, photo.mime);
+  const c = await openCropper(n.dataUrl, fmt);
+  if (!c) throw new Error(t('cropCancelled'));
+  const out = { raw: c.b64, mime: c.mimeType };
+  _galleryCrop[key] = out;
+  return out;
+}
+
 // ╔═══════════════════════════════════════════════════╗
 // ║  INIT — DOMContentLoaded                        ║
 // ╚═══════════════════════════════════════════════════╝
@@ -3981,21 +4126,22 @@ function setupUploads() {
     }
   });
   // Enhance
+  // D41 · S54: toda foto del cliente pasa por la cuadricula del formato elegido.
   setupDropzone('carouselCoverZone','carouselCoverFile','carouselCoverPrev','carouselCoverTitle','carouselCoverName', async (b64,mime)=>{
-    const n = await normalizeUpload(b64, mime);
-    carouselCoverB64 = n.b64; carouselCoverMime = n.mimeType; carouselCoverDims = n;
-    updateFitNotice();
+    await cropInto('cover', b64, mime);   // openCropper
   });
   setupDropzone('enhanceZone','enhanceFile','enhancePrev','enhanceTitle','enhanceName', async (b64,mime)=>{
-    const n = await normalizeUpload(b64, mime);
-    enhanceB64 = n.b64; enhanceMime = n.mimeType; enhanceDims = n;
-    framePhotoTags = []; frameAnchorManual = null;
-    updateFitNotice();
+    framePhotoTags = [];
+    await cropInto('enhance', b64, mime);   // openCropper
   });
   // Flyer
-  setupDropzone('flyerZone','flyerFile','flyerPrev','flyerTitle','flyerName', (b64,mime)=>{ flyerPhotoB64=b64; flyerPhotoMime=mime; });
+  setupDropzone('flyerZone','flyerFile','flyerPrev','flyerTitle','flyerName', async (b64,mime)=>{
+    await cropInto('flyer', b64, mime);   // openCropper
+  });
   // Testimonial
-  setupDropzone('testZone','testFile','testPrev','testTitle','testName', (b64,mime)=>{ testPhotoB64=b64; testPhotoMime=mime; });
+  setupDropzone('testZone','testFile','testPrev','testTitle','testName', async (b64,mime)=>{
+    await cropInto('test', b64, mime);   // openCropper
+  });
 }
 function setupDropzone(zoneId, inputId, prevId, titleId, nameId, cb) {
   const zone=document.getElementById(zoneId);
@@ -4505,7 +4651,6 @@ function setMode(m) {
   if(btn) btn.textContent = m === 'video' ? '🎬 ' + t('videoGenBtn') : '✨ ' + t('genBtn');
   // Update gallery toggle visibility per mode
   updateGalleryToggle();
-  updateFitNotice();
   // Reset gallery selector when switching modes
   const gSel = document.getElementById('gallerySelector');
   if(gSel) gSel.classList.remove('show');
@@ -4617,10 +4762,9 @@ function setPlatform(btn) {
   document.querySelectorAll('.plt-tab').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active'); platform=btn.dataset.plt;
   document.getElementById('pltInfo').innerHTML=getPltInfo()[platform];
-  // S53b · FB-64: cambiar de red recompone la vista previa con el formato de esa red.
-  // NO regenera ni cobra (D19): es el mismo composer sobre la misma base limpia.
-  updateFitNotice();
-  if (originalImageUrl && mode !== 'carousel' && mode !== 'video') redrawCanvas();
+  // D41/D42 · S54: la pieza ya generada conserva su formato (pieceFormat). Si hay una foto
+  // encuadrada para otro formato, se vuelve a encuadrar desde la original, sin subirla otra vez.
+  recropForFormat();
   // Auto-switch caption tab
   const tabMap={instagram:'ig',facebook:'fb',tiktok:'tt'};
   showCapTabById(tabMap[platform]);
@@ -4749,24 +4893,21 @@ async function genCarousel(brand, bg) {
     // cobro (la llamada 'carousel' viene despues), asi que no se pierde dinero —
     // pero la degradacion era muda: el usuario pedia su foto de portada y recibia
     // una de IA sin enterarse. Se aborta en vez de sustituir en silencio.
+    let photo;
     try {
-      const photo = await photoUrlToBase64(gallerySelectedPhoto.url);
-      // S41-3: el mime REAL, no un literal. Antes se declaraba 'image/png' sobre
-      // bytes JPEG: el data URL podia no decodificar (y convertToPNG devolvia el
-      // original sin convertir por su rama onerror), y aun decodificando el worker
-      // recibia coverPhotoType mentido y editRealPhoto lo rechazaba.
-      const conv = await normalizeUpload(photo.raw, photo.mime);
-      // conv.mimeType, no un literal: el tipo que se anuncia es el que se produjo.
-      coverPhoto = conv.b64; coverMime = conv.mimeType || photo.mime;
+      photo = await photoUrlToBase64(gallerySelectedPhoto.url);
     } catch(e) {
       console.warn('Gallery photo fetch failed (pre-cobro, sin cargo):', e.message);
       throw new Error(t('errGalleryPhoto'));
     }
+    // D41: se encuadra en el formato del carrusel antes del cobro. El mime es el que se produjo (S41-3).
+    const conv = await cropGalleryPhoto(photo, gallerySelectedPhoto.id || gallerySelectedPhoto.url);
+    coverPhoto = conv.raw; coverMime = conv.mime;
   } else if(carouselCoverMode==='photo' && carouselCoverB64) {
     coverPhoto = carouselCoverB64; coverMime = carouselCoverMime;   // ya normalizada al subir
   }
   const res = await postWithTimeout({
-    mode: 'carousel', actionId: currentActionId,
+    mode: 'carousel', actionId: currentActionId, platform,
     topic, slideCount: carouselSlides, style: carouselStyle,
     brandGuide: bg, brandData: brand, imageStyle,
     coverPhotoB64: coverPhoto, coverPhotoType: coverMime
@@ -4789,7 +4930,13 @@ async function genCarousel(brand, bg) {
 }
 
 async function renderCarouselSlide(slide, brand, coverImageUrl, totalSlides) {
-  const W = 1080, H = 1080;
+  // D42 · S54: las laminas salen en el formato de la pieza (4:5 o 9:16), no en 1:1 (FB-79).
+  const fmt = (typeof pieceFormat === 'string' && FORMAT_SIZE[pieceFormat]) ? pieceFormat : 'portrait';
+  const W = FORMAT_SIZE[fmt][0], H = FORMAT_SIZE[fmt][1];
+  // En 9:16 el contenido vive en la franja que TikTok no tapa (14% arriba, 35% abajo).
+  const SZc = SAFE_ZONE[fmt === 'story' ? 'story' : 'feed'];
+  const T0 = fmt === 'story' ? H * SZc.top : 0, B0 = fmt === 'story' ? H * (1 - SZc.bottom) : H;
+  const Y = f => T0 + f * (B0 - T0);
   const canvas = document.createElement('canvas');
   canvas.width = W; canvas.height = H;
   const ctx = canvas.getContext('2d');
@@ -4803,10 +4950,7 @@ async function renderCarouselSlide(slide, brand, coverImageUrl, totalSlides) {
     ctx.fillStyle = primary; ctx.fillRect(0,0,W,H);
     try {
       const img = coverImageUrl ? await loadImg(coverImageUrl) : null;
-      if(img) {
-        const ps = Math.min(img.width, img.height);
-        ctx.drawImage(img, (img.width-ps)/2, (img.height-ps)/2, ps, ps, 0, 0, W, H);
-      }
+      if(img) drawCover(ctx, img, 0, 0, W, H, 0.5);   // D42: la portada ya viene en el formato
     } catch(e) { /* fallback already drawn */ }
     const grad = ctx.createLinearGradient(0, H*0.3, 0, H);
     grad.addColorStop(0,'rgba(0,0,0,0.1)');
@@ -4815,14 +4959,14 @@ async function renderCarouselSlide(slide, brand, coverImageUrl, totalSlides) {
     // Headline
     ctx.fillStyle = '#fff'; ctx.textAlign = 'center';
     ctx.font = 'bold 68px sans-serif';
-    carouselWrapText(ctx, slide.headline || '', W/2, H*0.65, W-120, 80);
+    carouselWrapText(ctx, slide.headline || '', W/2, Y(0.65), W-120, 80);
     if(slide.subheadline) {
       ctx.font = '34px sans-serif'; ctx.fillStyle = 'rgba(255,255,255,0.85)';
-      ctx.fillText(slide.subheadline.slice(0,60), W/2, H*0.82);
+      ctx.fillText(slide.subheadline.slice(0,60), W/2, Y(0.82));
     }
     // Swipe cta
     ctx.font = 'bold 26px sans-serif'; ctx.fillStyle = 'rgba(255,255,255,0.7)';
-    ctx.fillText((slide.swipe || 'Desliza para saber más →'), W/2, H-40);
+    ctx.fillText((slide.swipe || 'Desliza para saber más →'), W/2, Y(1)-40);
 
   } else if (slide.type === 'cta') {
     // CTA: gradient background
@@ -4837,22 +4981,22 @@ async function renderCarouselSlide(slide, brand, coverImageUrl, totalSlides) {
     // Headline
     ctx.fillStyle = '#fff'; ctx.textAlign = 'center';
     ctx.font = 'bold 66px sans-serif';
-    carouselWrapText(ctx, slide.headline || '', W/2, H*0.35, W-120, 80);
+    carouselWrapText(ctx, slide.headline || '', W/2, Y(0.35), W-120, 80);
     // Body
     if(slide.body) {
       ctx.font = '34px sans-serif'; ctx.fillStyle = 'rgba(255,255,255,0.88)';
-      carouselWrapText(ctx, slide.body, W/2, H*0.55, W-140, 48);
+      carouselWrapText(ctx, slide.body, W/2, Y(0.55), W-140, 48);
     }
     // CTA button
     ctx.fillStyle = accent;
-    const btnW = 480, btnH = 80, btnX = (W-btnW)/2, btnY = H*0.7;
+    const btnW = 480, btnH = 80, btnX = (W-btnW)/2, btnY = Y(0.7);
     carouselRoundRect(ctx, btnX, btnY, btnW, btnH, 40);
     ctx.fillStyle = '#fff'; ctx.font = 'bold 30px sans-serif';
     ctx.fillText(slide.cta || 'Contáctanos', W/2, btnY + btnH*0.62);
     // WhatsApp
     if(brand?.whatsapp) {
       ctx.font = '24px sans-serif'; ctx.fillStyle = 'rgba(255,255,255,0.65)';
-      ctx.fillText('📱 ' + brand.whatsapp, W/2, H-50);
+      ctx.fillText('📱 ' + brand.whatsapp, W/2, Y(1)-50);
     }
 
   } else {
@@ -4864,29 +5008,29 @@ async function renderCarouselSlide(slide, brand, coverImageUrl, totalSlides) {
     ctx.fillStyle = primary; ctx.fillRect(0,H-10,W,10);
     // Slide number pill (top right)
     ctx.fillStyle = primary;
-    carouselRoundRect(ctx, W-130, 24, 100, 36, 18);
+    carouselRoundRect(ctx, W-130, T0+24, 100, 36, 18);
     ctx.fillStyle = '#fff'; ctx.font = 'bold 18px sans-serif'; ctx.textAlign = 'center';
-    ctx.fillText(slide.n + ' / ' + totalSlides, W-80, 47);
+    ctx.fillText(slide.n + ' / ' + totalSlides, W-80, T0+47);
     // Icon
     ctx.font = '90px sans-serif'; ctx.textAlign = 'center';
-    ctx.fillText(slide.icon || '💡', W/2, H*0.28);
+    ctx.fillText(slide.icon || '💡', W/2, Y(0.28));
     // Headline
     ctx.fillStyle = '#0C1F35'; ctx.font = 'bold 54px sans-serif';
-    carouselWrapText(ctx, slide.headline || '', W/2, H*0.45, W-100, 68);
+    carouselWrapText(ctx, slide.headline || '', W/2, Y(0.45), W-100, 68);
     // Body
     if(slide.body) {
       ctx.fillStyle = '#4A6080'; ctx.font = '34px sans-serif';
-      carouselWrapText(ctx, slide.body, W/2, H*0.65, W-120, 48);
+      carouselWrapText(ctx, slide.body, W/2, Y(0.65), W-120, 48);
     }
     // Brand name bottom center
     ctx.font = 'bold 22px sans-serif'; ctx.fillStyle = primary;
-    ctx.fillText(brand?.name || '', W/2, H-30);
+    ctx.fillText(brand?.name || '', W/2, Y(1)-30);
   }
 
   // S35 / RD-25: overlays centralizados. El carrusel tenía su propia copia del
   // dibujo del logo y del watermark, con valores de tamaño y posición distintos
   // a los de los modos de imagen simple. Ahora comparte la fuente única.
-  const ovRes = await applyBrandOverlays(ctx, W, H);
+  const ovRes = await applyBrandOverlays(ctx, W, H, fmt);
   warnIfLogoFailed(ovRes);
 
   return new Promise(res => canvas.toBlob(b => {
@@ -5093,6 +5237,7 @@ function setFlyerMode(m) {
 // GENERATE
 // ═══════════════════════════════════════════════════════
 async function generate(opts = {}) {
+  pieceFormat = currentFormat();   // D38: la pieza nace en el formato de la red elegida
   // Offline check (Fix #6)
   if (!navigator.onLine) {
     alert(detectLanguage() === 'es' ? 'Sin conexión a internet. Verifica tu conexión e intenta de nuevo.' : 'No internet connection. Check your connection and try again.');
@@ -5218,6 +5363,8 @@ async function genPost(brand,bg) {
       // No se degrada a imagen de IA en silencio: el usuario pidio SU foto.
       throw new Error(t('errGalleryPhoto'));
     }
+    // D41: el cliente la encuadra en el formato elegido, antes de cualquier cobro.
+    galleryPhoto = await cropGalleryPhoto(galleryPhoto, gallerySelectedPhoto.id || gallerySelectedPhoto.url);
   }
 
   if (usingGalleryPhoto) {
@@ -5233,7 +5380,7 @@ async function genPost(brand,bg) {
     // original diciendolo.
     setStep(1);
     const enhanceRes = await postWithTimeout({
-      mode: 'enhance', actionId: currentActionId,
+      mode: 'enhance', actionId: currentActionId, platform,
       imageBase64: galleryPhoto.raw,
       imageType: galleryPhoto.mime,
       textInput: document.getElementById('postText').value.trim(),
@@ -5259,7 +5406,7 @@ async function genPost(brand,bg) {
   setStep(2);
   setStep(3);
 
-  const imgRes=await post({ mode:'image', actionId: currentActionId, imagePrompt:capRes.imagePrompt, imageStyle, brandColors:brand.colors, brandType:brand.type });
+  const imgRes=await post({ mode:'image', actionId: currentActionId, platform, imagePrompt:capRes.imagePrompt, imageStyle, brandColors:brand.colors, brandType:brand.type });
   setStep(4);
   showResult({ ...capRes, imageUrl:imgRes.imageUrl });
 }
@@ -5274,7 +5421,7 @@ async function genEnhance(brand,bg) {
     alert(t('alertEnhanceDescribe')); return;
   }
   const res=await postWithTimeout({
-    mode:'enhance', actionId: currentActionId,
+    mode:'enhance', actionId: currentActionId, platform,
     imageBase64:enhanceB64,
     imageType:enhanceMime,
     brandGuide:bg,
@@ -6543,7 +6690,6 @@ function onGalleryToggleChange(checked) {
     selector.classList.remove('show');
     gallerySelectedPhoto = null;
     framePhotoTags = [];
-    updateFitNotice();
     // In carousel mode, restore cover photo controls
     if (mode === 'carousel') {
       const coverBtns = document.getElementById('cvrAI')?.parentElement;
@@ -6588,8 +6734,6 @@ function showGalleryPhotoSelector(filterTag) {
 
   gallerySelectedPhoto = photos[0];
   framePhotoTags = (photos[0] && photos[0].tags) || [];
-  frameAnchorManual = null;
-  updateFitNotice();
   selector.classList.add('show');
 }
 
@@ -6598,8 +6742,6 @@ function selectGalleryPhoto(photoId, el) {
   if (!photo) return;
   gallerySelectedPhoto = photo;
   framePhotoTags = photo.tags || [];   // D37: la etiqueta decide el ancla
-  frameAnchorManual = null;
-  updateFitNotice();
   // Update selection visual
   document.querySelectorAll('#gsPhotos .gs-photo').forEach(p => p.classList.remove('selected'));
   if (el) el.classList.add('selected');
@@ -8083,14 +8225,14 @@ async function genFlyerAI(brand,bg) {
   const fd=getFlyerData();
   setStep(1);
   setStep(2);
-  const res=await postWithTimeout({ mode:'flyer', actionId: currentActionId, flyerData:fd, brandGuide:bg, brandData:brand, imageStyle }, 90000);
+  const res=await postWithTimeout({ mode:'flyer', actionId: currentActionId, platform, flyerData:fd, brandGuide:bg, brandData:brand, imageStyle }, 90000);
   setStep(3);
   // S53b · S35-14 / MC-1: el modelo de imagen ya no escribe el texto —lo ignora o lo
   // deforma—. El servidor devuelve el FONDO y los campos los compone el mismo motor de
   // canvas que usa el flyer con foto: un solo composer para las dos rutas (RD-30).
   let imageUrl = res.imageUrl;
   try {
-    if (imageUrl) imageUrl = await composeFlyerCanvas(res.imageUrl, fd, brand);
+    if (imageUrl) imageUrl = await composeFlyerCanvas(res.imageUrl, fd, brand, pieceFormat);
   } catch(e) {
     console.warn('composeFlyerCanvas (IA) fallo:', e && e.message);
     showToast(t('flyerTextFail'), 6000);
@@ -8106,14 +8248,14 @@ async function genFlyerPhoto(brand,bg) {
   setStep(2);
   // Compose flyer image client-side with Canvas — instant, no API needed
   setStep(3);
-  const imageUrl=await composeFlyerCanvas('data:'+(flyerPhotoMime||'image/jpeg')+';base64,'+flyerPhotoB64, fd, brand);
+  const imageUrl=await composeFlyerCanvas('data:'+(flyerPhotoMime||'image/jpeg')+';base64,'+flyerPhotoB64, fd, brand, pieceFormat);
   setStep(4);
   showResult({ ...capRes, imageUrl, postType:fd.type });
 }
 // ─── TESTIMONIAL ───────────────────────────────────────
 async function genTestimonial(brand,bg) {
   setStep(1); setStep(2); setStep(3);
-  const res=await post({ mode:'testimonial', actionId: currentActionId, reviewText:document.getElementById('testText').value.trim(), imageBase64:testPhotoB64||undefined, imageType:testPhotoMime, brandGuide:bg, brandData:brand, pillar });
+  const res=await post({ mode:'testimonial', actionId: currentActionId, platform, reviewText:document.getElementById('testText').value.trim(), imageBase64:testPhotoB64||undefined, imageType:testPhotoMime, brandGuide:bg, brandData:brand, pillar });
   setStep(4);
   showResult(res);
 }
@@ -8316,7 +8458,7 @@ async function regenImage() {
     // no cobraba. 'image-regen' es accion propia (PU-2). La calidad ya no viaja en el
     // body: la decide el servidor (MODE_QUALITY) — antes iba 'low' y ahora que cobra
     // seria entregar a proposito menos de lo que se pago (§1.9.9).
-    const imgRes=await postWithTimeout({ mode:'image-regen', actionId: currentActionId, imagePrompt:prompt, imageStyle, brandColors:loadBrand()?.colors, brandType:loadBrand()?.type });
+    const imgRes=await postWithTimeout({ mode:'image-regen', actionId: currentActionId, platform: platformOfPiece(), imagePrompt:prompt, imageStyle, brandColors:loadBrand()?.colors, brandType:loadBrand()?.type });
     if(mode === 'carousel' && lastResult?.slides && lastResult.slides.length) {
       // S37 / RD-27 + INV-082: la portada nueva entra al estado ANTES de re-renderizar.
       // Antes se escribía sólo en lastResult.coverImage mientras redrawCanvas leía
@@ -8725,18 +8867,8 @@ async function getCanvasBlob(format) {
       grad.addColorStop(0, primary); grad.addColorStop(1, darken(primary, 50));
       ctx.fillStyle = grad; ctx.fillRect(0, 0, 1080, 1920);
     });
-    // S37/L1c: UNA identidad de marca por encuadre. El nombre centrado se dibujaba
-    // siempre, asi que en 9:16 convivia con el logo arriba-izquierda y con la firma
-    // de Postimity abajo-derecha: tres marcas en una sola imagen. Ahora el nombre
-    // solo aparece cuando NO hay logo, que es el unico caso en que hace falta.
-    if (brand?.name && !resolveLogoSrc()) {
-      ctx.save();
-      ctx.fillStyle = 'rgba(255,255,255,.85)';
-      ctx.font = 'bold 32px Plus Jakarta Sans,sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText(brand.name, 540, 1680);
-      ctx.restore();
-    }
+    // D40 · FB-72 (S54): en 9:16 ya no se escribe el nombre del negocio en texto plano.
+    // Tapaba contenido, no existia en 4:5 y caia donde TikTok tapa. La identidad la da la firma.
   }
 
   // S37/L1b · RD-29: el sello se aplica SIEMPRE y al ENCUADRE FINAL, despues de
@@ -8745,7 +8877,6 @@ async function getCanvasBlob(format) {
   // pero solo gobierna el preview; ninguna ruta de exportacion lo consulta.
   const ovRes = await applyBrandOverlays(ctx, canvas.width, canvas.height, format);
   warnIfLogoFailed(ovRes);
-  _lastFrameKeep = frameKeepFor(img, format);
   return new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.93));
 }
 
@@ -8972,6 +9103,11 @@ async function openInSocial(platform) {
   // WhatsApp y correo. Un cambio aqui obliga a mover fmtIg/fmtFb/fmtTk y pubFormats.
   const format = formatForPlatform(platform);
   const formatLabels = { portrait: '4:5', square: '1:1', story: '9:16' };
+  // D42: la pieza no se recorta a otra red. Se dice en una linea como obtenerla.
+  if (mode !== 'video' && format !== pieceFormat) {
+    showToast(t(format === 'story' ? 'otherFmtTiktok' : 'otherFmtFeed'), 7000);
+    return;
+  }
 
   // 1. Copy caption FIRST (must be first await — iOS clipboard requirement, RD-4)
   const copied = await copyToClipboard(caption);
@@ -9161,7 +9297,8 @@ async function applyBrandOverlays(ctx, w, h, format) {
     ctx.font = '600 ' + wfs + 'px -apple-system,sans-serif';
     const wtw = ctx.measureText(wmText).width;
     const wpw = wtw + wfs, wph = Math.round(wfs * 1.7);
-    const wpx = w - wpw - PADX, wpy = h - wph - PADB; // abajo-derecha, zona segura
+    // D40: en 9:16 la firma sube arriba a la derecha (abajo y a la derecha estan los botones de la red).
+    const wpx = w - wpw - PADX, wpy = format === 'story' ? PADT : h - wph - PADB;
     ctx.fillStyle = 'rgba(15,23,42,0.72)'; ctx.beginPath();
     if (ctx.roundRect) ctx.roundRect(wpx, wpy, wpw, wph, 6); else ctx.rect(wpx, wpy, wpw, wph);
     ctx.fill();
@@ -9282,12 +9419,10 @@ async function redrawCanvas() {
   // fallar (D19). La rama que devolvia la imagen cruda cuando no habia logo ni firma se
   // retira: era justo la que mostraba un encuadre que no existia.
   try {
-    const blob = await getCanvasBlob(formatForPlatform(platform));
+    const blob = await getCanvasBlob(pieceFormat);
     if (!blob) throw new Error('sin lienzo');
     resultImg.src = await blobToDataUrl(blob);
     resultImg.dataset.ovBaked = '1';
-    updateFitLabels();
-    updateFrameControl();
   } catch(e) {
     // INV-076: nunca en silencio.
     console.error('redrawCanvas fallo:', e);
@@ -9306,8 +9441,13 @@ function blobToDataUrl(blob) {
   });
 }
 
-async function composeFlyerCanvas(photoSrc, fd, brand) {
-  const W=1080, H=1080;
+async function composeFlyerCanvas(photoSrc, fd, brand, fmt) {
+  // D38 · FB-76 (S54): el flyer se compone en SU formato. Antes era 1080x1080 y la entrega
+  // en 4:5/9:16 lo recortaba: «urso de calistenia» y la etiqueta cortada.
+  const FF = FORMAT_SIZE[fmt] ? fmt : 'portrait';
+  const W = FORMAT_SIZE[FF][0], H = FORMAT_SIZE[FF][1];
+  const story = FF === 'story';
+  const TOPY = story ? Math.round(H * SAFE_ZONE.story.top) : 0;   // lo de arriba lo tapa TikTok
   const canvas=document.createElement('canvas');
   canvas.width=W; canvas.height=H;
   const ctx=canvas.getContext('2d');
@@ -9323,22 +9463,25 @@ async function composeFlyerCanvas(photoSrc, fd, brand) {
   else drawFramed(ctx, photo, W, H, function(){ ctx.fillStyle=primary; ctx.fillRect(0,0,W,H); });
 
   // 2. Degradado para que el texto se lea sobre la foto
-  const grad=ctx.createLinearGradient(0,250,0,H);
+  const grad=ctx.createLinearGradient(0,TOPY+Math.round(H*0.23),0,H);
   grad.addColorStop(0,'rgba(0,0,0,0)');
   grad.addColorStop(0.35,'rgba(0,0,0,0.45)');
   grad.addColorStop(1,hexToRgba(primary,0.92));
   ctx.fillStyle=grad; ctx.fillRect(0,0,W,H);
 
   // 3. Banda superior — nombre del negocio + tipo
-  ctx.fillStyle=hexToRgba(primary,0.85); ctx.fillRect(0,0,W,90);
+  ctx.fillStyle=hexToRgba(primary,0.85); ctx.fillRect(0,0,W,TOPY+90);
   ctx.fillStyle='rgba(255,255,255,0.95)';
   ctx.font='bold 28px sans-serif'; ctx.textAlign='left';
-  ctx.fillText((brand?.name||'').slice(0,30),20,58);
+  // D40: en 9:16 no hay nombre en texto plano; lo que se ve arriba es logo y firma.
+  if (!story) ctx.fillText((brand?.name||'').slice(0,30),20,58);
   if(fd.type){
+    // En 9:16 la etiqueta va al centro: a la derecha arriba vive la firma (D40).
+    const px = story ? (W-170)/2 : W-190;
     ctx.fillStyle=accent;
-    ctx.beginPath(); ctx.roundRect(W-190,15,170,48,8); ctx.fill();
+    ctx.beginPath(); ctx.roundRect(px,TOPY+15,170,48,8); ctx.fill();
     ctx.fillStyle='#fff'; ctx.font='bold 18px sans-serif'; ctx.textAlign='center';
-    ctx.fillText(fd.type.slice(0,18),W-105,44);
+    ctx.fillText(fd.type.slice(0,18),px+85,TOPY+44);
   }
 
   // ═══ 4. MOTOR DE TEXTO CON PRESUPUESTO VERTICAL — S53b · S40-3 / S41-D ═══
@@ -9348,8 +9491,8 @@ async function composeFlyerCanvas(photoSrc, fd, brand) {
   // se miden, se escalan a la vez y se anclan ABAJO: si no caben, se reduce la letra y
   // en el limite se corta con «…» (visible), nunca en silencio.
   const M = 40, MAXW = W - 2*M, GAP = 14;
-  const TOP_LIMIT = 110;                      // debajo de la banda superior
-  const BOTTOM = H - Math.round(H*0.055);     // margen inferior
+  const TOP_LIMIT = TOPY + 110;               // debajo de la banda superior
+  const BOTTOM = story ? Math.round(H * (1 - SAFE_ZONE.story.bottom)) : H - Math.round(H*0.055);   // 9:16: arriba de lo que TikTok tapa
   const infoItems=[fd.dates,fd.price,fd.schedule].filter(Boolean);
   const bloques = [
     { txt:(fd.title||'').trim(),     px:62, font:'bold {px}px sans-serif',   color:'#fff',                    lh:1.16, min:34, maxLines:4 },
@@ -9381,23 +9524,31 @@ async function composeFlyerCanvas(photoSrc, fd, brand) {
     return { lineas: keep, cortado:true };
   };
   const medir = (k, maxLinesK) => {
-    let alto = 0; const plan = [];
+    let alto = 0, cortado = false; const plan = [];
     for (const b of bloques) {
       const px = Math.max(b.min, Math.round(b.px * k));
       const cap = Math.max(1, Math.min(b.maxLines, maxLinesK(b)));
       const r = recortar(wrap(b.txt, px, b.font), px, b.font, cap);
+      if (r.cortado) cortado = true;
       const h = r.lineas.length * px * b.lh + (b.pill ? 18 : 0);
       plan.push({ b, px, lineas:r.lineas, h });
       alto += h + GAP;
     }
-    return { plan, alto: Math.max(0, alto - GAP) };
+    return { plan, cortado, alto: Math.max(0, alto - GAP) };
   };
   const disponible = BOTTOM - TOP_LIMIT;
-  let r = null;
+  // AR-28 (S54): ACHICAR ANTES DE CORTAR. Antes se paraba en la primera escala que cabia en
+  // altura, y la altura nunca se excede: todo titulo largo se cortaba con «…» a tamano
+  // completo. Ahora se busca la mayor escala que cabe SIN cortar; si ninguna, la mayor que cabe.
+  let r = null, primera = null;
   for (let k = 1; k >= 0.52; k -= 0.04) {
-    r = medir(k, b => b.maxLines);
-    if (r.alto <= disponible) break;
+    const m = medir(k, b => b.maxLines);
+    if (m.alto <= disponible) {
+      if (!primera) primera = m;
+      if (!m.cortado) { r = m; break; }
+    }
   }
+  if (!r) r = primera || medir(0.52, b => b.maxLines);
   if (r.alto > disponible) {                 // ultimo recurso: se corta, y se nota
     for (let cap = 3; cap >= 1 && r.alto > disponible; cap--) r = medir(0.52, () => cap);
   }
@@ -9447,8 +9598,7 @@ function hexToRgba(hex,alpha){
 // ═══ S53b · D36 / D37 — EL ENCUADRE SE ANCLA AL SUJETO Y LA PERDIDA SE AVISA ═══
 // D36: se retira el relleno con fondo difuminado. Rellenar en silencio decide por el
 // cliente y en feed se lee como error de exportacion. El umbral deja de disparar
-// relleno y pasa a disparar el AVISO, antes de gastar una generacion (updateFitNotice)
-// y el rotulo en la entrega (updateFitLabels).
+// relleno. Desde S54 (D41) ni siquiera se avisa: el cliente encuadra la foto al subirla.
 const FRAME_KEEP_MIN = 0.90;
 // D37: el ancla sale de la etiqueta que el cliente YA puso al subir la foto; si la IA
 // ve el sujeto, manda sobre la etiqueta; y el dedo del cliente manda sobre las dos.
@@ -9459,79 +9609,18 @@ const CROP_ANCHOR_BY_TAG = { equipo:0.30, cliente:0.30, evento:0.38, producto:0.
 const SAFE_ZONE = { story:{ top:0.14, bottom:0.35, side:0.06 }, feed:{ top:0.04, bottom:0.04, side:0.04 } };
 // Fuente unica del formato por red (antes vivia dentro de openInSocial).
 const PLATFORM_FORMAT = { instagram:'portrait', facebook:'portrait', tiktok:'story' };
-function formatForPlatform(p) { return PLATFORM_FORMAT[p] || 'square'; }
-let frameAnchorManual = null;   // el dedo del cliente
+function formatForPlatform(p) { return PLATFORM_FORMAT[p] || 'portrait'; }   // D42: no existe el 1:1
+// D38/D42 · S54: el formato de la PIEZA se fija al generar. Cambiar el selector despues no la
+// recorta: la otra red se obtiene generando para ella (el boton lo dice en una linea).
+let pieceFormat = 'portrait';
+function platformOfPiece() { return pieceFormat === 'story' ? 'tiktok' : (platform === 'tiktok' ? 'instagram' : platform); }
 let frameSubjectY = null;       // lo que la IA vio
 let framePhotoTags = [];        // la etiqueta de la foto en uso
 let enhanceDims = null, carouselCoverDims = null;
 const FORMAT_SIZE = { square:[1080,1080], portrait:[1080,1350], story:[1080,1920] };
-let _lastFrameKeep = 1, _lastBaseDims = null;
-function frameKeepFor(img, format) {
-  const sw = img && (img.naturalWidth || img.width), sh = img && (img.naturalHeight || img.height);
-  _lastBaseDims = (sw && sh) ? { width: sw, height: sh } : null;
-  if (!sw || !sh) return 1;
-  const d = FORMAT_SIZE[format] || FORMAT_SIZE.square;
-  return coverKeepRatio(sw, sh, d[0], d[1]);
-}
-// Lo que NO controlamos (que trae la foto) se dice ANTES de gastar una generacion.
-function currentPhotoDims() {
-  if (mode === 'enhance' && enhanceDims) return enhanceDims;
-  if (mode === 'carousel' && carouselCoverDims) return carouselCoverDims;
-  const gt = document.getElementById('galleryToggle');
-  if (gt && gt.checked && gallerySelectedPhoto && gallerySelectedPhoto.width) return gallerySelectedPhoto;
-  return null;
-}
-function updateFitNotice() {
-  const el = document.getElementById('fitNotice');
-  if (!el) return;
-  const d = currentPhotoDims();
-  if (!d || !d.width || !d.height) { el.style.display = 'none'; return; }
-  const fmt = formatForPlatform(platform);
-  const sz = FORMAT_SIZE[fmt] || FORMAT_SIZE.square;
-  const keep = coverKeepRatio(d.width, d.height, sz[0], sz[1]);
-  const msgs = [];
-  if (keep < FRAME_KEEP_MIN) msgs.push(t('fitCrop').replace('{p}', Math.round((1 - keep) * 100)).replace('{f}', fmt === 'story' ? '9:16' : '4:5'));
-  if (Math.min(d.width, d.height) < UPLOAD_MIN_SIDE) msgs.push(t('fitSmall'));
-  if (!msgs.length) { el.style.display = 'none'; return; }
-  el.textContent = '⚠️ ' + msgs.join(' · ');
-  el.style.display = 'block';
-}
 // Y en la entrega, cada boton dice lo que de verdad pasa con ESTA imagen.
-function updateFitLabels() {
-  const d = _lastBaseDims;
-  if (!d) return;
-  [['fmtIg','portrait'], ['fmtFb','portrait'], ['fmtTk','story'], ['fmtDl','square']].forEach(function(par) {
-    const el = document.getElementById(par[0]);
-    if (!el) return;
-    const base = (el.textContent || '').split(' — ')[0];
-    const sz = FORMAT_SIZE[par[1]] || FORMAT_SIZE.square;
-    const keep = coverKeepRatio(d.width, d.height, sz[0], sz[1]);
-    const suf = keep >= 0.999 ? ' — ' + t('fitReady')
-      : keep >= FRAME_KEEP_MIN ? ''
-      : ' — ' + t('fitAdapted').replace('{p}', Math.round((1 - keep) * 100));
-    el.textContent = base + suf;
-  });
-}
-function updateFrameControl() {
-  const el = document.getElementById('frameCtl');
-  if (!el) return;
-  el.style.display = _lastFrameKeep < 0.999 ? 'flex' : 'none';
-  // El control describe el eje que ESTA imagen recorta en el formato que se ve.
-  const d = _lastBaseDims, sz = FORMAT_SIZE[formatForPlatform(platform)] || FORMAT_SIZE.square;
-  const deLado = !!(d && d.width / d.height > sz[0] / sz[1]);
-  const pos = deLado ? (typeof frameAnchorManual === 'number' ? frameAnchorManual : 0.5) : currentAnchorY();
-  const inp = document.getElementById('frameRange');
-  if (inp) inp.value = Math.round(pos * 100);
-  const lab = document.getElementById('frameCtlLabel');
-  if (lab) lab.textContent = t(deLado ? 'frameCtlLabelX' : 'frameCtlLabelY');
-}
 // D37, tercer nivel: el dedo del cliente manda sobre la etiqueta y sobre la IA.
-function setFrameAnchor(v) {
-  frameAnchorManual = Math.min(1, Math.max(0, Number(v) / 100));
-  redrawCanvas();
-}
 function currentAnchorY() {
-  if (typeof frameAnchorManual === 'number') return Math.min(1, Math.max(0, frameAnchorManual));
   if (typeof frameSubjectY === 'number') return Math.min(1, Math.max(0, frameSubjectY));
   for (const tg of (framePhotoTags || [])) if (CROP_ANCHOR_BY_TAG[tg] != null) return CROP_ANCHOR_BY_TAG[tg];
   return CROP_ANCHOR_DEFAULT;
@@ -9545,7 +9634,7 @@ function coverKeepRatio(sw, sh, dw, dh) {
 // paintFallback: fondo de marca si la imagen no trae medidas utilizables.
 // S53b · D36: el reencuadre es SIEMPRE recorte anclado al sujeto. La rama de relleno
 // difuminado se retiro: en feed se lee como relleno y en publicidad penaliza. Lo que
-// antes se tapaba con desenfoque ahora se dice antes de gastar (updateFitNotice).
+// antes se tapaba con desenfoque; desde S54 (D41) el cliente encuadra al subir.
 function drawFramed(ctx, img, dw, dh, paintFallback, opts) {
   const sw = img.naturalWidth || img.width;
   const sh = img.naturalHeight || img.height;
@@ -9567,7 +9656,7 @@ function drawCover(ctx, img, dx, dy, dw, dh, ay) {
     // quedaba siempre centrado y el deslizador solo movia arriba/abajo: en una foto
     // horizontal llevada a vertical —el caso que mas pierde— no habia salida.
     // Las anclas por etiqueta son verticales (caras arriba); de lado, sin dedo, centro.
-    const ax = (typeof frameAnchorManual === 'number') ? Math.min(1, Math.max(0, frameAnchorManual)) : 0.5;
+    const ax = 0.5;   // D41: la foto ya llega encuadrada por el cliente; de lado, centro
     sh = H; sw = sh * dr;
     sx = (W - sw) * ax; sy = 0;
   } else { // source taller → crop top/bottom, anclado al sujeto
