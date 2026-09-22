@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="2.47.0">
+<meta name="app-version" content="2.48.0">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Postimity Studio — Tu estudio de contenido con AI</title>
 <meta name="description" content="Crea posts, flyers, carruseles y videos profesionales con AI. Describe tu negocio una vez y genera contenido listo para publicar en 20 segundos.">
@@ -1761,7 +1761,7 @@ Ej: 'Wonderik es increíble. Mi hija de 3 años ya lee palabras cortas y su desa
             </div>
           </div>
         </div>
-        <div style="font-size:11px;color:var(--t3);line-height:1.5;margin-bottom:8px" id="videoHint">💡 El video se genera con Kling 2.6 Pro. Toma ~2-5 minutos.</div>
+        <div style="font-size:11px;color:var(--t3);line-height:1.5;margin-bottom:8px" id="videoHint">💡 El video se genera con IA. Toma ~2-5 minutos.</div>
         <div class="upload-zone" id="videoPhotoZone" onclick="document.getElementById('videoFile').click()" style="margin-bottom:0;padding:14px">
           <input type="file" id="videoFile" accept="image/*" style="display:none" onchange="handleVideoPhoto(this)">
           <div class="uz-icon" style="font-size:20px">📸</div>
@@ -1883,7 +1883,7 @@ Ej: 'Wonderik es increíble. Mi hija de 3 años ya lee palabras cortas y su desa
                   🎵 TikTok<br><span class="fmt-lbl" id="fmtTk" style="font-size:9px;font-weight:400">9:16 · Guardar + Copiar</span>
                 </button>
               </div>
-              <div class="pub-hint" id="pubHint">💡 Guarda la imagen en el formato ideal y copia el caption — luego abre la app y pega</div>
+              <div class="pub-hint" id="pubHint">💡 Toca una red: se descarga la imagen en su formato y el caption se copia solo — luego abre la app, pega y publica</div>
             </div>
             <div class="dl-btns" style="justify-content:center">
               <button class="btn-dl" onclick="downloadImg(pieceFormat)" style="flex:1;max-width:200px">⬇ Descargar imagen<br><span class="fmt-lbl" id="fmtDl" style="font-size:9px;font-weight:400">4:5 · Descargar</span></button>
@@ -2238,7 +2238,7 @@ function updateShareLabels(mode) {
   // D42 · FB-78: una sola linea por boton. Lista si la pieza es de ese formato; si no, como obtenerla.
   const pf = (typeof pieceFormat === 'string') ? pieceFormat : 'portrait';
   const lab = pf === 'story' ? '9:16' : '4:5';
-  const listo = function(fmt) { return fmt === pf ? (fmt === 'story' ? '9:16' : '4:5') + ' ✓' : (es ? 'genera para esta red' : 'generate for this network'); };
+  const listo = function(fmt) { return fmt === pf ? (fmt === 'story' ? '9:16' : '4:5') + ' ✓' : (fmt === 'story' ? '9:16' : '4:5') + (es ? ' · genera aquí' : ' · generate here'); };
   if (mode === 'carousel') {
     set('fmtIg', listo('portrait')); set('fmtFb', listo('portrait')); set('fmtTk', listo('story'));
     set('fmtDl', lab + (es ? ' · todas las slides' : ' · all slides'));
@@ -2288,7 +2288,7 @@ function setOfflineUI(isOffline) {
 }
 
 // UX-16 / INV-061 — PRODUCT_CONTRACT Parte 1.8.
-// Un reintento absorbe los 429/5xx transitorios de OpenAI sin que el usuario se entere.
+// Un reintento absorbe los 429/5xx transitorios del proveedor sin que el usuario se entere.
 // Solo reintenta lo que es seguro reintentar: fallo de red o 5xx/429. Nunca un 4xx
 // de negocio (límite alcanzado, plan bloqueado) — eso no mejora al repetirlo.
 const RETRY_ONCE = { attempts: 2, backoffMs: 1200 };
@@ -2327,7 +2327,7 @@ function persistSlides(imgs) {
 }
 
 // APP_VERSION (S34) — deploy verification. Must match worker /version and all HTML files.
-const APP_VERSION = '2.47.0'; // 22 sep 2026 — S54: D38 la IA en el formato exacto de la red (tabla en el servidor), D41 la foto la encuadra el cliente al subirla (cuadricula estilo Instagram, sin relleno ni fondo extendido), D42 todo en 4:5 o 9:16 incluido el carrusel (sin 1:1), D40 sin nombre en 9:16 y firma arriba a la derecha, flyer compuesto en su formato (FB-76) y achicar antes de cortar (AR-28) ·· 21 sep 2026 — FB-74: el control de encuadre mueve el eje que se recorta (de lado en fotos horizontales) · FB-73 sube con el worker (AR-13) ·· S53b (20 sep 2026) — motor de composicion: D35 normalizacion unica al subir, D34 tamanio del editor segun la forma de la foto, D36 encuadre anclado sin relleno difuminado y con aviso antes de gastar, D37 ancla por etiqueta con el dedo del cliente por encima, S35-14 el flyer IA compone su texto en canvas, D19 vista previa = entregable, FB-69 el toggle de galeria ya no miente ·· S53 — FB-66/D33 galeria en una llamada y foto original si la mejora falla, FB-67 hashtags una vez, FB-68 barra fuera de Estudio Pro, D31 reintento desde el paso que fallo, D32 texto honesto ·· S52b — FB-58 reintento en el error con el mismo actionId, FB-61 textos honestos, FB-57 copiar que devuelve si copio.
+const APP_VERSION = '2.48.0'; // 22 sep 2026 — S54c: D44 flyer promocional (barra de acento, chips de fecha/horario/precio, boton con el telefono) y en 9:16 la foto ya no queda tapada por la banda ni el degradado; D45 la firma vuelve abajo a la derecha en todos los formatos y el logo arriba a la izquierda, con check ·· S54b: FB-84 fuera el nombre del proveedor de la pantalla y del fuente, FB-82 el hint dice lo que hace el boton, FB-83 dos niveles de nitidez segun si la IA toca la foto, FB-86 rotulo de TikTok completo ·· S54 — S54: D38 la IA en el formato exacto de la red (tabla en el servidor), D41 la foto la encuadra el cliente al subirla (cuadricula estilo Instagram, sin relleno ni fondo extendido), D42 todo en 4:5 o 9:16 incluido el carrusel (sin 1:1), D40 sin nombre en 9:16 y firma arriba a la derecha, flyer compuesto en su formato (FB-76) y achicar antes de cortar (AR-28) ·· 21 sep 2026 — FB-74: el control de encuadre mueve el eje que se recorta (de lado en fotos horizontales) · FB-73 sube con el worker (AR-13) ·· S53b (20 sep 2026) — motor de composicion: D35 normalizacion unica al subir, D34 tamanio del editor segun la forma de la foto, D36 encuadre anclado sin relleno difuminado y con aviso antes de gastar, D37 ancla por etiqueta con el dedo del cliente por encima, S35-14 el flyer IA compone su texto en canvas, D19 vista previa = entregable, FB-69 el toggle de galeria ya no miente ·· S53 — FB-66/D33 galeria en una llamada y foto original si la mejora falla, FB-67 hashtags una vez, FB-68 barra fuera de Estudio Pro, D31 reintento desde el paso que fallo, D32 texto honesto ·· S52b — FB-58 reintento en el error con el mismo actionId, FB-61 textos honestos, FB-57 copiar que devuelve si copio.
 window.APP_VERSION = APP_VERSION;
 // El log de version vive unas lineas mas abajo (console.info). No agregar otro aqui:
 // S38 borro POSTIMITY_VERSION para tener un solo log y este lo volvio a duplicar.
@@ -2466,7 +2466,7 @@ const T = {
     logoInImgLabel:'🏷️ Logo en la imagen',
     wmLabel:'✦ Watermark Postimity', wmLock:'Growth+ para quitar',
     pubLabel:'📤 Publicar en redes sociales',
-    pubCopySub:'Guardar + Copiar caption', pubHint:'💡 Guarda la imagen en el formato ideal y copia el caption — luego abre la app y pega',
+    pubCopySub:'Guardar + Copiar caption', pubHint:'💡 Toca una red: se descarga la imagen en su formato y el caption se copia solo — luego abre la app, pega y publica', pubHintVideo:'💡 Toca una red: se descarga el video y el caption se copia solo — luego abre la app, pega y publica', pubHintCarousel:'💡 Toca una red: se descargan todos los slides y el caption se copia solo — luego abre la app, súbelos como carrusel y pega',
     dlLabel:'⬇ Solo descargar imagen',
     copyForIG:'📋 Copiar para Instagram', copyForFB:'📋 Copiar para Facebook', copyForTK:'📋 Copiar para TikTok',
     postHintIG:'⏰ <strong>Mejor hora:</strong> Martes a Viernes, 9-11am o 6-8pm · Objetivo: que lo guarden y lo compartan por DM',
@@ -2611,7 +2611,7 @@ const T = {
     // ── Video generation ──
     videoTopicLabel:'🎬 Tema del video', videoDurLabel:'Duración', videoRatioLabel:'Formato',
     vdurNote:'5 seg = 1 video · 10 seg = 2 videos',
-    videoHint:'💡 El video se genera con Kling 2.6 Pro. Toma ~2-5 minutos.',
+    videoHint:'💡 El video se genera con IA. Toma ~2-5 minutos.',
     videoGenBtn:'Generar video con AI', genBtn:'Generar contenido con AI',
     videoPhTopic:'Ej: Mostrar el ambiente acogedor de nuestra cafetería con clientes disfrutando...',
     videoPolling:'Generando video... esto toma ~2-5 min',
@@ -2760,7 +2760,7 @@ const T = {
     logoInImgLabel:'🏷️ Logo on image',
     wmLabel:'✦ Watermark Postimity', wmLock:'Growth+ to remove',
     pubLabel:'📤 Publish to social media',
-    pubCopySub:'Save + Copy caption', pubHint:'💡 Saves the image in the ideal format and copies the caption — then open the app and paste',
+    pubCopySub:'Save + Copy caption', pubHint:'💡 Tap a network: the image downloads in its format and the caption is copied for you — then open the app, paste and publish', pubHintVideo:'💡 Tap a network: the video downloads and the caption is copied for you — then open the app, paste and publish', pubHintCarousel:'💡 Tap a network: all slides download and the caption is copied for you — then open the app, upload them as a carousel and paste',
     dlLabel:'⬇ Download image only',
     copyForIG:'📋 Copy for Instagram', copyForFB:'📋 Copy for Facebook', copyForTK:'📋 Copy for TikTok',
     postHintIG:'⏰ <strong>Best time:</strong> Tue–Fri, 9-11am or 6-8pm · Goal: saves + DM shares',
@@ -2904,7 +2904,7 @@ const T = {
     // ── Video generation ──
     videoTopicLabel:'🎬 Video topic', videoDurLabel:'Duration', videoRatioLabel:'Format',
     vdurNote:'5 sec = 1 video · 10 sec = 2 videos',
-    videoHint:'💡 Video is generated with Kling 2.6 Pro. Takes ~2-5 minutes.',
+    videoHint:'💡 Video is generated with AI. Takes ~2-5 minutes.',
     videoGenBtn:'Generate video with AI', genBtn:'Generate content with AI',
     videoPhTopic:'E.g.: Show the cozy atmosphere of our coffee shop with customers enjoying a latte...',
     videoPolling:'Generating video... ~2-5 min',
@@ -3568,6 +3568,15 @@ async function loadBrandFromCloud(id) {
 // (HEIC de iPhone) se rechaza con mensaje, en vez de guardarse para fallar despues.
 const UPLOAD_MAX_SIDE = 2048;   // D35: 2048 evita ampliar una foto horizontal llevada a 9:16
 const UPLOAD_MIN_SIDE = 1080;   // por debajo se AVISA, no se bloquea (FB-64 e)
+// FB-83 (S54): el aviso de nitidez tiene DOS niveles, y depende de si la IA va a tocar la foto.
+// Con IA el editor reconstruye la imagen a 1024 px de ancho, asi que decir «borrosa» a 900 px
+// exagera; sin IA (flyer con la foto tal cual) 1080 px es exactamente el ancho que se entrega.
+const SHARP_SOFT = 1080, SHARP_BLUR = 810, SHARP_IA = 0.75;   // con IA los dos umbrales bajan un cuarto
+function sharpnessLevel(w, h, conIA) {
+  const m = Math.min(w, h), k = conIA ? SHARP_IA : 1;
+  if (m >= SHARP_SOFT * k) return 'ok';
+  return m >= SHARP_BLUR * k ? 'soft' : 'blur';
+}
 const UPLOAD_JPEG_Q   = 0.85;
 async function normalizeUpload(base64, mimeType) {
   const src = String(base64).startsWith('data:') ? String(base64) : 'data:' + (mimeType || 'image/jpeg') + ';base64,' + base64;
@@ -3624,7 +3633,7 @@ async function cropToFormat(src, fmt, rect) {
 }
 function currentFormat() { return formatForPlatform(platform); }
 // La cuadricula. Devuelve la foto recortada o null si el cliente cancela.
-function openCropper(src, fmt) {
+function openCropper(src, fmt, conIA) {
   return new Promise(async function(resolve) {
     const img = await loadImg(src);
     if (!img) { showToast(t('errPhotoUnreadable')); resolve(null); return; }
@@ -3665,7 +3674,8 @@ function openCropper(src, fmt) {
       const r = cropRect(sw, sh, fmt, zoom, px, py);
       ctx.drawImage(img, r.sx, r.sy, r.sw, r.sh, 0, 0, cv.width, cv.height);
       const k = Math.min(1, UPLOAD_MAX_SIDE / Math.max(r.sw, r.sh));
-      warn.textContent = Math.min(r.sw * k, r.sh * k) < UPLOAD_MIN_SIDE ? t('cropSmall') : '';
+      const niv = sharpnessLevel(r.sw * k, r.sh * k, conIA);
+      warn.textContent = niv === 'ok' ? '' : t(niv === 'soft' ? (conIA ? 'cropSoftIA' : 'cropSoft') : 'cropBlur');
     }
     draw();
     const pts = new Map(); let pinch0 = 0, zoom0 = 1;
@@ -3699,15 +3709,17 @@ const CROP_SLOTS = {
   test:    { prev:'testPrev',    set: function(c) { testPhotoB64 = c ? c.b64 : null; testPhotoMime = c ? c.mimeType : null; } },
   cover:   { prev:'carouselCoverPrev', set: function(c) { carouselCoverB64 = c ? c.b64 : null; carouselCoverMime = c ? c.mimeType : null; carouselCoverDims = c; } }
 };
+// El flyer usa la foto TAL CUAL; el resto pasa por el editor de IA (FB-83).
+const SLOT_CON_IA = { enhance:true, flyer:false, test:true, cover:true };
 async function cropInto(slot, b64, mime) {
   const n = await normalizeUpload(b64, mime);
-  const c = await openCropper(n.dataUrl, currentFormat());
+  const c = await openCropper(n.dataUrl, currentFormat(), SLOT_CON_IA[slot] !== false);
   const S = CROP_SLOTS[slot], prev = document.getElementById(S.prev);
   if (!c) { S.set(null); delete cropSrc[slot]; if (prev) { prev.src = ''; prev.classList.remove('show'); } return null; }
   cropSrc[slot] = { src: n.dataUrl, fmt: c.fmt };
   S.set(c);
   if (prev) { prev.src = c.dataUrl; prev.classList.add('show'); }
-  if (c.small) showToast(t('photoSmallWarn'), 6000);
+  if (sharpnessLevel(c.width, c.height, SLOT_CON_IA[slot] !== false) === 'blur') showToast(t('cropBlur'), 6000);
   return c;
 }
 // Cambiar de red con una foto ya encuadrada: se vuelve a encuadrar desde la original.
@@ -3715,7 +3727,7 @@ async function recropForFormat() {
   const slot = { enhance:'enhance', flyer:'flyer', testimonial:'test', carousel:'cover' }[mode];
   const s = slot && cropSrc[slot];
   if (!s || s.fmt === currentFormat()) return;
-  const c = await openCropper(s.src, currentFormat());
+  const c = await openCropper(s.src, currentFormat(), SLOT_CON_IA[slot] !== false);
   const S = CROP_SLOTS[slot], prev = document.getElementById(S.prev);
   if (!c) { S.set(null); delete cropSrc[slot]; if (prev) { prev.src = ''; prev.classList.remove('show'); } return; }
   cropSrc[slot] = { src: s.src, fmt: c.fmt }; S.set(c);
@@ -3727,7 +3739,7 @@ async function cropGalleryPhoto(photo, id) {
   const fmt = currentFormat(), key = String(id) + '|' + fmt;
   if (_galleryCrop[key]) return _galleryCrop[key];
   const n = await normalizeUpload(photo.raw, photo.mime);
-  const c = await openCropper(n.dataUrl, fmt);
+  const c = await openCropper(n.dataUrl, fmt, true);   // la galeria siempre va al editor de IA
   if (!c) throw new Error(t('cropCancelled'));
   const out = { raw: c.b64, mime: c.mimeType };
   _galleryCrop[key] = out;
@@ -5132,7 +5144,7 @@ async function adjustResult() {
 
   newActionId(); // S37/L2: ajustar (texto o imagen) es una accion propia (PU-2)
   if (currentAdjustMode === 'image') {
-    // ── IMAGE ADJUST: edit existing image via OpenAI Edit API ──
+    // ── IMAGE ADJUST: ajusta la imagen ya generada via el editor del proveedor ──
     const imgEl = document.getElementById('resultImg');
     const imageUrl = imgEl?.src;
     if (!imageUrl || imageUrl === window.location.href) {
@@ -5517,7 +5529,7 @@ async function generateVideo(brand) {
   const isES = detectLanguage() === 'es';
 
   try {
-    // Step 1: Generate video prompt with Claude
+    // Step 1: el prompt del video lo redacta el modelo de texto del proveedor
     newActionId(); // S37/L2: video-prompt, image, video-submit y video-captions
                    // comparten actionId. El cobro ocurre una sola vez, en video-submit.
     setStep(1);
@@ -5749,9 +5761,7 @@ function showVideoResult(videoUrl, topic, captionsData) {
     const pubLabel = pubSection.querySelector('.pub-label');
     if(pubLabel) pubLabel.textContent = isES ? '📤 Publicar video en redes sociales' : '📤 Publish video to social media';
     const pubHint = pubSection.querySelector('.pub-hint');
-    if(pubHint) pubHint.textContent = isES
-      ? '💡 Guarda el video y copia el caption — luego abre la app y pega'
-      : '💡 Saves the video and copies the caption — then open the app and paste';
+    if(pubHint) pubHint.textContent = t('pubHintVideo');
     // Replace button onclick to use video share
     const pubBtns = pubSection.querySelectorAll('.pub-btn');
     pubBtns.forEach(btn => {
@@ -8642,9 +8652,7 @@ function showResult(data) {
     const pubLabel = pubSec.querySelector('.pub-label');
     if(pubLabel) pubLabel.textContent = isES ? '📤 Publicar carrusel en redes sociales' : '📤 Publish carousel to social media';
     const pubHint = pubSec.querySelector('.pub-hint');
-    if(pubHint) pubHint.textContent = isES
-      ? '💡 Guarda todos los slides y copia el caption — luego abre la app y súbelos como carrusel'
-      : '💡 Saves all slides and copies the caption — then open the app and upload as carousel';
+    if(pubHint) pubHint.textContent = t('pubHintCarousel');
   }
   // First post celebration
   showFirstPostCelebration();
@@ -9297,8 +9305,10 @@ async function applyBrandOverlays(ctx, w, h, format) {
     ctx.font = '600 ' + wfs + 'px -apple-system,sans-serif';
     const wtw = ctx.measureText(wmText).width;
     const wpw = wtw + wfs, wph = Math.round(wfs * 1.7);
-    // D40: en 9:16 la firma sube arriba a la derecha (abajo y a la derecha estan los botones de la red).
-    const wpx = w - wpw - PADX, wpy = format === 'story' ? PADT : h - wph - PADB;
+    // D45 (S54c, decision del operador): la firma va abajo a la derecha en TODOS los formatos.
+    // D40 la subia en 9:16; pesa mas que la marca se vea siempre en el mismo sitio. Queda dentro
+    // de la zona segura; el riesgo de la columna de iconos de TikTok se acepta a sabiendas.
+    const wpx = w - wpw - PADX, wpy = h - wph - PADB;
     ctx.fillStyle = 'rgba(15,23,42,0.72)'; ctx.beginPath();
     if (ctx.roundRect) ctx.roundRect(wpx, wpy, wpw, wph, 6); else ctx.rect(wpx, wpy, wpw, wph);
     ctx.fill();
@@ -9462,27 +9472,8 @@ async function composeFlyerCanvas(photoSrc, fd, brand, fmt) {
   if(!photo) { ctx.fillStyle=primary; ctx.fillRect(0,0,W,H); }
   else drawFramed(ctx, photo, W, H, function(){ ctx.fillStyle=primary; ctx.fillRect(0,0,W,H); });
 
-  // 2. Degradado para que el texto se lea sobre la foto
-  const grad=ctx.createLinearGradient(0,TOPY+Math.round(H*0.23),0,H);
-  grad.addColorStop(0,'rgba(0,0,0,0)');
-  grad.addColorStop(0.35,'rgba(0,0,0,0.45)');
-  grad.addColorStop(1,hexToRgba(primary,0.92));
-  ctx.fillStyle=grad; ctx.fillRect(0,0,W,H);
-
-  // 3. Banda superior — nombre del negocio + tipo
-  ctx.fillStyle=hexToRgba(primary,0.85); ctx.fillRect(0,0,W,TOPY+90);
-  ctx.fillStyle='rgba(255,255,255,0.95)';
-  ctx.font='bold 28px sans-serif'; ctx.textAlign='left';
-  // D40: en 9:16 no hay nombre en texto plano; lo que se ve arriba es logo y firma.
-  if (!story) ctx.fillText((brand?.name||'').slice(0,30),20,58);
-  if(fd.type){
-    // En 9:16 la etiqueta va al centro: a la derecha arriba vive la firma (D40).
-    const px = story ? (W-170)/2 : W-190;
-    ctx.fillStyle=accent;
-    ctx.beginPath(); ctx.roundRect(px,TOPY+15,170,48,8); ctx.fill();
-    ctx.fillStyle='#fff'; ctx.font='bold 18px sans-serif'; ctx.textAlign='center';
-    ctx.fillText(fd.type.slice(0,18),px+85,TOPY+44);
-  }
+  // 2 y 3 se pintan DESPUES de medir el texto (D44): el degradado arranca donde empieza el
+  //    bloque promocional, no en una fraccion fija que se comia media foto en 9:16.
 
   // ═══ 4. MOTOR DE TEXTO CON PRESUPUESTO VERTICAL — S53b · S40-3 / S41-D ═══
   // Antes el titulo arrancaba en y=670 fijo y CRECIA HACIA ABAJO sin medir: con cuatro
@@ -9493,14 +9484,34 @@ async function composeFlyerCanvas(photoSrc, fd, brand, fmt) {
   const M = 40, MAXW = W - 2*M, GAP = 14;
   const TOP_LIMIT = TOPY + 110;               // debajo de la banda superior
   const BOTTOM = story ? Math.round(H * (1 - SAFE_ZONE.story.bottom)) : H - Math.round(H*0.055);   // 9:16: arriba de lo que TikTok tapa
-  const infoItems=[fd.dates,fd.price,fd.schedule].filter(Boolean);
+  // ═══ D44 (S54c) · EL FLYER ES PROMOCIONAL ═══
+  // Antes el bloque era un pie de foto: titulo, subtitulo y una barra gris con todo junto.
+  // Ahora: barra de acento, titulo, subtitulo, los datos como CHIPS sueltos, boton de
+  // llamada a la accion con el telefono de la marca, y la frase al final. El motor que mide,
+  // escala y achica antes de cortar (AR-28) se conserva entero.
+  const infoItems=[fd.dates,fd.schedule,fd.price].filter(Boolean);
+  const telefono = (brand?.whatsapp || '').toString().trim();
   const bloques = [
+    { kind:'rule', txt:(fd.title||'').trim(), px:9, min:6 },
     { txt:(fd.title||'').trim(),     px:62, font:'bold {px}px sans-serif',   color:'#fff',                    lh:1.16, min:34, maxLines:4 },
-    { txt:(fd.subtitle||'').trim(),  px:32, font:'{px}px sans-serif',        color:'rgba(255,255,255,0.88)',  lh:1.28, min:20, maxLines:2 },
-    { txt:(fd.tagline||'').trim(),   px:26, font:'italic {px}px sans-serif', color:'rgba(255,255,255,0.72)',  lh:1.28, min:17, maxLines:2 },
-    { txt:infoItems.join('  ·  '),   px:26, font:'bold {px}px sans-serif',   color:'#fff',                    lh:1.30, min:17, maxLines:2, pill:true },
+    { txt:(fd.subtitle||'').trim(),  px:32, font:'{px}px sans-serif',        color:'rgba(255,255,255,0.90)',  lh:1.28, min:20, maxLines:2 },
+    { kind:'chips', items:infoItems, txt:infoItems.join(' '), px:26, min:17, lh:1.3 },
+    { kind:'cta', txt:telefono ? ('📱 ' + telefono) : '', px:28, min:20, lh:1.3 },
+    { txt:(fd.tagline||'').trim(),   px:26, font:'italic {px}px sans-serif', color:'rgba(255,255,255,0.75)',  lh:1.28, min:17, maxLines:2 },
     { txt:(fd.extraInfo||'').trim(), px:22, font:'{px}px sans-serif',        color:'rgba(255,255,255,0.78)',  lh:1.28, min:15, maxLines:2 }
   ].filter(b => b.txt);
+  const CHIP_PAD = 22, CHIP_GAP = 12;
+  const medirChips = (items, px) => {   // filas de chips que caben en el ancho
+    ctx.font = 'bold ' + px + 'px sans-serif';
+    const filas = [[]]; let ancho = 0;
+    for (const it of items) {
+      const w = Math.round(ctx.measureText(it).width) + CHIP_PAD * 2;
+      if (ancho && ancho + CHIP_GAP + w > MAXW) { filas.push([]); ancho = 0; }
+      filas[filas.length-1].push({ txt:it, w });
+      ancho += (ancho ? CHIP_GAP : 0) + w;
+    }
+    return filas;
+  };
 
   const wrap = (txt, px, fontTpl) => {
     ctx.font = fontTpl.replace('{px}', px);
@@ -9527,10 +9538,17 @@ async function composeFlyerCanvas(photoSrc, fd, brand, fmt) {
     let alto = 0, cortado = false; const plan = [];
     for (const b of bloques) {
       const px = Math.max(b.min, Math.round(b.px * k));
+      if (b.kind === 'rule') { plan.push({ b, px, h: px }); alto += px + GAP; continue; }
+      if (b.kind === 'chips') {
+        const filas = medirChips(b.items, px);
+        const h = filas.length * (px * 1.95) + (filas.length - 1) * CHIP_GAP;
+        plan.push({ b, px, filas, h }); alto += h + GAP; continue;
+      }
+      if (b.kind === 'cta') { const h = px * 2.3; plan.push({ b, px, h }); alto += h + GAP; continue; }
       const cap = Math.max(1, Math.min(b.maxLines, maxLinesK(b)));
       const r = recortar(wrap(b.txt, px, b.font), px, b.font, cap);
       if (r.cortado) cortado = true;
-      const h = r.lineas.length * px * b.lh + (b.pill ? 18 : 0);
+      const h = r.lineas.length * px * b.lh;
       plan.push({ b, px, lineas:r.lineas, h });
       alto += h + GAP;
     }
@@ -9554,18 +9572,69 @@ async function composeFlyerCanvas(photoSrc, fd, brand, fmt) {
   }
 
   let y = BOTTOM - r.alto;
+
+  // 2. Degradado: arranca donde empieza el bloque, con un respiro. En 9:16 esto deja ver la
+  //    foto entera; antes empezaba en una fraccion fija y la tapaba (hallado el 22 sep).
+  const gradTop = Math.max(story ? Math.round(H*0.36) : Math.round(H*0.22), Math.round(y - H*0.14));
+  const grad=ctx.createLinearGradient(0,gradTop,0,H);
+  grad.addColorStop(0,'rgba(0,0,0,0)');
+  grad.addColorStop(0.35,'rgba(0,0,0,0.48)');
+  grad.addColorStop(1,hexToRgba(primary,0.94));
+  ctx.fillStyle=grad; ctx.fillRect(0,0,W,H);
+
+  // 3. Arriba: en 4:5 una banda fina con el nombre; en 9:16 nada de banda (la foto manda y el
+  //    logo ya va arriba a la izquierda, D45). La etiqueta del tipo, arriba a la derecha siempre.
+  if (!story) {
+    ctx.fillStyle=hexToRgba(primary,0.85); ctx.fillRect(0,0,W,90);
+    ctx.fillStyle='rgba(255,255,255,0.95)';
+    ctx.font='bold 28px sans-serif'; ctx.textAlign='left';
+    ctx.fillText((brand?.name||'').slice(0,30),20,58);
+  }
+  if(fd.type){
+    const tx = W-190;
+    ctx.fillStyle=accent;
+    ctx.beginPath(); ctx.roundRect(tx,TOPY+15,170,48,8); ctx.fill();
+    ctx.fillStyle='#fff'; ctx.font='bold 18px sans-serif'; ctx.textAlign='center';
+    ctx.fillText(fd.type.slice(0,18),tx+85,TOPY+44);
+  }
+
+  // 4. El bloque promocional
   for (const it of r.plan) {
-    const { b, px, lineas } = it;
-    if (b.pill) {
-      const alto = lineas.length * px * b.lh;
-      ctx.fillStyle='rgba(255,255,255,0.18)';
-      ctx.beginPath(); ctx.roundRect(M, y, MAXW, alto + 18, 26); ctx.fill();
-      y += 9;
+    const { b, px, lineas, filas } = it;
+    if (b.kind === 'rule') {                       // barra de acento sobre el titulo
+      ctx.fillStyle = accent;
+      ctx.fillRect(Math.round((W - 96) / 2), y + Math.round(px * 0.2), 96, Math.max(5, Math.round(px * 0.7)));
+      y += px + GAP; continue;
+    }
+    if (b.kind === 'chips') {                      // fecha · horario · precio, sueltos
+      const alto = px * 1.95;
+      for (const fila of filas) {
+        const total = fila.reduce((a, c) => a + c.w, 0) + (fila.length - 1) * CHIP_GAP;
+        let x = (W - total) / 2;
+        for (const chip of fila) {
+          ctx.fillStyle = 'rgba(255,255,255,0.20)';
+          ctx.beginPath(); ctx.roundRect(x, y, chip.w, alto, Math.round(alto/2)); ctx.fill();
+          ctx.fillStyle = '#fff'; ctx.font = 'bold ' + px + 'px sans-serif'; ctx.textAlign = 'center';
+          ctx.fillText(chip.txt, x + chip.w/2, y + alto/2 + px*0.35);
+          x += chip.w + CHIP_GAP;
+        }
+        y += alto + CHIP_GAP;
+      }
+      y += GAP - CHIP_GAP; continue;
+    }
+    if (b.kind === 'cta') {                        // boton de llamada a la accion
+      const alto = px * 2.3;
+      ctx.font = 'bold ' + px + 'px sans-serif';
+      const ancho = Math.min(MAXW, Math.round(ctx.measureText(b.txt).width) + px * 2.6);
+      ctx.fillStyle = accent;
+      ctx.beginPath(); ctx.roundRect((W - ancho)/2, y, ancho, alto, Math.round(alto/2)); ctx.fill();
+      ctx.fillStyle = '#fff'; ctx.textAlign = 'center';
+      ctx.fillText(b.txt, W/2, y + alto/2 + px*0.35);
+      y += alto + GAP; continue;
     }
     ctx.font = b.font.replace('{px}', px);
     ctx.fillStyle = b.color; ctx.textAlign = 'center';
     for (const ln of lineas) { y += px * b.lh; ctx.fillText(ln, W/2, y - px * 0.24); }
-    if (b.pill) y += 9;
     y += GAP;
   }
 
