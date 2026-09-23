@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="2.49.2">
+<meta name="app-version" content="2.49.4">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Postimity Studio — Tu estudio de contenido con AI</title>
 <meta name="description" content="Crea posts, flyers, carruseles y videos profesionales con AI. Describe tu negocio una vez y genera contenido listo para publicar en 20 segundos.">
@@ -1370,6 +1370,10 @@ fbq('track', 'PageView');
           <button type="button" class="palette-btn" onclick="applyPalette('#263238','#607D8B','#FF5722')" title="Servicios profesionales">🏢 <span class="pal-dots" style="display:inline-flex;gap:2px"><span style="width:10px;height:10px;border-radius:50%;background:#263238;display:inline-block"></span><span style="width:10px;height:10px;border-radius:50%;background:#607D8B;display:inline-block"></span><span style="width:10px;height:10px;border-radius:50%;background:#FF5722;display:inline-block"></span></span></button>
           <button type="button" class="palette-btn" onclick="applyPalette('#0D47A1','#1E88E5','#FFC107')" title="Inmobiliaria / Bienes raíces">🏠 <span class="pal-dots" style="display:inline-flex;gap:2px"><span style="width:10px;height:10px;border-radius:50%;background:#0D47A1;display:inline-block"></span><span style="width:10px;height:10px;border-radius:50%;background:#1E88E5;display:inline-block"></span><span style="width:10px;height:10px;border-radius:50%;background:#FFC107;display:inline-block"></span></span></button>
           <button type="button" class="palette-btn" onclick="applyPalette('#FF6F00','#F9A825','#4E342E')" title="Mascotas / Veterinaria">🐾 <span class="pal-dots" style="display:inline-flex;gap:2px"><span style="width:10px;height:10px;border-radius:50%;background:#FF6F00;display:inline-block"></span><span style="width:10px;height:10px;border-radius:50%;background:#F9A825;display:inline-block"></span><span style="width:10px;height:10px;border-radius:50%;background:#4E342E;display:inline-block"></span></span></button>
+          <button type="button" class="palette-btn" onclick="applyPalette('#E91E63','#FFC107','#7E57C2')" title="Eventos / Globos y decoración">🎈 <span class="pal-dots" style="display:inline-flex;gap:2px"><span style="width:10px;height:10px;border-radius:50%;background:#E91E63"></span><span style="width:10px;height:10px;border-radius:50%;background:#FFC107"></span><span style="width:10px;height:10px;border-radius:50%;background:#7E57C2"></span></span></button>
+          <button type="button" class="palette-btn" onclick="applyPalette('#2E7D32','#F9A825','#EF6C00')" title="Abarrotes / Tienda de barrio">🛒 <span class="pal-dots" style="display:inline-flex;gap:2px"><span style="width:10px;height:10px;border-radius:50%;background:#2E7D32"></span><span style="width:10px;height:10px;border-radius:50%;background:#F9A825"></span><span style="width:10px;height:10px;border-radius:50%;background:#EF6C00"></span></span></button>
+          <button type="button" class="palette-btn" onclick="applyPalette('#0D47A1','#FF6F00','#455A64')" title="Oficios / Servicios del hogar">🔧 <span class="pal-dots" style="display:inline-flex;gap:2px"><span style="width:10px;height:10px;border-radius:50%;background:#0D47A1"></span><span style="width:10px;height:10px;border-radius:50%;background:#FF6F00"></span><span style="width:10px;height:10px;border-radius:50%;background:#455A64"></span></span></button>
+          <button type="button" class="palette-btn" onclick="applyPalette('#00838F','#FFB300','#8D6E63')" title="Hotel / Turismo y hospedaje">🏨 <span class="pal-dots" style="display:inline-flex;gap:2px"><span style="width:10px;height:10px;border-radius:50%;background:#00838F"></span><span style="width:10px;height:10px;border-radius:50%;background:#FFB300"></span><span style="width:10px;height:10px;border-radius:50%;background:#8D6E63"></span></span></button>
           <button type="button" class="palette-btn" onclick="applyPalette('#6200EA','#00BFA5','#FF4081')" title="Tech / E-commerce">💻 <span class="pal-dots" style="display:inline-flex;gap:2px"><span style="width:10px;height:10px;border-radius:50%;background:#6200EA;display:inline-block"></span><span style="width:10px;height:10px;border-radius:50%;background:#00BFA5;display:inline-block"></span><span style="width:10px;height:10px;border-radius:50%;background:#FF4081;display:inline-block"></span></span></button>
         </div>
       </div>
@@ -2330,7 +2334,7 @@ function persistSlides(imgs) {
 }
 
 // APP_VERSION (S34) — deploy verification. Must match worker /version and all HTML files.
-const APP_VERSION = '2.49.2'; // 22 sep 2026 — S54g: FB-91 tres mensajes de desarrollador viajaban al cliente (le pedian recargar saldo en el panel del proveedor y revisar nuestra configuracion) ·· S54f: FB-90 guardar en galeria pedia etiqueta y el estudio mandaba ninguna (el worker respondia NO_TAGS); FB-89 la foto que alimenta el video se encuadra en 9:16, porque el proveedor copia la forma de la imagen (un video salio 1244x1660) ·· S54e: D47 el video sale 9:16 siempre y se retira el selector (las tres redes convergen en 1080x1920) con el servidor imponiendolo; FB-85 guardar en la galeria la foto ya mejorada, sin cobrar otra generacion ·· S54d: D46 — la firma pegada abajo a la derecha tambien en 9:16 (D45-B), el degradado del flyer deja de convertir el tercio inferior en un bloque plano (FB-88) y el carrusel 9:16 es una tarjeta sobre fondo de marca en vez de media lamina en blanco (FB-87) ·· S54c: D44 flyer promocional (barra de acento, chips de fecha/horario/precio, boton con el telefono) y en 9:16 la foto ya no queda tapada por la banda ni el degradado; D45 la firma vuelve abajo a la derecha en todos los formatos y el logo arriba a la izquierda, con check ·· S54b: FB-84 fuera el nombre del proveedor de la pantalla y del fuente, FB-82 el hint dice lo que hace el boton, FB-83 dos niveles de nitidez segun si la IA toca la foto, FB-86 rotulo de TikTok completo ·· S54 — S54: D38 la IA en el formato exacto de la red (tabla en el servidor), D41 la foto la encuadra el cliente al subirla (cuadricula estilo Instagram, sin relleno ni fondo extendido), D42 todo en 4:5 o 9:16 incluido el carrusel (sin 1:1), D40 sin nombre en 9:16 y firma arriba a la derecha, flyer compuesto en su formato (FB-76) y achicar antes de cortar (AR-28) ·· 21 sep 2026 — FB-74: el control de encuadre mueve el eje que se recorta (de lado en fotos horizontales) · FB-73 sube con el worker (AR-13) ·· S53b (20 sep 2026) — motor de composicion: D35 normalizacion unica al subir, D34 tamanio del editor segun la forma de la foto, D36 encuadre anclado sin relleno difuminado y con aviso antes de gastar, D37 ancla por etiqueta con el dedo del cliente por encima, S35-14 el flyer IA compone su texto en canvas, D19 vista previa = entregable, FB-69 el toggle de galeria ya no miente ·· S53 — FB-66/D33 galeria en una llamada y foto original si la mejora falla, FB-67 hashtags una vez, FB-68 barra fuera de Estudio Pro, D31 reintento desde el paso que fallo, D32 texto honesto ·· S52b — FB-58 reintento en el error con el mismo actionId, FB-61 textos honestos, FB-57 copiar que devuelve si copio.
+const APP_VERSION = '2.49.4'; // 22 sep 2026 — S54h: FB-94 el panel de resultado de la pieza ANTERIOR seguia ofreciendo descargar, publicar y guardar mientras se armaba otra; se oculta al cambiar de modo o elegir foto nueva, en los seis modos ·· S54h: FB-85 v2 el selector de etiqueta se dibujaba sin estilos cuando la cuadricula nunca se abrio (guardar en galeria fallaba EN SILENCIO); D48 paletas de color para los cinco giros nuevos ·· S54g: FB-91 tres mensajes de desarrollador viajaban al cliente (le pedian recargar saldo en el panel del proveedor y revisar nuestra configuracion) ·· S54f: FB-90 guardar en galeria pedia etiqueta y el estudio mandaba ninguna (el worker respondia NO_TAGS); FB-89 la foto que alimenta el video se encuadra en 9:16, porque el proveedor copia la forma de la imagen (un video salio 1244x1660) ·· S54e: D47 el video sale 9:16 siempre y se retira el selector (las tres redes convergen en 1080x1920) con el servidor imponiendolo; FB-85 guardar en la galeria la foto ya mejorada, sin cobrar otra generacion ·· S54d: D46 — la firma pegada abajo a la derecha tambien en 9:16 (D45-B), el degradado del flyer deja de convertir el tercio inferior en un bloque plano (FB-88) y el carrusel 9:16 es una tarjeta sobre fondo de marca en vez de media lamina en blanco (FB-87) ·· S54c: D44 flyer promocional (barra de acento, chips de fecha/horario/precio, boton con el telefono) y en 9:16 la foto ya no queda tapada por la banda ni el degradado; D45 la firma vuelve abajo a la derecha en todos los formatos y el logo arriba a la izquierda, con check ·· S54b: FB-84 fuera el nombre del proveedor de la pantalla y del fuente, FB-82 el hint dice lo que hace el boton, FB-83 dos niveles de nitidez segun si la IA toca la foto, FB-86 rotulo de TikTok completo ·· S54 — S54: D38 la IA en el formato exacto de la red (tabla en el servidor), D41 la foto la encuadra el cliente al subirla (cuadricula estilo Instagram, sin relleno ni fondo extendido), D42 todo en 4:5 o 9:16 incluido el carrusel (sin 1:1), D40 sin nombre en 9:16 y firma arriba a la derecha, flyer compuesto en su formato (FB-76) y achicar antes de cortar (AR-28) ·· 21 sep 2026 — FB-74: el control de encuadre mueve el eje que se recorta (de lado en fotos horizontales) · FB-73 sube con el worker (AR-13) ·· S53b (20 sep 2026) — motor de composicion: D35 normalizacion unica al subir, D34 tamanio del editor segun la forma de la foto, D36 encuadre anclado sin relleno difuminado y con aviso antes de gastar, D37 ancla por etiqueta con el dedo del cliente por encima, S35-14 el flyer IA compone su texto en canvas, D19 vista previa = entregable, FB-69 el toggle de galeria ya no miente ·· S53 — FB-66/D33 galeria en una llamada y foto original si la mejora falla, FB-67 hashtags una vez, FB-68 barra fuera de Estudio Pro, D31 reintento desde el paso que fallo, D32 texto honesto ·· S52b — FB-58 reintento en el error con el mismo actionId, FB-61 textos honestos, FB-57 copiar que devuelve si copio.
 window.APP_VERSION = APP_VERSION;
 // El log de version vive unas lineas mas abajo (console.info). No agregar otro aqui:
 // S38 borro POSTIMITY_VERSION para tener un solo log y este lo volvio a duplicar.
@@ -2642,7 +2646,7 @@ const T = {
     fitCrop:'Esta foto se recortará {p}% para salir en {f}. Al ver el resultado puedes mover el encuadre o elegir otra red.',
     fitSmall:'Tiene poca resolución: puede verse borrosa.',
     fitReady:'Listo', fitAdapted:'Adaptada · se recorta {p}%',
-    gallerySaved:'✅ Guardada en tu galería — ya puedes reutilizarla', gallerySavedAlready:'Esta foto ya está en tu galería', gallerySaveError:'No se pudo guardar en tu galería. Inténtalo de nuevo.', cropTitle:'Encuadra tu foto · {f}', cropHint:'Arrastra para mover · pellizca o usa la barra para acercar', cropSmall:'Así queda chica (menos de 1080 px): se verá borrosa. Aleja el zoom o usa otra foto.', cropOk:'Usar este encuadre', cropCancel:'Cancelar', cropCancelled:'Cancelaste el encuadre. No se descontó nada: vuelve a generar cuando quieras.', otherFmtTiktok:'Esta pieza está en 4:5. Para TikTok (9:16) elige TikTok arriba y genera de nuevo.', otherFmtFeed:'Esta pieza está en 9:16. Para Instagram o Facebook (4:5) elige esa red arriba y genera de nuevo.', frameCtlLabel:'Mover encuadre', frameCtlLabelX:'Mover encuadre ← →', frameCtlLabelY:'Mover encuadre ↑ ↓', flyerTextFail:'No pudimos componer los textos del flyer. Vuelve a intentarlo.',
+    gallerySaved:'✅ Guardada en tu galería — ya puedes reutilizarla', gallerySaveNoResult:'Primero genera o mejora una imagen: esto guarda el resultado, no la foto que subiste.', gallerySavedAlready:'Esta foto ya está en tu galería', gallerySaveError:'No se pudo guardar en tu galería. Inténtalo de nuevo.', cropTitle:'Encuadra tu foto · {f}', cropHint:'Arrastra para mover · pellizca o usa la barra para acercar', cropSmall:'Así queda chica (menos de 1080 px): se verá borrosa. Aleja el zoom o usa otra foto.', cropOk:'Usar este encuadre', cropCancel:'Cancelar', cropCancelled:'Cancelaste el encuadre. No se descontó nada: vuelve a generar cuando quieras.', otherFmtTiktok:'Esta pieza está en 4:5. Para TikTok (9:16) elige TikTok arriba y genera de nuevo.', otherFmtFeed:'Esta pieza está en 9:16. Para Instagram o Facebook (4:5) elige esa red arriba y genera de nuevo.', frameCtlLabel:'Mover encuadre', frameCtlLabelX:'Mover encuadre ← →', frameCtlLabelY:'Mover encuadre ↑ ↓', flyerTextFail:'No pudimos componer los textos del flyer. Vuelve a intentarlo.',
     gtHintAvailable:'{n} foto(s) disponible(s)',
     gsTitle:'📷 Foto sugerida — toca para cambiar',
     galleryPhotoLabel:'📷 Tu foto real',
@@ -2935,7 +2939,7 @@ const T = {
     fitCrop:'This photo will be cropped {p}% to fit {f}. On the result you can move the framing or pick another network.',
     fitSmall:'Low resolution: it may look blurry.',
     fitReady:'Ready', fitAdapted:'Adapted · {p}% cropped',
-    gallerySaved:'✅ Saved to your gallery — you can reuse it now', gallerySavedAlready:'This photo is already in your gallery', gallerySaveError:'Could not save to your gallery. Try again.', cropTitle:'Frame your photo · {f}', cropHint:'Drag to move · pinch or use the slider to zoom', cropSmall:'This is small (under 1080 px): it will look blurry. Zoom out or use another photo.', cropOk:'Use this framing', cropCancel:'Cancel', cropCancelled:'You cancelled the framing. Nothing was deducted: generate again whenever you like.', otherFmtTiktok:'This piece is 4:5. For TikTok (9:16), choose TikTok above and generate again.', otherFmtFeed:'This piece is 9:16. For Instagram or Facebook (4:5), choose that network above and generate again.', frameCtlLabel:'Move framing', frameCtlLabelX:'Move framing ← →', frameCtlLabelY:'Move framing ↑ ↓', flyerTextFail:'We could not compose the flyer text. Please try again.',
+    gallerySaved:'✅ Saved to your gallery — you can reuse it now', gallerySaveNoResult:'Generate or enhance an image first: this saves the result, not the photo you uploaded.', gallerySavedAlready:'This photo is already in your gallery', gallerySaveError:'Could not save to your gallery. Try again.', cropTitle:'Frame your photo · {f}', cropHint:'Drag to move · pinch or use the slider to zoom', cropSmall:'This is small (under 1080 px): it will look blurry. Zoom out or use another photo.', cropOk:'Use this framing', cropCancel:'Cancel', cropCancelled:'You cancelled the framing. Nothing was deducted: generate again whenever you like.', otherFmtTiktok:'This piece is 4:5. For TikTok (9:16), choose TikTok above and generate again.', otherFmtFeed:'This piece is 9:16. For Instagram or Facebook (4:5), choose that network above and generate again.', frameCtlLabel:'Move framing', frameCtlLabelX:'Move framing ← →', frameCtlLabelY:'Move framing ↑ ↓', flyerTextFail:'We could not compose the flyer text. Please try again.',
     gtHintAvailable:'{n} photo(s) available',
     gsTitle:'📷 Suggested photo — tap to change',
     galleryPhotoLabel:'📷 Your real photo',
@@ -3609,12 +3613,21 @@ let _savedToGallery = null;
 function pickGalleryTag() {
   return new Promise(function(resolve) {
     const es = detectLanguage() !== 'en';
+    ensureOverlayCss();
     const ov = document.createElement('div'); ov.className = 'crop-ov';
-    ov.innerHTML = '<div class="crop-box"><div class="crop-title"></div><div class="crop-hint"></div>'
+    ov.innerHTML = '<div class="crop-box"><div class="crop-title"></div>'
+      + '<img id="tagPickPrev" style="max-height:28vh;border-radius:10px;margin:10px auto;display:block" alt="">'
+      + '<div class="crop-hint"></div>'
       + '<div id="tagPick" style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:14px 0"></div>'
       + '<div class="crop-btns"><button class="crop-cancel"></button></div></div>';
-    ov.querySelector('.crop-title').textContent = es ? '¿Qué muestra esta foto?' : 'What does this photo show?';
-    ov.querySelector('.crop-hint').textContent = es ? 'Se guarda en tu galería con esa etiqueta' : 'It will be saved to your gallery with that tag';
+    ov.querySelector('.crop-title').textContent = es ? '¿Qué muestra esta foto ya mejorada?' : 'What does this enhanced photo show?';
+    ov.querySelector('.crop-hint').textContent = es
+      ? 'Guardas ESTA imagen en tu galería para reutilizarla después'
+      : 'You are saving THIS image to your gallery to reuse later';
+    // FB-94: se ve la imagen que se va a guardar, para que nadie la confunda con la foto que subio
+    const prevEl = ov.querySelector('#tagPickPrev');
+    const resImg = document.getElementById('resultImg');
+    if (prevEl && resImg && resImg.src) prevEl.src = resImg.src; else if (prevEl) prevEl.style.display = 'none';
     ov.querySelector('.crop-cancel').textContent = t('cropCancel');
     const cont = ov.querySelector('#tagPick');
     VALID_GALLERY_TAGS.forEach(function(tag) {
@@ -3629,7 +3642,11 @@ function pickGalleryTag() {
   });
 }
 async function saveResultToGallery(btn) {
-  if (!originalImageUrl) return;
+  const w = document.getElementById('resultWrap');
+  if (!originalImageUrl || (w && w.style.display === 'none')) {
+    showToast(t('gallerySaveNoResult'));   // FB-94: nunca en silencio
+    return;
+  }
   if (_savedToGallery === originalImageUrl) { showToast(t('gallerySavedAlready')); return; }
   const etiqueta = await pickGalleryTag();
   if (!etiqueta) return;                       // cancelar no guarda ni gasta cupo
@@ -3702,15 +3719,12 @@ async function cropToFormat(src, fmt, rect) {
            small: Math.min(w, h) < UPLOAD_MIN_SIDE, dataUrl: url, fmt: fmt };
 }
 function currentFormat() { return formatForPlatform(platform); }
-// La cuadricula. Devuelve la foto recortada o null si el cliente cancela.
-function openCropper(src, fmt, conIA) {
-  return new Promise(async function(resolve) {
-    const img = await loadImg(src);
-    if (!img) { showToast(t('errPhotoUnreadable')); resolve(null); return; }
-    const sw = img.naturalWidth || img.width, sh = img.naturalHeight || img.height;
-    const d = FORMAT_SIZE[fmt] || FORMAT_SIZE.portrait;
-    if (!document.getElementById('cropCss')) {
-      const st = document.createElement('style'); st.id = 'cropCss';
+// FB-85 v2 (S54g): el CSS de los overlays vivia DENTRO de openCropper. El selector de etiqueta
+// usa las mismas clases, asi que en un post con imagen de IA —donde la cuadricula nunca se abre—
+// se dibujaba sin estilos al final de la pagina: invisible. Guardar fallaba EN SILENCIO.
+function ensureOverlayCss() {
+  if (document.getElementById('cropCss')) return;
+  const st = document.createElement('style'); st.id = 'cropCss';
       st.textContent = '.crop-ov{position:fixed;inset:0;z-index:9999;background:rgba(10,14,25,.92);display:flex;align-items:center;justify-content:center;padding:16px;touch-action:none}'
         + '.crop-box{background:#111827;border-radius:16px;padding:16px;max-width:420px;width:100%;color:#fff;font-family:inherit;text-align:center}'
         + '.crop-frame{position:relative;margin:10px auto;border-radius:6px;overflow:hidden;touch-action:none;cursor:grab}'
@@ -3720,7 +3734,16 @@ function openCropper(src, fmt, conIA) {
         + '.crop-zoom{width:100%;margin-top:8px}.crop-btns{display:flex;gap:10px;margin-top:12px}.crop-btns button{flex:1;padding:12px;border-radius:10px;border:0;font-weight:700;font-size:15px}'
         + '.crop-ok{background:#2979FF;color:#fff}.crop-cancel{background:#374151;color:#fff}';
       document.head.appendChild(st);
-    }
+}
+
+// La cuadricula. Devuelve la foto recortada o null si el cliente cancela.
+function openCropper(src, fmt, conIA) {
+  return new Promise(async function(resolve) {
+    const img = await loadImg(src);
+    if (!img) { showToast(t('errPhotoUnreadable')); resolve(null); return; }
+    const sw = img.naturalWidth || img.width, sh = img.naturalHeight || img.height;
+    const d = FORMAT_SIZE[fmt] || FORMAT_SIZE.portrait;
+    ensureOverlayCss();
     const ov = document.createElement('div'); ov.className = 'crop-ov';
     const lbl = fmt === 'story' ? '9:16 · TikTok' : '4:5 · Instagram / Facebook';
     ov.innerHTML = '<div class="crop-box"><div class="crop-title"></div><div class="crop-frame"><canvas></canvas><div class="crop-grid"></div></div>'
@@ -3782,6 +3805,7 @@ const CROP_SLOTS = {
 // El flyer usa la foto TAL CUAL; el resto pasa por el editor de IA (FB-83).
 const SLOT_CON_IA = { enhance:true, flyer:false, test:true, cover:true };
 async function cropInto(slot, b64, mime) {
+  ocultarResultadoAnterior();   // FB-94: la pieza anterior deja de ofrecer sus acciones
   const n = await normalizeUpload(b64, mime);
   const c = await openCropper(n.dataUrl, currentFormat(), SLOT_CON_IA[slot] !== false);
   const S = CROP_SLOTS[slot], prev = document.getElementById(S.prev);
@@ -4722,7 +4746,20 @@ function handleModeClick(m) {
   setMode(m);
 }
 
+// FB-94 (S54h) — EL RESULTADO ANTERIOR NO SE QUEDA EN PANTALLA MIENTRAS SE ARMA OTRA PIEZA.
+// Sintoma reportado: en Estudio Pro, al tomar una foto aparecia el selector de etiqueta de
+// «Guardar en mi galeria» —que pertenece al RESULTADO de la pieza anterior, aun visible mas
+// abajo—, como si la etiqueta fuera parte de mejorar la foto. Aplica a los seis modos: el panel
+// de resultado trae descargar, publicar y guardar, y ninguno tiene sentido sobre una pieza que
+// ya no es la que el cliente esta armando.
+function ocultarResultadoAnterior() {
+  const w = document.getElementById('resultWrap');
+  if (w && w.style.display !== 'none') w.style.display = 'none';
+  const b = document.getElementById('saveGalleryBtn');
+  if (b) b.disabled = false;
+}
 function setMode(m) {
+  ocultarResultadoAnterior();
   mode=m;
   ['post','enhance','flyer','testimonial','carousel','video'].forEach(n=>{ const el=document.getElementById(n+'Input'); if(el) el.style.display=n===m?'block':'none'; });
   const modeMap = ['post','enhance','flyer','testimonial','carousel','video'];
