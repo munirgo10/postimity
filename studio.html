@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="2.49.0">
+<meta name="app-version" content="2.49.1">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Postimity Studio — Tu estudio de contenido con AI</title>
 <meta name="description" content="Crea posts, flyers, carruseles y videos profesionales con AI. Describe tu negocio una vez y genera contenido listo para publicar en 20 segundos.">
@@ -1764,6 +1764,7 @@ Ej: 'Wonderik es increíble. Mi hija de 3 años ya lee palabras cortas y su desa
           </div>
         </div>
         <div style="font-size:11px;color:var(--t3);line-height:1.5;margin-bottom:8px" id="videoHint">💡 El video se genera con IA. Toma ~2-5 minutos.</div>
+        <div style="font-size:11px;color:var(--t3);line-height:1.5;margin-bottom:8px" id="videoPhotoNote">📸 Si subes una foto, el video <b>anima esa foto</b> (movimiento de cámara y luz); no crea una escena nueva. La encuadras en 9:16 antes de generar.</div>
         <div class="upload-zone" id="videoPhotoZone" onclick="document.getElementById('videoFile').click()" style="margin-bottom:0;padding:14px">
           <input type="file" id="videoFile" accept="image/*" style="display:none" onchange="handleVideoPhoto(this)">
           <div class="uz-icon" style="font-size:20px">📸</div>
@@ -2329,7 +2330,7 @@ function persistSlides(imgs) {
 }
 
 // APP_VERSION (S34) — deploy verification. Must match worker /version and all HTML files.
-const APP_VERSION = '2.49.0'; // 22 sep 2026 — S54e: D47 el video sale 9:16 siempre y se retira el selector (las tres redes convergen en 1080x1920) con el servidor imponiendolo; FB-85 guardar en la galeria la foto ya mejorada, sin cobrar otra generacion ·· S54d: D46 — la firma pegada abajo a la derecha tambien en 9:16 (D45-B), el degradado del flyer deja de convertir el tercio inferior en un bloque plano (FB-88) y el carrusel 9:16 es una tarjeta sobre fondo de marca en vez de media lamina en blanco (FB-87) ·· S54c: D44 flyer promocional (barra de acento, chips de fecha/horario/precio, boton con el telefono) y en 9:16 la foto ya no queda tapada por la banda ni el degradado; D45 la firma vuelve abajo a la derecha en todos los formatos y el logo arriba a la izquierda, con check ·· S54b: FB-84 fuera el nombre del proveedor de la pantalla y del fuente, FB-82 el hint dice lo que hace el boton, FB-83 dos niveles de nitidez segun si la IA toca la foto, FB-86 rotulo de TikTok completo ·· S54 — S54: D38 la IA en el formato exacto de la red (tabla en el servidor), D41 la foto la encuadra el cliente al subirla (cuadricula estilo Instagram, sin relleno ni fondo extendido), D42 todo en 4:5 o 9:16 incluido el carrusel (sin 1:1), D40 sin nombre en 9:16 y firma arriba a la derecha, flyer compuesto en su formato (FB-76) y achicar antes de cortar (AR-28) ·· 21 sep 2026 — FB-74: el control de encuadre mueve el eje que se recorta (de lado en fotos horizontales) · FB-73 sube con el worker (AR-13) ·· S53b (20 sep 2026) — motor de composicion: D35 normalizacion unica al subir, D34 tamanio del editor segun la forma de la foto, D36 encuadre anclado sin relleno difuminado y con aviso antes de gastar, D37 ancla por etiqueta con el dedo del cliente por encima, S35-14 el flyer IA compone su texto en canvas, D19 vista previa = entregable, FB-69 el toggle de galeria ya no miente ·· S53 — FB-66/D33 galeria en una llamada y foto original si la mejora falla, FB-67 hashtags una vez, FB-68 barra fuera de Estudio Pro, D31 reintento desde el paso que fallo, D32 texto honesto ·· S52b — FB-58 reintento en el error con el mismo actionId, FB-61 textos honestos, FB-57 copiar que devuelve si copio.
+const APP_VERSION = '2.49.1'; // 22 sep 2026 — S54f: FB-90 guardar en galeria pedia etiqueta y el estudio mandaba ninguna (el worker respondia NO_TAGS); FB-89 la foto que alimenta el video se encuadra en 9:16, porque el proveedor copia la forma de la imagen (un video salio 1244x1660) ·· S54e: D47 el video sale 9:16 siempre y se retira el selector (las tres redes convergen en 1080x1920) con el servidor imponiendolo; FB-85 guardar en la galeria la foto ya mejorada, sin cobrar otra generacion ·· S54d: D46 — la firma pegada abajo a la derecha tambien en 9:16 (D45-B), el degradado del flyer deja de convertir el tercio inferior en un bloque plano (FB-88) y el carrusel 9:16 es una tarjeta sobre fondo de marca en vez de media lamina en blanco (FB-87) ·· S54c: D44 flyer promocional (barra de acento, chips de fecha/horario/precio, boton con el telefono) y en 9:16 la foto ya no queda tapada por la banda ni el degradado; D45 la firma vuelve abajo a la derecha en todos los formatos y el logo arriba a la izquierda, con check ·· S54b: FB-84 fuera el nombre del proveedor de la pantalla y del fuente, FB-82 el hint dice lo que hace el boton, FB-83 dos niveles de nitidez segun si la IA toca la foto, FB-86 rotulo de TikTok completo ·· S54 — S54: D38 la IA en el formato exacto de la red (tabla en el servidor), D41 la foto la encuadra el cliente al subirla (cuadricula estilo Instagram, sin relleno ni fondo extendido), D42 todo en 4:5 o 9:16 incluido el carrusel (sin 1:1), D40 sin nombre en 9:16 y firma arriba a la derecha, flyer compuesto en su formato (FB-76) y achicar antes de cortar (AR-28) ·· 21 sep 2026 — FB-74: el control de encuadre mueve el eje que se recorta (de lado en fotos horizontales) · FB-73 sube con el worker (AR-13) ·· S53b (20 sep 2026) — motor de composicion: D35 normalizacion unica al subir, D34 tamanio del editor segun la forma de la foto, D36 encuadre anclado sin relleno difuminado y con aviso antes de gastar, D37 ancla por etiqueta con el dedo del cliente por encima, S35-14 el flyer IA compone su texto en canvas, D19 vista previa = entregable, FB-69 el toggle de galeria ya no miente ·· S53 — FB-66/D33 galeria en una llamada y foto original si la mejora falla, FB-67 hashtags una vez, FB-68 barra fuera de Estudio Pro, D31 reintento desde el paso que fallo, D32 texto honesto ·· S52b — FB-58 reintento en el error con el mismo actionId, FB-61 textos honestos, FB-57 copiar que devuelve si copio.
 window.APP_VERSION = APP_VERSION;
 // El log de version vive unas lineas mas abajo (console.info). No agregar otro aqui:
 // S38 borro POSTIMITY_VERSION para tener un solo log y este lo volvio a duplicar.
@@ -3603,9 +3604,35 @@ async function normalizeUpload(base64, mimeType) {
 // (sin sello ni firma, RD-29), no lleva actionId —guardar algo ya pagado no cobra otra
 // generacion— y consume cupo de FOTOS del plan, que es lo que dice el boton antes de tocarlo.
 let _savedToGallery = null;
+// FB-90 (S54f): el worker rechaza una foto sin etiqueta (NO_TAGS) y el estudio mandaba
+// `tags: []`: guardar fallaba siempre. La etiqueta la elige el cliente, como al subir.
+function pickGalleryTag() {
+  return new Promise(function(resolve) {
+    const es = detectLanguage() !== 'en';
+    const ov = document.createElement('div'); ov.className = 'crop-ov';
+    ov.innerHTML = '<div class="crop-box"><div class="crop-title"></div><div class="crop-hint"></div>'
+      + '<div id="tagPick" style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:14px 0"></div>'
+      + '<div class="crop-btns"><button class="crop-cancel"></button></div></div>';
+    ov.querySelector('.crop-title').textContent = es ? '¿Qué muestra esta foto?' : 'What does this photo show?';
+    ov.querySelector('.crop-hint').textContent = es ? 'Se guarda en tu galería con esa etiqueta' : 'It will be saved to your gallery with that tag';
+    ov.querySelector('.crop-cancel').textContent = t('cropCancel');
+    const cont = ov.querySelector('#tagPick');
+    VALID_GALLERY_TAGS.forEach(function(tag) {
+      const b = document.createElement('button');
+      b.className = 'crop-ok'; b.style.cssText = 'padding:10px 14px;border-radius:10px;border:0;font-weight:700;font-size:14px';
+      b.textContent = (GALLERY_TAG_LABELS[es ? 'es' : 'en'] || {})[tag] || tag;
+      b.onclick = function() { ov.remove(); resolve(tag); };
+      cont.appendChild(b);
+    });
+    ov.querySelector('.crop-cancel').onclick = function() { ov.remove(); resolve(null); };
+    document.body.appendChild(ov);
+  });
+}
 async function saveResultToGallery(btn) {
   if (!originalImageUrl) return;
   if (_savedToGallery === originalImageUrl) { showToast(t('gallerySavedAlready')); return; }
+  const etiqueta = await pickGalleryTag();
+  if (!etiqueta) return;                       // cancelar no guarda ni gasta cupo
   if (btn) btn.disabled = true;
   try {
     const dataUrl = await toDataUrlCached(originalImageUrl);
@@ -3617,7 +3644,7 @@ async function saveResultToGallery(btn) {
       imageData: dataUrl,
       width: img ? (img.naturalWidth || img.width) : 0,
       height: img ? (img.naturalHeight || img.height) : 0,
-      tags: [],
+      tags: [etiqueta],
       fileName: 'postimity-' + Date.now() + '.jpg',
     });
     if (data && data.success) {
@@ -3778,8 +3805,8 @@ async function recropForFormat() {
 }
 // La foto de galeria se encuadra al usarla, ANTES del primer cobro. Un reintento no vuelve a preguntar.
 const _galleryCrop = {};
-async function cropGalleryPhoto(photo, id) {
-  const fmt = currentFormat(), key = String(id) + '|' + fmt;
+async function cropGalleryPhoto(photo, id, fmtFijo) {
+  const fmt = fmtFijo || currentFormat(), key = String(id) + '|' + fmt;
   if (_galleryCrop[key]) return _galleryCrop[key];
   const n = await normalizeUpload(photo.raw, photo.mime);
   const c = await openCropper(n.dataUrl, fmt, true);   // la galeria siempre va al editor de IA
@@ -5522,16 +5549,26 @@ function setVideoDur(d, btn) {
 }
 // D47: el aspecto ya no se elige. Se conserva la constante porque viaja en el cuerpo de la
 // peticion y el servidor la impone de todos modos (MC-26 c).
+// FB-89 (S54f): con foto, el proveedor hereda la FORMA de la imagen e ignora el aspecto que
+// pedimos: un video salio en 1244x1660 (3:4) con el cuerpo pidiendo 9:16. La foto se encuadra
+// en 9:16 antes de subirla, con la misma cuadricula de D41.
 function handleVideoPhoto(input) {
   const file = input.files[0];
   if(!file) return;
   if(file.size > 10*1024*1024) { alert('Max 10MB'); return; }
   const reader = new FileReader();
-  reader.onload = function(e) {
-    videoPhotoB64 = e.target.result;
-    document.getElementById('videoPrev').src = videoPhotoB64;
-    document.getElementById('videoPrev').style.display = 'block';
-    document.getElementById('videoPhotoName').textContent = '✓ ' + file.name;
+  reader.onload = async function(e) {
+    const prev = document.getElementById('videoPrev');
+    try {
+      const n = await normalizeUpload(e.target.result, file.type);
+      const c = await openCropper(n.dataUrl, 'story', true);
+      if (!c) { videoPhotoB64 = null; prev.style.display = 'none'; prev.src = ''; return; }
+      videoPhotoB64 = c.dataUrl;
+      prev.src = videoPhotoB64; prev.style.display = 'block';
+      document.getElementById('videoPhotoName').textContent = '✓ ' + file.name;
+    } catch (err) {
+      videoPhotoB64 = null; showToast(t('errPhotoUnreadable'));
+    }
   };
   reader.readAsDataURL(file);
 }
@@ -5624,7 +5661,13 @@ async function generateVideo(brand) {
     if (usingGalleryPhoto) {
       setStep(2);
       document.getElementById('loadTitle').textContent = isES ? '📸 Usando tu foto de galería...' : '📸 Using your gallery photo...';
-      imageUrl = gallerySelectedPhoto.url;
+      // FB-89: la galeria guarda la ORIGINAL (D43). Para video se encuadra en 9:16 y se sube,
+      // porque el proveedor copia la forma de la imagen que recibe.
+      const gp = await photoUrlToBase64(gallerySelectedPhoto.url);
+      const cortada = await cropGalleryPhoto(gp, (gallerySelectedPhoto.id || gallerySelectedPhoto.url) + '|video', 'story');
+      const up = await postWithTimeout({ mode: 'image', actionId: currentActionId, action: 'upload-video-photo',
+        imageData: 'data:' + cortada.mime + ';base64,' + cortada.raw, brandId }, 30000);
+      imageUrl = up.imageUrl || null;
     } else if(videoPhotoB64) {
       setStep(2);
       document.getElementById('loadTitle').textContent = isES ? '📸 Subiendo foto...' : '📸 Uploading photo...';
