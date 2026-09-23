@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="2.49.1">
+<meta name="app-version" content="2.49.2">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Postimity Studio — Tu estudio de contenido con AI</title>
 <meta name="description" content="Crea posts, flyers, carruseles y videos profesionales con AI. Describe tu negocio una vez y genera contenido listo para publicar en 20 segundos.">
@@ -2330,7 +2330,7 @@ function persistSlides(imgs) {
 }
 
 // APP_VERSION (S34) — deploy verification. Must match worker /version and all HTML files.
-const APP_VERSION = '2.49.1'; // 22 sep 2026 — S54f: FB-90 guardar en galeria pedia etiqueta y el estudio mandaba ninguna (el worker respondia NO_TAGS); FB-89 la foto que alimenta el video se encuadra en 9:16, porque el proveedor copia la forma de la imagen (un video salio 1244x1660) ·· S54e: D47 el video sale 9:16 siempre y se retira el selector (las tres redes convergen en 1080x1920) con el servidor imponiendolo; FB-85 guardar en la galeria la foto ya mejorada, sin cobrar otra generacion ·· S54d: D46 — la firma pegada abajo a la derecha tambien en 9:16 (D45-B), el degradado del flyer deja de convertir el tercio inferior en un bloque plano (FB-88) y el carrusel 9:16 es una tarjeta sobre fondo de marca en vez de media lamina en blanco (FB-87) ·· S54c: D44 flyer promocional (barra de acento, chips de fecha/horario/precio, boton con el telefono) y en 9:16 la foto ya no queda tapada por la banda ni el degradado; D45 la firma vuelve abajo a la derecha en todos los formatos y el logo arriba a la izquierda, con check ·· S54b: FB-84 fuera el nombre del proveedor de la pantalla y del fuente, FB-82 el hint dice lo que hace el boton, FB-83 dos niveles de nitidez segun si la IA toca la foto, FB-86 rotulo de TikTok completo ·· S54 — S54: D38 la IA en el formato exacto de la red (tabla en el servidor), D41 la foto la encuadra el cliente al subirla (cuadricula estilo Instagram, sin relleno ni fondo extendido), D42 todo en 4:5 o 9:16 incluido el carrusel (sin 1:1), D40 sin nombre en 9:16 y firma arriba a la derecha, flyer compuesto en su formato (FB-76) y achicar antes de cortar (AR-28) ·· 21 sep 2026 — FB-74: el control de encuadre mueve el eje que se recorta (de lado en fotos horizontales) · FB-73 sube con el worker (AR-13) ·· S53b (20 sep 2026) — motor de composicion: D35 normalizacion unica al subir, D34 tamanio del editor segun la forma de la foto, D36 encuadre anclado sin relleno difuminado y con aviso antes de gastar, D37 ancla por etiqueta con el dedo del cliente por encima, S35-14 el flyer IA compone su texto en canvas, D19 vista previa = entregable, FB-69 el toggle de galeria ya no miente ·· S53 — FB-66/D33 galeria en una llamada y foto original si la mejora falla, FB-67 hashtags una vez, FB-68 barra fuera de Estudio Pro, D31 reintento desde el paso que fallo, D32 texto honesto ·· S52b — FB-58 reintento en el error con el mismo actionId, FB-61 textos honestos, FB-57 copiar que devuelve si copio.
+const APP_VERSION = '2.49.2'; // 22 sep 2026 — S54g: FB-91 tres mensajes de desarrollador viajaban al cliente (le pedian recargar saldo en el panel del proveedor y revisar nuestra configuracion) ·· S54f: FB-90 guardar en galeria pedia etiqueta y el estudio mandaba ninguna (el worker respondia NO_TAGS); FB-89 la foto que alimenta el video se encuadra en 9:16, porque el proveedor copia la forma de la imagen (un video salio 1244x1660) ·· S54e: D47 el video sale 9:16 siempre y se retira el selector (las tres redes convergen en 1080x1920) con el servidor imponiendolo; FB-85 guardar en la galeria la foto ya mejorada, sin cobrar otra generacion ·· S54d: D46 — la firma pegada abajo a la derecha tambien en 9:16 (D45-B), el degradado del flyer deja de convertir el tercio inferior en un bloque plano (FB-88) y el carrusel 9:16 es una tarjeta sobre fondo de marca en vez de media lamina en blanco (FB-87) ·· S54c: D44 flyer promocional (barra de acento, chips de fecha/horario/precio, boton con el telefono) y en 9:16 la foto ya no queda tapada por la banda ni el degradado; D45 la firma vuelve abajo a la derecha en todos los formatos y el logo arriba a la izquierda, con check ·· S54b: FB-84 fuera el nombre del proveedor de la pantalla y del fuente, FB-82 el hint dice lo que hace el boton, FB-83 dos niveles de nitidez segun si la IA toca la foto, FB-86 rotulo de TikTok completo ·· S54 — S54: D38 la IA en el formato exacto de la red (tabla en el servidor), D41 la foto la encuadra el cliente al subirla (cuadricula estilo Instagram, sin relleno ni fondo extendido), D42 todo en 4:5 o 9:16 incluido el carrusel (sin 1:1), D40 sin nombre en 9:16 y firma arriba a la derecha, flyer compuesto en su formato (FB-76) y achicar antes de cortar (AR-28) ·· 21 sep 2026 — FB-74: el control de encuadre mueve el eje que se recorta (de lado en fotos horizontales) · FB-73 sube con el worker (AR-13) ·· S53b (20 sep 2026) — motor de composicion: D35 normalizacion unica al subir, D34 tamanio del editor segun la forma de la foto, D36 encuadre anclado sin relleno difuminado y con aviso antes de gastar, D37 ancla por etiqueta con el dedo del cliente por encima, S35-14 el flyer IA compone su texto en canvas, D19 vista previa = entregable, FB-69 el toggle de galeria ya no miente ·· S53 — FB-66/D33 galeria en una llamada y foto original si la mejora falla, FB-67 hashtags una vez, FB-68 barra fuera de Estudio Pro, D31 reintento desde el paso que fallo, D32 texto honesto ·· S52b — FB-58 reintento en el error con el mismo actionId, FB-61 textos honestos, FB-57 copiar que devuelve si copio.
 window.APP_VERSION = APP_VERSION;
 // El log de version vive unas lineas mas abajo (console.info). No agregar otro aqui:
 // S38 borro POSTIMITY_VERSION para tener un solo log y este lo volvio a duplicar.
@@ -5677,7 +5677,7 @@ async function generateVideo(brand) {
       } catch(upErr) { /* continue without photo */ }
     }
 
-    // Step 3: Submit to fal.ai queue
+    // Step 3: se envia a la cola del proveedor de video
     setStep(3);
     document.getElementById('loadTitle').textContent = isES ? '🚀 Enviando a generación...' : '🚀 Submitting to generate...';
     let submitData;
@@ -5697,13 +5697,20 @@ async function generateVideo(brand) {
     }
     if(!submitData || !submitData.success) {
       const errDetail = submitData?.error || '';
-      if(errDetail.includes('402') || errDetail.toLowerCase().includes('payment') || errDetail.toLowerCase().includes('credit')) {
-        throw new Error(isES ? '❌ Sin créditos en fal.ai — agrega créditos en fal.ai/dashboard/billing' : '❌ No fal.ai credits — add credits at fal.ai/dashboard/billing');
+      // FB-91 (S54g): estos tres mensajes eran de desarrollador y viajaban al CLIENTE. Uno lo
+      // mandaba a recargar saldo en el panel de facturación de NUESTRO proveedor, otro a revisar
+      // NUESTRA configuración. Y hablaban de la moneda interna del proveedor, contra la promesa de la landing (BL-12).
+      // Lo que el cliente necesita saber es: no salio, no se le cobro, y que hacer.
+      const detalle = String(errDetail).toLowerCase();
+      if (detalle.includes('402') || detalle.includes('payment') || detalle.includes('credit')
+          || detalle.includes('401') || detalle.includes('unauthorized') || detalle.includes('invalid')) {
+        throw new Error(isES
+          ? '❌ El generador de video no está disponible en este momento. No se descontó nada de tu cuenta. Estamos al tanto — intenta más tarde.'
+          : '❌ Video generation is unavailable right now. Nothing was deducted from your account. We are on it — please try later.');
       }
-      if(errDetail.includes('401') || errDetail.toLowerCase().includes('unauthorized') || errDetail.toLowerCase().includes('invalid')) {
-        throw new Error(isES ? '❌ FAL_KEY inválida — verifica en Cloudflare Workers secrets' : '❌ Invalid FAL_KEY — check Cloudflare Workers secrets');
-      }
-      throw new Error(isES ? '❌ Error fal.ai: ' + (errDetail || 'respuesta vacía') : '❌ fal.ai error: ' + (errDetail || 'empty response'));
+      throw new Error(isES
+        ? '❌ No se pudo generar el video. No se descontó nada de tu cuenta. Intenta de nuevo en unos minutos.'
+        : '❌ We could not generate the video. Nothing was deducted from your account. Try again in a few minutes.');
     }
 
     // Step 4: Captions in parallel — use object wrapper so reference stays live
