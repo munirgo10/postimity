@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="2.49.5">
+<meta name="app-version" content="2.49.6">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Postimity Studio — Tu estudio de contenido con AI</title>
 <meta name="description" content="Crea posts, flyers, carruseles y videos profesionales con AI. Describe tu negocio una vez y genera contenido listo para publicar en 20 segundos.">
@@ -318,6 +318,10 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
 .btn-regen{flex:1;padding:9px;background:var(--bg);border:1.5px solid var(--bor);border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;color:var(--t2);transition:.15s;display:flex;align-items:center;justify-content:center;gap:5px}
 .btn-regen:hover{border-color:var(--b);color:var(--b);background:var(--b3)}
 .btn-regen:disabled{opacity:.4;cursor:not-allowed}
+/* FB-99 (S55b): camino directo a la camara. Va DEBAJO de la zona: dentro, el campo transparente que cubre la zona se lo tragaria. */
+.btn-camara{display:block;width:100%;margin:8px 0 0;padding:11px;background:var(--bg);border:1.5px solid var(--bor);border-radius:10px;font-size:13px;font-weight:700;color:var(--t2);cursor:pointer}
+.btn-camara:active{border-color:var(--b);color:var(--b);background:var(--b3)}
+@media (hover:hover) and (pointer:fine){.btn-camara{display:none}}
 /* Ad brief */
 .ad-brief-wrap{background:var(--w);border:1px solid var(--bor);border-radius:var(--r);margin-bottom:10px;overflow:hidden;box-shadow:var(--s1)}
 .ab-toggle{width:100%;padding:11px 14px;background:transparent;border:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;font-size:12px;font-weight:700;color:var(--t2);font-family:inherit;transition:.15s}
@@ -781,6 +785,9 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
 .fb-fab{position:fixed;bottom:20px;right:20px;z-index:300;width:56px;height:56px;border-radius:50%;background:var(--b);color:#fff;border:none;font-size:24px;cursor:pointer;box-shadow:0 4px 20px rgba(41,121,255,.4);transition:.2s;display:flex;align-items:center;justify-content:center;font-family:inherit}
 .fb-fab:hover{transform:scale(1.1);box-shadow:0 6px 28px rgba(41,121,255,.45)}
 .fb-fab.open{background:var(--t1);transform:rotate(45deg)}
+/* FB-86 (resto, S55c): la burbuja se aparta cuando cae encima de la pieza o de sus botones.
+   Sin transform a proposito: su caja no cambia al esconderse, asi no parpadea. */
+.fb-fab.tucked{opacity:0;visibility:hidden;pointer-events:none}
 .fb-panel{position:fixed;bottom:86px;right:20px;z-index:300;width:340px;max-height:480px;background:var(--w);border:1px solid var(--bor);border-radius:var(--r2);box-shadow:0 8px 40px rgba(0,0,0,.15);display:none;flex-direction:column;overflow:hidden;animation:fbSlideUp .2s ease-out}
 .fb-panel.show{display:flex}
 @keyframes fbSlideUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
@@ -1870,7 +1877,7 @@ Ej: 'Wonderik es increíble. Mi hija de 3 años ya lee palabras cortas y su desa
               </label>
             </div>
             <div class="wm-toggle-row" id="wmToggleRow">
-              <span class="wm-label">✦ Watermark Postimity <span class="wm-lock" id="wmLockBadge">Growth+ para quitar</span></span>
+              <span class="wm-label">✦ Firma Postimity <span class="wm-lock" id="wmLockBadge">Growth+ para quitarla</span></span>
               <label class="lt-switch" id="wmToggleWrap" style="display:none">
                 <input type="checkbox" id="wmToggle" checked onchange="onWmToggleChange(this.checked)">
                 <span class="lt-slider"></span>
@@ -2334,7 +2341,7 @@ function persistSlides(imgs) {
 }
 
 // APP_VERSION (S34) — deploy verification. Must match worker /version and all HTML files.
-const APP_VERSION = '2.49.5'; // 22 sep 2026 — S55: FB-95 tras cambiar de modo o elegir foto, cada resultado siguiente se cobraba y quedaba INVISIBLE (FB-94 ocultaba con estilo en linea y nadie lo devolvia) ·· S54h: FB-94 el panel de resultado de la pieza ANTERIOR seguia ofreciendo descargar, publicar y guardar mientras se armaba otra; se oculta al cambiar de modo o elegir foto nueva, en los seis modos ·· S54h: FB-85 v2 el selector de etiqueta se dibujaba sin estilos cuando la cuadricula nunca se abrio (guardar en galeria fallaba EN SILENCIO); D48 paletas de color para los cinco giros nuevos ·· S54g: FB-91 tres mensajes de desarrollador viajaban al cliente (le pedian recargar saldo en el panel del proveedor y revisar nuestra configuracion) ·· S54f: FB-90 guardar en galeria pedia etiqueta y el estudio mandaba ninguna (el worker respondia NO_TAGS); FB-89 la foto que alimenta el video se encuadra en 9:16, porque el proveedor copia la forma de la imagen (un video salio 1244x1660) ·· S54e: D47 el video sale 9:16 siempre y se retira el selector (las tres redes convergen en 1080x1920) con el servidor imponiendolo; FB-85 guardar en la galeria la foto ya mejorada, sin cobrar otra generacion ·· S54d: D46 — la firma pegada abajo a la derecha tambien en 9:16 (D45-B), el degradado del flyer deja de convertir el tercio inferior en un bloque plano (FB-88) y el carrusel 9:16 es una tarjeta sobre fondo de marca en vez de media lamina en blanco (FB-87) ·· S54c: D44 flyer promocional (barra de acento, chips de fecha/horario/precio, boton con el telefono) y en 9:16 la foto ya no queda tapada por la banda ni el degradado; D45 la firma vuelve abajo a la derecha en todos los formatos y el logo arriba a la izquierda, con check ·· S54b: FB-84 fuera el nombre del proveedor de la pantalla y del fuente, FB-82 el hint dice lo que hace el boton, FB-83 dos niveles de nitidez segun si la IA toca la foto, FB-86 rotulo de TikTok completo ·· S54 — S54: D38 la IA en el formato exacto de la red (tabla en el servidor), D41 la foto la encuadra el cliente al subirla (cuadricula estilo Instagram, sin relleno ni fondo extendido), D42 todo en 4:5 o 9:16 incluido el carrusel (sin 1:1), D40 sin nombre en 9:16 y firma arriba a la derecha, flyer compuesto en su formato (FB-76) y achicar antes de cortar (AR-28) ·· 21 sep 2026 — FB-74: el control de encuadre mueve el eje que se recorta (de lado en fotos horizontales) · FB-73 sube con el worker (AR-13) ·· S53b (20 sep 2026) — motor de composicion: D35 normalizacion unica al subir, D34 tamanio del editor segun la forma de la foto, D36 encuadre anclado sin relleno difuminado y con aviso antes de gastar, D37 ancla por etiqueta con el dedo del cliente por encima, S35-14 el flyer IA compone su texto en canvas, D19 vista previa = entregable, FB-69 el toggle de galeria ya no miente ·· S53 — FB-66/D33 galeria en una llamada y foto original si la mejora falla, FB-67 hashtags una vez, FB-68 barra fuera de Estudio Pro, D31 reintento desde el paso que fallo, D32 texto honesto ·· S52b — FB-58 reintento en el error con el mismo actionId, FB-61 textos honestos, FB-57 copiar que devuelve si copio.
+const APP_VERSION = '2.49.6'; // 24 sep 2026 — S55b/S55c: FB-101 deshacer el video en una sola funcion, FB-99 boton Tomar foto en las zonas de foto, FB-92/FB-103 la cuenta sin prueba ve 0 desde el alta y el panel de error no ensena trazas, FB-86 la burbuja de ayuda se aparta de la pieza, FB-102 la cita del testimonio con un solo par de comillas, FB-104 la firma se llama firma (PR-077) ·· 22 sep 2026 — S55: FB-95 tras cambiar de modo o elegir foto, cada resultado siguiente se cobraba y quedaba INVISIBLE (FB-94 ocultaba con estilo en linea y nadie lo devolvia) ·· S54h: FB-94 el panel de resultado de la pieza ANTERIOR seguia ofreciendo descargar, publicar y guardar mientras se armaba otra; se oculta al cambiar de modo o elegir foto nueva, en los seis modos ·· S54h: FB-85 v2 el selector de etiqueta se dibujaba sin estilos cuando la cuadricula nunca se abrio (guardar en galeria fallaba EN SILENCIO); D48 paletas de color para los cinco giros nuevos ·· S54g: FB-91 tres mensajes de desarrollador viajaban al cliente (le pedian recargar saldo en el panel del proveedor y revisar nuestra configuracion) ·· S54f: FB-90 guardar en galeria pedia etiqueta y el estudio mandaba ninguna (el worker respondia NO_TAGS); FB-89 la foto que alimenta el video se encuadra en 9:16, porque el proveedor copia la forma de la imagen (un video salio 1244x1660) ·· S54e: D47 el video sale 9:16 siempre y se retira el selector (las tres redes convergen en 1080x1920) con el servidor imponiendolo; FB-85 guardar en la galeria la foto ya mejorada, sin cobrar otra generacion ·· S54d: D46 — la firma pegada abajo a la derecha tambien en 9:16 (D45-B), el degradado del flyer deja de convertir el tercio inferior en un bloque plano (FB-88) y el carrusel 9:16 es una tarjeta sobre fondo de marca en vez de media lamina en blanco (FB-87) ·· S54c: D44 flyer promocional (barra de acento, chips de fecha/horario/precio, boton con el telefono) y en 9:16 la foto ya no queda tapada por la banda ni el degradado; D45 la firma vuelve abajo a la derecha en todos los formatos y el logo arriba a la izquierda, con check ·· S54b: FB-84 fuera el nombre del proveedor de la pantalla y del fuente, FB-82 el hint dice lo que hace el boton, FB-83 dos niveles de nitidez segun si la IA toca la foto, FB-86 rotulo de TikTok completo ·· S54 — S54: D38 la IA en el formato exacto de la red (tabla en el servidor), D41 la foto la encuadra el cliente al subirla (cuadricula estilo Instagram, sin relleno ni fondo extendido), D42 todo en 4:5 o 9:16 incluido el carrusel (sin 1:1), D40 sin nombre en 9:16 y firma arriba a la derecha, flyer compuesto en su formato (FB-76) y achicar antes de cortar (AR-28) ·· 21 sep 2026 — FB-74: el control de encuadre mueve el eje que se recorta (de lado en fotos horizontales) · FB-73 sube con el worker (AR-13) ·· S53b (20 sep 2026) — motor de composicion: D35 normalizacion unica al subir, D34 tamanio del editor segun la forma de la foto, D36 encuadre anclado sin relleno difuminado y con aviso antes de gastar, D37 ancla por etiqueta con el dedo del cliente por encima, S35-14 el flyer IA compone su texto en canvas, D19 vista previa = entregable, FB-69 el toggle de galeria ya no miente ·· S53 — FB-66/D33 galeria en una llamada y foto original si la mejora falla, FB-67 hashtags una vez, FB-68 barra fuera de Estudio Pro, D31 reintento desde el paso que fallo, D32 texto honesto ·· S52b — FB-58 reintento en el error con el mismo actionId, FB-61 textos honestos, FB-57 copiar que devuelve si copio.
 window.APP_VERSION = APP_VERSION;
 // El log de version vive unas lineas mas abajo (console.info). No agregar otro aqui:
 // S38 borro POSTIMITY_VERSION para tener un solo log y este lo volvio a duplicar.
@@ -2466,12 +2473,12 @@ const T = {
     // ── Error ──
     errTitle:'Algo salió mal', errDefault:'Error inesperado.', errRetry:'Reintentar',
     // ── Results ──
-    regenImg:'🔄 Nueva imagen · 1 gen', regenText:'✍️ Nuevo texto · 1 gen', regenBack:'← Crear otro',
+    regenImg:'🔄 Nueva imagen · 1 gen', regenText:'✍️ Nuevo texto · 1 gen', regenBack:'← Crear otro', takePhoto:'📷 Tomar foto',
     carouselSlidesLabel:'🎠 Slides del carrusel', carouselNavHint:'← → para navegar · click para previsualizar',
     carouselDlAll:'⬇️ Guardar todos los slides',
     quoteLabel:'⭐ Quote destacada del cliente',
     logoInImgLabel:'🏷️ Logo en la imagen',
-    wmLabel:'✦ Watermark Postimity', wmLock:'Growth+ para quitar',
+    wmLabel:'✦ Firma Postimity', wmLock:'Growth+ para quitarla',
     pubLabel:'📤 Publicar en redes sociales',
     pubCopySub:'Guardar + Copiar caption', pubHint:'💡 Toca una red: se descarga la imagen en su formato y el caption se copia solo — luego abre la app, pega y publica', pubHintVideo:'💡 Toca una red: se descarga el video y el caption se copia solo — luego abre la app, pega y publica', pubHintCarousel:'💡 Toca una red: se descargan todos los slides y el caption se copia solo — luego abre la app, súbelos como carrusel y pega',
     dlLabel:'⬇ Solo descargar imagen',
@@ -2760,12 +2767,12 @@ const T = {
     // ── Error ──
     errTitle:'Something went wrong', errDefault:'Unexpected error.', errRetry:'Retry',
     // ── Results ──
-    regenImg:'🔄 New image · 1 gen', regenText:'✍️ New text · 1 gen', regenBack:'← Create another',
+    regenImg:'🔄 New image · 1 gen', regenText:'✍️ New text · 1 gen', regenBack:'← Create another', takePhoto:'📷 Take photo',
     carouselSlidesLabel:'🎠 Carousel slides', carouselNavHint:'← → to navigate · click to preview',
     carouselDlAll:'⬇️ Save all slides',
     quoteLabel:'⭐ Featured customer quote',
     logoInImgLabel:'🏷️ Logo on image',
-    wmLabel:'✦ Watermark Postimity', wmLock:'Growth+ to remove',
+    wmLabel:'✦ Postimity signature', wmLock:'Growth+ to remove',
     pubLabel:'📤 Publish to social media',
     pubCopySub:'Save + Copy caption', pubHint:'💡 Tap a network: the image downloads in its format and the caption is copied for you — then open the app, paste and publish', pubHintVideo:'💡 Tap a network: the video downloads and the caption is copied for you — then open the app, paste and publish', pubHintCarousel:'💡 Tap a network: all slides download and the caption is copied for you — then open the app, upload them as a carousel and paste',
     dlLabel:'⬇ Download image only',
@@ -3436,6 +3443,9 @@ async function syncBrandToCloud(brand, id) {
       return false;
     }
     markPendingSync(false);   // llegó a la nube: ya no hay nada pendiente
+    // FB-92 (S55b): el servidor devuelve los topes efectivos al guardar. En el alta es la primera
+    // vez que existen (check-auth pregunto antes de la marca): se aplican y se repinta ya.
+    if (data && data.limits) { window._srvLimits = data.limits; try { updateGenCounter(); } catch(e) {} }
     // S46 — el resultado se DEVUELVE. Antes los cuatro caminos volvian undefined,
     // asi que quien llamaba no podia distinguir "guardado" de "rechazado". Generar
     // la guia sobre una marca que no llego al almacen da "Marca no encontrada", y
@@ -4248,11 +4258,40 @@ function setupUploads() {
   setupDropzone('testZone','testFile','testPrev','testTitle','testName', async (b64,mime)=>{
     await cropInto('test', b64, mime);   // openCropper
   });
+  // Video (FB-99): su zona no pasa por setupDropzone; la camara usa el mismo camino que su campo.
+  agregarBotonCamara(document.getElementById('videoPhotoZone'), f => handleVideoPhoto({ files: [f] }));
+}
+// FB-99 (S55b): en Android el campo «cualquier imagen» abre un selector de fotos SIN camara
+// (Android 13, Chrome directo, 23 sep). Fotografiar el producto en vivo es el uso diario de una
+// PyME y el momento fuerte de una demo. Un campo aparte con capture="environment" abre la camara
+// trasera; la foto sigue EXACTAMENTE el camino de la de galeria (alElegir). Se construye aqui y
+// solo aqui: setupDropzone lo usa para sus cuatro zonas y setupUploads para la del video.
+function agregarBotonCamara(zone, alElegir) {
+  if (!zone || zone.dataset.camara) return;   // una vez por zona
+  zone.dataset.camara = '1';
+  const cam = document.createElement('input');
+  cam.type = 'file';
+  cam.setAttribute('accept', 'image/*');
+  cam.setAttribute('capture', 'environment');
+  cam.style.display = 'none';
+  const btn = document.createElement('button');
+  btn.setAttribute('type', 'button');
+  btn.className = 'btn-camara';
+  btn.textContent = t('takePhoto');
+  btn.onclick = e => { if (e) e.stopPropagation(); cam.click(); };
+  cam.addEventListener('change', e => {
+    const f = e.target.files && e.target.files[0];
+    if (f) alElegir(f);
+    e.target.value = '';   // permite volver a tomar la foto
+  });
+  zone.insertAdjacentElement('afterend', btn);
+  btn.insertAdjacentElement('afterend', cam);
 }
 function setupDropzone(zoneId, inputId, prevId, titleId, nameId, cb) {
   const zone=document.getElementById(zoneId);
   const input=document.getElementById(inputId);
   input.addEventListener('change',e=>{ if(e.target.files[0]) handleDrop(e.target.files[0],zone,prevId,titleId,nameId,cb); });
+  agregarBotonCamara(zone, f => handleDrop(f, zone, prevId, titleId, nameId, cb));
   zone.addEventListener('dragover',e=>{ e.preventDefault(); zone.classList.add('drag'); });
   zone.addEventListener('dragleave',()=>zone.classList.remove('drag'));
   zone.addEventListener('drop',e=>{ e.preventDefault(); zone.classList.remove('drag'); if(e.dataTransfer.files[0]) handleDrop(e.dataTransfer.files[0],zone,prevId,titleId,nameId,cb); });
@@ -4755,6 +4794,42 @@ function handleModeClick(m) {
 // FB-95 (S55): se oculta con la CLASE `show`, el mismo mecanismo con que showResult muestra.
 // La version anterior (FB-94, S54h) ponia `style.display = 'none'`: el estilo en linea gana a la clase y nadie
 // lo devolvia, asi que tras cambiar de modo cada resultado siguiente se cobraba y quedaba invisible.
+// FB-101 (S55b): deshacer lo que pinta showVideoResult vive AQUI y solo aqui. Antes eran tres
+// copias parciales —resetCreator, showResult y setMode— y cada una restauraba cosas distintas:
+// showResult no reconstruia los botones, asi que una pieza de imagen generada despues de un video
+// ofrecia «Nuevo video» en vez de «Nueva imagen» y «Nuevo texto» (contrato §5). Es la clase de
+// FB-95: el que muestra y el que oculta tienen que ser el mismo mecanismo. Deja la pantalla como
+// la trae el HTML; lo propio de cada modo (carrusel sin descargas, etc.) lo aplica quien llama.
+function deshacerVideo() {
+  const regenBtns = document.querySelector('.regen-btns');
+  if(regenBtns) {
+    regenBtns.innerHTML =
+      '<button class="btn-regen" id="regenImg" onclick="regenImage()">' + t('regenImg') + '</button>' +
+      '<button class="btn-regen" id="regenText" onclick="regenText()">' + t('regenText') + '</button>' +
+      '<button class="btn-regen" onclick="resetCreator()">' + t('regenBack') + '</button>';
+  }
+  const vp = document.getElementById('videoPlayerWrap');
+  if(vp) vp.remove();
+  const videoDlBtn = document.getElementById('videoDlBtn');
+  if(videoDlBtn) videoDlBtn.remove();
+  const resultImg = document.getElementById('resultImg');
+  if(resultImg) resultImg.style.display = '';
+  const amtToggle = document.getElementById('adjustModeToggle');
+  if(amtToggle) amtToggle.style.display = 'flex';
+  ['.logo-toggle','.dl-label','.dl-btns','.img-controls','.cap-panel'].forEach(sel => {
+    const e = document.querySelector(sel); if(e) e.style.display = '';
+  });
+  const wmRow = document.getElementById('wmToggleRow');
+  if(wmRow) wmRow.style.display = '';
+  document.querySelectorAll('.pub-btn').forEach(btn => {
+    const plat = btn.classList.contains('ig') ? 'instagram' : btn.classList.contains('fb') ? 'facebook' : 'tiktok';
+    btn.onclick = function(){ openInSocial(plat); };
+  });
+  const pubLabel = document.querySelector('.pub-label');
+  if(pubLabel) pubLabel.textContent = t('pubLabel');
+  const pubHintEl = document.querySelector('.pub-hint');
+  if(pubHintEl) pubHintEl.textContent = t('pubHint');
+}
 function ocultarResultadoAnterior() {
   const w = document.getElementById('resultWrap');
   if (w) w.classList.remove('show');
@@ -4787,13 +4862,8 @@ function setMode(m) {
   gallerySelectedPhoto = null;
   if(gToggle) gToggle.checked = false;
   if(eraGaleria) showToast(t('toastGalleryReset'), 5000);
-  // S25: Clear video results when switching AWAY from video mode to prevent cross-mode contamination
-  if(m !== 'video') {
-    const vp = document.getElementById('videoPlayerWrap');
-    if(vp) vp.remove();
-    const vdl = document.getElementById('videoDlBtn');
-    if(vdl) vdl.remove();
-  }
+  // FB-101: cambiar de modo deshace TODO lo del video (antes, solo reproductor y descarga).
+  deshacerVideo();
   // S25: Clear carousel content area when switching away from carousel
   if(m !== 'carousel') {
     const cr = document.getElementById('carouselResult');
@@ -5450,7 +5520,10 @@ async function generate(opts = {}) {
     const stepInfo = document.querySelector('.ls.on')?.textContent || '';
     const trace = genTraceSummary(currentActionId);
     const debugHint = ' [' + mode + (stepInfo ? '→' + stepInfo.trim() : '') + (trace ? ' · ' + trace : '') + ']';
-    document.getElementById('errMsg').textContent = err.message + debugHint;
+    // FB-92 (S55b): la traza es un instrumento de FB-58, cerrado en S53 (condicion de retiro cumplida).
+    // Al cliente, el mensaje; la traza, a la consola.
+    document.getElementById('errMsg').textContent = err.message;
+    console.warn('[gen-trace]', debugHint);
     mostrarReintento(puedeReintentar());
     console.warn('Generation error:', mode, err);
   }
@@ -5826,7 +5899,9 @@ function startVideoPolling(requestId, endpoint, statusUrl, responseUrl, brand, t
           // Video completed but URL missing — show debug
           showLoading(false);
           document.getElementById('errWrap').classList.add('show');
-          document.getElementById('errMsg').textContent = 'Video generado pero URL no encontrada. Debug: ' + (data.debug || data.error || 'unknown');
+          // FB-92 (S55b): el detalle interno va a la consola, no al cliente.
+          document.getElementById('errMsg').textContent = t('videoError');
+          console.warn('video sin URL:', data.debug || data.error || 'unknown');
         }
       } else if(data.status === 'error') {
         clearInterval(videoPollingTimer);
@@ -8157,6 +8232,7 @@ function applyBilingualUI() {
   // Result buttons
   st('regenImg','regenImg'); st('regenText','regenText');
   const regenBackBtn = document.querySelector('.regen-btns .btn-regen:last-child'); if(regenBackBtn) regenBackBtn.textContent = t('regenBack');
+  document.querySelectorAll('.btn-camara').forEach(b => { b.textContent = t('takePhoto'); });   // FB-99
   // Carousel result labels
   const csnLbl = document.querySelector('.csn-label'); if(csnLbl) csnLbl.textContent = t('carouselSlidesLabel');
   st('csHint','carouselNavHint');
@@ -8520,7 +8596,8 @@ async function postWithTimeout(body, timeoutMs=130000) {
       showScreen('authScreen');
       throw new Error(data.error);
     }
-    if (data.code === 'TRIAL_EXPIRED' || data.code === 'GEN_LIMIT' || data.code === 'VIDEO_LIMIT' || data.code === 'FEATURE_LOCKED') {
+    // FB-92 (S55b): NO_TRIAL es un bloqueo por plan (contrato 4.4, PR-209: se sale contratando), no un fallo.
+    if (data.code === 'TRIAL_EXPIRED' || data.code === 'GEN_LIMIT' || data.code === 'VIDEO_LIMIT' || data.code === 'FEATURE_LOCKED' || data.code === 'NO_TRIAL') {
       // B3 (Session 18): Meta Pixel — upgrade intent from server-side blocks
       track('track', 'AddToCart', { content_name: 'server_block_' + data.code, currency: 'USD' });
       // S38-2: el 403 trae los contadores reales de KV. Se adoptan como verdad:
@@ -8684,6 +8761,21 @@ async function regenText() {
 // SHOW RESULT
 // ═══════════════════════════════════════════════════════
 // ─── RESULT DISPLAY ──────────────────────────────────
+// FB-102 (S55c) — la cita del testimonio lleva UN par de comillas. El modelo la trae ya entre
+// comillas (dobles, tipograficas, angulares o las simples que le pide el prompt) y la pantalla le
+// ponia las suyas. Se quitan los pares de fuera, repetidos si hace falta, y se envuelve una vez.
+function limpiarCita(txt) {
+  const Q = '"\'“”«»‘’„';
+  let s = String(txt == null ? '' : txt).trim();
+  let punto = '';
+  for (;;) {
+    if (s.length >= 3 && /[.!?…]$/.test(s) && Q.includes(s[s.length - 2]) && Q.includes(s[0])) { punto = s.slice(-1) + punto; s = s.slice(0, -1); }
+    if (s.length >= 2 && Q.includes(s[0]) && Q.includes(s[s.length - 1])) { s = s.slice(1, -1).trim(); continue; }
+    break;
+  }
+  s = s.replace(/^["'“”«»‘’„]+$/, '').trim();
+  return s ? '“' + s + punto + '”' : '';
+}
 function showResult(data) {
   // S41-4: guarda del resultado fantasma. Aunque abortemos las peticiones, una que
   // ya haya respondido puede seguir su camino hasta aqui y repintar el resultado
@@ -8735,12 +8827,9 @@ function showResult(data) {
     if(wmBadge) { wmBadge.style.display = 'inline'; wmBadge.textContent = t('wmLock'); }
   }
   // Image — ensure resultImg is visible (video mode hides it) and clean up stale video player
+  // FB-101: primero se deshace el video entero; los ajustes de cada modo van mas abajo.
+  deshacerVideo();
   const resultImg = document.getElementById('resultImg');
-  resultImg.style.display = '';
-  const staleVP = document.getElementById('videoPlayerWrap');
-  if(staleVP) staleVP.remove();
-  const staleVDL = document.getElementById('videoDlBtn');
-  if(staleVDL) staleVDL.remove();
   // S37 / RD-27: escritor único. En carrusel el re-dibujo lo dispara el bloque de
   // slides de más abajo, no esta llamada (redrawCanvas en modo carrusel re-renderiza
   // la tira completa y pelearía con el preview que showResult acaba de construir).
@@ -8813,7 +8902,7 @@ function showResult(data) {
   // Show keyQuote for testimonials
   const kqWrap = document.getElementById('keyQuoteWrap');
   if(data.keyQuote && data.postType==='Testimonio') {
-    document.getElementById('keyQuoteText').textContent = '"' + data.keyQuote + '"';
+    document.getElementById('keyQuoteText').textContent = limpiarCita(data.keyQuote);
     kqWrap.style.display='block';
   } else { kqWrap.style.display='none'; }
   // Fill captions
@@ -9961,48 +10050,9 @@ function setStep(n) {
 // ═══════════════════════════════════════════════════════
 function resetCreator() {
   showLoading(false);
-  // Restore regen buttons (video mode replaces them via innerHTML)
-  const regenBtns = document.querySelector('.regen-btns');
-  if(regenBtns) {
-    regenBtns.innerHTML =
-      '<button class="btn-regen" id="regenImg" onclick="regenImage()">' + t('regenImg') + '</button>' +
-      '<button class="btn-regen" id="regenText" onclick="regenText()">' + t('regenText') + '</button>' +
-      '<button class="btn-regen" onclick="resetCreator()">' + t('regenBack') + '</button>';
-  }
-  // Clean up any video remnants
-  const vp = document.getElementById('videoPlayerWrap');
-  if(vp) vp.remove();
-  const videoDlBtn = document.getElementById('videoDlBtn');
-  if(videoDlBtn) videoDlBtn.remove();
-  const resultImg = document.getElementById('resultImg');
-  if(resultImg) resultImg.style.display = '';
-  // Restore adjust mode toggle (video mode hides it)
-  const amtToggle = document.getElementById('adjustModeToggle');
-  if(amtToggle) amtToggle.style.display = 'flex';
+  // FB-101: deshacer el video vive en una sola funcion.
+  deshacerVideo();
   currentAdjustMode = 'text';
-  // Restore image-specific controls that video may have hidden
-  const logoToggle = document.querySelector('.logo-toggle');
-  if(logoToggle) logoToggle.style.display = '';
-  const wmRow = document.getElementById('wmToggleRow');
-  if(wmRow) wmRow.style.display = '';
-  const dlLabel = document.querySelector('.dl-label');
-  if(dlLabel) dlLabel.style.display = '';
-  const dlBtnsEl = document.querySelector('.dl-btns');
-  if(dlBtnsEl) dlBtnsEl.style.display = '';
-  const imgControls = document.querySelector('.img-controls');
-  if(imgControls) imgControls.style.display = '';
-  const capPanel = document.querySelector('.cap-panel');
-  if(capPanel) capPanel.style.display = '';
-  // Restore publish button original onclick handlers + pub label/hint text
-  const pubBtns = document.querySelectorAll('.pub-btn');
-  pubBtns.forEach(btn => {
-    const plat = btn.classList.contains('ig') ? 'instagram' : btn.classList.contains('fb') ? 'facebook' : 'tiktok';
-    btn.onclick = function(){ openInSocial(plat); };
-  });
-  const pubLabel = document.querySelector('.pub-label');
-  if(pubLabel) pubLabel.textContent = t('pubLabel');
-  const pubHintEl = document.querySelector('.pub-hint');
-  if(pubHintEl) pubHintEl.textContent = t('pubHint');
   // Clear video photo
   videoPhotoB64 = null;
   const vPrev = document.getElementById('videoPrev');
@@ -10057,6 +10107,37 @@ function toggleFeedback() {
   panel.classList.toggle('show', !isOpen);
   fab.classList.toggle('open', !isOpen);
   if(!isOpen) resetFeedbackForm();
+  acomodarFab();
+}
+
+// ── FB-86 (resto, S55c) — la burbuja nunca tapa la pieza ni sus botones ──
+// La firma vive abajo a la derecha (D45) y la burbuja tambien: en cada captura del 23 sep
+// la tapaba, y tambien al boton de TikTok. Se esconde solo mientras de verdad cae encima.
+const FAB_NO_TAPA = '#resultWrap img, #resultWrap video, #resultWrap canvas, #resultWrap button';
+function fabTapa(fab, objetivos) {
+  const m = 8;
+  return objetivos.some(r => r && r.width > 0 && r.height > 0 &&
+    r.left < fab.right + m && r.right > fab.left - m && r.top < fab.bottom + m && r.bottom > fab.top - m);
+}
+function acomodarFab() {
+  const fab = document.getElementById('fbFab');
+  if (!fab) return;
+  if (fab.classList.contains('open')) { fab.classList.remove('tucked'); return; }
+  const rects = Array.from(document.querySelectorAll(FAB_NO_TAPA))
+    .filter(e => e.offsetParent !== null).map(e => e.getBoundingClientRect());
+  fab.classList.toggle('tucked', fabTapa(fab.getBoundingClientRect(), rects));
+}
+let _fabRaf = 0;
+function programarFab() {
+  if (_fabRaf) return;
+  _fabRaf = requestAnimationFrame(() => { _fabRaf = 0; acomodarFab(); });
+}
+function iniciarAcomodoFab() {
+  window.addEventListener('scroll', programarFab, { passive: true, capture: true });
+  window.addEventListener('resize', programarFab);
+  const rw = document.getElementById('resultWrap');
+  if (rw && window.ResizeObserver) new window.ResizeObserver(programarFab).observe(rw);
+  programarFab();
 }
 
 function setFbType(type) {
@@ -10210,8 +10291,10 @@ applyBilingualUI = function() {
 // Also init on load
 if(document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', initFeedbackWidget);
+  document.addEventListener('DOMContentLoaded', iniciarAcomodoFab);
 } else {
   initFeedbackWidget();
+  iniciarAcomodoFab();
 }
 </script>
 
