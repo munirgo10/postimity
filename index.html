@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="2.49.6">
+<meta name="app-version" content="2.49.7">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>¿No sabes qué publicar? Postimity sí.</title>
 <meta name="description" content="Postimity crea tu estrategia, planea tu mes y genera posts, flyers, carruseles y videos con la voz de tu marca. Sin diseñador. Sin agencia. Desde $199 MXN/mes.">
@@ -522,7 +522,7 @@ function track(...args) {
 
 <script>
 // Language
-function detectLang(){const s=localStorage.getItem('postimity_lang');if(s==='es'||s==='en')return s;const u=new URLSearchParams(location.search).get('lang');if(u==='en'||u==='es'){localStorage.setItem('postimity_lang',u);return u}try{const t=Intl.DateTimeFormat().resolvedOptions().timeZone;const en=['New_York','Chicago','Denver','Phoenix','Los_Angeles','Anchorage','Honolulu','Adak','Boise','Indiana','Kentucky','Menominee','Nome','North_Dakota','Sitka','Yakutat','Toronto','Vancouver','Edmonton','Winnipeg','Halifax','St_Johns','Regina','Whitehorse','Yellowknife','Iqaluit','Moncton','Goose_Bay','Glace_Bay','Rankin_Inlet','Resolute','Atikokan','Nipigon','Thunder_Bay','Pangnirtung','Cambridge_Bay','Inuvik','Dawson','Dawson_Creek','Creston','Fort_Nelson','Swift_Current','Rainy_River','Blanc-Sablon'];const br=['Sao_Paulo','Bahia','Belem','Fortaleza','Recife','Manaus','Porto_Velho','Boa_Vista','Campo_Grande','Cuiaba','Maceio','Araguaina','Santarem','Rio_Branco','Noronha','Eirunepe'];if(t.startsWith('America/')&&!en.some(z=>t.includes(z))&&!br.some(z=>t.includes(z)))return'es';if(t.startsWith('Europe/')||t.startsWith('Asia/')||t.startsWith('Africa/')||t.startsWith('Australia/'))return'en'}catch(e){}const b=navigator.language?.slice(0,2);if(b==='es')return'es';return'en'}
+function detectLang(){const s=localStorage.getItem('postimity_lang');if(s==='es'||s==='en')return s;const u=new URLSearchParams(location.search).get('lang');if(u==='en'||u==='es'){localStorage.setItem('postimity_lang',u);return u}/* FB-106 (S55c): espanol por defecto para todos, Googlebot incluido; ingles solo si se pide. Decision hasta lanzar en EE. UU. */return'es'}
 function applyLang(l){localStorage.setItem('postimity_lang',l);document.documentElement.lang=l;document.getElementById('langES').classList.toggle('active',l==='es');document.getElementById('langEN').classList.toggle('active',l==='en');document.querySelectorAll('[data-es]').forEach(el=>{const t=el.getAttribute('data-'+l);if(t)el.innerHTML=t});const n=document.getElementById('navCta');if(n)n.textContent=l==='es'?'Comenzar gratis':'Start free'}
 function toggleLang(){applyLang(detectLang()==='es'?'en':'es')}
 
