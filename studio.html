@@ -2,15 +2,15 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="2.49.7">
+<meta name="app-version" content="2.49.8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Postimity Studio — Tu estudio de contenido con AI</title>
-<meta name="description" content="Crea posts, flyers, carruseles y videos profesionales con AI. Describe tu negocio una vez y genera contenido listo para publicar en 20 segundos.">
+<title>Postimity Studio — Tu estudio de contenido con IA</title>
+<meta name="description" content="Crea posts, flyers, carruseles y videos profesionales con IA. Describe tu negocio una vez y genera contenido listo para publicar en 20 segundos.">
 <meta name="robots" content="index, follow">
 <!-- Open Graph -->
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://postimity.com/studio.html">
-<meta property="og:title" content="Postimity Studio — Tu estudio de contenido con AI">
+<meta property="og:title" content="Postimity Studio — Tu estudio de contenido con IA">
 <meta property="og:description" content="Posts, flyers, carruseles y videos profesionales en 20 segundos. Gratis por 7 días.">
 <meta property="og:image" content="https://postimity.com/og_image_pro.jpg">
 <meta property="og:image:width" content="1200">
@@ -19,7 +19,7 @@
 <meta property="og:site_name" content="Postimity">
 <!-- Twitter Card -->
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Postimity Studio — Tu estudio de contenido con AI">
+<meta name="twitter:title" content="Postimity Studio — Tu estudio de contenido con IA">
 <meta name="twitter:description" content="Posts, flyers, carruseles y videos profesionales en 20 segundos. Gratis por 7 días.">
 <meta name="twitter:image" content="https://postimity.com/og_image_pro.jpg">
 <meta name="twitter:site" content="@postimity">
@@ -319,7 +319,7 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
 .btn-regen:hover{border-color:var(--b);color:var(--b);background:var(--b3)}
 .btn-regen:disabled{opacity:.4;cursor:not-allowed}
 /* FB-99 (S55b): camino directo a la camara. Va DEBAJO de la zona: dentro, el campo transparente que cubre la zona se lo tragaria. */
-.btn-camara{display:block;width:100%;margin:8px 0 0;padding:11px;background:var(--bg);border:1.5px solid var(--bor);border-radius:10px;font-size:13px;font-weight:700;color:var(--t2);cursor:pointer}
+.btn-camara{display:block;width:100%;margin:8px 0 12px;padding:11px;background:var(--bg);border:1.5px solid var(--bor);border-radius:10px;font-size:13px;font-weight:700;color:var(--t2);cursor:pointer}
 .btn-camara:active{border-color:var(--b);color:var(--b);background:var(--b3)}
 @media (hover:hover) and (pointer:fine){.btn-camara{display:none}}
 /* Ad brief */
@@ -683,6 +683,12 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
 .gallery-upload-zone{border:2px dashed var(--bor);border-radius:12px;padding:20px;text-align:center;cursor:pointer;transition:.2s;background:var(--bg);position:relative;overflow:hidden}
 .gallery-upload-zone:hover{border-color:var(--b);background:var(--b3)}
 .gallery-upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;z-index:2}
+/* FB-105 (S55c): el campo invisible de arriba cubre toda la zona; el boton de camara va ENCIMA o el dedo abre la galeria */
+.gallery-upload-zone .btn-camara{position:relative;z-index:3}
+/* S55c: ritmo unico — 8 px sobre el boton y 12 px bajo el (se funden con el margen de lo que siga);
+   dentro de «Mis fotos», 14 px desde el texto y la cuadricula a 16 px de la zona */
+.gallery-upload-zone .btn-camara{margin:14px 0 0}
+#galleryUploadZone ~ .gallery-grid{margin-top:16px}
 .gallery-tag-bar{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
 .gallery-tag-btn{font-size:11px;font-weight:700;padding:5px 12px;border-radius:8px;border:1.5px solid var(--bor);background:var(--w);color:var(--t2);cursor:pointer;transition:.15s}
 .gallery-tag-btn:hover{border-color:var(--b);color:var(--b)}
@@ -969,7 +975,7 @@ fbq('track', 'PageView');
       </div>
       <!-- Planes -->
       <div class="brand-card">
-        <div class="brand-card-title" style="margin-bottom:12px">⬆️ Mejora tu plan</div>
+        <div class="brand-card-title" id="dashPlansTitle" style="margin-bottom:12px">⬆️ Mejora tu plan</div>
         <div class="pricing-grid" id="cuentaPricingGrid"></div>
         <div style="font-size:11px;color:var(--t3);text-align:center;margin-top:6px" data-es="Los pagos se activarán próximamente con Stripe" data-en="Payments will be activated soon with Stripe">
           Los pagos se activarán próximamente con Stripe
@@ -1093,13 +1099,13 @@ fbq('track', 'PageView');
       <div id="agentConfigWrap">
         <div class="agent-config">
           <div class="agent-config-title">⚙️ Configura tu plan mensual</div>
-          <div class="ic-label">Posts por semana</div>
+          <div class="ic-label" id="agentFreqLabel">Posts por semana</div>
           <div class="agent-freq-btns">
             <button class="agent-freq-btn" data-freq="3" onclick="setAgentFreq(this)">3/semana<br><span style="font-size:10px;opacity:.7">~12 posts</span></button>
             <button class="agent-freq-btn active" data-freq="5" onclick="setAgentFreq(this)">5/semana<br><span style="font-size:10px;opacity:.7">~20 posts</span></button>
             <button class="agent-freq-btn" data-freq="7" onclick="setAgentFreq(this)" id="agentFreq7">7/semana<br><span style="font-size:10px;opacity:.7" id="agentFreq7Sub">~28 posts</span></button>
           </div>
-          <div class="ic-label">Plataformas</div>
+          <div class="ic-label" id="agentPlatsLabel">Plataformas</div>
           <div class="agent-plat-btns">
             <button class="agent-plat-btn active" data-plat="instagram" onclick="toggleAgentPlat(this)">📸 Instagram</button>
             <button class="agent-plat-btn active" data-plat="facebook" onclick="toggleAgentPlat(this)">👥 Facebook</button>
@@ -1190,7 +1196,7 @@ fbq('track', 'PageView');
       <div class="welcome-logo-pill"><svg viewBox="0 0 32 32" width="32" height="32" style="display:block"><g transform="translate(16,16)" fill="white"><circle r="1.8"/><circle cx="2.8" cy="1" r="1.5"/><circle cx="-2.2" cy="2" r="1.4"/><circle cx="1" cy="-3" r="1.4"/><circle cx="-3" cy="-1.2" r="1.3"/><circle cx="2" cy="3" r="1.2"/><circle cx="-1.2" cy="-3.2" r="1.1"/><circle cx="3.5" cy="-1.5" r="1.1"/><circle cx="-3.5" cy="1" r="1"/><circle cx="5.5" cy="2" r="1.1"/><circle cx="-1.5" cy="6" r="1"/><circle cx="4" cy="-4.5" r="1"/><circle cx="-5.5" cy="-3" r="1"/><circle cx="-4.8" cy="4" r=".9"/><circle cx="2.5" cy="-6" r=".9"/><circle cx="6" cy="-1" r=".9"/><circle cx="-6" cy="2" r=".8"/><circle cx="1" cy="6.2" r=".9"/><circle cx="5.5" cy="4.5" r=".8"/><circle cx="-4" cy="-5.5" r=".8"/><circle cx="8" cy="1.5" r=".7"/><circle cx="-2.5" cy="8.5" r=".6"/><circle cx="6" cy="-7" r=".6"/><circle cx="-8" cy="-3.5" r=".6"/><circle cx="3.5" cy="-8.5" r=".5"/><circle cx="8.5" cy="-3" r=".5"/><circle cx="2" cy="8.5" r=".5"/><circle cx="-8.5" cy="3" r=".5"/><circle cx="10" cy="2.5" r=".4"/><circle cx="-3" cy="10.5" r=".4"/><circle cx="-10" cy="-4" r=".4"/><circle cx="4.5" cy="-10.5" r=".3"/></g></svg></div>
       <div class="welcome-tagline">✦ Postimity</div>
       <h1 class="welcome-h1" id="wlcH1">Crea contenido que suena como tú</h1>
-      <p class="welcome-sub" id="wlcSub">La AI que aprende la voz de tu marca y genera posts, flyers y carruseles profesionales en segundos. Sin diseñadores. Sin agencias.</p>
+      <p class="welcome-sub" id="wlcSub">La IA que aprende la voz de tu marca y genera posts, flyers y carruseles profesionales en segundos. Sin diseñadores. Sin agencias.</p>
 
       <div class="welcome-steps">
         <div class="ws-item">
@@ -1201,7 +1207,7 @@ fbq('track', 'PageView');
         <div class="ws-arrow">→</div>
         <div class="ws-item">
           <div class="ws-num">2</div>
-          <div class="ws-label">Brand Guide AI</div>
+          <div class="ws-label">Brand Guide con IA</div>
           <div class="ws-time">automático</div>
         </div>
         <div class="ws-arrow">→</div>
@@ -1234,7 +1240,7 @@ fbq('track', 'PageView');
     <div class="setup-hero">
       <div class="setup-icon">✨</div>
       <h1 id="setupH1">Configura tu marca</h1>
-      <p id="setupSub">En menos de 2 minutos. Esta información es el cerebro de la AI — define el estilo, voz y estrategia de TODO tu contenido.</p>
+      <p id="setupSub">En menos de 2 minutos. Esta información es el cerebro de la IA — define el estilo, voz y estrategia de TODO tu contenido.</p>
     </div>
     <div class="setup-step-label" id="setupStepLabel">Paso 1 de 5 · Identidad del negocio</div>
     <div class="setup-progress" id="setupProgress">
@@ -1406,9 +1412,9 @@ fbq('track', 'PageView');
 
     <!-- Card 5: Brand Guide -->
     <div class="scard">
-      <div class="scard-title">🤖 Brand Guide con AI</div>
-      <p style="font-size:13px;color:var(--t3);margin-bottom:14px;line-height:1.6">La AI analizará tu negocio y generará la estrategia de contenido completa: pilares, voz de marca, estrategia por plataforma y hashtags. Puedes editarlo antes de guardar.</p>
-      <button class="btn btn-primary btn-full" id="btnGenBG" onclick="ensureBrandThenGuide()" disabled>✨ Generar Brand Guide con AI</button>
+      <div class="scard-title">🤖 Brand Guide con IA</div>
+      <p style="font-size:13px;color:var(--t3);margin-bottom:14px;line-height:1.6">La IA analizará tu negocio y generará la estrategia de contenido completa: pilares, voz de marca, estrategia por plataforma y hashtags. Puedes editarlo antes de guardar.</p>
+      <button class="btn btn-primary btn-full" id="btnGenBG" onclick="ensureBrandThenGuide()" disabled>✨ Generar Brand Guide con IA</button>
       <div id="bgNeedsSave" style="font-size:12px;color:var(--t3);margin-top:8px;text-align:center;line-height:1.5">
         🔒 Acepta los Términos y el Aviso de Privacidad para generar tu Brand Guide.
       </div>
@@ -1417,10 +1423,10 @@ fbq('track', 'PageView');
         <div class="bg-label" style="margin-top:14px">📋 Brand Guide generado — puedes editarlo</div>
         <textarea class="bg-area" id="bgText" rows="12"></textarea>
         <div id="bgAIDisclaimer" style="font-size:12px;line-height:1.55;margin-top:8px;padding:10px 12px;background:var(--bg2);border:1px solid var(--bor);border-left:3px solid var(--pk);border-radius:8px;color:var(--t2)">
-          ⚠️ <strong>Revisa esta guía antes de guardarla.</strong> La AI la redacta a partir de lo que escribiste y <strong>puede afirmar cosas que no son ciertas de tu negocio</strong>.
+          ⚠️ <strong>Revisa esta guía antes de guardarla.</strong> La IA la redacta a partir de lo que escribiste y <strong>puede afirmar cosas que no son ciertas de tu negocio</strong>.
           Presta atención a frases como «somos los únicos» o «los mejores»: ese tipo de afirmación está regulada en publicidad y respondes tú por ella.
         </div>
-        <p style="font-size:11px;color:var(--t3);margin-top:5px">Este texto guía a la AI en cada post. Edita cualquier cosa que quieras ajustar.</p>
+        <p style="font-size:11px;color:var(--t3);margin-top:5px">Este texto guía a la IA en cada post. Edita cualquier cosa que quieras ajustar.</p>
         <!-- Editing guide + AI update -->
         <div class="bg-edit-guide" id="bgEditGuide" style="display:none">
           <button class="beg-toggle" onclick="toggleBGGuide()">📋 ¿Cómo editar el Brand Guide? <span id="begChevron">▼</span></button>
@@ -1433,7 +1439,7 @@ fbq('track', 'PageView');
           </div>
         </div>
         <div class="bg-ai-update" id="bgAIUpdate">
-          <div class="bau-label">🤖 Pedir a la AI que haga el cambio por ti</div>
+          <div class="bau-label">🤖 Pedir a la IA que haga el cambio por ti</div>
           <div class="bau-row">
             <input type="text" class="bau-input" id="bgUpdateInstr" placeholder='Ej: "Cambia Neurociencia a 25% y agrega pilar de Eventos al 15%"'>
             <button class="bau-btn" id="btnAIUpdate" onclick="aiUpdateBrandGuide()">Aplicar →</button>
@@ -1509,7 +1515,7 @@ fbq('track', 'PageView');
       <div class="mode-card active" id="mc1" onclick="handleModeClick('post')">
         <div class="mc-icon">✍️</div>
         <div class="mc-title">Post</div>
-        <div class="mc-desc">Texto → imagen AI + captions</div>
+        <div class="mc-desc">Texto → imagen con IA + captions</div>
       </div>
       <div class="mode-card" id="mc2" onclick="handleModeClick('enhance')">
         <div class="mc-icon">🖼️</div>
@@ -1534,7 +1540,7 @@ fbq('track', 'PageView');
       <div class="mode-card" id="mc6" onclick="handleModeClick('video')">
         <span class="mc-soon-badge" id="mcVideoBadge" style="display:none">PRONTO</span>
         <div class="mc-icon">🎬</div>
-        <div class="mc-title">Video AI</div>
+        <div class="mc-title">Video IA</div>
         <div class="mc-desc">Reels, TikTok, Shorts</div>
       </div>
     </div>
@@ -1620,14 +1626,14 @@ Ej: &quot;Hazla blanco y negro estilo editorial de revista&quot;"></textarea>
               <!-- S46 — retirado: "Estilo flyer" ofrecia en Estudio Pro un estilo que pertenece al modo Flyer.
            Un atajo que lleva a otro modo desde dentro de este confunde sobre que hace cada uno. -->
             </div>
-            <p class="ep-hint">💡 Sé específico — la AI seguirá tus instrucciones exactas. Cuanto más detalle, mejor resultado.</p>
+            <p class="ep-hint">💡 Sé específico — la IA seguirá tus instrucciones exactas. Cuanto más detalle, mejor resultado.</p>
           </div>
         </div>
       </div>
       <!-- FLYER MODE -->
       <div id="flyerInput" style="display:none">
         <div class="flyer-toggle">
-          <button class="ft-btn active" id="flyerAIBtn" onclick="setFlyerMode('ai')">🤖 Imagen con AI</button>
+          <button class="ft-btn active" id="flyerAIBtn" onclick="setFlyerMode('ai')">🤖 Imagen con IA</button>
           <button class="ft-btn" id="flyerPhotoBtn" onclick="setFlyerMode('photo')">📸 Usar mi foto</button>
         </div>
         <div id="flyerPhotoUp" style="display:none;margin-bottom:12px">
@@ -1718,7 +1724,7 @@ Ej: &quot;Hazla blanco y negro estilo editorial de revista&quot;"></textarea>
         <!-- Cover source option -->
         <div class="ic-label" style="margin-top:14px">Portada del carrusel</div>
         <div style="display:flex;gap:8px;margin-bottom:10px">
-          <button class="em-btn active" id="cvrAI" onclick="setCarouselCoverMode('ai',this)">🤖 Generar con AI</button>
+          <button class="em-btn active" id="cvrAI" onclick="setCarouselCoverMode('ai',this)">🤖 Generar con IA</button>
           <button class="em-btn" id="cvrPhoto" onclick="setCarouselCoverMode('photo',this)">📸 Usar mi foto</button>
         </div>
         <div id="carouselPhotoWrap" style="display:none">
@@ -1780,7 +1786,7 @@ Ej: 'Wonderik es increíble. Mi hija de 3 años ya lee palabras cortas y su desa
           <input type="file" id="videoFile" accept="image/*" style="display:none" onchange="handleVideoPhoto(this)">
           <div class="uz-icon" style="font-size:20px">📸</div>
           <div class="uz-title" style="font-size:12px" id="videoPhotoTitle">Foto de producto o lugar (opcional)</div>
-          <div class="uz-sub" style="font-size:10px" id="videoPhotoSub">Sube una foto y el AI la animará en video</div>
+          <div class="uz-sub" style="font-size:10px" id="videoPhotoSub">Sube una foto y la IA la animará en video</div>
           <div class="uz-name" id="videoPhotoName"></div>
         </div>
         <img id="videoPrev" class="photo-prev" src="" alt="" style="display:none">
@@ -1803,7 +1809,7 @@ Ej: 'Wonderik es increíble. Mi hija de 3 años ya lee palabras cortas y su desa
         <div class="gs-photos" id="gsPhotos"></div>
       </div>
 
-      <button class="btn-gen" id="btnGen" onclick="generate()">✨ Generar contenido con AI</button>
+      <button class="btn-gen" id="btnGen" onclick="generate()">✨ Generar contenido con IA</button>
     </div>
 
     <!-- Loading -->
@@ -1813,7 +1819,7 @@ Ej: 'Wonderik es increíble. Mi hija de 3 años ya lee palabras cortas y su desa
       <div class="load-steps">
         <div class="ls" id="ls1">Analizando solicitud y contexto</div>
         <div class="ls" id="ls2">Generando captions para 3 plataformas</div>
-        <div class="ls" id="ls3">Creando imagen con AI</div>
+        <div class="ls" id="ls3">Creando imagen con IA</div>
         <div class="ls" id="ls4">Preparando resultado final</div>
       </div>
       <p style="font-size:11px;color:var(--t3);margin-top:12px">15–45 segundos · Imágenes de alta calidad toman más</p>
@@ -1836,7 +1842,7 @@ Ej: 'Wonderik es increíble. Mi hija de 3 años ya lee palabras cortas y su desa
            escondido en los terminos. Breve a proposito: el largo esta en la guia de
            marca, que es donde nacen las afirmaciones sobre el negocio. -->
       <div style="font-size:12px;color:var(--t3);padding:8px 12px;border-bottom:1px solid var(--bor);line-height:1.5">
-        ⚠️ Contenido generado por AI — <strong>revísalo antes de publicar</strong>. Puede contener datos o afirmaciones que no sean exactas.
+        ⚠️ Contenido generado por IA — <strong>revísalo antes de publicar</strong>. Puede contener datos o afirmaciones que no sean exactas.
       </div>
       <div class="regen-btns">
         <button class="btn-regen" id="regenImg" onclick="regenImage()">🔄 Nueva imagen · 1 gen</button>
@@ -1846,7 +1852,7 @@ Ej: 'Wonderik es increíble. Mi hija de 3 años ya lee palabras cortas y su desa
       <div class="result-grid">
         <!-- Image -->
         <div class="img-panel">
-          <img id="resultImg" src="" alt="Generada por AI" crossorigin="anonymous">
+          <img id="resultImg" src="" alt="Generada por IA" crossorigin="anonymous">
           <div class="photo-desc-bar" id="photoDescBar"></div>
           <!-- Carousel slides preview -->
           <div id="carouselPreviewWrap" style="display:none;padding:14px;background:var(--bg);border-bottom:1px solid var(--bor)">
@@ -1935,9 +1941,9 @@ Ej: 'Wonderik es increíble. Mi hija de 3 años ya lee palabras cortas y su desa
               <div id="ttCounter" style="font-size:10px;font-weight:700;text-align:right;padding:2px 6px;border-radius:4px;margin-bottom:4px;background:var(--g3);color:var(--g2)">0 / 150 chars</div>
               <div contenteditable="true" class="cap-tags" id="ttHash" spellcheck="false"></div>
               <div class="tt-script-box">
-                <div class="tsb-label">🎬 Hook (primeros 1.5 seg)</div>
+                <div class="tsb-label" id="ttHookLabel">🎬 Hook (primeros 1.5 seg)</div>
                 <div contenteditable="true" class="tsb-hook" id="ttHook" spellcheck="false"></div>
-                <div class="tsb-label" style="margin-top:8px">📝 Script</div>
+                <div class="tsb-label" id="ttScriptLabel" style="margin-top:8px">📝 Script</div>
                 <div contenteditable="true" class="tsb-text" id="ttScript" spellcheck="false"></div>
               </div>
               <div class="post-hint">⏰ <strong>Mejor hora:</strong> 6-10pm cualquier día · Caption ideal: 50-150 caracteres con keywords de búsqueda</div>
@@ -2341,7 +2347,7 @@ function persistSlides(imgs) {
 }
 
 // APP_VERSION (S34) — deploy verification. Must match worker /version and all HTML files.
-const APP_VERSION = '2.49.7'; // 24 sep 2026 — S55c tras desplegar la version anterior: FB-105 Tomar foto tambien en «Mis fotos» de Mi cuenta, dentro de su zona ·· antes, S55b/S55c: FB-101 deshacer el video en una sola funcion, FB-99 boton Tomar foto en las zonas de foto, FB-92/FB-103 la cuenta sin prueba ve 0 desde el alta y el panel de error no ensena trazas, FB-86 la burbuja de ayuda se aparta de la pieza, FB-102 la cita del testimonio con un solo par de comillas, FB-104 la firma se llama firma (PR-077) ·· 22 sep 2026 — S55: FB-95 tras cambiar de modo o elegir foto, cada resultado siguiente se cobraba y quedaba INVISIBLE (FB-94 ocultaba con estilo en linea y nadie lo devolvia) ·· S54h: FB-94 el panel de resultado de la pieza ANTERIOR seguia ofreciendo descargar, publicar y guardar mientras se armaba otra; se oculta al cambiar de modo o elegir foto nueva, en los seis modos ·· S54h: FB-85 v2 el selector de etiqueta se dibujaba sin estilos cuando la cuadricula nunca se abrio (guardar en galeria fallaba EN SILENCIO); D48 paletas de color para los cinco giros nuevos ·· S54g: FB-91 tres mensajes de desarrollador viajaban al cliente (le pedian recargar saldo en el panel del proveedor y revisar nuestra configuracion) ·· S54f: FB-90 guardar en galeria pedia etiqueta y el estudio mandaba ninguna (el worker respondia NO_TAGS); FB-89 la foto que alimenta el video se encuadra en 9:16, porque el proveedor copia la forma de la imagen (un video salio 1244x1660) ·· S54e: D47 el video sale 9:16 siempre y se retira el selector (las tres redes convergen en 1080x1920) con el servidor imponiendolo; FB-85 guardar en la galeria la foto ya mejorada, sin cobrar otra generacion ·· S54d: D46 — la firma pegada abajo a la derecha tambien en 9:16 (D45-B), el degradado del flyer deja de convertir el tercio inferior en un bloque plano (FB-88) y el carrusel 9:16 es una tarjeta sobre fondo de marca en vez de media lamina en blanco (FB-87) ·· S54c: D44 flyer promocional (barra de acento, chips de fecha/horario/precio, boton con el telefono) y en 9:16 la foto ya no queda tapada por la banda ni el degradado; D45 la firma vuelve abajo a la derecha en todos los formatos y el logo arriba a la izquierda, con check ·· S54b: FB-84 fuera el nombre del proveedor de la pantalla y del fuente, FB-82 el hint dice lo que hace el boton, FB-83 dos niveles de nitidez segun si la IA toca la foto, FB-86 rotulo de TikTok completo ·· S54 — S54: D38 la IA en el formato exacto de la red (tabla en el servidor), D41 la foto la encuadra el cliente al subirla (cuadricula estilo Instagram, sin relleno ni fondo extendido), D42 todo en 4:5 o 9:16 incluido el carrusel (sin 1:1), D40 sin nombre en 9:16 y firma arriba a la derecha, flyer compuesto en su formato (FB-76) y achicar antes de cortar (AR-28) ·· 21 sep 2026 — FB-74: el control de encuadre mueve el eje que se recorta (de lado en fotos horizontales) · FB-73 sube con el worker (AR-13) ·· S53b (20 sep 2026) — motor de composicion: D35 normalizacion unica al subir, D34 tamanio del editor segun la forma de la foto, D36 encuadre anclado sin relleno difuminado y con aviso antes de gastar, D37 ancla por etiqueta con el dedo del cliente por encima, S35-14 el flyer IA compone su texto en canvas, D19 vista previa = entregable, FB-69 el toggle de galeria ya no miente ·· S53 — FB-66/D33 galeria en una llamada y foto original si la mejora falla, FB-67 hashtags una vez, FB-68 barra fuera de Estudio Pro, D31 reintento desde el paso que fallo, D32 texto honesto ·· S52b — FB-58 reintento en el error con el mismo actionId, FB-61 textos honestos, FB-57 copiar que devuelve si copio.
+const APP_VERSION = '2.49.8'; // 25 sep 2026 — S55c: FB-105 el boton de camara de «Mis fotos» queda encima del campo invisible de la galeria (Android abria la galeria), FB-107 el traductor escribe por id y no por posicion ·· antes, tras desplegar: FB-105 Tomar foto tambien en «Mis fotos» de Mi cuenta, dentro de su zona ·· antes, S55b/S55c: FB-101 deshacer el video en una sola funcion, FB-99 boton Tomar foto en las zonas de foto, FB-92/FB-103 la cuenta sin prueba ve 0 desde el alta y el panel de error no ensena trazas, FB-86 la burbuja de ayuda se aparta de la pieza, FB-102 la cita del testimonio con un solo par de comillas, FB-104 la firma se llama firma (PR-077) ·· 22 sep 2026 — S55: FB-95 tras cambiar de modo o elegir foto, cada resultado siguiente se cobraba y quedaba INVISIBLE (FB-94 ocultaba con estilo en linea y nadie lo devolvia) ·· S54h: FB-94 el panel de resultado de la pieza ANTERIOR seguia ofreciendo descargar, publicar y guardar mientras se armaba otra; se oculta al cambiar de modo o elegir foto nueva, en los seis modos ·· S54h: FB-85 v2 el selector de etiqueta se dibujaba sin estilos cuando la cuadricula nunca se abrio (guardar en galeria fallaba EN SILENCIO); D48 paletas de color para los cinco giros nuevos ·· S54g: FB-91 tres mensajes de desarrollador viajaban al cliente (le pedian recargar saldo en el panel del proveedor y revisar nuestra configuracion) ·· S54f: FB-90 guardar en galeria pedia etiqueta y el estudio mandaba ninguna (el worker respondia NO_TAGS); FB-89 la foto que alimenta el video se encuadra en 9:16, porque el proveedor copia la forma de la imagen (un video salio 1244x1660) ·· S54e: D47 el video sale 9:16 siempre y se retira el selector (las tres redes convergen en 1080x1920) con el servidor imponiendolo; FB-85 guardar en la galeria la foto ya mejorada, sin cobrar otra generacion ·· S54d: D46 — la firma pegada abajo a la derecha tambien en 9:16 (D45-B), el degradado del flyer deja de convertir el tercio inferior en un bloque plano (FB-88) y el carrusel 9:16 es una tarjeta sobre fondo de marca en vez de media lamina en blanco (FB-87) ·· S54c: D44 flyer promocional (barra de acento, chips de fecha/horario/precio, boton con el telefono) y en 9:16 la foto ya no queda tapada por la banda ni el degradado; D45 la firma vuelve abajo a la derecha en todos los formatos y el logo arriba a la izquierda, con check ·· S54b: FB-84 fuera el nombre del proveedor de la pantalla y del fuente, FB-82 el hint dice lo que hace el boton, FB-83 dos niveles de nitidez segun si la IA toca la foto, FB-86 rotulo de TikTok completo ·· S54 — S54: D38 la IA en el formato exacto de la red (tabla en el servidor), D41 la foto la encuadra el cliente al subirla (cuadricula estilo Instagram, sin relleno ni fondo extendido), D42 todo en 4:5 o 9:16 incluido el carrusel (sin 1:1), D40 sin nombre en 9:16 y firma arriba a la derecha, flyer compuesto en su formato (FB-76) y achicar antes de cortar (AR-28) ·· 21 sep 2026 — FB-74: el control de encuadre mueve el eje que se recorta (de lado en fotos horizontales) · FB-73 sube con el worker (AR-13) ·· S53b (20 sep 2026) — motor de composicion: D35 normalizacion unica al subir, D34 tamanio del editor segun la forma de la foto, D36 encuadre anclado sin relleno difuminado y con aviso antes de gastar, D37 ancla por etiqueta con el dedo del cliente por encima, S35-14 el flyer IA compone su texto en canvas, D19 vista previa = entregable, FB-69 el toggle de galeria ya no miente ·· S53 — FB-66/D33 galeria en una llamada y foto original si la mejora falla, FB-67 hashtags una vez, FB-68 barra fuera de Estudio Pro, D31 reintento desde el paso que fallo, D32 texto honesto ·· S52b — FB-58 reintento en el error con el mismo actionId, FB-61 textos honestos, FB-57 copiar que devuelve si copio.
 window.APP_VERSION = APP_VERSION;
 // El log de version vive unas lineas mas abajo (console.info). No agregar otro aqui:
 // S38 borro POSTIMITY_VERSION para tener un solo log y este lo volvio a duplicar.
@@ -2382,16 +2388,16 @@ const T = {
   es: {
     // ── Welcome screen ──
     welcomeTagline:'✦ Postimity', welcomeH1:'Crea contenido que suena como tú',
-    welcomeSub:'La AI que aprende la voz de tu marca y genera posts, flyers y carruseles profesionales en segundos. Sin diseñadores. Sin agencias.',
-    welcomeStep1:'Tu marca', welcomeStep1t:'~60 seg', welcomeStep2:'Brand Guide AI', welcomeStep2t:'automático',
+    welcomeSub:'La IA que aprende la voz de tu marca y genera posts, flyers y carruseles profesionales en segundos. Sin diseñadores. Sin agencias.',
+    welcomeStep1:'Tu marca', welcomeStep1t:'~60 seg', welcomeStep2:'Brand Guide con IA', welcomeStep2t:'automático',
     welcomeStep3:'Primer post', welcomeStep3t:'~20 seg',
     welcomeCta:'¡Comenzar gratis — 7 días →', welcomeNote:'Sin tarjeta de crédito · Sin compromiso · Cancela cuando quieras',
     weChipPosts:'🖊️ Posts', weChipFlyers:'🎨 Flyers', weChipCarousels:'🎠 Carruseles', weChipTestimonials:'⭐ Testimonios', weChipPlan:'🤖 Plan mensual',
     // ── Setup screen ──
-    setupTitle:'Configura tu marca', setupSub:'En menos de 2 minutos. Esta información es el cerebro de la AI — define el estilo, voz y estrategia de TODO tu contenido.',
+    setupTitle:'Configura tu marca', setupSub:'En menos de 2 minutos. Esta información es el cerebro de la IA — define el estilo, voz y estrategia de TODO tu contenido.',
     setupStep:'Paso {n} de 5 · {label}',
-    setupStep1:'Identidad del negocio', setupStep2:'Ubicación', setupStep3:'Estrategia de contenido', setupStep4:'Colores de marca', setupStep5:'Brand Guide con AI',
-    scardIdentity:'🏪 Identidad del negocio', scardLocation:'📍 Ubicación', scardStrategy:'🎯 Estrategia de contenido', scardColors:'🎨 Colores de marca', scardBG:'🤖 Brand Guide con AI',
+    setupStep1:'Identidad del negocio', setupStep2:'Ubicación', setupStep3:'Estrategia de contenido', setupStep4:'Colores de marca', setupStep5:'Brand Guide con IA',
+    scardIdentity:'🏪 Identidad del negocio', scardLocation:'📍 Ubicación', scardStrategy:'🎯 Estrategia de contenido', scardColors:'🎨 Colores de marca', scardBG:'🤖 Brand Guide con IA',
     logoTitle:'Logo del negocio', logoOptional:'(opcional)', logoSub:'Se añadirá en todas las imágenes generadas', logoHint:'💡 Usa PNG con fondo transparente para mejores resultados',
     labelName:'Nombre del negocio', labelWA:'WhatsApp de contacto', labelEmail:'Email de acceso ✓', labelType:'Tipo de negocio',
     tipWA:'Número con lada internacional. Ej: +52 449 123 4567. Se usará en los CTAs de todos los posts.',
@@ -2405,23 +2411,23 @@ const T = {
     tipDiff:'La razón única por la que un cliente te elige a ti y no a la competencia. Ej: \'Somos el único kinder que integra Neurociencias + Psicología en Aguascalientes\'',
     phDiff:'Ej: Somos el único kinder con enfoque en neurociencia aplicada en Aguascalientes',
     labelAudience:'¿A quién le hablas? (Audiencia objetivo)',
-    tipAudience:'Describe a tu cliente ideal: edad, profesión, situación de vida, qué les preocupa. Cuanto más específico, mejor contenido generará la AI.',
+    tipAudience:'Describe a tu cliente ideal: edad, profesión, situación de vida, qué les preocupa. Cuanto más específico, mejor contenido generará la IA.',
     phAudience:'Ej: Papás y mamás de 28-40 años, nivel medio-alto, que buscan la mejor educación inicial para sus hijos en Aguascalientes',
     labelTone:'Tono de comunicación',
     toneWarm:'Cálido y moderno', tonePro:'Profesional y confiable', toneFun:'Divertido y energético', toneInsp:'Inspiracional y motivador', toneEdu:'Informativo y educativo',
     toneWarmVal:'Cálido, moderno y cercano', toneProVal:'Profesional y confiable', toneFunVal:'Divertido y energético', toneInspVal:'Inspiracional y motivador', toneEduVal:'Informativo y educativo',
     colorPrimary:'Primario', colorSecondary:'Secundario', colorAccent:'Acento',
     colorCardTitle:'🎨 Colores de marca', paletteSuggestLabel:'💡 Paletas sugeridas por giro:',
-    bgCardDesc:'La AI analizará tu negocio y generará la estrategia de contenido completa: pilares, voz de marca, estrategia por plataforma y hashtags. Puedes editarlo antes de guardar.',
-    bgGenBtn:'✨ Generar Brand Guide con AI', bgGenerating:'Generando tu Brand Guide...', bgGenerated:'✅ Brand Guide generado',
-    bgLabel:'📋 Brand Guide generado — puedes editarlo', bgHint:'Este texto guía a la AI en cada post. Edita cualquier cosa que quieras ajustar.',
+    bgCardDesc:'La IA analizará tu negocio y generará la estrategia de contenido completa: pilares, voz de marca, estrategia por plataforma y hashtags. Puedes editarlo antes de guardar.',
+    bgGenBtn:'✨ Generar Brand Guide con IA', bgGenerating:'Generando tu Brand Guide...', bgGenerated:'✅ Brand Guide generado',
+    bgLabel:'📋 Brand Guide generado — puedes editarlo', bgHint:'Este texto guía a la IA en cada post. Edita cualquier cosa que quieras ajustar.',
     bgEditToggle:'📋 ¿Cómo editar el Brand Guide?',
     bgEditFree:'✅ <strong>Puedes cambiar libremente:</strong> % de pilares, descripciones, tono, hashtags',
     bgEditAdd:'➕ <strong>Agregar pilar:</strong> <code>5. Nombre (XX%) — descripción en 1 línea</code>',
     bgEditModify:'✏️ <strong>Modificar pilar:</strong> Cambia el nombre, % o descripción directamente',
     bgEditDelete:'🗑️ <strong>Eliminar pilar:</strong> Borra la línea completa del pilar',
     bgEditFormat:'⚠️ <strong>Importante:</strong> Usa el formato <code>N. Nombre (XX%) —</code> para que los botones se actualicen',
-    bgAILabel:'🤖 Pedir a la AI que haga el cambio por ti',
+    bgAILabel:'🤖 Pedir a la IA que haga el cambio por ti',
     bgAIPlaceholder:'Ej: "Cambia Neurociencia a 25% y agrega pilar de Eventos al 15%"', bgAIBtn:'Aplicar →',
     bgLoaded:'✅ Brand Guide cargado — puedes regenerar',
     termsLabel:'He leído y acepto los <a href="terms.html" target="_blank" style="color:var(--b);font-weight:600">Términos y Condiciones</a> y el <a href="privacy.html" target="_blank" style="color:var(--b);font-weight:600">Aviso de Privacidad</a> de Postimity.',
@@ -2430,7 +2436,7 @@ const T = {
     // ── Creator screen ──
     brandBarEdit:'✏️ Editar marca',
     pillarLabel:'¿Para qué pilar es este contenido?',
-    mcPost:'Post', mcPostDesc:'Texto → imagen AI + captions',
+    mcPost:'Post', mcPostDesc:'Texto → imagen con IA + captions',
     mcEnhance:'Estudio Pro', mcEnhanceDesc:'Tu foto → versión publicitaria',
     mcFlyer:'Flyer', mcFlyerDesc:'Gráfico promocional completo',
     mcTestimonial:'Testimonio', mcTestimonialDesc:'Reseña → post profesional',
@@ -2449,8 +2455,8 @@ const T = {
     enhanceAuto:'✨ Mejorar automáticamente', enhanceCustom:'✏️ Instrucciones personalizadas',
     enhancePH:'Describe qué quieres hacer con la foto...\n\nEj: "Quita el fondo y ponlo blanco limpio"\nEj: "Agrega efecto de estudio con luz suave y profesional"\nEj: "Convierte en estilo flyer, agrega una banda azul arriba con el texto Curso de Verano"\nEj: "Hazla blanco y negro estilo editorial de revista"',
     epWhiteBG:'Fondo blanco', epStudioLight:'Luz de estudio', epEditorial:'Estilo editorial', epVibrant:'Colores vibrantes', epBW:'Blanco y negro', epFlyerStyle:'Estilo flyer',
-    epHint:'💡 Sé específico — la AI seguirá tus instrucciones exactas. Cuanto más detalle, mejor resultado.',
-    flyerAI:'🤖 Imagen con AI', flyerPhoto:'📸 Usar mi foto',
+    epHint:'💡 Sé específico — la IA seguirá tus instrucciones exactas. Cuanto más detalle, mejor resultado.',
+    flyerAI:'🤖 Imagen con IA', flyerPhoto:'📸 Usar mi foto',
     flyerUploadTitle:'Sube la foto base del flyer', flyerUploadSub:'Tu foto será el elemento central del flyer',
     ffType:'Tipo de contenido *', ffStyle:'Estilo visual', ffTitle:'Título principal *', ffSubtitle:'Subtítulo', ffTagline:'Tagline', ffDates:'Fecha / Período', ffPrice:'Precio', ffSchedule:'Horario', ffExtra:'Info adicional',
     flyerEvento:'📅 Evento', flyerInscripciones:'🎓 Inscripciones', flyerPromo:'🛍️ Promoción', flyerInfo:'📢 Información', flyerCurso:'📋 Curso / Taller', flyerLaunch:'🚀 Lanzamiento', flyerAniversario:'🎉 Aniversario', flyerMenu:'🍽️ Menú especial', flyerOther:'✨ Otro',
@@ -2461,12 +2467,12 @@ const T = {
     carouselSlideCount:'Número de slides', slideCountLabel:'slides (mín 3, máx 10)',
     carouselStyleLabel:'Estilo del carrusel',
     csEducativo:'📚 Educativo', csTips:'💡 Tips', csHistoria:'📖 Historia', csDatos:'📊 Datos', csTutorial:'🎯 Tutorial', csQA:'❓ Q&A',
-    carouselCoverLabel:'Portada del carrusel', coverAI:'🤖 Generar con AI', coverPhoto:'📸 Usar mi foto',
+    carouselCoverLabel:'Portada del carrusel', coverAI:'🤖 Generar con IA', coverPhoto:'📸 Usar mi foto',
     coverUploadTitle:'Arrastra tu foto o haz click', coverUploadSub:'Esta foto será el fondo del slide de portada',
     testLabel:'Reseña del cliente',
     phTest:'Pega aquí la reseña de tu cliente tal como la escribió...\n\nEj: \'Wonderik es increíble. Mi hija de 3 años ya lee palabras cortas y su desarrollo emocional ha mejorado muchísimo. Las maestras son excepcionales ⭐⭐⭐⭐⭐ — Fernanda R.\'',
     testDivider:'o también sube una foto del cliente', testPhotoTitle:'Foto del cliente (opcional)', testPhotoSub:'El contenido UGC auténtico convierte 3-5x más',
-    btnGenerate:'✨ Generar contenido con AI',
+    btnGenerate:'✨ Generar contenido con IA',
     // ── Loading ──
     loadDefault:'Creando tu contenido...', loadHint:'15–45 segundos · Imágenes de alta calidad toman más',
     loadCancel:'✕ Cancelar y volver', loadTimeout:'La solicitud tardó demasiado. Pudo haberse descontado 1 generación: revisa tu contador.', errNetUncertain:'Se perdió la conexión. Pudo haberse descontado 1 generación: revisa tu contador.', errRetryHint:'Retoma la misma solicitud desde el paso en que se cortó.', errBack:'Volver', toastStillOffline:'Sigues sin conexión. Cuando vuelva, toca Reintentar aquí mismo.', manualCopyTitle:'No se pudo copiar el texto. Mantenlo presionado para copiarlo:', manualCopyDone:'Listo', capCopied:'Caption copiado ✓', capNotCopied:'Caption: cópialo abajo',
@@ -2526,8 +2532,8 @@ const T = {
     histDlSlide:'Descargar slide',
     toastGalleryReset:'⚠️ Se apagó \'Usar mis fotos\' al cambiar de modo. Vuelve a activarlo y elige tu foto.',
     errGalleryPhoto:'No pudimos cargar tu foto de la galeria. No se descontó ninguna generación. Revisa tu conexión e intenta de nuevo.',
-    photoOriginalNoEnhance:'Tu foto original (la mejora con AI no estuvo disponible)',
-    toastEnhanceFailed:'⚠️ La mejora con AI falló: te entregamos los textos con tu foto original y no se descontó esta generación.', toastEnhanceFailedPro:'⚠️ La mejora con AI falló: esta es tu foto original y no se descontó esta generación.',
+    photoOriginalNoEnhance:'Tu foto original (la mejora con IA no estuvo disponible)',
+    toastEnhanceFailed:'⚠️ La mejora con IA falló: te entregamos los textos con tu foto original y no se descontó esta generación.', toastEnhanceFailedPro:'⚠️ La mejora con IA falló: esta es tu foto original y no se descontó esta generación.',
     histSlidesLabel:'🎠 Slides de este carrusel',
     histDlAll:'⬇️ Guardar todos los slides',
     histSlidePrep:'Preparando slides...',
@@ -2562,13 +2568,13 @@ const T = {
     pltTK:'🎵 <strong>TikTok 2026:</strong> Caption 50-150 chars con keywords SEO (es motor de búsqueda). Hook en 1.5 seg. Meta: Completion rate 70%+',
     // ── Loading by mode ──
     loadPostTitle:'Creando tu Post...', loadPostTime:'~20 segundos',
-    loadPostS1:'Analizando tu solicitud', loadPostS2:'Generando captions para 3 plataformas', loadPostS3:'Creando imagen con AI', loadPostS4:'Preparando resultado',
-    loadCarouselTitle:'Creando tu Carrusel...', loadCarouselTime:'~35 segundos — generando slides con AI',
+    loadPostS1:'Analizando tu solicitud', loadPostS2:'Generando captions para 3 plataformas', loadPostS3:'Creando imagen con IA', loadPostS4:'Preparando resultado',
+    loadCarouselTitle:'Creando tu Carrusel...', loadCarouselTime:'~35 segundos — generando slides con IA',
     loadCarouselS1:'Generando contenido de los slides', loadCarouselS2:'Creando imagen de portada', loadCarouselS3:'Renderizando slides', loadCarouselS4:'Listo',
-    loadEnhanceTitle:'Editando tu foto profesionalmente...', loadEnhanceTime:'~35 segundos — editando tu foto real con AI',
+    loadEnhanceTitle:'Editando tu foto profesionalmente...', loadEnhanceTime:'~35 segundos — editando tu foto real con IA',
     loadEnhanceS1:'Analizando tu foto', loadEnhanceS2:'Generando captions optimizados', loadEnhanceS3:'Aplicando mejoras profesionales a la imagen', loadEnhanceS4:'Preparando resultado',
     loadFlyerTitle:'Diseñando tu Flyer...', loadFlyerTime:'~30 segundos',
-    loadFlyerS1:'Analizando el contenido del flyer', loadFlyerS2:'Generando captions para 3 plataformas', loadFlyerS3:'Diseñando el gráfico con AI', loadFlyerS4:'Preparando resultado',
+    loadFlyerS1:'Analizando el contenido del flyer', loadFlyerS2:'Generando captions para 3 plataformas', loadFlyerS3:'Diseñando el gráfico con IA', loadFlyerS4:'Preparando resultado',
     loadTestTitle:'Transformando el testimonio...', loadTestTime:'~25 segundos',
     loadTestS1:'Analizando la reseña del cliente', loadTestS2:'Generando captions auténticos', loadTestS3:'Creando imagen de fondo', loadTestS4:'Preparando resultado',
     // ── Toasts/alerts ──
@@ -2602,7 +2608,7 @@ const T = {
     alertEnhanceDescribe:'Describe qué quieres hacer con la foto.',
     alertImgOnly:'Solo imágenes.', alertMaxSize:'Máximo 10MB.',
     alertRecoveryEmail:'Ingresa tu email',
-    alertAgentParseError:'La AI devolvió una respuesta inválida — intenta de nuevo en unos segundos.',
+    alertAgentParseError:'La IA devolvió una respuesta inválida — intenta de nuevo en unos segundos.',
     alertAgentFailed:'No se pudo generar el plan. ',
     alertRecoveryLink:'Guarda este link: {url} — En una próxima versión lo enviaremos a {email}',
     // ── Plan names ──
@@ -2617,16 +2623,16 @@ const T = {
     upsellDesc:'El Marketing Agent está incluido desde el plan Starter. Genera un plan de contenido mensual completo con un clic.',
     upsellFeat1:'Plan mensual de 20+ posts', upsellFeat2:'Deep links directos a crear', upsellFeat3:'Recordatorios de publicación', upsellFeat4:'Estrategia por pilares de contenido', upsellFeat5:'100 generaciones/mes',
     upsellCta:'Ver planes →', upsellClose:'Ahora no',
-    upsellVideoTitle:'Video AI — Disponible en Growth',
+    upsellVideoTitle:'Video IA — Disponible en Growth',
     upsellVideoDesc:'Crea videos cortos para Reels, TikTok y Shorts con inteligencia artificial. Incluido desde el plan Growth.',
     upsellVideoCta:'Ver planes →',
     // ── Video mode card ──
-    mcVideoTitle:'Video AI', mcVideoDesc:'Reels, TikTok, Shorts',
+    mcVideoTitle:'Video IA', mcVideoDesc:'Reels, TikTok, Shorts',
     // ── Video generation ──
     videoTopicLabel:'🎬 Tema del video', videoDurLabel:'Duración', videoRatioLabel:'Formato',
     vdurNote:'5 seg = 1 video · 10 seg = 2 videos',
     videoHint:'💡 El video se genera con IA. Toma ~2-5 minutos.',
-    videoGenBtn:'Generar video con AI', genBtn:'Generar contenido con AI',
+    videoGenBtn:'Generar video con IA', genBtn:'Generar contenido con IA',
     videoPhTopic:'Ej: Mostrar el ambiente acogedor de nuestra cafetería con clientes disfrutando...',
     videoPolling:'Generando video... esto toma ~2-5 min',
     videoQueue:'En cola de procesamiento...',
@@ -2636,7 +2642,7 @@ const T = {
     videoDownload:'⬇️ Descargar video',
     videoNewOne:'🎬 Generar otro video',
     videoPhotoTitle:'📸 Foto de producto o lugar (opcional)',
-    videoPhotoSub:'Sube una foto y el AI la animará en video',
+    videoPhotoSub:'Sube una foto y la IA la animará en video',
     genPerMonth:'gen/mes',
     // ── Photo Gallery ──
     galleryTitle:'📸 Mis fotos', galleryUploadTitle:'Arrastra fotos o haz click',
@@ -5609,7 +5615,7 @@ async function genPost(brand,bg) {
       return;
     }
     // S40-6: el dato NO lleva decoracion; la vista (photoDescBar) antepone el icono.
-    showResult({ ...enhanceRes, photoDescription: detectLanguage() === 'es' ? 'Tu foto mejorada con AI' : 'Your photo enhanced with AI' });
+    showResult({ ...enhanceRes, photoDescription: detectLanguage() === 'es' ? 'Tu foto mejorada con IA' : 'Your photo enhanced with AI' });
     return;
   }
 
@@ -5948,10 +5954,10 @@ function showVideoResult(videoUrl, topic, captionsData) {
   // Insert video player in place of result image
   resultImg.style.display = 'none';
   const tipText = isES
-    ? '🏷️ Al publicar, activa el label de AI en cada plataforma para maximizar alcance.'
+    ? '🏷️ Al publicar, activa la etiqueta de IA en cada plataforma para maximizar alcance.'
     : '🏷️ When posting, enable the AI label on each platform to maximize reach.';
   const tipDetails = isES
-    ? '<b>TikTok:</b> Activa "AI-generated" · <b>Instagram:</b> No requiere acción · <b>YouTube:</b> Marca "Contenido alterado"'
+    ? '<b>TikTok:</b> Activa la etiqueta de contenido generado por IA · <b>Instagram:</b> No requiere acción · <b>YouTube:</b> Marca "Contenido alterado"'
     : '<b>TikTok:</b> Toggle "AI-generated" · <b>Instagram:</b> No action needed · <b>YouTube:</b> Mark "Altered content"';
   const videoHtml =
     '<video controls autoplay playsinline loop muted style="width:100%;border-radius:12px;max-height:500px;background:#000" src="' + videoUrl + '"></video>' +
@@ -6161,7 +6167,7 @@ async function saveVideoToHistory(videoUrl, topic) {
           pillar: pillar,
           topic: topic,
           imageUrl: videoUrl,
-          caption: igCap || fbCap || ('🎬 Video AI: ' + topic),
+          caption: igCap || fbCap || ('🎬 Video IA: ' + topic),
           captionSnippet: (igCap || fbCap || topic).slice(0, 120),
           hashtags: igHash || fbHash || '',
           captions: {
@@ -7255,7 +7261,7 @@ function openHistDetail(idx) {
     img.style.display = 'none';
   }
   const date = new Date(histCurrentPost.timestamp);
-  const modeLabels = { post:'✍️ Post', enhance:'📸 Estudio Pro', flyer:'🎨 Flyer', carousel:'🎠 Carrusel', testimonial:'⭐ Testimonio', video:'🎬 Video AI' };
+  const modeLabels = { post:'✍️ Post', enhance:'📸 Estudio Pro', flyer:'🎨 Flyer', carousel:'🎠 Carrusel', testimonial:'⭐ Testimonio', video:'🎬 Video IA' };
   const platLabel = histCurrentPost.platform === 'instagram' ? '📸 Instagram' : histCurrentPost.platform === 'facebook' ? '👥 Facebook' : '🎵 TikTok';
   meta.textContent = (modeLabels[histCurrentPost.mode] || '✍️ Post') + ' · ' + date.toLocaleDateString(detectLanguage()==='en'?'en-US':'es-MX', {day:'numeric',month:'long',year:'numeric'}) + ' · ' + platLabel;
   pilar.textContent = histCurrentPost.pillar || 'General';
@@ -7735,7 +7741,7 @@ function renderAgentPlan(plan) {
       const platLabel = post.platform === 'instagram' ? '📸 Instagram' : post.platform === 'facebook' ? '👥 Facebook' : '🎵 TikTok';
       const modeClass = agentTargetMode(post);
       const modeLabel = modeClass === 'video' ? t('agentModeVideo') : modeClass === 'carousel' ? t('agentModeCarousel') : modeClass === 'testimonial' ? (detectLanguage()==='es'?'💬 Testimonio':'💬 Testimonial') : t('agentModePost');
-      const styleLabel = modeClass === 'video' ? '🎬 Video AI' : post.suggestedStyle === 'photo' ? t('agentStylePhoto') : post.suggestedStyle === 'abstract' ? t('agentStyleAbstract') : t('agentStyleIllus');
+      const styleLabel = modeClass === 'video' ? '🎬 Video IA' : post.suggestedStyle === 'photo' ? t('agentStylePhoto') : post.suggestedStyle === 'abstract' ? t('agentStyleAbstract') : t('agentStyleIllus');
       const postIdx = agentPostsCache.indexOf(post);
       card.innerHTML = '<div class="apc-meta">' +
         '<span class="apc-date">' + (post.dayName||'') + ' ' + (post.dateShort||post.date) + '</span>' +
@@ -7810,7 +7816,7 @@ function goCreatePost(idx) {
   if(agentEl) { agentEl.classList.remove('active'); agentEl.style.display = ''; }
   showScreen('creatorScreen');
   const modeLabel = targetMode === 'video' ? t('mcVideoTitle') : targetMode === 'carousel' ? t('mcCarousel') : targetMode === 'testimonial' ? t('mcTestimonial') : targetMode === 'enhance' ? t('mcEnhance') : t('mcPost');
-  const styleLabel = targetMode === 'video' ? '🎬 Video AI' : post.suggestedStyle === 'photo' ? t('agentStylePhoto') : post.suggestedStyle === 'abstract' ? t('agentStyleAbstract') : t('agentStyleIllus');
+  const styleLabel = targetMode === 'video' ? '🎬 Video IA' : post.suggestedStyle === 'photo' ? t('agentStylePhoto') : post.suggestedStyle === 'abstract' ? t('agentStyleAbstract') : t('agentStyleIllus');
   // S50 · FB-56 — la pista sustituye al aviso generico: dos toasts seguidos se pisan.
   if (hintToast) showToast('💡 ' + hintToast, 6000);
   else showToast(t('toastPreloaded').replace('{mode}', modeLabel).replace('{style}', styleLabel));
@@ -8269,8 +8275,9 @@ function applyBilingualUI() {
   const phKeys = ['postHintIG','postHintFB','postHintTK'];
   postHints.forEach((el, i) => { if(phKeys[i]) el.innerHTML = t(phKeys[i]); });
   // TT labels
-  const ttHookLbl = document.querySelector('.tsb-label'); if(ttHookLbl) ttHookLbl.textContent = t('ttHookLabel');
-  const ttScriptLbl = document.querySelectorAll('.tsb-label')[1]; if(ttScriptLbl) ttScriptLbl.textContent = t('ttScriptLabel');
+  // FB-107 (S55c): por id, nunca por posicion (I18N-1)
+  const ttHookLbl = document.getElementById('ttHookLabel'); if(ttHookLbl) ttHookLbl.textContent = t('ttHookLabel');
+  const ttScriptLbl = document.getElementById('ttScriptLabel'); if(ttScriptLbl) ttScriptLbl.textContent = t('ttScriptLabel');
   // Adjust section
   const adjLbl = document.querySelector('.adjust-label'); if(adjLbl) adjLbl.textContent = t('adjustLabel');
   sp('adjustInput','adjustPlaceholder');
@@ -8331,7 +8338,9 @@ function applyBilingualUI() {
   const genLabelEl = document.querySelector('.gen-label'); if(genLabelEl) genLabelEl.textContent = t('dashGensUsed');
   const brandCardTitle = document.querySelector('.brand-card-title'); if(brandCardTitle) brandCardTitle.textContent = t('dashBrandTitle');
   const brandEditBtn = document.querySelector('.brand-edit-btn'); if(brandEditBtn) brandEditBtn.textContent = t('dashEditBG');
-  const plansTitle = document.querySelectorAll('.brand-card-title')[1]; if(plansTitle) plansTitle.textContent = t('dashPlansTitle');
+  // FB-107 (S55c): la tarjeta «Mis fotos» corrio las posiciones y su titulo decia «Mejora tu plan»
+  const plansTitle = document.getElementById('dashPlansTitle'); if(plansTitle) plansTitle.textContent = t('dashPlansTitle');
+  const galTitle = document.getElementById('galleryTitle'); if(galTitle) galTitle.textContent = t('galleryTitle');
   const stripeNote = document.querySelector('.pricing-grid + div');
   if(stripeNote) {
     const plan = getUserPlan();
@@ -8359,8 +8368,8 @@ function applyBilingualUI() {
   const agBackBtn = document.querySelector('.agent-back'); if(agBackBtn) agBackBtn.textContent = t('agentBack');
   const agTitleEl = document.querySelector('.agent-header-title'); if(agTitleEl) agTitleEl.textContent = t('agentTitle');
   const agConfigTitle = document.querySelector('.agent-config-title'); if(agConfigTitle) agConfigTitle.textContent = t('agentConfigTitle');
-  const agFreqLbl = document.querySelector('#agentConfigWrap .ic-label'); if(agFreqLbl) agFreqLbl.textContent = t('agentFreqLabel');
-  const agPlatsLbl = document.querySelectorAll('#agentConfigWrap .ic-label')[1]; if(agPlatsLbl) agPlatsLbl.textContent = t('agentPlatsLabel');
+  const agFreqLbl = document.getElementById('agentFreqLabel'); if(agFreqLbl) agFreqLbl.textContent = t('agentFreqLabel');
+  const agPlatsLbl = document.getElementById('agentPlatsLabel'); if(agPlatsLbl) agPlatsLbl.textContent = t('agentPlatsLabel');
   st('agentConfigNote','agentPlatNote');
   const agLoadNote = document.querySelector('#agentLoadNote'); if(agLoadNote) agLoadNote.textContent = t('agentGenLoading');
   const agRegenBtn = document.querySelector('#agentPlanWrap > button'); if(agRegenBtn) agRegenBtn.textContent = t('agentRegenPlan');
@@ -10155,7 +10164,7 @@ function setFbType(type) {
     ? [['new-feature','✨ Nueva función'],['mode-request','🎨 Nuevo modo'],['improvement','📈 Mejora'],['other','💬 Otro']]
     : [['new-feature','✨ New feature'],['mode-request','🎨 New mode'],['improvement','📈 Improvement'],['other','💬 Other']];
   const issueCats = isES
-    ? [['bug','🐛 Error/Bug'],['ux','🖥️ Usabilidad'],['quality','📊 Calidad AI'],['billing','💳 Pagos'],['other','💬 Otro']]
+    ? [['bug','🐛 Error/Bug'],['ux','🖥️ Usabilidad'],['quality','📊 Calidad de IA'],['billing','💳 Pagos'],['other','💬 Otro']]
     : [['bug','🐛 Bug'],['ux','🖥️ Usability'],['quality','📊 AI Quality'],['billing','💳 Billing'],['other','💬 Other']];
   const cats = type === 'suggestion' ? sugCats : issueCats;
   const catsWrap = document.getElementById('fbCatsWrap');
