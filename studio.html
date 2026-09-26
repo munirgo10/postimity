@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="2.49.8">
+<meta name="app-version" content="2.49.9">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Postimity Studio — Tu estudio de contenido con IA</title>
 <meta name="description" content="Crea posts, flyers, carruseles y videos profesionales con IA. Describe tu negocio una vez y genera contenido listo para publicar en 20 segundos.">
@@ -2347,7 +2347,7 @@ function persistSlides(imgs) {
 }
 
 // APP_VERSION (S34) — deploy verification. Must match worker /version and all HTML files.
-const APP_VERSION = '2.49.8'; // 25 sep 2026 — S55c: FB-105 el boton de camara de «Mis fotos» queda encima del campo invisible de la galeria (Android abria la galeria), FB-107 el traductor escribe por id y no por posicion ·· antes, tras desplegar: FB-105 Tomar foto tambien en «Mis fotos» de Mi cuenta, dentro de su zona ·· antes, S55b/S55c: FB-101 deshacer el video en una sola funcion, FB-99 boton Tomar foto en las zonas de foto, FB-92/FB-103 la cuenta sin prueba ve 0 desde el alta y el panel de error no ensena trazas, FB-86 la burbuja de ayuda se aparta de la pieza, FB-102 la cita del testimonio con un solo par de comillas, FB-104 la firma se llama firma (PR-077) ·· 22 sep 2026 — S55: FB-95 tras cambiar de modo o elegir foto, cada resultado siguiente se cobraba y quedaba INVISIBLE (FB-94 ocultaba con estilo en linea y nadie lo devolvia) ·· S54h: FB-94 el panel de resultado de la pieza ANTERIOR seguia ofreciendo descargar, publicar y guardar mientras se armaba otra; se oculta al cambiar de modo o elegir foto nueva, en los seis modos ·· S54h: FB-85 v2 el selector de etiqueta se dibujaba sin estilos cuando la cuadricula nunca se abrio (guardar en galeria fallaba EN SILENCIO); D48 paletas de color para los cinco giros nuevos ·· S54g: FB-91 tres mensajes de desarrollador viajaban al cliente (le pedian recargar saldo en el panel del proveedor y revisar nuestra configuracion) ·· S54f: FB-90 guardar en galeria pedia etiqueta y el estudio mandaba ninguna (el worker respondia NO_TAGS); FB-89 la foto que alimenta el video se encuadra en 9:16, porque el proveedor copia la forma de la imagen (un video salio 1244x1660) ·· S54e: D47 el video sale 9:16 siempre y se retira el selector (las tres redes convergen en 1080x1920) con el servidor imponiendolo; FB-85 guardar en la galeria la foto ya mejorada, sin cobrar otra generacion ·· S54d: D46 — la firma pegada abajo a la derecha tambien en 9:16 (D45-B), el degradado del flyer deja de convertir el tercio inferior en un bloque plano (FB-88) y el carrusel 9:16 es una tarjeta sobre fondo de marca en vez de media lamina en blanco (FB-87) ·· S54c: D44 flyer promocional (barra de acento, chips de fecha/horario/precio, boton con el telefono) y en 9:16 la foto ya no queda tapada por la banda ni el degradado; D45 la firma vuelve abajo a la derecha en todos los formatos y el logo arriba a la izquierda, con check ·· S54b: FB-84 fuera el nombre del proveedor de la pantalla y del fuente, FB-82 el hint dice lo que hace el boton, FB-83 dos niveles de nitidez segun si la IA toca la foto, FB-86 rotulo de TikTok completo ·· S54 — S54: D38 la IA en el formato exacto de la red (tabla en el servidor), D41 la foto la encuadra el cliente al subirla (cuadricula estilo Instagram, sin relleno ni fondo extendido), D42 todo en 4:5 o 9:16 incluido el carrusel (sin 1:1), D40 sin nombre en 9:16 y firma arriba a la derecha, flyer compuesto en su formato (FB-76) y achicar antes de cortar (AR-28) ·· 21 sep 2026 — FB-74: el control de encuadre mueve el eje que se recorta (de lado en fotos horizontales) · FB-73 sube con el worker (AR-13) ·· S53b (20 sep 2026) — motor de composicion: D35 normalizacion unica al subir, D34 tamanio del editor segun la forma de la foto, D36 encuadre anclado sin relleno difuminado y con aviso antes de gastar, D37 ancla por etiqueta con el dedo del cliente por encima, S35-14 el flyer IA compone su texto en canvas, D19 vista previa = entregable, FB-69 el toggle de galeria ya no miente ·· S53 — FB-66/D33 galeria en una llamada y foto original si la mejora falla, FB-67 hashtags una vez, FB-68 barra fuera de Estudio Pro, D31 reintento desde el paso que fallo, D32 texto honesto ·· S52b — FB-58 reintento en el error con el mismo actionId, FB-61 textos honestos, FB-57 copiar que devuelve si copio.
+const APP_VERSION = '2.49.9'; // 26 sep 2026 — S55d: G-1 el plan del Agente se pinta en las semanas que asigna el worker, el domingo con su semana (AGT-2) ·· antes, S55c: FB-105 el boton de camara de «Mis fotos» queda encima del campo invisible de la galeria (Android abria la galeria), FB-107 el traductor escribe por id y no por posicion ·· antes, tras desplegar: FB-105 Tomar foto tambien en «Mis fotos» de Mi cuenta, dentro de su zona ·· antes, S55b/S55c: FB-101 deshacer el video en una sola funcion, FB-99 boton Tomar foto en las zonas de foto, FB-92/FB-103 la cuenta sin prueba ve 0 desde el alta y el panel de error no ensena trazas, FB-86 la burbuja de ayuda se aparta de la pieza, FB-102 la cita del testimonio con un solo par de comillas, FB-104 la firma se llama firma (PR-077) ·· 22 sep 2026 — S55: FB-95 tras cambiar de modo o elegir foto, cada resultado siguiente se cobraba y quedaba INVISIBLE (FB-94 ocultaba con estilo en linea y nadie lo devolvia) ·· S54h: FB-94 el panel de resultado de la pieza ANTERIOR seguia ofreciendo descargar, publicar y guardar mientras se armaba otra; se oculta al cambiar de modo o elegir foto nueva, en los seis modos ·· S54h: FB-85 v2 el selector de etiqueta se dibujaba sin estilos cuando la cuadricula nunca se abrio (guardar en galeria fallaba EN SILENCIO); D48 paletas de color para los cinco giros nuevos ·· S54g: FB-91 tres mensajes de desarrollador viajaban al cliente (le pedian recargar saldo en el panel del proveedor y revisar nuestra configuracion) ·· S54f: FB-90 guardar en galeria pedia etiqueta y el estudio mandaba ninguna (el worker respondia NO_TAGS); FB-89 la foto que alimenta el video se encuadra en 9:16, porque el proveedor copia la forma de la imagen (un video salio 1244x1660) ·· S54e: D47 el video sale 9:16 siempre y se retira el selector (las tres redes convergen en 1080x1920) con el servidor imponiendolo; FB-85 guardar en la galeria la foto ya mejorada, sin cobrar otra generacion ·· S54d: D46 — la firma pegada abajo a la derecha tambien en 9:16 (D45-B), el degradado del flyer deja de convertir el tercio inferior en un bloque plano (FB-88) y el carrusel 9:16 es una tarjeta sobre fondo de marca en vez de media lamina en blanco (FB-87) ·· S54c: D44 flyer promocional (barra de acento, chips de fecha/horario/precio, boton con el telefono) y en 9:16 la foto ya no queda tapada por la banda ni el degradado; D45 la firma vuelve abajo a la derecha en todos los formatos y el logo arriba a la izquierda, con check ·· S54b: FB-84 fuera el nombre del proveedor de la pantalla y del fuente, FB-82 el hint dice lo que hace el boton, FB-83 dos niveles de nitidez segun si la IA toca la foto, FB-86 rotulo de TikTok completo ·· S54 — S54: D38 la IA en el formato exacto de la red (tabla en el servidor), D41 la foto la encuadra el cliente al subirla (cuadricula estilo Instagram, sin relleno ni fondo extendido), D42 todo en 4:5 o 9:16 incluido el carrusel (sin 1:1), D40 sin nombre en 9:16 y firma arriba a la derecha, flyer compuesto en su formato (FB-76) y achicar antes de cortar (AR-28) ·· 21 sep 2026 — FB-74: el control de encuadre mueve el eje que se recorta (de lado en fotos horizontales) · FB-73 sube con el worker (AR-13) ·· S53b (20 sep 2026) — motor de composicion: D35 normalizacion unica al subir, D34 tamanio del editor segun la forma de la foto, D36 encuadre anclado sin relleno difuminado y con aviso antes de gastar, D37 ancla por etiqueta con el dedo del cliente por encima, S35-14 el flyer IA compone su texto en canvas, D19 vista previa = entregable, FB-69 el toggle de galeria ya no miente ·· S53 — FB-66/D33 galeria en una llamada y foto original si la mejora falla, FB-67 hashtags una vez, FB-68 barra fuera de Estudio Pro, D31 reintento desde el paso que fallo, D32 texto honesto ·· S52b — FB-58 reintento en el error con el mismo actionId, FB-61 textos honestos, FB-57 copiar que devuelve si copio.
 window.APP_VERSION = APP_VERSION;
 // El log de version vive unas lineas mas abajo (console.info). No agregar otro aqui:
 // S38 borro POSTIMITY_VERSION para tener un solo log y este lo volvio a duplicar.
@@ -7695,12 +7695,20 @@ function renderAgentPlan(plan) {
   // Cache posts by index for clean onclick access
   const posts = plan.posts || [];
   agentPostsCache = posts;
+  // S55d (G-1, INV-212): la semana la asigna el worker (post.week) y aqui solo se pinta.
+  // Recalcularla por lunes partia un mes que empieza en jueves en 5 grupos con los temas
+  // corridos. Un plan guardado antes de S55d no trae week: se agrupa de lunes a domingo, y el
+  // domingo con SU semana (getDay() es 0 en domingo: sin el «|| 7» caia en la siguiente).
   const weeks = {};
   posts.forEach(post => {
-    const d = new Date(post.date + 'T12:00:00');
-    const weekStart = new Date(d);
-    weekStart.setDate(d.getDate() - d.getDay() + 1); // Monday
-    const wKey = weekStart.toISOString().slice(0,10);
+    let wKey;
+    if (post.week >= 1 && post.week <= 5) wKey = 'w' + post.week;
+    else {
+      const d = new Date(post.date + 'T12:00:00');
+      const weekStart = new Date(d);
+      weekStart.setDate(d.getDate() - (d.getDay() || 7) + 1); // lunes de su semana
+      wKey = weekStart.toISOString().slice(0,10);
+    }
     if(!weeks[wKey]) weeks[wKey] = [];
     weeks[wKey].push(post);
   });
@@ -7721,15 +7729,16 @@ function renderAgentPlan(plan) {
 
   Object.keys(weeks).sort().forEach((wKey, wi) => {
     const wPosts = weeks[wKey];
-    const firstDate = new Date(wKey + 'T12:00:00');
+    const weekNo = /^w\d$/.test(wKey) ? +wKey.slice(1) : wi + 1;
+    const firstDate = new Date(wPosts[0].date + 'T12:00:00');
     const lastDate = new Date(wPosts[wPosts.length-1].date + 'T12:00:00');
     const weekDiv = document.createElement('div');
     weekDiv.className = 'agent-week';
     const range = firstDate.getDate() + ' – ' + lastDate.getDate() + ' ' + monthNames[firstDate.getMonth()];
-    weekDiv.innerHTML = '<div class="agent-week-label">' + t('agentWeekLabel').replace('{n}', wi+1).replace('{range}', range) + '</div>';
+    weekDiv.innerHTML = '<div class="agent-week-label">' + t('agentWeekLabel').replace('{n}', weekNo).replace('{range}', range) + '</div>';
 
     // S28: Render weekly theme if available
-    const weekTheme = (plan.weeklyThemes || []).find(wt => wt.week === wi + 1);
+    const weekTheme = (plan.weeklyThemes || []).find(wt => wt.week === weekNo);
     if (weekTheme && weekTheme.theme) {
       weekDiv.innerHTML += '<div class="agent-week-theme">🎯 <strong>' + weekTheme.theme + '</strong>' + (weekTheme.goal ? ' — ' + weekTheme.goal : '') + '</div>';
     }
