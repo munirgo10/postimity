@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="2.49.9">
+<meta name="app-version" content="2.50.0">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Postimity Studio — Tu estudio de contenido con IA</title>
 <meta name="description" content="Crea posts, flyers, carruseles y videos profesionales con IA. Describe tu negocio una vez y genera contenido listo para publicar en 20 segundos.">
@@ -530,6 +530,11 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
 .apc-btn.wa:hover{background:#1fa851}
 .apc-btn.copy{background:var(--bg);color:var(--t2);border:.5px solid var(--bor)}
 .apc-mode.testimonial{background:#E8F5E9;color:#2E7D32}
+.apc-mode.flyer{background:#FCE4EC;color:#AD1457}
+.apc-style.real{background:#E8F5E9;color:#2E7D32}
+.agent-cost-line{font-size:12px;color:var(--t2);line-height:1.5;margin:-6px 0 14px}
+.agent-cost-line:empty{display:none}
+.agent-cost-line .warn{display:block;color:#B5750B;font-weight:700;margin-top:2px}
 .apc-btn.copy:hover{background:var(--bor)}
 .apc-btn.reminder{background:var(--bg);color:var(--t3);border:.5px solid var(--bor);padding:7px 10px;border-radius:8px;font-size:14px}
 .apc-btn.reminder:hover{background:#FDF0DC;border-color:#E8961A;color:#E8961A}
@@ -1105,6 +1110,7 @@ fbq('track', 'PageView');
             <button class="agent-freq-btn active" data-freq="5" onclick="setAgentFreq(this)">5/semana<br><span style="font-size:10px;opacity:.7">~20 posts</span></button>
             <button class="agent-freq-btn" data-freq="7" onclick="setAgentFreq(this)" id="agentFreq7">7/semana<br><span style="font-size:10px;opacity:.7" id="agentFreq7Sub">~28 posts</span></button>
           </div>
+          <div id="agentCostLine" class="agent-cost-line"></div>
           <div class="ic-label" id="agentPlatsLabel">Plataformas</div>
           <div class="agent-plat-btns">
             <button class="agent-plat-btn active" data-plat="instagram" onclick="toggleAgentPlat(this)">📸 Instagram</button>
@@ -2179,6 +2185,10 @@ function syncCounters(data) {
     capsState = data.caps;
     updateCapLabels();
   }
+  if (data.agentQuote && typeof data.agentQuote === 'object') {   // D57 · B (RD-39)
+    agentQuoteState = data.agentQuote;
+    try { paintAgentQuote(); } catch(e) {}
+  }
   if (typeof data.genCount === 'number') {
     localStorage.setItem(genMonthKey(), String(data.genCount));
     genCount = data.genCount;
@@ -2347,7 +2357,7 @@ function persistSlides(imgs) {
 }
 
 // APP_VERSION (S34) — deploy verification. Must match worker /version and all HTML files.
-const APP_VERSION = '2.49.9'; // 26 sep 2026 — S55d: G-1 el plan del Agente se pinta en las semanas que asigna el worker, el domingo con su semana (AGT-2) ·· antes, S55c: FB-105 el boton de camara de «Mis fotos» queda encima del campo invisible de la galeria (Android abria la galeria), FB-107 el traductor escribe por id y no por posicion ·· antes, tras desplegar: FB-105 Tomar foto tambien en «Mis fotos» de Mi cuenta, dentro de su zona ·· antes, S55b/S55c: FB-101 deshacer el video en una sola funcion, FB-99 boton Tomar foto en las zonas de foto, FB-92/FB-103 la cuenta sin prueba ve 0 desde el alta y el panel de error no ensena trazas, FB-86 la burbuja de ayuda se aparta de la pieza, FB-102 la cita del testimonio con un solo par de comillas, FB-104 la firma se llama firma (PR-077) ·· 22 sep 2026 — S55: FB-95 tras cambiar de modo o elegir foto, cada resultado siguiente se cobraba y quedaba INVISIBLE (FB-94 ocultaba con estilo en linea y nadie lo devolvia) ·· S54h: FB-94 el panel de resultado de la pieza ANTERIOR seguia ofreciendo descargar, publicar y guardar mientras se armaba otra; se oculta al cambiar de modo o elegir foto nueva, en los seis modos ·· S54h: FB-85 v2 el selector de etiqueta se dibujaba sin estilos cuando la cuadricula nunca se abrio (guardar en galeria fallaba EN SILENCIO); D48 paletas de color para los cinco giros nuevos ·· S54g: FB-91 tres mensajes de desarrollador viajaban al cliente (le pedian recargar saldo en el panel del proveedor y revisar nuestra configuracion) ·· S54f: FB-90 guardar en galeria pedia etiqueta y el estudio mandaba ninguna (el worker respondia NO_TAGS); FB-89 la foto que alimenta el video se encuadra en 9:16, porque el proveedor copia la forma de la imagen (un video salio 1244x1660) ·· S54e: D47 el video sale 9:16 siempre y se retira el selector (las tres redes convergen en 1080x1920) con el servidor imponiendolo; FB-85 guardar en la galeria la foto ya mejorada, sin cobrar otra generacion ·· S54d: D46 — la firma pegada abajo a la derecha tambien en 9:16 (D45-B), el degradado del flyer deja de convertir el tercio inferior en un bloque plano (FB-88) y el carrusel 9:16 es una tarjeta sobre fondo de marca en vez de media lamina en blanco (FB-87) ·· S54c: D44 flyer promocional (barra de acento, chips de fecha/horario/precio, boton con el telefono) y en 9:16 la foto ya no queda tapada por la banda ni el degradado; D45 la firma vuelve abajo a la derecha en todos los formatos y el logo arriba a la izquierda, con check ·· S54b: FB-84 fuera el nombre del proveedor de la pantalla y del fuente, FB-82 el hint dice lo que hace el boton, FB-83 dos niveles de nitidez segun si la IA toca la foto, FB-86 rotulo de TikTok completo ·· S54 — S54: D38 la IA en el formato exacto de la red (tabla en el servidor), D41 la foto la encuadra el cliente al subirla (cuadricula estilo Instagram, sin relleno ni fondo extendido), D42 todo en 4:5 o 9:16 incluido el carrusel (sin 1:1), D40 sin nombre en 9:16 y firma arriba a la derecha, flyer compuesto en su formato (FB-76) y achicar antes de cortar (AR-28) ·· 21 sep 2026 — FB-74: el control de encuadre mueve el eje que se recorta (de lado en fotos horizontales) · FB-73 sube con el worker (AR-13) ·· S53b (20 sep 2026) — motor de composicion: D35 normalizacion unica al subir, D34 tamanio del editor segun la forma de la foto, D36 encuadre anclado sin relleno difuminado y con aviso antes de gastar, D37 ancla por etiqueta con el dedo del cliente por encima, S35-14 el flyer IA compone su texto en canvas, D19 vista previa = entregable, FB-69 el toggle de galeria ya no miente ·· S53 — FB-66/D33 galeria en una llamada y foto original si la mejora falla, FB-67 hashtags una vez, FB-68 barra fuera de Estudio Pro, D31 reintento desde el paso que fallo, D32 texto honesto ·· S52b — FB-58 reintento en el error con el mismo actionId, FB-61 textos honestos, FB-57 copiar que devuelve si copio.
+const APP_VERSION = '2.50.0'; // 29 sep 2026 — S55g: D57 tarjetas del Agente con una etiqueta de cada tipo, tarjeta flyer de la oferta y costo antes de generar; S55f: realPhoto en el video (D58)
 window.APP_VERSION = APP_VERSION;
 // El log de version vive unas lineas mas abajo (console.info). No agregar otro aqui:
 // S38 borro POSTIMITY_VERSION para tener un solo log y este lo volvio a duplicar.
@@ -2357,7 +2367,8 @@ window.BUILD_FIXES = ['s50-agente-abre-lo-que-anuncia','s50-copiar-no-miente','s
   'video-captions-no-cobra','adjust-y-flyer-captions-cobran','calidad-la-decide-el-servidor',
   'contador-sincronizado-al-refinar','etiqueta-de-cobro-en-botones',
   'fb27-growth-entra-sin-firma','fb27-la-eleccion-del-usuario-manda',
-  's41b-galeria-oculta-y-desarmada-en-flyer-y-testimonio'];
+  's41b-galeria-oculta-y-desarmada-en-flyer-y-testimonio',
+  's55g-d57-tarjetas-sin-contradiccion','s55g-d57-flyer-oferta-del-dueno','s55g-d57-costo-antes-de-generar','s55f-d58-realphoto-video'];
 console.info('Postimity Studio v' + APP_VERSION);
 
 // ── FUENTE ÚNICA DE CUOTAS (S38-4) ───────────────────────────────────────
@@ -3185,6 +3196,7 @@ async function refreshServerState({ esperarCambioDePlan = false, planPrevio = nu
     auth = await checkAuth();
     if (!auth) continue;
     if (auth.caps && typeof auth.caps === 'object') capsState = auth.caps;
+    if (auth.agentQuote && typeof auth.agentQuote === 'object') agentQuoteState = auth.agentQuote;   // D57 · B
     if (auth.limits) window._srvLimits = auth.limits;
     try { updateCapLabels(); applyAgentFreqGate(); updateGenCounter(); } catch(e) {}
     if (!esperarCambioDePlan) break;
@@ -3911,6 +3923,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   if (auth.caps && typeof auth.caps === 'object') {
     capsState = auth.caps;
   }
+  if (auth.agentQuote && typeof auth.agentQuote === 'object') agentQuoteState = auth.agentQuote;   // D57 · B
   try { updateCapLabels(); applyAgentFreqGate(); } catch(e) {}
 
   // Authenticated — load brand if exists
@@ -5842,7 +5855,7 @@ async function generateVideo(brand) {
     apiFetch(WORKER, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ mode:'video-captions', actionId: currentActionId, textInput: topic, brandGuide: brand.brandGuide, brandData: { name: brand.name, type: brand.type, whatsapp: brand.whatsapp }, platform, imageStyle: 'video', pillar }),
+      body: JSON.stringify({ mode:'video-captions', actionId: currentActionId, textInput: topic, brandGuide: brand.brandGuide, brandData: { name: brand.name, type: brand.type, whatsapp: brand.whatsapp, differentiator: brand.differentiator, story: brand.story }, platform, imageStyle: 'video', pillar, realPhoto: !!imageUrl }),  // D58/D59 (S55f): el video animado de foto real puede decir «nuestro»; la historia del dueno autoriza sus ofertas
     }).then(r => r.json()).then(d => { if(d && d.success !== false) captionsBox.data = d; }).catch(() => {});
 
     // Step 5: Start polling
@@ -7497,6 +7510,9 @@ let agentFreq = 5;
 let agentPlats = ['instagram', 'facebook'];
 let agentPlan = null;
 let agentPostsCache = []; // Stores posts indexed for onclick access
+// D57 · B (S55g): cotizacion del servidor — cuanto costaria ejecutar un plan en cada frecuencia con lo
+// que queda. Llega con check-auth y con cada respuesta que cobra. El estudio la pinta; no la calcula (RD-6).
+let agentQuoteState = null;
 
 function getCurrentMonth() {
   const now = new Date();
@@ -7564,6 +7580,31 @@ function setAgentFreq(btn) {
   document.querySelectorAll('.agent-freq-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   agentFreq = parseInt(btn.dataset.freq);
+  try { paintAgentQuote(); } catch(e) {}
+}
+
+// D57 · B: el texto del costo sale de UNA funcion, para la linea previa y para el plan ya generado.
+// Recibe lo que manda el servidor (costo, saldo y si cabe); no suma ni resta nada.
+function agentCostText(k, gensLeft, videosLeft, sugiere) {
+  if (!k || typeof k.gens !== 'number') return '';
+  const es = detectLanguage() !== 'en';
+  let h = es ? 'Ejecutar este plan usa hasta <strong>' + k.gens + ' generaciones</strong> y <strong>' + k.videos + ' videos</strong>.'
+             : 'Running this plan uses up to <strong>' + k.gens + ' generations</strong> and <strong>' + k.videos + ' videos</strong>.';
+  if (typeof gensLeft === 'number') h += es ? ' Te quedan ' + gensLeft + ' generaciones y ' + (videosLeft || 0) + ' videos.'
+                                            : ' You have ' + gensLeft + ' generations and ' + (videosLeft || 0) + ' videos left.';
+  if (k.fits === false) h += '<span class="warn">⚠️ ' + (sugiere
+    ? (es ? 'No te alcanza: con lo que te queda cabe el de ' + sugiere + '/semana.' : 'Not enough: what you have left fits ' + sugiere + '/week.')
+    : (es ? 'No te alcanza ni el plan más corto: puedes generar el plan y ejecutar solo una parte, o subir de plan.' : 'Not even the shortest plan fits: you can generate it and run part of it, or upgrade.')) + '</span>';
+  return h;
+}
+function paintAgentQuote() {
+  const el = document.getElementById('agentCostLine');
+  if (!el) return;
+  const q = agentQuoteState;
+  if (!q || !q[agentFreq]) { el.innerHTML = ''; return; }
+  // la frecuencia que cabe: la mayor MENOR que la elegida que el servidor marco como que cabe
+  const sugiere = [3, 5, 7].filter(f => f < agentFreq && q[f] && q[f].fits === true).pop() || null;
+  el.innerHTML = agentCostText(q[agentFreq], q.gensLeft, q.videosLeft, sugiere);
 }
 
 // 7/semana son 28 posts, y ejecutarlos cuesta 28 generaciones. En trial (25) es
@@ -7591,6 +7632,7 @@ function applyAgentFreqGate() {
   if(sub) sub.textContent = (7 > maxF)
     ? (es ? '~28 posts · Growth' : '~28 posts · Growth')
     : '~28 posts';
+  try { paintAgentQuote(); } catch(e) {}
 }
 
 function toggleAgentPlat(btn) {
@@ -7679,7 +7721,25 @@ async function generateAgentPlan() {
 // propio prompt del worker define como sugerencia que el usuario puede ignorar.
 function agentTargetMode(post) {
   const m = post && post.suggestedMode;
-  return ['carousel', 'video', 'testimonial'].includes(m) ? m : 'post';
+  return ['carousel', 'video', 'testimonial', 'flyer'].includes(m) ? m : 'post';
+}
+
+// D57 (S55g · FB-117): la tarjeta dice UN formato y a lo mas UN origen. Antes se pintaban formato,
+// estilo y origen por separado: «Video» + «Video IA» + «Foto→Video», «Fotorrealista» (IA) junto a
+// «Tu foto» (real), y el testimonio sin estilo salia «Ilustrado». El origen lo pone el worker; un
+// plan guardado antes de S55g no lo trae y se deduce aqui de photoStrategy.
+function agentCardChips(post) {
+  const es = detectLanguage() !== 'en', m = agentTargetMode(post), ps = String((post && post.photoStrategy) || '');
+  const origin = (post && post.origin) || (m === 'testimonial' ? 'resena' : m === 'flyer' ? 'oferta'
+    : m === 'video' ? (ps === 'gallery+video' ? 'animada' : 'ia') : ps === 'gallery' ? 'real' : ps === 'gallery+enhance' ? 'real-enhance' : 'ia');
+  const mode = m === 'video' ? t('agentModeVideo') : m === 'carousel' ? t('agentModeCarousel')
+    : m === 'testimonial' ? (es ? '💬 Testimonio' : '💬 Testimonial') : m === 'flyer' ? '🎨 Flyer' : t('agentModePost');
+  const ORIG = { real: es ? '📷 Tu foto' : '📷 Your photo', 'real-enhance': es ? '📷 Foto mejorada' : '📷 Enhanced photo',
+    animada: es ? '📷 Tu foto animada' : '📷 Your photo, animated', oferta: es ? '🏷️ Tu oferta' : '🏷️ Your offer', resena: null };
+  let orig = ORIG[origin];
+  if (origin === 'ia') orig = m === 'video' ? (es ? '✦ Con IA' : '✦ With AI')
+    : post.suggestedStyle === 'photo' ? t('agentStylePhoto') : post.suggestedStyle === 'abstract' ? t('agentStyleAbstract') : t('agentStyleIllus');
+  return { mode: m, modeLabel: mode, origin, originLabel: orig === undefined ? null : orig };
 }
 
 function renderAgentPlan(plan) {
@@ -7687,7 +7747,9 @@ function renderAgentPlan(plan) {
   document.getElementById('agentPlanWrap').style.display = 'block';
 
   const summary = document.getElementById('agentSummary');
-  if(summary) summary.innerHTML = '📋 <strong>' + (plan.month||'') + '</strong> · ' + (plan.totalPosts||0) + ' posts · ' + (plan.summary||'');
+  if(summary) summary.innerHTML = '📋 <strong>' + (plan.month||'') + '</strong> · ' + (plan.totalPosts||0) + ' posts · ' + (plan.summary||'') +
+    // D57 · B: el plan dice su costo con el saldo que leyo el servidor al generarlo
+    (plan.cost ? '<div class="agent-cost-line" style="margin:8px 0 0">' + agentCostText(plan.cost, plan.cost.gensLeft, plan.cost.videosLeft, plan.cost.fits === false ? plan.cost.suggestedFreq : null) + '</div>' : '');
 
   const container = document.getElementById('agentPlanContent');
   if(!container) return;
@@ -7749,23 +7811,21 @@ function renderAgentPlan(plan) {
       const platClass = post.platform || 'instagram';
       const platLabel = post.platform === 'instagram' ? '📸 Instagram' : post.platform === 'facebook' ? '👥 Facebook' : '🎵 TikTok';
       const modeClass = agentTargetMode(post);
-      const modeLabel = modeClass === 'video' ? t('agentModeVideo') : modeClass === 'carousel' ? t('agentModeCarousel') : modeClass === 'testimonial' ? (detectLanguage()==='es'?'💬 Testimonio':'💬 Testimonial') : t('agentModePost');
-      const styleLabel = modeClass === 'video' ? '🎬 Video IA' : post.suggestedStyle === 'photo' ? t('agentStylePhoto') : post.suggestedStyle === 'abstract' ? t('agentStyleAbstract') : t('agentStyleIllus');
+      const chips = agentCardChips(post);
       const postIdx = agentPostsCache.indexOf(post);
       card.innerHTML = '<div class="apc-meta">' +
         '<span class="apc-date">' + (post.dayName||'') + ' ' + (post.dateShort||post.date) + '</span>' +
         '<span class="apc-plat ' + platClass + '">' + platLabel + '</span>' +
         '<span class="apc-pilar">' + (post.pilar||'') + '</span>' +
-        '<span class="apc-mode ' + modeClass + '">' + modeLabel + '</span>' +
-        '<span class="apc-style">' + styleLabel + '</span>' +
-        (post.photoStrategy && post.photoStrategy !== 'ai-generated' ? '<span class="apc-style" style="background:#E8F5E9;color:#2E7D32">📷 ' + (post.photoStrategy === 'gallery' ? (detectLanguage()==='es'?'Tu foto':'Your photo') : post.photoStrategy === 'gallery+enhance' ? (detectLanguage()==='es'?'Foto mejorada':'Enhanced photo') : (detectLanguage()==='es'?'Foto→Video':'Photo→Video')) + '</span>' : '') +
+        '<span class="apc-mode ' + modeClass + '">' + chips.modeLabel + '</span>' +
+        (chips.originLabel ? '<span class="apc-style' + (['real', 'real-enhance', 'animada'].includes(chips.origin) ? ' real' : '') + '">' + chips.originLabel + '</span>' : '') +
         (post.festivity ? '<span class="apc-fest">🎉 ' + post.festivity + '</span>' : '') +
         '</div>' +
         '<div class="apc-topic">' + (post.topic||'') + '</div>' +
         '<div class="apc-prompt">' + (post.prompt||'') + '</div>' +
         (post.actionHint && post.userAction !== 'none' ? '<div class="apc-hint">💡 ' + post.actionHint + '</div>' : '') +
         '<div class="apc-btns">' +
-        '<button class="apc-btn create" onclick="goCreatePost(' + postIdx + ')">' + (modeClass === 'video' ? t('agentCreateVideo') : modeClass === 'carousel' ? t('agentCreateCarousel') : modeClass === 'testimonial' ? (detectLanguage()==='es'?'→ Crear testimonio':'→ Create testimonial') : t('agentCreatePost')) + '</button>' +
+        '<button class="apc-btn create" onclick="goCreatePost(' + postIdx + ')">' + (modeClass === 'video' ? t('agentCreateVideo') : modeClass === 'carousel' ? t('agentCreateCarousel') : modeClass === 'testimonial' ? (detectLanguage()==='es'?'→ Crear testimonio':'→ Create testimonial') : modeClass === 'flyer' ? (detectLanguage()==='es'?'→ Crear flyer':'→ Create flyer') : t('agentCreatePost')) + '</button>' +
         '<button class="apc-btn copy" onclick="copyPrompt(' + postIdx + ')">' + t('agentCopyPrompt') + '</button>' +
 
         '</div>';
@@ -7788,6 +7848,13 @@ function goCreatePost(idx) {
   } else if(targetMode === 'carousel') {
     const ta = document.getElementById('carouselTopic');
     if(ta) ta.value = post.prompt || post.topic || '';
+  } else if(targetMode === 'flyer') {
+    // D59 (S55g): la tarjeta flyer es la oferta del DUENO. Se abre como Promocion y el titulo queda en
+    // blanco con la guia de lo que debe escribir: nada de lo que redacto el sistema llega al formulario.
+    const ty = document.getElementById('flyerType');
+    if(ty) ty.value = 'Promoción / Oferta';
+    const ti = document.getElementById('flyerTitle2');
+    if(ti) ti.setAttribute('placeholder', post.actionHint || '');
   } else if(targetMode === 'testimonial') {
     // S50 · FB-56 — el campo real es testText (el que lee genTestimonial); reviewText
     // no existe. La guia va como PLACEHOLDER a proposito: el valor es la resena real
@@ -7799,7 +7866,7 @@ function goCreatePost(idx) {
     if(ta) ta.value = post.prompt || '';
   }
   // Set image style if suggested (not for video/testimonial)
-  if(!['video','testimonial'].includes(targetMode) && post.suggestedStyle && ['photo','illustrated','abstract'].includes(post.suggestedStyle)) {
+  if(!['video','testimonial','flyer'].includes(targetMode) && post.suggestedStyle && ['photo','illustrated','abstract'].includes(post.suggestedStyle)) {
     const styleMap = { photo: 'sPhoto', illustrated: 'sIllus', abstract: 'sAbstr' };
     const styleBtn = document.getElementById(styleMap[post.suggestedStyle]);
     if(styleBtn) setImageStyle(post.suggestedStyle, styleBtn);
@@ -7824,13 +7891,13 @@ function goCreatePost(idx) {
   const agentEl = document.getElementById('agentScreen');
   if(agentEl) { agentEl.classList.remove('active'); agentEl.style.display = ''; }
   showScreen('creatorScreen');
-  const modeLabel = targetMode === 'video' ? t('mcVideoTitle') : targetMode === 'carousel' ? t('mcCarousel') : targetMode === 'testimonial' ? t('mcTestimonial') : targetMode === 'enhance' ? t('mcEnhance') : t('mcPost');
-  const styleLabel = targetMode === 'video' ? '🎬 Video IA' : post.suggestedStyle === 'photo' ? t('agentStylePhoto') : post.suggestedStyle === 'abstract' ? t('agentStyleAbstract') : t('agentStyleIllus');
+  const modeLabel = targetMode === 'video' ? t('mcVideoTitle') : targetMode === 'carousel' ? t('mcCarousel') : targetMode === 'testimonial' ? t('mcTestimonial') : targetMode === 'flyer' ? t('mcFlyer') : targetMode === 'enhance' ? t('mcEnhance') : t('mcPost');
+  const styleLabel = agentCardChips(post).originLabel || '';   // D57 · FB-117: la misma etiqueta que la tarjeta
   // S50 · FB-56 — la pista sustituye al aviso generico: dos toasts seguidos se pisan.
   if (hintToast) showToast('💡 ' + hintToast, 6000);
   else showToast(t('toastPreloaded').replace('{mode}', modeLabel).replace('{style}', styleLabel));
   setTimeout(() => {
-    const focusId = { video:'videoTopic', carousel:'carouselTopic', testimonial:'testText' }[targetMode] || 'postText';
+    const focusId = { video:'videoTopic', carousel:'carouselTopic', testimonial:'testText', flyer:'flyerTitle2' }[targetMode] || 'postText';
     const input = document.getElementById(focusId);
     input?.focus(); input?.scrollIntoView({behavior:'smooth', block:'center'});
   }, 350);
@@ -8452,6 +8519,9 @@ function checkDeepLink() {
     } else if(dlMode === 'video') {
       const ta = document.getElementById('videoTopic');
       if(ta && dlPrompt) ta.value = decodeURIComponent(dlPrompt);
+    } else if(dlMode === 'flyer') {
+      // D59: el enlace de la tarjeta flyer abre la promocion en blanco; la oferta la escribe el dueno
+      const ty = document.getElementById('flyerType'); if(ty) ty.value = 'Promoción / Oferta';
     } else {
       if(dlPrompt) { const ta = document.getElementById('postText'); if(ta) ta.value = decodeURIComponent(dlPrompt); }
     }
