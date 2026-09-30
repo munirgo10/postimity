@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="2.50.0">
+<meta name="app-version" content="2.50.1">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Postimity Studio — Tu estudio de contenido con IA</title>
 <meta name="description" content="Crea posts, flyers, carruseles y videos profesionales con IA. Describe tu negocio una vez y genera contenido listo para publicar en 20 segundos.">
@@ -2357,7 +2357,7 @@ function persistSlides(imgs) {
 }
 
 // APP_VERSION (S34) — deploy verification. Must match worker /version and all HTML files.
-const APP_VERSION = '2.50.0'; // 29 sep 2026 — S55g: D57 tarjetas del Agente con una etiqueta de cada tipo, tarjeta flyer de la oferta y costo antes de generar; S55f: realPhoto en el video (D58)
+const APP_VERSION = '2.50.1'; // 29 sep 2026 — S55h: FB-132 el plan del Agente se recupera tras un corte de red sin re-pedirlo · antes: S55g: D57 tarjetas del Agente con una etiqueta de cada tipo, tarjeta flyer de la oferta y costo antes de generar; S55f: realPhoto en el video (D58)
 window.APP_VERSION = APP_VERSION;
 // El log de version vive unas lineas mas abajo (console.info). No agregar otro aqui:
 // S38 borro POSTIMITY_VERSION para tener un solo log y este lo volvio a duplicar.
@@ -2368,7 +2368,7 @@ window.BUILD_FIXES = ['s50-agente-abre-lo-que-anuncia','s50-copiar-no-miente','s
   'contador-sincronizado-al-refinar','etiqueta-de-cobro-en-botones',
   'fb27-growth-entra-sin-firma','fb27-la-eleccion-del-usuario-manda',
   's41b-galeria-oculta-y-desarmada-en-flyer-y-testimonio',
-  's55g-d57-tarjetas-sin-contradiccion','s55g-d57-flyer-oferta-del-dueno','s55g-d57-costo-antes-de-generar','s55f-d58-realphoto-video'];
+  's55h-fb132-agente-recupera-plan','s55g-d57-tarjetas-sin-contradiccion','s55g-d57-flyer-oferta-del-dueno','s55g-d57-costo-antes-de-generar','s55f-d58-realphoto-video'];
 console.info('Postimity Studio v' + APP_VERSION);
 
 // ── FUENTE ÚNICA DE CUOTAS (S38-4) ───────────────────────────────────────
@@ -2621,6 +2621,8 @@ const T = {
     alertRecoveryEmail:'Ingresa tu email',
     alertAgentParseError:'La IA devolvió una respuesta inválida — intenta de nuevo en unos segundos.',
     alertAgentFailed:'No se pudo generar el plan. ',
+    agentRecovering:'Se cortó la conexión. Tu plan se sigue generando: lo estamos recuperando, no cierres esta pantalla…',
+    agentNetLost:'Se perdió la conexión mientras se generaba tu plan. Si se terminó, lo verás al volver a abrir el Agente. Si vuelves a tocar Generar en los próximos minutos no se cobra otro plan.',
     alertRecoveryLink:'Guarda este link: {url} — En una próxima versión lo enviaremos a {email}',
     // ── Plan names ──
     planTrialName:'Trial Gratuito', planTrialBadge:'⭐ Trial', planTrialPrice:'Gratis 7 días',
@@ -2915,6 +2917,8 @@ const T = {
     alertRecoveryEmail:'Enter your email',
     alertAgentParseError:'The AI returned an invalid response — try again in a few seconds.',
     alertAgentFailed:'Could not generate the plan. ',
+    agentRecovering:'The connection dropped. Your plan is still being generated: we are recovering it, do not close this screen…',
+    agentNetLost:'The connection was lost while your plan was being generated. If it finished, you will see it when you reopen the Agent. If you tap Generate again in the next few minutes, no extra plan is charged.',
     alertRecoveryLink:'Save this link: {url} — In a future version we will send it to {email}',
     // ── Plan names ──
     planTrialName:'Free Trial', planTrialBadge:'⭐ Trial', planTrialPrice:'Free for 7 days',
@@ -7646,6 +7650,28 @@ function toggleAgentPlat(btn) {
   }
 }
 
+// FB-132 (S55h · INV-226): Safari corta a ~60 s un fetch sin respuesta («Load failed») aunque el
+// servidor termine y cobre el plan. Cada generacion lleva actionId; el worker guarda el plan entregado
+// con ESE actionId. Ante un corte de red el estudio NO vuelve a pedirlo (seria otro gasto del proveedor):
+// consulta get-agent-plan hasta encontrar el plan de su accion. Si no aparece, la accion se conserva
+// unos minutos y el siguiente Generar la reusa: el servidor devuelve lo ya entregado (replay) o suprime
+// el segundo cobro (RD-28). La ventana es menor que CHARGE_DEDUP_TTL (10 min) del worker.
+let agentAccion = null;
+const AGENT_RECOVERY = { tries: 15, waitMs: 6000, reuseMs: 9 * 60 * 1000 };
+async function recuperarPlanAgente(aid, month) {
+  for (let k = 0; k < AGENT_RECOVERY.tries; k++) {
+    await esperarVisible();
+    await new Promise(r => setTimeout(r, AGENT_RECOVERY.waitMs));
+    try {
+      const r = await apiFetch(WORKER, { method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ mode:'get-agent-plan', brandId, month }) });
+      const d = await r.json();
+      if (d && d.success && d.plan && d.plan.actionId === aid) return d.plan;
+    } catch (e) { /* la red sigue caida: se intenta de nuevo */ }
+  }
+  return null;
+}
+
 async function generateAgentPlan() {
   const brand = loadBrand();
   const bg = brand?.brandGuide;
@@ -7664,24 +7690,40 @@ async function generateAgentPlan() {
   btn.textContent = t('agentGenerating');
   if(note) note.style.display = 'block';
 
+  const noteText = note ? note.textContent : '';
   try {
     const month = getCurrentMonth();
     const lang = detectLanguage();
     // Check if gallery has photos and toggle is meaningful
     const galleryActive = galleryData.length > 0;
-    const res = await apiFetch(WORKER,{ method:'POST', headers:{'Content-Type':'application/json'}, 
-      body: JSON.stringify({
-        mode: 'marketing-agent',
-        brandGuide: bg,
-        brandData: { ...brand, brandId: brandId || '' },
-        month, postsPerWeek: agentFreq,
-        platforms: agentPlats, language: lang,
-        useGallery: galleryActive,
-        galleryTagSummary: galleryActive ? galleryTagSummary : null,
-      })
-    });
-    const data = await res.json();
-    syncCounters(data); // refresca el tope de planes con el numero del servidor
+    // FB-132: una accion cortada por la red se reusa (mismo mes y frecuencia, dentro de la ventana)
+    const reusar = !!(agentAccion && agentAccion.month === month && agentAccion.freq === agentFreq && (Date.now() - agentAccion.t) < AGENT_RECOVERY.reuseMs);
+    const aid = reusar ? agentAccion.id : newActionId();
+    let data, recuperado = false;
+    try {
+      const res = await apiFetch(WORKER,{ method:'POST', headers:{'Content-Type':'application/json'}, 
+        body: JSON.stringify({
+          mode: 'marketing-agent', actionId: aid,
+          brandGuide: bg,
+          brandData: { ...brand, brandId: brandId || '' },
+          month, postsPerWeek: agentFreq,
+          platforms: agentPlats, language: lang,
+          useGallery: galleryActive,
+          galleryTagSummary: galleryActive ? galleryTagSummary : null,
+        })
+      });
+      data = await res.json();
+    } catch (netErr) {
+      if (!netErr || netErr.name !== 'TypeError') throw netErr;   // solo un corte de red (Load failed / Failed to fetch)
+      agentAccion = { id: aid, month, freq: agentFreq, t: reusar ? agentAccion.t : Date.now() };
+      if (note) note.textContent = t('agentRecovering');
+      const recu = await recuperarPlanAgente(aid, month);
+      if (!recu) { const e = new Error(t('agentNetLost')); e.netLost = true; throw e; }
+      data = recu; recuperado = true;
+    }
+    agentAccion = null;   // el servidor respondio (o el plan se recupero): la siguiente es una accion nueva
+    if (recuperado) { try { await refreshServerState(); } catch (e) {} }   // el plan guardado no trae contadores
+    else syncCounters(data); // refresca el tope de planes con el numero del servidor
     if(!data.success) {
       // S26: Log full server response for debugging
       console.error('MA server response:', data);
@@ -7690,8 +7732,8 @@ async function generateAgentPlan() {
 
     agentPlan = data;
 
-    // Save plan to KV
-    if(brandId) {
+    // Save plan to KV (un plan recuperado ya lo guardo el servidor)
+    if(brandId && !recuperado) {
       apiFetch(WORKER,{ method:'POST', headers:{'Content-Type':'application/json'}, 
         body: JSON.stringify({ mode:'save-agent-plan', brandId, month, plan: data })
       }).catch(() => {});
@@ -7706,8 +7748,10 @@ async function generateAgentPlan() {
   } catch(e) {
     console.error('Marketing Agent error:', e);
     const msg = e.message || t('errUnknown');
-    alert(t('alertAgentFailed') + (msg.includes('Could not parse') ? t('alertAgentParseError') : msg));
+    if (e.netLost) alert(msg);   // FB-132: el aviso honesto, sin el error crudo del navegador
+    else alert(t('alertAgentFailed') + (msg.includes('Could not parse') ? t('alertAgentParseError') : msg));
   } finally {
+    if (note) note.textContent = noteText;
     btn.disabled = false;
     btn.innerHTML = t('agentGenBtn').replace('{month}', '<span id="agentMonthLabel">' + getMonthLabel(getCurrentMonth()) + '</span>');
     if(note) note.style.display = 'none';
