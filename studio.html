@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="2.50.2">
+<meta name="app-version" content="2.50.3">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Postimity Studio — Tu estudio de contenido con IA</title>
 <meta name="description" content="Crea posts, flyers, carruseles y videos profesionales con IA. Describe tu negocio una vez y genera contenido listo para publicar en 20 segundos.">
@@ -1650,7 +1650,7 @@ Ej: &quot;Hazla blanco y negro estilo editorial de revista&quot;"></textarea>
           <div class="upload-zone" id="flyerZone">
             <input type="file" id="flyerFile" accept="image/*">
             <div class="uz-icon">📷</div>
-            <div class="uz-title" id="flyerTitle">Sube la foto base del flyer</div>
+            <div class="uz-title" id="flyerTitle" data-def="Sube la foto base del flyer">Sube la foto base del flyer</div>
             <div class="uz-sub">Tu foto será el elemento central del flyer</div>
             <div class="uz-name" id="flyerName"></div>
           </div>
@@ -1762,7 +1762,7 @@ Ej: 'Wonderik es increíble. Mi hija de 3 años ya lee palabras cortas y su desa
         <div class="upload-zone" id="testZone">
           <input type="file" id="testFile" accept="image/*">
           <div class="uz-icon">👤</div>
-          <div class="uz-title" id="testTitle">Foto del cliente (opcional)</div>
+          <div class="uz-title" id="testTitle" data-def="Foto del cliente (opcional)">Foto del cliente (opcional)</div>
           <div class="uz-sub">El contenido UGC auténtico convierte 3-5x más</div>
           <div class="uz-name" id="testName"></div>
         </div>
@@ -2364,7 +2364,7 @@ function persistSlides(imgs) {
 }
 
 // APP_VERSION (S34) — deploy verification. Must match worker /version and all HTML files.
-const APP_VERSION = '2.50.2'; // 30 sep 2026 — S55i/S55j: FB-133 historial, FB-131 campos, FB-135 tipo de flyer obligatorio, D62 hint de giro regulado · antes: 29 sep 2026 — S55h: FB-132 el plan del Agente se recupera tras un corte de red sin re-pedirlo · antes: S55g: D57 tarjetas del Agente con una etiqueta de cada tipo, tarjeta flyer de la oferta y costo antes de generar; S55f: realPhoto en el video (D58)
+const APP_VERSION = '2.50.3'; // 1 oct 2026 — S55j: FB-137 hint al entrar por codigo, FB-139 foto usada se limpia, FB-140 nota de estilo en el Agente · antes: 30 sep 2026 — S55i/S55j: FB-133 historial, FB-131 campos, FB-135 tipo de flyer obligatorio, D62 hint de giro regulado · antes: 29 sep 2026 — S55h: FB-132 el plan del Agente se recupera tras un corte de red sin re-pedirlo · antes: S55g: D57 tarjetas del Agente con una etiqueta de cada tipo, tarjeta flyer de la oferta y costo antes de generar; S55f: realPhoto en el video (D58)
 window.APP_VERSION = APP_VERSION;
 // El log de version vive unas lineas mas abajo (console.info). No agregar otro aqui:
 // S38 borro POSTIMITY_VERSION para tener un solo log y este lo volvio a duplicar.
@@ -2375,7 +2375,7 @@ window.BUILD_FIXES = ['s50-agente-abre-lo-que-anuncia','s50-copiar-no-miente','s
   'contador-sincronizado-al-refinar','etiqueta-de-cobro-en-botones',
   'fb27-growth-entra-sin-firma','fb27-la-eleccion-del-usuario-manda',
   's41b-galeria-oculta-y-desarmada-en-flyer-y-testimonio',
-  's55h-fb132-agente-recupera-plan','s55g-d57-tarjetas-sin-contradiccion','s55g-d57-flyer-oferta-del-dueno','s55g-d57-costo-antes-de-generar','s55f-d58-realphoto-video','s55i-fb133-historial-guarda','s55i-fb131-campos-limpios','s55j-fb135-tipo-flyer-obligatorio','s55j-d62-hint-regulado'];
+  's55h-fb132-agente-recupera-plan','s55g-d57-tarjetas-sin-contradiccion','s55g-d57-flyer-oferta-del-dueno','s55g-d57-costo-antes-de-generar','s55f-d58-realphoto-video','s55i-fb133-historial-guarda','s55i-fb131-campos-limpios','s55j-fb135-tipo-flyer-obligatorio','s55j-d62-hint-regulado','s55j-fb137-regulado-al-entrar','s55j-fb139-foto-usada-se-limpia','s55j-fb140-nota-estilo'];
 console.info('Postimity Studio v' + APP_VERSION);
 
 // ── FUENTE ÚNICA DE CUOTAS (S38-4) ───────────────────────────────────────
@@ -2573,6 +2573,7 @@ const T = {
     agentCreatePost:'→ Crear post', agentCreateCarousel:'→ Crear carrusel', agentCreateVideo:'→ Crear video', agentCopyPrompt:'📋 Copiar prompt',
     // ── Agent labels ──
     agentModePost:'📌 Post', agentModeCarousel:'🎠 Carrusel', agentModeVideo:'🎬 Video',
+    agentStyleNote:'El estilo de cada publicación (fotorrealista, ilustración…) es una sugerencia: puedes cambiarlo al abrirla.',
     agentStylePhoto:'📷 Fotorrealista', agentStyleIllus:'🖼️ Ilustrado', agentStyleAbstract:'🎨 Abstracto',
     // ── Reminders ──
     remTitle:'Recordatorios automáticos', remSub:'Aviso cálido cada mañana antes de tu post del día',
@@ -2872,6 +2873,7 @@ const T = {
     agentCreatePost:'→ Create post', agentCreateCarousel:'→ Create carousel', agentCreateVideo:'→ Create video', agentCopyPrompt:'📋 Copy prompt',
     // ── Agent labels ──
     agentModePost:'📌 Post', agentModeCarousel:'🎠 Carousel', agentModeVideo:'🎬 Video',
+    agentStyleNote:'The style of each post (photorealistic, illustration…) is a suggestion: you can change it when you open it.',
     agentStylePhoto:'📷 Photorealistic', agentStyleIllus:'🖼️ Illustrated', agentStyleAbstract:'🎨 Abstract',
     // ── Reminders ──
     remTitle:'Auto reminders', remSub:'A warm nudge every morning before your daily post',
@@ -3214,7 +3216,7 @@ async function refreshServerState({ esperarCambioDePlan = false, planPrevio = nu
     if (!auth) continue;
     if (auth.caps && typeof auth.caps === 'object') capsState = auth.caps;
     if (auth.agentQuote && typeof auth.agentQuote === 'object') agentQuoteState = auth.agentQuote;   // D57 · B
-    reguladoState = Array.isArray(auth.regulado) ? auth.regulado : []; try { pintarHintRegulado(); } catch(e) {}   // D62
+    adoptarRegulado(auth.regulado);   // D62
     if (auth.limits) window._srvLimits = auth.limits;
     try { updateCapLabels(); applyAgentFreqGate(); updateGenCounter(); } catch(e) {}
     if (!esperarCambioDePlan) break;
@@ -3482,6 +3484,7 @@ async function syncBrandToCloud(brand, id) {
     // FB-92 (S55b): el servidor devuelve los topes efectivos al guardar. En el alta es la primera
     // vez que existen (check-auth pregunto antes de la marca): se aplican y se repinta ya.
     if (data && data.limits) { window._srvLimits = data.limits; try { updateGenCounter(); } catch(e) {} }
+    if (data) adoptarRegulado(data.regulado);   // FB-137: cambiar el giro actualiza el hint
     // S46 — el resultado se DEVUELVE. Antes los cuatro caminos volvian undefined,
     // asi que quien llamaba no podia distinguir "guardado" de "rechazado". Generar
     // la guia sobre una marca que no llego al almacen da "Marca no encontrada", y
@@ -3576,6 +3579,7 @@ async function loadBrandFromCloud(id) {
     });
     const data = await res.json();
     if (data.found && data.brand) {
+      adoptarRegulado(data.regulado);   // FB-137: el login con codigo no pasa por check-auth
       // Sync server-side gen counts to localStorage (server is source of truth)
       // D7 fix (Session 19): Server is source of truth — always overwrite localStorage
       if (typeof data.genCount === 'number') {
@@ -3942,7 +3946,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     capsState = auth.caps;
   }
   if (auth.agentQuote && typeof auth.agentQuote === 'object') agentQuoteState = auth.agentQuote;   // D57 · B
-  reguladoState = Array.isArray(auth.regulado) ? auth.regulado : []; try { pintarHintRegulado(); } catch(e) {}   // D62
+  adoptarRegulado(auth.regulado);   // D62
   try { updateCapLabels(); applyAgentFreqGate(); } catch(e) {}
 
   // Authenticated — load brand if exists
@@ -4893,14 +4897,44 @@ function fotografiarCampos(m) {
   const o = {};
   camposDeModo(m).forEach(el => { if (el.id && el.value) o[el.id] = el.value; });
   _camposUsados[m] = o;
+  // FB-139 (humo del 1 oct): la foto con la que se genero, tambien
+  const z = FOTO_ZONA[FOTO_DE_MODO[m]], p = z && document.getElementById(z.prev);
+  if (p && p.src && p.classList.contains('show')) _fotosUsadas[m] = p.src; else delete _fotosUsadas[m];
+}
+// FB-139: la foto de cada modo y su zona. Un solo sitio limpia una foto (setMode y resetCreator).
+const FOTO_DE_MODO = { enhance: 'enhance', flyer: 'flyer', testimonial: 'test' };
+const FOTO_ZONA = { enhance: { prev: 'enhancePrev', zone: 'enhanceZone', title: 'enhanceTitle', name: 'enhanceName' }, flyer: { prev: 'flyerPrev', zone: 'flyerZone', title: 'flyerTitle', name: 'flyerName' }, test: { prev: 'testPrev', zone: 'testZone', title: 'testTitle', name: 'testName' } };
+const _fotosUsadas = {};
+function limpiarFoto(slot) {
+  const z = FOTO_ZONA[slot]; if (!z) return;
+  try { CROP_SLOTS[slot].set(null); } catch(e) {}
+  try { delete cropSrc[slot]; } catch(e) {}
+  const p = document.getElementById(z.prev); if (p) { p.src = ''; p.classList.remove('show'); }
+  const zn = document.getElementById(z.zone); if (zn) zn.classList.remove('has-file');
+  const ti = document.getElementById(z.title);
+  if (ti) ti.textContent = slot === 'enhance' ? t('uploadDrag') : (ti.dataset.def || ti.textContent);
+  const nm = document.getElementById(z.name); if (nm) nm.textContent = '';
 }
 // D62 (S55j): el servidor dice si el giro es regulado (check-auth); el cliente solo pinta. Sin dato, nada.
 let reguladoState = [];
+// FB-137 (humo del 1 oct): un solo escritor. El dato llega por check-auth (sesion guardada), get-brand (login con
+// codigo: no pasa por check-auth) y save-brand (cambio de giro). Sin dato del servidor no se toca lo pintado.
+function adoptarRegulado(x) {
+  if (!Array.isArray(x)) return;
+  reguladoState = x;
+  try { pintarHintRegulado(); } catch(e) {}
+}
 function pintarHintRegulado() {
   const on = Array.isArray(reguladoState) && reguladoState.length > 0;
   document.querySelectorAll('.hint-regulado').forEach(h => { h.textContent = t('hintRegulado'); h.style.display = on ? '' : 'none'; });
 }
 function limpiarCamposUsados(m) {
+  const fu = _fotosUsadas[m];
+  if (fu) {   // FB-139: la foto ya usada y sin cambiar se va; una nueva se queda
+    const z = FOTO_ZONA[FOTO_DE_MODO[m]], p = z && document.getElementById(z.prev);
+    if (p && p.src === fu) limpiarFoto(FOTO_DE_MODO[m]);
+    delete _fotosUsadas[m];
+  }
   const o = _camposUsados[m];
   if (!o) return;
   camposDeModo(m).forEach(el => { if (el.id && Object.prototype.hasOwnProperty.call(o, el.id) && el.value === o[el.id]) el.value = ''; });
@@ -7908,7 +7942,8 @@ function renderAgentPlan(plan) {
   // Reminder toggle card
   const brandForReminder = loadBrand();
   const remActive = localStorage.getItem('postimity_reminders_' + getCurrentMonth()) === 'on';
-  container.innerHTML = renderReminderCard(remActive, brandForReminder);
+  // FB-140 (S55j): una sola nota, estatica, debajo de los recordatorios — no una por tarjeta
+  container.innerHTML = renderReminderCard(remActive, brandForReminder) + '<div class="agent-style-note" style="font-size:12px;color:var(--t3);line-height:1.5;margin:8px 2px 14px">💡 ' + t('agentStyleNote') + '</div>';
   // S42 / INV-129 — localStorage pinta rapido, pero NO es la fuente de verdad: quien
   // envia es el worker leyendo KV. Los dos se separan al borrar datos del sitio (la
   // instruccion post-deploy de S41-A), al cambiar de dispositivo o de navegador, y la
@@ -10303,9 +10338,7 @@ function resetCreator() {
   const ep=document.getElementById('enhancePrompt');
   if(ep) ep.value='';
   document.getElementById('testText').value='';
-  enhanceB64=null; flyerPhotoB64=null; testPhotoB64=null;
-  ['enhanceZone','flyerZone','testZone'].forEach(id=>{ const z=document.getElementById(id); if(z)z.classList.remove('has-file'); });
-  ['enhancePrev','flyerPrev','testPrev'].forEach(id=>{ const p=document.getElementById(id); if(p)p.classList.remove('show'); });
+  ['enhance','flyer','test'].forEach(limpiarFoto);   // FB-139: un solo sitio limpia una foto
   document.getElementById('photoDescBar').classList.remove('show');
   // Hide carousel and testimonial-specific elements
   const cpw = document.getElementById('carouselPreviewWrap'); if(cpw) cpw.style.display='none';
