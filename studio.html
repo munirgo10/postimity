@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="2.50.1">
+<meta name="app-version" content="2.50.2">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Postimity Studio — Tu estudio de contenido con IA</title>
 <meta name="description" content="Crea posts, flyers, carruseles y videos profesionales con IA. Describe tu negocio una vez y genera contenido listo para publicar en 20 segundos.">
@@ -607,7 +607,7 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
 /* Hist detail modal */
 .hist-detail{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1000;display:flex;align-items:center;justify-content:center;padding:16px}
 .hist-detail-card{background:var(--w);border-radius:16px;max-width:480px;width:100%;max-height:90vh;overflow-y:auto}
-.hist-detail-img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:16px 16px 0 0;background:var(--bg)}
+.hist-detail-img{width:100%;max-height:62vh;object-fit:contain;border-radius:16px 16px 0 0;background:var(--bg)}
 .hist-detail-body{padding:16px}
 .hist-detail-close{float:right;background:none;border:none;font-size:20px;cursor:pointer;color:var(--t3);line-height:1}
 .hist-detail-caption{font-size:13px;color:var(--t1);line-height:1.6;margin:10px 0;background:var(--bg);border-radius:8px;padding:10px}
@@ -838,6 +838,7 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
 .auth-btn:hover{background:var(--b2)}
 .auth-btn:disabled{opacity:.6;cursor:not-allowed}
 .auth-error{color:var(--r);font-size:13px;margin-top:10px;display:none;padding:8px 12px;background:rgba(239,68,68,.08);border-radius:8px;line-height:1.4}
+.hint-regulado{font-size:12px;line-height:1.4;color:#6B7280;margin-top:6px}
 </style>
 <script defer data-domain="postimity.com" src="https://plausible.io/js/script.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -1077,6 +1078,8 @@ fbq('track', 'PageView');
           <div class="hs-strip" id="histDetailSlides"></div>
           <button class="btn" id="histDlAllBtn" style="width:100%;padding:9px;font-size:12px;border-radius:8px;background:var(--bg);color:var(--t2);border:.5px solid var(--bor);margin-bottom:10px;font-family:inherit;cursor:pointer" onclick="downloadHistAllSlides()"></button>
         </div>
+        <!-- FB-133 (S55i): la pieza se descarga en todo modo, no solo el carrusel -->
+        <button class="btn" id="histDlOneBtn" style="display:none;width:100%;padding:9px;font-size:12px;border-radius:8px;background:var(--bg);color:var(--t2);border:.5px solid var(--bor);margin-bottom:10px;font-family:inherit;cursor:pointer" onclick="downloadHistPiece()"></button>
         <div class="hist-detail-caption" id="histDetailCaption"></div>
         <div class="hist-detail-btns">
           <button class="btn btn-primary" style="flex:1;padding:10px;font-size:12px;border-radius:8px" onclick="reuseHistPost()">↺ Usar este modo y pilar</button>
@@ -1591,6 +1594,7 @@ fbq('track', 'PageView');
       <div id="postInput">
         <div class="ic-label">¿Qué quieres publicar?</div>
         <textarea class="text-ta" id="postText" placeholder="Ej: Post sobre nuestra nueva colección de verano · Promoción del menú del día · Tip de bienestar para esta semana · Testimonio de cliente satisfecho..."></textarea>
+        <div class="hint-regulado" style="display:none"></div>
         <p style="font-size:11px;color:var(--t3);margin-top:6px">💡 Entre más detalle das, mejor es el resultado. Describe la actividad, el momento o el mensaje que quieres comunicar.</p>
       </div>
       <!-- ENHANCE MODE -->
@@ -1653,18 +1657,20 @@ Ej: &quot;Hazla blanco y negro estilo editorial de revista&quot;"></textarea>
           <img id="flyerPrev" class="photo-prev" src="" alt="">
         </div>
         <div class="flyer-form">
+          <div style="grid-column:span 2"><div class="hint-regulado" style="display:none"></div></div>
           <div>
             <div class="ff-label">Tipo de contenido *</div>
             <select id="flyerType">
-              <option value="Evento">📅 Evento</option>
-              <option value="Inscripciones / Admisiones">🎓 Inscripciones</option>
-              <option value="Promoción / Oferta">🛍️ Promoción</option>
-              <option value="Información">📢 Información</option>
-              <option value="Curso o Taller">📋 Curso / Taller</option>
-              <option value="Lanzamiento">🚀 Lanzamiento</option>
-              <option value="Aniversario">🎉 Aniversario</option>
-              <option value="Menú especial">🍽️ Menú especial</option>
-              <option value="Otro">✨ Otro</option>
+              <option value="" data-k="flyerTypePick" selected>Elige el tipo…</option>
+              <option value="Evento" data-k="flyerEvento">📅 Evento</option>
+              <option value="Inscripciones / Admisiones" data-k="flyerInscripciones">🎓 Inscripciones</option>
+              <option value="Promoción / Oferta" data-k="flyerPromo">🛍️ Promoción</option>
+              <option value="Información" data-k="flyerInfo">📢 Información</option>
+              <option value="Curso o Taller" data-k="flyerCurso">📋 Curso / Taller</option>
+              <option value="Lanzamiento" data-k="flyerLaunch">🚀 Lanzamiento</option>
+              <option value="Aniversario" data-k="flyerAniversario">🎉 Aniversario</option>
+              <option value="Menú especial" data-k="flyerMenu">🍽️ Menú especial</option>
+              <option value="Otro" data-k="flyerOther">✨ Otro</option>
             </select>
           </div>
           <div>
@@ -1751,6 +1757,7 @@ Ej: &quot;Hazla blanco y negro estilo editorial de revista&quot;"></textarea>
         <textarea class="test-ta" id="testText" placeholder="Pega aquí la reseña de tu cliente tal como la escribió...
 
 Ej: 'Wonderik es increíble. Mi hija de 3 años ya lee palabras cortas y su desarrollo emocional ha mejorado muchísimo. Las maestras son excepcionales ⭐⭐⭐⭐⭐ — Fernanda R.'"></textarea>
+        <div class="hint-regulado" style="display:none"></div>
         <div class="test-divider">o también sube una foto del cliente</div>
         <div class="upload-zone" id="testZone">
           <input type="file" id="testFile" accept="image/*">
@@ -2357,7 +2364,7 @@ function persistSlides(imgs) {
 }
 
 // APP_VERSION (S34) — deploy verification. Must match worker /version and all HTML files.
-const APP_VERSION = '2.50.1'; // 29 sep 2026 — S55h: FB-132 el plan del Agente se recupera tras un corte de red sin re-pedirlo · antes: S55g: D57 tarjetas del Agente con una etiqueta de cada tipo, tarjeta flyer de la oferta y costo antes de generar; S55f: realPhoto en el video (D58)
+const APP_VERSION = '2.50.2'; // 30 sep 2026 — S55i/S55j: FB-133 historial, FB-131 campos, FB-135 tipo de flyer obligatorio, D62 hint de giro regulado · antes: 29 sep 2026 — S55h: FB-132 el plan del Agente se recupera tras un corte de red sin re-pedirlo · antes: S55g: D57 tarjetas del Agente con una etiqueta de cada tipo, tarjeta flyer de la oferta y costo antes de generar; S55f: realPhoto en el video (D58)
 window.APP_VERSION = APP_VERSION;
 // El log de version vive unas lineas mas abajo (console.info). No agregar otro aqui:
 // S38 borro POSTIMITY_VERSION para tener un solo log y este lo volvio a duplicar.
@@ -2368,7 +2375,7 @@ window.BUILD_FIXES = ['s50-agente-abre-lo-que-anuncia','s50-copiar-no-miente','s
   'contador-sincronizado-al-refinar','etiqueta-de-cobro-en-botones',
   'fb27-growth-entra-sin-firma','fb27-la-eleccion-del-usuario-manda',
   's41b-galeria-oculta-y-desarmada-en-flyer-y-testimonio',
-  's55h-fb132-agente-recupera-plan','s55g-d57-tarjetas-sin-contradiccion','s55g-d57-flyer-oferta-del-dueno','s55g-d57-costo-antes-de-generar','s55f-d58-realphoto-video'];
+  's55h-fb132-agente-recupera-plan','s55g-d57-tarjetas-sin-contradiccion','s55g-d57-flyer-oferta-del-dueno','s55g-d57-costo-antes-de-generar','s55f-d58-realphoto-video','s55i-fb133-historial-guarda','s55i-fb131-campos-limpios','s55j-fb135-tipo-flyer-obligatorio','s55j-d62-hint-regulado'];
 console.info('Postimity Studio v' + APP_VERSION);
 
 // ── FUENTE ÚNICA DE CUOTAS (S38-4) ───────────────────────────────────────
@@ -2547,6 +2554,7 @@ const T = {
     toastEnhanceFailed:'⚠️ La mejora con IA falló: te entregamos los textos con tu foto original y no se descontó esta generación.', toastEnhanceFailedPro:'⚠️ La mejora con IA falló: esta es tu foto original y no se descontó esta generación.',
     histSlidesLabel:'🎠 Slides de este carrusel',
     histDlAll:'⬇️ Guardar todos los slides',
+    histDlImage:'⬇️ Guardar imagen', histDlVideo:'⬇️ Guardar video', histPieceErr:'No pudimos preparar la descarga. Cierra y vuelve a abrir.', histPieceSaved:'Guardado ✓', histPieceOpened:'Se abrió en otra pestaña: mantén presionado para guardarlo',
     histSlidePrep:'Preparando slides...',
     histSlidesSaved:'✅ {n} slides guardados',
     histSlidesOpened:'📷 Guarda los {n} slides desde las pestañas',
@@ -2613,6 +2621,8 @@ const T = {
     alertNoBrand:'Primero configura tu marca.', alertBGFirst:'Primero genera el Brand Guide.',
     alertNoInstr:'Describe el cambio que quieres hacer.',
     alertPostEmpty:'Escribe qué quieres publicar.', alertPhotoFirst:'Sube una foto primero.',
+    alertFlyerType:'Elige el tipo de flyer: evento, promoción, información…', flyerTypePick:'Elige el tipo…',
+    hintRegulado:'Lo que escribas aquí se publica tal cual. En tu giro no puedes prometer resultados ni beneficios de salud.',
     alertFlyerTitle:'Escribe el título del flyer.', alertFlyerPhoto:'Sube una foto para el flyer.',
     alertCarouselTopic:'Escribe el tema del carrusel.', alertCarouselPhoto:'Sube una foto para la portada.',
     alertTestimonial:'Pega una reseña de tu cliente o sube su foto para continuar.',
@@ -2843,6 +2853,7 @@ const T = {
     toastEnhanceFailed:'⚠️ The AI enhancement failed: here are your captions with your original photo, and this generation was not used.', toastEnhanceFailedPro:'⚠️ The AI enhancement failed: this is your original photo, and this generation was not used.',
     histSlidesLabel:'🎠 Slides in this carousel',
     histDlAll:'⬇️ Save all slides',
+    histDlImage:'⬇️ Save image', histDlVideo:'⬇️ Save video', histPieceErr:'We could not prepare the download. Close and open it again.', histPieceSaved:'Saved ✓', histPieceOpened:'Opened in a new tab: press and hold to save it',
     histSlidePrep:'Preparing slides...',
     histSlidesSaved:'✅ {n} slides saved',
     histSlidesOpened:'📷 Save the {n} slides from the tabs',
@@ -2909,6 +2920,8 @@ const T = {
     alertNoBrand:'Set up your brand first.', alertBGFirst:'Generate the Brand Guide first.',
     alertNoInstr:'Describe the change you want to make.',
     alertPostEmpty:'Write what you want to post.', alertPhotoFirst:'Upload a photo first.',
+    alertFlyerType:'Choose the flyer type: event, promotion, information…', flyerTypePick:'Choose the type…',
+    hintRegulado:'What you write here is published as is. In your industry you cannot promise results or health benefits.',
     alertFlyerTitle:'Enter the flyer title.', alertFlyerPhoto:'Upload a photo for the flyer.',
     alertCarouselTopic:'Enter the carousel topic.', alertCarouselPhoto:'Upload a photo for the cover.',
     alertTestimonial:'Paste a customer review or upload their photo to continue.',
@@ -3201,6 +3214,7 @@ async function refreshServerState({ esperarCambioDePlan = false, planPrevio = nu
     if (!auth) continue;
     if (auth.caps && typeof auth.caps === 'object') capsState = auth.caps;
     if (auth.agentQuote && typeof auth.agentQuote === 'object') agentQuoteState = auth.agentQuote;   // D57 · B
+    reguladoState = Array.isArray(auth.regulado) ? auth.regulado : []; try { pintarHintRegulado(); } catch(e) {}   // D62
     if (auth.limits) window._srvLimits = auth.limits;
     try { updateCapLabels(); applyAgentFreqGate(); updateGenCounter(); } catch(e) {}
     if (!esperarCambioDePlan) break;
@@ -3928,6 +3942,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     capsState = auth.caps;
   }
   if (auth.agentQuote && typeof auth.agentQuote === 'object') agentQuoteState = auth.agentQuote;   // D57 · B
+  reguladoState = Array.isArray(auth.regulado) ? auth.regulado : []; try { pintarHintRegulado(); } catch(e) {}   // D62
   try { updateCapLabels(); applyAgentFreqGate(); } catch(e) {}
 
   // Authenticated — load brand if exists
@@ -4864,7 +4879,35 @@ function ocultarResultadoAnterior() {
   const b = document.getElementById('saveGalleryBtn');
   if (b) b.disabled = false;
 }
+// FB-131 (S55i · INV-229): al cambiar de modo se limpia lo ya USADO — lo que se genero o lo que el
+// sistema prellenó (Agente) — si el usuario no lo toco despues; lo que escribio y aun no genera se queda.
+// Regresion de FB-94: D50 oculta el resultado al cambiar de modo, pero nadie limpiaba su tema y al volver
+// habia que borrarlo a mano. Se compara contra una foto de los campos tomada en cada entrega.
+const _camposUsados = {};
+function camposDeModo(m) {
+  const c = document.getElementById(m + 'Input');
+  if (!c || !c.querySelectorAll) return [];
+  return Array.from(c.querySelectorAll('textarea, input')).filter(el => el.tagName === 'TEXTAREA' || ['text', 'tel', 'search', 'url', 'email'].includes(el.type));
+}
+function fotografiarCampos(m) {
+  const o = {};
+  camposDeModo(m).forEach(el => { if (el.id && el.value) o[el.id] = el.value; });
+  _camposUsados[m] = o;
+}
+// D62 (S55j): el servidor dice si el giro es regulado (check-auth); el cliente solo pinta. Sin dato, nada.
+let reguladoState = [];
+function pintarHintRegulado() {
+  const on = Array.isArray(reguladoState) && reguladoState.length > 0;
+  document.querySelectorAll('.hint-regulado').forEach(h => { h.textContent = t('hintRegulado'); h.style.display = on ? '' : 'none'; });
+}
+function limpiarCamposUsados(m) {
+  const o = _camposUsados[m];
+  if (!o) return;
+  camposDeModo(m).forEach(el => { if (el.id && Object.prototype.hasOwnProperty.call(o, el.id) && el.value === o[el.id]) el.value = ''; });
+  delete _camposUsados[m];
+}
 function setMode(m) {
+  if (m !== mode) limpiarCamposUsados(mode);   // FB-131
   ocultarResultadoAnterior();
   mode=m;
   ['post','enhance','flyer','testimonial','carousel','video'].forEach(n=>{ const el=document.getElementById(n+'Input'); if(el) el.style.display=n===m?'block':'none'; });
@@ -5488,6 +5531,7 @@ async function generate(opts = {}) {
   // Validate inputs
   if(mode==='post'&&!document.getElementById('postText').value.trim()){ alert(t('alertPostEmpty')); return; }
   if(mode==='enhance'&&!enhanceB64){ alert(t('alertPhotoFirst')); return; }
+  if(mode==='flyer'&&!document.getElementById('flyerType')?.value){ showToast(t('alertFlyerType'), 5000); return; }   // FLT-1 (S55j)
   if(mode==='flyer'&&flyerMode==='ai'&&!document.getElementById('flyerTitle2')?.value.trim()){ alert(t('alertFlyerTitle')); return; }
   if(mode==='flyer'&&flyerMode==='photo'&&!flyerPhotoB64){ alert(t('alertFlyerPhoto')); return; }
   if(mode==='carousel'&&!document.getElementById('carouselTopic')?.value.trim()){ alert(t('alertCarouselTopic')); return; }
@@ -6104,6 +6148,7 @@ function showVideoResult(videoUrl, topic, captionsData) {
 
   // Show results
   const resultWrap = document.getElementById('resultWrap');
+  fotografiarCampos('video');   // FB-131
   if(resultWrap) { resultWrap.classList.add('show'); resultWrap.scrollIntoView({ behavior:'smooth', block:'start' }); }
   showToast(t('videoReady'));
   saveVideoToHistory(videoUrl, topic);
@@ -7288,7 +7333,47 @@ function openHistDetail(idx) {
   // carrusel anterior seguiria pintada al abrir el siguiente. Es el defecto que
   // EX-2 vigila — una funcion que depende de que otra la limpie.
   renderHistSlides(isVideo ? null : histCurrentPost.carouselImages);
+  prefetchHistPiece(histCurrentPost);   // FB-133: la descarga de la pieza, precargada al abrir (iOS)
   if(modal) modal.style.display = 'flex';
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// DESCARGA DE LA PIEZA DEL HISTORIAL — FB-133 (S55i · INV-227)
+// ═══════════════════════════════════════════════════════════════════
+// Solo el carrusel se podia bajar; post, Estudio Pro, flyer, testimonio y video solo copiaban caption, y
+// D50 oculta el resultado al cambiar de modo «porque quedo en el Historial». Misma regla que los slides
+// (prefetchHistSlides): la red va al ABRIR; al tocar ya esta el blob y no hay await antes de compartir.
+let histPieceBlob = null;
+function histPieceName(post) {
+  const brand = loadBrand();
+  const slug = (brand?.name || 'postimity').toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 20);
+  return slug + '-' + (post.mode || 'post') + '-' + Date.now() + (post.mode === 'video' ? '.mp4' : '.jpg');
+}
+async function prefetchHistPiece(post) {
+  histPieceBlob = null;
+  const btn = document.getElementById('histDlOneBtn');
+  if (!btn || !post) return;
+  const tira = Array.isArray(post.carouselImages) && post.carouselImages.filter(Boolean).length >= 2;
+  if (!post.imageUrl || tira) { btn.style.display = 'none'; return; }   // el carrusel ya tiene su boton
+  const esVideo = post.mode === 'video';
+  btn.style.display = 'block'; btn.disabled = true; btn.textContent = t('histSlidePrep');
+  let blob = null;
+  try { blob = await fetchImageBlobNoCache(post.imageUrl); }
+  catch (e) { console.warn('prefetchHistPiece:', e.message); }
+  if (histCurrentPost !== post) return;   // se cerro o se abrio otra pieza mientras bajaba
+  // entradas guardadas antes de S55i: el video quedo en R2 como image/jpeg; se descarga como video
+  if (blob && esVideo && blob.type !== 'video/mp4') blob = new Blob([blob], { type: 'video/mp4' });
+  histPieceBlob = blob;
+  btn.disabled = !blob;
+  btn.textContent = blob ? t(esVideo ? 'histDlVideo' : 'histDlImage') : t('histPieceErr');
+}
+async function downloadHistPiece() {
+  // CERO await antes de universalSave: iOS anula la activacion del toque con cualquier espera de red.
+  if (!histPieceBlob || !histCurrentPost) { showToast(t('histSlidePrep')); return; }
+  const r = await universalSave(histPieceBlob, histPieceName(histCurrentPost));
+  if (r === 'shared' || r === 'downloaded') showToast(t('histPieceSaved'));
+  else if (r === 'opened') showToast(t('histPieceOpened'), 5000);
+  else if (r !== false) showToast(t('histPieceErr'), 5000);
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -7487,6 +7572,7 @@ function closeHistDetail(event) {
   if(slidesWrap) slidesWrap.style.display = 'none';
   // Soltar los blobs precargados: 10 slides son varios MB retenidos.
   histSlideBlobs = []; histSlidesReady = false;
+  histPieceBlob = null;   // FB-133: un video son varios MB
   if(modal) modal.style.display = 'none';
 }
 
@@ -7917,6 +8003,7 @@ function goCreatePost(idx) {
   }
   if(post.pilar) setPillarByName(post.pilar);
   if(post.platform) setPlatformByName(post.platform);
+  fotografiarCampos(targetMode);   // FB-131: lo prellenado por el Agente, si no se toca, se limpia al irse
   // S50 · FB-56 — la pista viaja en cualquier modo; antes solo en Estudio Pro.
   const hintToast = (post.actionHint && post.userAction !== 'none') ? post.actionHint : '';
   // Gallery integration: if agent assigned a photoStrategy with gallery photo, activate toggle and pre-select
@@ -8312,10 +8399,10 @@ function applyBilingualUI() {
   const ffKeys = ['ffType','ffStyle','ffTitle','ffSubtitle','ffTagline','ffDates','ffPrice','ffSchedule','ffExtra'];
   ffLabels.forEach((el, i) => { if(ffKeys[i]) el.textContent = t(ffKeys[i]); });
   // Flyer type select
-  const flyerTypeOpts = document.querySelectorAll('#flyerType option');
-  const ftKeys = ['flyerEvento','flyerInscripciones','flyerPromo','flyerInfo','flyerCurso','flyerLaunch','flyerAniversario','flyerMenu','flyerOther'];
-  const ftValKeys = ['flyerEventoVal','flyerInscripcionesVal','flyerPromoVal','flyerInfoVal','flyerCursoVal','flyerLaunchVal','flyerAniversarioVal','flyerMenuVal','flyerOtherVal'];
-  flyerTypeOpts.forEach((opt, i) => { if(ftKeys[i]) { opt.textContent = t(ftKeys[i]); opt.value = t(ftValKeys[i]); } });
+  // FLT-1 (S55j): por llave (data-k), no por posicion: la opcion vacia del inicio correria todos los tipos (I18N-1).
+  document.querySelectorAll('#flyerType option').forEach(opt => { const k = opt.dataset.k; if (!k) return;
+    opt.textContent = t(k); opt.value = k === 'flyerTypePick' ? '' : t(k + 'Val'); });
+  try { pintarHintRegulado(); } catch(e) {}
   // Flyer style select
   const flyerStyleOpts = document.querySelectorAll('#flyerStyle option');
   const fsKeys = ['flyerStyleColorful','flyerStylePro','flyerStyleMin','flyerStyleFestive','flyerStyleInfo'];
@@ -8627,7 +8714,7 @@ async function genTestimonial(brand,bg) {
 
 function getFlyerData() {
   return {
-    type:     document.getElementById('flyerType')?.value || 'Evento',
+    type:     document.getElementById('flyerType')?.value || '',   // FLT-1: el tipo lo elige el dueno
     style:    document.getElementById('flyerStyle')?.value || 'Colorido y vibrante, estilo agencia creativa',
     title:    document.getElementById('flyerTitle2')?.value.trim() || '',
     subtitle: document.getElementById('flyerSub')?.value.trim() || '',
@@ -8914,6 +9001,7 @@ function limpiarCita(txt) {
   return s ? '“' + s + punto + '”' : '';
 }
 function showResult(data) {
+  fotografiarCampos(mode);   // FB-131: lo entregado se limpia al cambiar de modo
   // S41-4: guarda del resultado fantasma. Aunque abortemos las peticiones, una que
   // ya haya respondido puede seguir su camino hasta aqui y repintar el resultado
   // sobre la pantalla a la que el usuario volvio al cancelar. Este es el ultimo
