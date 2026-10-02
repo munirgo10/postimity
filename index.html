@@ -2,7 +2,16 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="2.50.3">
+<script>
+// FB-141 (S55k): un enlace de recordatorio ya guardado apunta a la raiz. Si trae marca y modo
+// es para el estudio: se reenvia con sus parametros intactos, antes de pintar la pagina publica.
+function reenviarAlEstudio(loc) {
+  var q = new URLSearchParams(loc.search || '');
+  if (q.get('b') && q.get('mode')) loc.replace('studio.html' + loc.search);
+}
+try { reenviarAlEstudio(location); } catch (e) {}
+</script>
+<meta name="app-version" content="2.50.4">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>¿No sabes qué publicar? Postimity sí.</title>
 <meta name="description" content="Postimity crea tu estrategia, planea tu mes y genera posts, flyers, carruseles y videos con la voz de tu marca. Sin diseñador. Sin agencia. Desde $199 MXN/mes.">
@@ -459,7 +468,7 @@ function track(...args) {
       <a href="studio.html" class="price-cta primary" data-es="Comenzar gratis" data-en="Start free">Comenzar gratis</a>
     </div>
     <div class="price-card">
-      <div class="price-name">Agency</div>
+      <div class="price-name">Premium</div>
       <div class="price-amount" data-es="$899 <span>MXN</span>" data-en="$50 <span>USD</span>">$899 <span>MXN</span></div>
       <div class="price-period" data-es="por mes" data-en="per month">por mes</div>
       <div class="price-divider"></div>
@@ -470,10 +479,9 @@ function track(...args) {
         <li><span class="pf-check">✓</span> <span data-es="Marketing Agent — 8 planes/mes" data-en="Marketing Agent — 8 plans/month">Marketing Agent — 8 planes/mes</span></li>
         <li><span class="pf-check">✓</span> <span data-es="Brand Guide con IA — 20 cambios/mes" data-en="AI Brand Guide — 20 changes/month">Brand Guide con IA — 20 cambios/mes</span></li>
         <li><span class="pf-check">✓</span> <span data-es="Tus diseños 100% tuyos, sin firma" data-en="Your designs 100% yours, no signature">Tus diseños 100% tuyos, sin firma</span></li>
-        <li><span class="pf-check">✓</span> <span data-es="Soporte prioritario" data-en="Priority support">Soporte prioritario</span></li>
         <li><span class="pf-check">✓</span> <span style="color:var(--t4)" data-es="Multi-marca (próximamente)" data-en="Multi-brand (coming soon)">Multi-marca (próximamente)</span></li>
       </ul>
-      <span class="price-cta outline" style="opacity:.5;cursor:default;pointer-events:none;text-align:center" data-es="Próximamente" data-en="Coming soon">Próximamente</span>
+      <a href="studio.html" class="price-cta outline" data-es="Comenzar gratis" data-en="Start free">Comenzar gratis</a>
     </div>
   </div>
   <div class="trial-note" data-es="🎁 Todos los planes incluyen <strong>7 días de prueba gratis</strong> con 20 generaciones + 2 videos. Sin tarjeta de crédito." data-en="🎁 All plans include a <strong>7-day free trial</strong> with 20 generations + 2 videos. No credit card required.">🎁 Todos los planes incluyen <strong>7 días de prueba gratis</strong> con 20 generaciones + 2 videos. Sin tarjeta de crédito.<br><span style="font-size:13px;color:var(--t3)">Los videos se miden en clips de 5 segundos. Un video de 10 segundos usa 2.</span></div>
