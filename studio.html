@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="2.50.3">
+<meta name="app-version" content="2.50.4">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Postimity Studio — Tu estudio de contenido con IA</title>
 <meta name="description" content="Crea posts, flyers, carruseles y videos profesionales con IA. Describe tu negocio una vez y genera contenido listo para publicar en 20 segundos.">
@@ -637,12 +637,12 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
 .plan-card.trial{background:linear-gradient(135deg,#FDF0DC,#FEF7EC);border:1.5px solid rgba(200,121,26,.3)}
 .plan-card.starter{background:linear-gradient(135deg,#E6F1FB,#EEF7FF);border:1.5px solid rgba(24,95,165,.25)}
 .plan-card.growth{background:linear-gradient(135deg,#EAF3DE,#F0F9E8);border:1.5px solid rgba(59,109,17,.25)}
-.plan-card.agency{background:linear-gradient(135deg,#FDF0DC,#FEF6E8);border:1.5px solid rgba(133,79,11,.25)}
+.plan-card.premium{background:linear-gradient(135deg,#FDF0DC,#FEF6E8);border:1.5px solid rgba(133,79,11,.25)}
 .plan-badge{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;padding:3px 10px;border-radius:20px;display:inline-block;margin-bottom:8px}
 .plan-card.trial  .plan-badge{background:#E8961A;color:#fff}
 .plan-card.starter .plan-badge{background:#185FA5;color:#fff}
 .plan-card.growth  .plan-badge{background:#3B6D11;color:#fff}
-.plan-card.agency  .plan-badge{background:#854F0B;color:#fff}
+.plan-card.premium .plan-badge{background:#854F0B;color:#fff}
 .plan-name{font-size:22px;font-weight:800;color:var(--t1);margin-bottom:4px}
 .plan-desc{font-size:12px;color:var(--t3);margin-bottom:12px;line-height:1.5}
 .plan-days{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.7);border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;color:var(--t2);margin-bottom:12px}
@@ -2364,7 +2364,7 @@ function persistSlides(imgs) {
 }
 
 // APP_VERSION (S34) — deploy verification. Must match worker /version and all HTML files.
-const APP_VERSION = '2.50.3'; // 1 oct 2026 — S55j: FB-137 hint al entrar por codigo, FB-139 foto usada se limpia, FB-140 nota de estilo en el Agente · antes: 30 sep 2026 — S55i/S55j: FB-133 historial, FB-131 campos, FB-135 tipo de flyer obligatorio, D62 hint de giro regulado · antes: 29 sep 2026 — S55h: FB-132 el plan del Agente se recupera tras un corte de red sin re-pedirlo · antes: S55g: D57 tarjetas del Agente con una etiqueta de cada tipo, tarjeta flyer de la oferta y costo antes de generar; S55f: realPhoto en el video (D58)
+const APP_VERSION = '2.50.4'; // 2 oct 2026 — S55k: FB-142 texto del hint, FB-141 enlace sobrevive al login, plan Premium activo · antes: 1 oct 2026 — S55j: FB-137 hint al entrar por codigo, FB-139 foto usada se limpia, FB-140 nota de estilo en el Agente · antes: 30 sep 2026 — S55i/S55j: FB-133 historial, FB-131 campos, FB-135 tipo de flyer obligatorio, D62 hint de giro regulado · antes: 29 sep 2026 — S55h: FB-132 el plan del Agente se recupera tras un corte de red sin re-pedirlo · antes: S55g: D57 tarjetas del Agente con una etiqueta de cada tipo, tarjeta flyer de la oferta y costo antes de generar; S55f: realPhoto en el video (D58)
 window.APP_VERSION = APP_VERSION;
 // El log de version vive unas lineas mas abajo (console.info). No agregar otro aqui:
 // S38 borro POSTIMITY_VERSION para tener un solo log y este lo volvio a duplicar.
@@ -2375,7 +2375,7 @@ window.BUILD_FIXES = ['s50-agente-abre-lo-que-anuncia','s50-copiar-no-miente','s
   'contador-sincronizado-al-refinar','etiqueta-de-cobro-en-botones',
   'fb27-growth-entra-sin-firma','fb27-la-eleccion-del-usuario-manda',
   's41b-galeria-oculta-y-desarmada-en-flyer-y-testimonio',
-  's55h-fb132-agente-recupera-plan','s55g-d57-tarjetas-sin-contradiccion','s55g-d57-flyer-oferta-del-dueno','s55g-d57-costo-antes-de-generar','s55f-d58-realphoto-video','s55i-fb133-historial-guarda','s55i-fb131-campos-limpios','s55j-fb135-tipo-flyer-obligatorio','s55j-d62-hint-regulado','s55j-fb137-regulado-al-entrar','s55j-fb139-foto-usada-se-limpia','s55j-fb140-nota-estilo'];
+  's55k-fb141-enlace-tras-login','s55k-fb142-hint','s55k-plan-premium','s55h-fb132-agente-recupera-plan','s55g-d57-tarjetas-sin-contradiccion','s55g-d57-flyer-oferta-del-dueno','s55g-d57-costo-antes-de-generar','s55f-d58-realphoto-video','s55i-fb133-historial-guarda','s55i-fb131-campos-limpios','s55j-fb135-tipo-flyer-obligatorio','s55j-d62-hint-regulado','s55j-fb137-regulado-al-entrar','s55j-fb139-foto-usada-se-limpia','s55j-fb140-nota-estilo'];
 console.info('Postimity Studio v' + APP_VERSION);
 
 // ── FUENTE ÚNICA DE CUOTAS (S38-4) ───────────────────────────────────────
@@ -2385,8 +2385,8 @@ console.info('Postimity Studio v' + APP_VERSION);
 // CAT 25 verifica que no divergan.
 // INV-063 (S37): trial sube de 20 a 25. Con PU-2 vigente, 20 acciones equivalen a
 // ~13 posts terminados; el trial compite contra el abandono, no contra Growth.
-const GEN_LIMITS = { trial: 20, starter: 40, growth: 100, agency: 250 };
-const VIDEO_LIMITS = { trial: 2, starter: 2, growth: 8, agency: 20 };
+const GEN_LIMITS = { trial: 20, starter: 40, growth: 100, premium: 250 };
+const VIDEO_LIMITS = { trial: 2, starter: 2, growth: 8, premium: 20 };
 const VIDEO_COST = { '5': 1, '10': 2 }; // espejo del worker — la unidad es el clip de 5 seg
 
 // ── FEATURE ACCESS MAP ──────────────────────────────────────
@@ -2398,7 +2398,7 @@ const PLAN_FEATURE_ACCESS = {
   trial:   { post:true, enhance:true, testimonial:true, flyer:true, carousel:true, agent:true, adBrief:true, video:true },
   starter: { post:true, enhance:true, testimonial:true, flyer:true, carousel:true, agent:true, adBrief:true, video:true },
   growth:  { post:true, enhance:true, testimonial:true, flyer:true, carousel:true, agent:true, adBrief:true, video:true },
-  agency:  { post:true, enhance:true, testimonial:true, flyer:true, carousel:true, agent:true, adBrief:true, video:true },
+  premium: { post:true, enhance:true, testimonial:true, flyer:true, carousel:true, agent:true, adBrief:true, video:true },
 };
 
 // ── BILINGUAL STRINGS ─────────────────────────────────────────────────────
@@ -2623,7 +2623,7 @@ const T = {
     alertNoInstr:'Describe el cambio que quieres hacer.',
     alertPostEmpty:'Escribe qué quieres publicar.', alertPhotoFirst:'Sube una foto primero.',
     alertFlyerType:'Elige el tipo de flyer: evento, promoción, información…', flyerTypePick:'Elige el tipo…',
-    hintRegulado:'Lo que escribas aquí se publica tal cual. En tu giro no puedes prometer resultados ni beneficios de salud.',
+    hintRegulado:'Tu publicación se crea con lo que escribas aquí. En tu giro no puedes prometer resultados ni beneficios de salud.',
     alertFlyerTitle:'Escribe el título del flyer.', alertFlyerPhoto:'Sube una foto para el flyer.',
     alertCarouselTopic:'Escribe el tema del carrusel.', alertCarouselPhoto:'Sube una foto para la portada.',
     alertTestimonial:'Pega una reseña de tu cliente o sube su foto para continuar.',
@@ -2638,9 +2638,9 @@ const T = {
     // ── Plan names ──
     planTrialName:'Trial Gratuito', planTrialBadge:'⭐ Trial', planTrialPrice:'Gratis 7 días',
     planTrialAllModes:'Todos los modos + 2 videos',
-    planStarterUp:'🚀 Activar plan Starter — $199/mes', planGrowthUp:'⬆️ Cambiar a Growth — $399/mes', planAgencyUp:'⬆️ Cambiar a Agency — $899/mes', planAgencyMax:'✅ Plan máximo activo',
+    planStarterUp:'🚀 Activar plan Starter — $199/mes', planGrowthUp:'⬆️ Cambiar a Growth — $399/mes', planPremiumUp:'⬆️ Cambiar a Premium — $899/mes', planPremiumMax:'✅ Plan máximo activo',
     // S38-9: techo de Growth — captura segmentada de demanda
-    ceilingTitle:'🚀 Agency viene en camino. ¿Qué necesitas más?', ceilingMoreQuota:'📈 Más generaciones y videos', ceilingMultibrand:'🏢 Manejar varias marcas',
+    premiumMultiSoon:'Multi-marca (próximamente)', premiumMultiLink:'Me interesa multimarca',
     // ── Feature Gating ──
     lockBadge:'GROWTH', lockSoonBadge:'PRONTO',
     upsellTitle:'Disponible en Starter',
@@ -2923,7 +2923,7 @@ const T = {
     alertNoInstr:'Describe the change you want to make.',
     alertPostEmpty:'Write what you want to post.', alertPhotoFirst:'Upload a photo first.',
     alertFlyerType:'Choose the flyer type: event, promotion, information…', flyerTypePick:'Choose the type…',
-    hintRegulado:'What you write here is published as is. In your industry you cannot promise results or health benefits.',
+    hintRegulado:'Your post is created from what you write here. In your industry you cannot promise results or health benefits.',
     alertFlyerTitle:'Enter the flyer title.', alertFlyerPhoto:'Upload a photo for the flyer.',
     alertCarouselTopic:'Enter the carousel topic.', alertCarouselPhoto:'Upload a photo for the cover.',
     alertTestimonial:'Paste a customer review or upload their photo to continue.',
@@ -2938,8 +2938,8 @@ const T = {
     // ── Plan names ──
     planTrialName:'Free Trial', planTrialBadge:'⭐ Trial', planTrialPrice:'Free for 7 days',
     planTrialAllModes:'All modes + 2 videos',
-    planStarterUp:'🚀 Activate Starter — $9/mo', planGrowthUp:'⬆️ Upgrade to Growth — $19/mo', planAgencyUp:'⬆️ Upgrade to Agency — $45/mo', planAgencyMax:'✅ Top plan active',
-    ceilingTitle:'🚀 Agency is coming. What do you need more of?', ceilingMoreQuota:'📈 More generations and videos', ceilingMultibrand:'🏢 Manage several brands',
+    planStarterUp:'🚀 Activate Starter — $9/mo', planGrowthUp:'⬆️ Upgrade to Growth — $19/mo', planPremiumUp:'⬆️ Upgrade to Premium — $45/mo', planPremiumMax:'✅ Top plan active',
+    premiumMultiSoon:'Multi-brand (coming soon)', premiumMultiLink:'I want multi-brand',
     // ── Feature Gating ──
     lockBadge:'GROWTH', lockSoonBadge:'SOON',
     upsellTitle:'Available on Starter',
@@ -3138,6 +3138,7 @@ async function verifyAuthCode() {
         applyBrand(merged);
         showCloudBar(merged.name);
         showScreen('creatorScreen');
+        checkDeepLink();   // FB-141 (S55k): el enlace del correo sobrevive al login con codigo
       } else {
         // Brand data missing from KV — go to setup
         showScreen('setupScreen');
@@ -6298,10 +6299,10 @@ function getPlanConfig() {
     // vez era una segunda tabla que nadie mantenia sincronizada con la primera.
     trial:   { name: t('planTrialName'), badge: t('planTrialBadge'), gens: GEN_LIMITS.trial, videos: VIDEO_LIMITS.trial, price: t('planTrialPrice'), upgradeLabel: t('planStarterUp'), color: 'trial' },
     starter: { name: 'Starter', badge: '💙 Starter', gens: GEN_LIMITS.starter, videos: VIDEO_LIMITS.starter, price: mxn?'$199 MXN/mes':'$11 USD/mo', upgradeLabel: t('planGrowthUp'), color: 'starter' },
-    // S38-9: Growth ya no es un callejon sin salida. Agency existe pero esta pausado
-    // hasta que haya multimarca, asi que el techo captura demanda en vez de cerrarla.
-    growth:  { name: 'Growth',  badge: '💚 Growth',  gens: GEN_LIMITS.growth, videos: VIDEO_LIMITS.growth, price: mxn?'$399 MXN/mes':'$22 USD/mo', upgradeLabel: '', color: 'growth', maxAvailable: true },
-    agency:  { name: 'Agency',  badge: '🏆 Agency',  gens: GEN_LIMITS.agency, videos: VIDEO_LIMITS.agency, price: mxn?'$899 MXN/mes':'$50 USD/mo', upgradeLabel: t('planAgencyMax'), color: 'agency' },
+    // S55k (operador, 2 oct): el plan superior se llama Premium y esta ACTIVO. Growth sube con el
+    // boton normal; multimarca sigue sin construirse y su demanda se mide con el enlace de la tarjeta.
+    growth:  { name: 'Growth',  badge: '💚 Growth',  gens: GEN_LIMITS.growth, videos: VIDEO_LIMITS.growth, price: mxn?'$399 MXN/mes':'$22 USD/mo', upgradeLabel: t('planPremiumUp'), color: 'growth' },
+    premium: { name: 'Premium', badge: '🏆 Premium', gens: GEN_LIMITS.premium, videos: VIDEO_LIMITS.premium, price: mxn?'$899 MXN/mes':'$50 USD/mo', upgradeLabel: t('planPremiumMax'), color: 'premium' },
   };
 }
 
@@ -6514,18 +6515,10 @@ function renderCuenta() {
       (daysLeft !== null ? '<div class="plan-days">' + t('dashTrialDays').replace('{n}', daysLeft) + '</div>' : '') +
       // S38-10: el texto iba en var(--g3) (#EEF7E6) sobre la tarjeta verde claro de
       // Growth. Solo se veia el emoji, que trae color propio. Ahora usa var(--g2).
-      // S38-9: Growth ya no dice "no hay nada arriba". Pregunta QUE falta, y las dos
-      // respuestas llegan separadas al correo: sirven para decidir si multimarca se
-      // construye y como se cobra. Es la investigacion de mercado mas barata que hay.
-      (plan.maxAvailable
-        ? '<div style="text-align:center;padding:10px 8px">' +
-            '<div style="font-size:12px;font-weight:700;color:var(--g2);margin-bottom:8px">' + t('ceilingTitle') + '</div>' +
-            '<button class="plan-upgrade-btn" style="margin-bottom:6px" onclick="requestUpgrade(\'more-quota\')">' + t('ceilingMoreQuota') + '</button>' +
-            '<button class="plan-upgrade-btn" onclick="requestUpgrade(\'multibrand\')">' + t('ceilingMultibrand') + '</button>' +
-          '</div>'
-        : planKey === 'agency'
+      // S55k: el plan maximo lo dice; cualquier otro sube al siguiente con el boton normal.
+      (planKey === 'premium'
           ? '<div style="font-size:12px;font-weight:700;color:var(--g2);text-align:center;padding:8px">' + plan.upgradeLabel + '</div>'
-          : '<button class="plan-upgrade-btn" onclick="activatePlan(\'' + (planKey === 'trial' ? 'starter' : planKey === 'starter' ? 'growth' : 'agency') + '\')">' + plan.upgradeLabel + '</button>') +
+          : '<button class="plan-upgrade-btn" onclick="activatePlan(\'' + (planKey === 'trial' ? 'starter' : planKey === 'starter' ? 'growth' : 'premium') + '\')">' + plan.upgradeLabel + '</button>') +
     '</div>';
   }
 
@@ -6579,14 +6572,14 @@ function renderCuenta() {
     const tiers = [
       { key:'starter', name:'Starter', price: mxn?'$199':'$11', period: mxn?'MXN/mes':'USD/mo', gens:'40 '+t('genPerMonth'), videos:'2 videos de 5 seg', features: isES ? 'Todas las herramientas · Diseños firmados con Postimity' : 'All tools · Designs signed with Postimity' },
       { key:'growth',  name:'Growth',  price: mxn?'$399':'$22', period: mxn?'MXN/mes':'USD/mo', gens:'100 '+t('genPerMonth'), videos:'8 videos de 5 seg', features: isES ? 'Todo + tus diseños sin firma' : 'All + your designs unsigned', popular: true },
-      { key:'agency',  name:'Agency',  price: mxn?'$899':'$50', period: mxn?'MXN/mes':'USD/mo', gens:'250 '+t('genPerMonth'), videos:'20 videos de 5 seg', features: isES ? 'Todo en Growth + soporte prioritario' : 'Everything in Growth + priority support' },
+      { key:'premium', name:'Premium', price: mxn?'$899':'$50', period: mxn?'MXN/mes':'USD/mo', gens:'250 '+t('genPerMonth'), videos:'20 videos de 5 seg', features: isES ? 'Todo lo de Growth, con más del doble de volumen' : 'Everything in Growth, with more than twice the volume', multi: true },
     ];
     const activateLabel = isES ? 'Activar' : 'Activate';
     const currentLabel = isES ? '✅ Plan actual' : '✅ Current plan';
     const popularLabel = isES ? '⭐ Más popular' : '⭐ Most popular';
     grid.innerHTML = tiers.map(tr => {
       const isCurrent = tr.key === planKey;
-      const isDowngrade = (planKey === 'growth' && tr.key === 'starter') || (planKey === 'agency' && (tr.key === 'starter' || tr.key === 'growth'));
+      const isDowngrade = (planKey === 'growth' && tr.key === 'starter') || (planKey === 'premium' && (tr.key === 'starter' || tr.key === 'growth'));
       return '<div class="pricing-tile' + (isCurrent ? ' current' : '') + (tr.popular && !isCurrent ? ' popular' : '') + '" style="' + (tr.popular && !isCurrent ? 'border:2px solid var(--b);position:relative' : '') + '">' +
         (tr.popular && !isCurrent ? '<div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:var(--b);color:#fff;font-size:9px;font-weight:800;padding:2px 10px;border-radius:10px;white-space:nowrap">' + popularLabel + '</div>' : '') +
         '<div class="pt-name">' + tr.name + '</div>' +
@@ -6594,13 +6587,14 @@ function renderCuenta() {
         '<div class="pt-gens">' + tr.gens + '</div>' +
         '<div style="font-size:11px;color:var(--b);font-weight:600;margin-top:2px">🎬 ' + tr.videos + '/' + (isES?'mes':'mo') + '</div>' +
         '<div style="font-size:10px;color:var(--t3);margin-top:4px">' + tr.features + '</div>' +
+        // S55k: multimarca no existe todavia. Se dice atenuado y el interes llega a admin · User Feedback.
+        (tr.multi ? '<div style="font-size:10px;color:var(--t3);opacity:.6;margin-top:4px">' + t('premiumMultiSoon') + '</div>' +
+          '<a href="#" style="font-size:10px;color:var(--b);text-decoration:underline" onclick="requestUpgrade(\'multibrand\');return false">' + t('premiumMultiLink') + '</a>' : '') +
         (isCurrent
           ? '<div class="pt-current">' + currentLabel + '</div>'
           : isDowngrade
             ? ''
-            : tr.key === 'agency'
-              ? '<div style="margin-top:8px;font-size:11px;color:var(--t3);text-align:center;padding:9px;opacity:.6">' + (isES ? 'Próximamente' : 'Coming soon') + '</div>'
-              : '<button class="plan-upgrade-btn" style="margin-top:8px;font-size:12px;padding:9px" onclick="activatePlan(\'' + tr.key + '\')">' + activateLabel + ' ' + tr.name + '</button>'
+            : '<button class="plan-upgrade-btn" style="margin-top:8px;font-size:12px;padding:9px" onclick="activatePlan(\'' + tr.key + '\')">' + activateLabel + ' ' + tr.name + '</button>'
         ) +
       '</div>';
     }).join('');
@@ -6670,7 +6664,7 @@ function renderGalleryGrid() {
     const cls = pct >= 1 ? 'gc-full' : pct >= 0.8 ? 'gc-warn' : '';
     const brand = loadBrand();
     const planKey = brand?.plan || 'trial';
-    const planNames = { trial: 'Trial', starter: 'Starter', growth: 'Growth', agency: 'Agency' };
+    const planNames = { trial: 'Trial', starter: 'Starter', growth: 'Growth', premium: 'Premium' };
     const planName = planNames[planKey] || 'Trial';
     countEl.innerHTML = '<span class="' + cls + '">' + galleryData.length + '/' + galleryLimit + '</span> ' + (isES ? 'fotos · Plan ' + planName : 'photos · ' + planName + ' plan');
   }
@@ -7102,13 +7096,13 @@ function showUpgradeInfo() {
 
 async function activatePlan(planKey) {
   const isES = detectLanguage() === 'es';
-  const validPlans = ['starter', 'growth', 'agency'];
+  const validPlans = ['starter', 'growth', 'premium'];
   if (!validPlans.includes(planKey)) return;
   const currency = isES ? 'mxn' : 'usd';
-  const planNames = { starter: 'Starter', growth: 'Growth', agency: 'Agency' };
+  const planNames = { starter: 'Starter', growth: 'Growth', premium: 'Premium' };
   const prices = isES
-    ? { starter: '$199 MXN/mes', growth: '$399 MXN/mes', agency: '$899 MXN/mes' }
-    : { starter: '$11 USD/mo', growth: '$22 USD/mo', agency: '$50 USD/mo' };
+    ? { starter: '$199 MXN/mes', growth: '$399 MXN/mes', premium: '$899 MXN/mes' }
+    : { starter: '$11 USD/mo', growth: '$22 USD/mo', premium: '$50 USD/mo' };
 
   // Show payment method selection for MXN
   let paymentMethod = 'card';
@@ -7199,7 +7193,7 @@ function handleStripeRedirect() {
     const plan = params.get('plan') || '';
     const isES = detectLanguage() === 'es';
     // S28: Meta Pixel — Purchase event
-    const planValues = { starter: 9, growth: 19, agency: 45 };
+    const planValues = { starter: 9, growth: 19, premium: 45 };
     track('track', 'Purchase', { content_name: plan, value: planValues[plan] || 9, currency: 'USD' });
     setTimeout(() => {
       showToast(isES ? '🎉 ¡Pago exitoso! Tu plan ' + plan.charAt(0).toUpperCase() + plan.slice(1) + ' está activo.' : '🎉 Payment successful! Your ' + plan.charAt(0).toUpperCase() + plan.slice(1) + ' plan is now active.', 8000);
@@ -7735,7 +7729,7 @@ function paintAgentQuote() {
 // matematicamente imposible y en Starter (40) se come el 70% del mes: le entregabamos
 // al usuario un plan que su propio plan no le deja ejecutar. Se muestra deshabilitado
 // con el motivo, no oculto — mismo criterio que el toggle de firma (RD-22).
-const AGENT_FREQ_MAX_BY_PLAN = { trial: 5, starter: 5, growth: 7, agency: 7 };
+const AGENT_FREQ_MAX_BY_PLAN = { trial: 5, starter: 5, growth: 7, premium: 7 };
 function applyAgentFreqGate() {
   const plan = loadBrand()?.plan || 'trial';
   const maxF = AGENT_FREQ_MAX_BY_PLAN[plan] || AGENT_FREQ_MAX_BY_PLAN.trial;   // S46 — RD-46
@@ -9065,7 +9059,7 @@ function showResult(data) {
   const wmWrap = document.getElementById('wmToggleWrap');
   const wmBadge = document.getElementById('wmLockBadge');
   const wmInput = document.getElementById('wmToggle');
-  if(['growth','agency'].includes(srPlan)) {
+  if(['growth','premium'].includes(srPlan)) {
     if(wmWrap) { wmWrap.style.display = 'flex'; wmWrap.style.opacity = ''; wmWrap.style.cursor = ''; }
     // S49 · FB-27 / PR-080 — el contrato 2.3 fija el default en SIN firma: es la
     // razon de compra de Growth, no una preferencia. El valor inicial del HTML es
@@ -9746,11 +9740,11 @@ function onWmToggleChange(checked) {
   redrawCanvas();
 }
 
-// Sólo Growth y Agency pueden apagar el watermark.
+// Sólo Growth y Premium pueden apagar el watermark.
 function shouldShowWatermark() {
   const plan = loadBrand()?.plan || 'trial';
   const el = document.getElementById('wmToggle');
-  return !(['growth', 'agency'].includes(plan) && el && !el.checked);
+  return !(['growth', 'premium'].includes(plan) && el && !el.checked);
 }
 
 // Dibuja logo + watermark sobre un contexto ya pintado.
@@ -10464,7 +10458,7 @@ async function submitFeedback() {
     // pintaba la pantalla de exito ante cualquier rechazo del servidor: el usuario
     // veia la palomita y el mensaje nunca se guardaba en KV. Y submit-feedback va
     // detras de authenticateRequest, asi que una sesion caida basta para perderlo.
-    // Este es el canal que decide si multimarca se construye y el precio de Agency.
+    // Este es el canal que decide si multimarca se construye y el alcance de Premium.
     const res = await apiFetch(WORKER, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
