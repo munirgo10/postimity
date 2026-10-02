@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="2.50.4">
+<meta name="app-version" content="2.50.6">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Postimity Studio — Tu estudio de contenido con IA</title>
 <meta name="description" content="Crea posts, flyers, carruseles y videos profesionales con IA. Describe tu negocio una vez y genera contenido listo para publicar en 20 segundos.">
@@ -1368,15 +1368,15 @@ fbq('track', 'PageView');
       <div class="scard-title" id="colorCardTitle">🎨 Colores de marca</div>
       <div class="color-row">
         <div class="color-pick">
-          <input type="color" id="bC1" value="#2979FF" onchange="checkColorContrast()">
+          <input type="color" id="bC1" value="#1B3A5C" onchange="checkColorContrast()">
           <label for="bC1" id="lblC1">Primario</label>
         </div>
         <div class="color-pick">
-          <input type="color" id="bC2" value="#76C442" onchange="checkColorContrast()">
+          <input type="color" id="bC2" value="#5C8DB8" onchange="checkColorContrast()">
           <label for="bC2" id="lblC2">Secundario</label>
         </div>
         <div class="color-pick">
-          <input type="color" id="bC3" value="#E91E8C" onchange="checkColorContrast()">
+          <input type="color" id="bC3" value="#F2A33A" onchange="checkColorContrast()">
           <label for="bC3" id="lblC3">Acento</label>
         </div>
       </div>
@@ -2364,7 +2364,7 @@ function persistSlides(imgs) {
 }
 
 // APP_VERSION (S34) — deploy verification. Must match worker /version and all HTML files.
-const APP_VERSION = '2.50.4'; // 2 oct 2026 — S55k: FB-142 texto del hint, FB-141 enlace sobrevive al login, plan Premium activo · antes: 1 oct 2026 — S55j: FB-137 hint al entrar por codigo, FB-139 foto usada se limpia, FB-140 nota de estilo en el Agente · antes: 30 sep 2026 — S55i/S55j: FB-133 historial, FB-131 campos, FB-135 tipo de flyer obligatorio, D62 hint de giro regulado · antes: 29 sep 2026 — S55h: FB-132 el plan del Agente se recupera tras un corte de red sin re-pedirlo · antes: S55g: D57 tarjetas del Agente con una etiqueta de cada tipo, tarjeta flyer de la oferta y costo antes de generar; S55f: realPhoto en el video (D58)
+const APP_VERSION = '2.50.6'; // 2 oct 2026 — S55k: D64 paleta base en el alta, nota de estilo del Agente · antes: 2 oct 2026 — S55k: sin cambios de estudio (FB-125/FB-126 viven en el worker) · antes: 2 oct 2026 — S55k: FB-142 texto del hint, FB-141 enlace sobrevive al login, plan Premium activo · antes: 1 oct 2026 — S55j: FB-137 hint al entrar por codigo, FB-139 foto usada se limpia, FB-140 nota de estilo en el Agente · antes: 30 sep 2026 — S55i/S55j: FB-133 historial, FB-131 campos, FB-135 tipo de flyer obligatorio, D62 hint de giro regulado · antes: 29 sep 2026 — S55h: FB-132 el plan del Agente se recupera tras un corte de red sin re-pedirlo · antes: S55g: D57 tarjetas del Agente con una etiqueta de cada tipo, tarjeta flyer de la oferta y costo antes de generar; S55f: realPhoto en el video (D58)
 window.APP_VERSION = APP_VERSION;
 // El log de version vive unas lineas mas abajo (console.info). No agregar otro aqui:
 // S38 borro POSTIMITY_VERSION para tener un solo log y este lo volvio a duplicar.
@@ -2375,7 +2375,7 @@ window.BUILD_FIXES = ['s50-agente-abre-lo-que-anuncia','s50-copiar-no-miente','s
   'contador-sincronizado-al-refinar','etiqueta-de-cobro-en-botones',
   'fb27-growth-entra-sin-firma','fb27-la-eleccion-del-usuario-manda',
   's41b-galeria-oculta-y-desarmada-en-flyer-y-testimonio',
-  's55k-fb141-enlace-tras-login','s55k-fb142-hint','s55k-plan-premium','s55h-fb132-agente-recupera-plan','s55g-d57-tarjetas-sin-contradiccion','s55g-d57-flyer-oferta-del-dueno','s55g-d57-costo-antes-de-generar','s55f-d58-realphoto-video','s55i-fb133-historial-guarda','s55i-fb131-campos-limpios','s55j-fb135-tipo-flyer-obligatorio','s55j-d62-hint-regulado','s55j-fb137-regulado-al-entrar','s55j-fb139-foto-usada-se-limpia','s55j-fb140-nota-estilo'];
+  's55k-d64-paleta-base','s55k-nota-estilo','s55k-fb141-enlace-tras-login','s55k-fb142-hint','s55k-plan-premium','s55h-fb132-agente-recupera-plan','s55g-d57-tarjetas-sin-contradiccion','s55g-d57-flyer-oferta-del-dueno','s55g-d57-costo-antes-de-generar','s55f-d58-realphoto-video','s55i-fb133-historial-guarda','s55i-fb131-campos-limpios','s55j-fb135-tipo-flyer-obligatorio','s55j-d62-hint-regulado','s55j-fb137-regulado-al-entrar','s55j-fb139-foto-usada-se-limpia','s55j-fb140-nota-estilo'];
 console.info('Postimity Studio v' + APP_VERSION);
 
 // ── FUENTE ÚNICA DE CUOTAS (S38-4) ───────────────────────────────────────
@@ -2385,6 +2385,7 @@ console.info('Postimity Studio v' + APP_VERSION);
 // CAT 25 verifica que no divergan.
 // INV-063 (S37): trial sube de 20 a 25. Con PU-2 vigente, 20 acciones equivalen a
 // ~13 posts terminados; el trial compite contra el abandono, no contra Growth.
+const PALETA_BASE = { primary:'#1B3A5C', secondary:'#5C8DB8', accent:'#F2A33A' };   // D64 (S55k): la marca que no elige color; NO es la paleta de Postimity
 const GEN_LIMITS = { trial: 20, starter: 40, growth: 100, premium: 250 };
 const VIDEO_LIMITS = { trial: 2, starter: 2, growth: 8, premium: 20 };
 const VIDEO_COST = { '5': 1, '10': 2 }; // espejo del worker — la unidad es el clip de 5 seg
@@ -2573,7 +2574,7 @@ const T = {
     agentCreatePost:'→ Crear post', agentCreateCarousel:'→ Crear carrusel', agentCreateVideo:'→ Crear video', agentCopyPrompt:'📋 Copiar prompt',
     // ── Agent labels ──
     agentModePost:'📌 Post', agentModeCarousel:'🎠 Carrusel', agentModeVideo:'🎬 Video',
-    agentStyleNote:'El estilo de cada publicación (fotorrealista, ilustración…) es una sugerencia: puedes cambiarlo al abrirla.',
+    agentStyleNote:'Fotorrealista o Ilustrado es solo una sugerencia. Toca la tarjeta y elige el que prefieras antes de generar.',
     agentStylePhoto:'📷 Fotorrealista', agentStyleIllus:'🖼️ Ilustrado', agentStyleAbstract:'🎨 Abstracto',
     // ── Reminders ──
     remTitle:'Recordatorios automáticos', remSub:'Aviso cálido cada mañana antes de tu post del día',
@@ -2873,7 +2874,7 @@ const T = {
     agentCreatePost:'→ Create post', agentCreateCarousel:'→ Create carousel', agentCreateVideo:'→ Create video', agentCopyPrompt:'📋 Copy prompt',
     // ── Agent labels ──
     agentModePost:'📌 Post', agentModeCarousel:'🎠 Carousel', agentModeVideo:'🎬 Video',
-    agentStyleNote:'The style of each post (photorealistic, illustration…) is a suggestion: you can change it when you open it.',
+    agentStyleNote:'Photorealistic or Illustrated is only a suggestion. Tap the card and pick the one you prefer before generating.',
     agentStylePhoto:'📷 Photorealistic', agentStyleIllus:'🖼️ Illustrated', agentStyleAbstract:'🎨 Abstract',
     // ── Reminders ──
     remTitle:'Auto reminders', remSub:'A warm nudge every morning before your daily post',
@@ -5247,9 +5248,9 @@ async function renderCarouselSlide(slide, brand, coverImageUrl, totalSlides) {
   const canvas = document.createElement('canvas');
   canvas.width = W; canvas.height = H;
   const ctx = canvas.getContext('2d');
-  const primary = brand?.colors?.primary || '#2979FF';
-  const secondary = brand?.colors?.secondary || '#76C442';
-  const accent = brand?.colors?.accent || '#E91E8C';
+  const primary = brand?.colors?.primary || PALETA_BASE.primary;
+  const secondary = brand?.colors?.secondary || PALETA_BASE.secondary;
+  const accent = brand?.colors?.accent || PALETA_BASE.accent;
 
   if (slide.type === 'cover') {
     // Cover: AI image + dark overlay + title
@@ -9311,7 +9312,7 @@ async function getCanvasBlob(format) {
   const imgEl = document.getElementById('resultImg');
   if (!imgEl.src || imgEl.src === window.location.href) return null;
   const brand = loadBrand();
-  const primary = brand?.colors?.primary || '#2979FF';
+  const primary = brand?.colors?.primary || PALETA_BASE.primary;
 
   // S37/L1b · RD-29: se parte SIEMPRE de la BASE LIMPIA, nunca de resultImg.
   // resultImg trae el sello horneado al aspecto ORIGINAL de la imagen; reencuadrarlo
@@ -9948,8 +9949,8 @@ async function composeFlyerCanvas(photoSrc, fd, brand, fmt) {
   const canvas=document.createElement('canvas');
   canvas.width=W; canvas.height=H;
   const ctx=canvas.getContext('2d');
-  const primary=brand?.colors?.primary||'#2979FF';
-  const accent=brand?.colors?.accent||'#E91E8C';
+  const primary=brand?.colors?.primary||PALETA_BASE.primary;
+  const accent=brand?.colors?.accent||PALETA_BASE.accent;
 
   // 1. Foto de fondo. S53b · S43-1/D36/D37: se encuadra con drawFramed —recorte anclado
   //    al sujeto— en vez del recorte a cuadrado escrito a mano (Math.min(w,h) centrado),
