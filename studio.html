@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="2.50.7">
+<meta name="app-version" content="2.50.8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Postimity Studio — Tu estudio de contenido con IA</title>
 <meta name="description" content="Crea posts, flyers, carruseles y videos profesionales con IA. Describe tu negocio una vez y genera contenido listo para publicar en 20 segundos.">
@@ -2364,7 +2364,7 @@ function persistSlides(imgs) {
 }
 
 // APP_VERSION (S34) — deploy verification. Must match worker /version and all HTML files.
-const APP_VERSION = '2.50.7'; // 2 oct 2026 — S55k: FB-143 cambiar de cuenta recarga y limpia · antes: 2 oct 2026 — S55k: D64 paleta base en el alta, nota de estilo del Agente · antes: 2 oct 2026 — S55k: sin cambios de estudio (FB-125/FB-126 viven en el worker) · antes: 2 oct 2026 — S55k: FB-142 texto del hint, FB-141 enlace sobrevive al login, plan Premium activo · antes: 1 oct 2026 — S55j: FB-137 hint al entrar por codigo, FB-139 foto usada se limpia, FB-140 nota de estilo en el Agente · antes: 30 sep 2026 — S55i/S55j: FB-133 historial, FB-131 campos, FB-135 tipo de flyer obligatorio, D62 hint de giro regulado · antes: 29 sep 2026 — S55h: FB-132 el plan del Agente se recupera tras un corte de red sin re-pedirlo · antes: S55g: D57 tarjetas del Agente con una etiqueta de cada tipo, tarjeta flyer de la oferta y costo antes de generar; S55f: realPhoto en el video (D58)
+const APP_VERSION = '2.50.8'; // 2 oct 2026 — S55l: FB-112 el plan del mes completo abre en hoy · antes: 2 oct 2026 — S55k: FB-143 cambiar de cuenta recarga y limpia · antes: 2 oct 2026 — S55k: D64 paleta base en el alta, nota de estilo del Agente · antes: 2 oct 2026 — S55k: sin cambios de estudio (FB-125/FB-126 viven en el worker) · antes: 2 oct 2026 — S55k: FB-142 texto del hint, FB-141 enlace sobrevive al login, plan Premium activo · antes: 1 oct 2026 — S55j: FB-137 hint al entrar por codigo, FB-139 foto usada se limpia, FB-140 nota de estilo en el Agente · antes: 30 sep 2026 — S55i/S55j: FB-133 historial, FB-131 campos, FB-135 tipo de flyer obligatorio, D62 hint de giro regulado · antes: 29 sep 2026 — S55h: FB-132 el plan del Agente se recupera tras un corte de red sin re-pedirlo · antes: S55g: D57 tarjetas del Agente con una etiqueta de cada tipo, tarjeta flyer de la oferta y costo antes de generar; S55f: realPhoto en el video (D58)
 window.APP_VERSION = APP_VERSION;
 // El log de version vive unas lineas mas abajo (console.info). No agregar otro aqui:
 // S38 borro POSTIMITY_VERSION para tener un solo log y este lo volvio a duplicar.
@@ -7929,6 +7929,13 @@ function agentCardChips(post) {
   return { mode: m, modeLabel: mode, origin, originLabel: orig === undefined ? null : orig };
 }
 
+// FB-112 (S55l · D55): la fecha de HOY en la hora del usuario, no en UTC: a las 23:30 en México
+// toISOString() ya dice mañana y la publicación de hoy saldría como pasada.
+function agentHoy() {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+
 function renderAgentPlan(plan) {
   document.getElementById('agentConfigWrap').style.display = 'none';
   document.getElementById('agentPlanWrap').style.display = 'block';
@@ -7976,6 +7983,12 @@ function renderAgentPlan(plan) {
   reconcileReminderState(brandForReminder);
 
   const monthNames = t('months');
+  // FB-112 (D55 · operador, 2 oct): el plan es del mes completo y lo que ya pasó se puede crear igual,
+  // SIN rótulo ni nota. Lo único que cambia es que el plan abre en la primera publicación de hoy en adelante.
+  const hoy = agentHoy() || '';
+  const esPasada = post => !!hoy && typeof post.date === 'string' && post.date < hoy;
+  const hayPasadas = posts.some(esPasada);
+  let anclaHoy = null;
 
   Object.keys(weeks).sort().forEach((wKey, wi) => {
     const wPosts = weeks[wKey];
@@ -7995,7 +8008,9 @@ function renderAgentPlan(plan) {
 
     wPosts.forEach(post => {
       const card = document.createElement('div');
+      const pasada = esPasada(post);
       card.className = 'agent-post-card' + (post.festivity ? ' festivity' : '');
+      if (hayPasadas && !pasada && !anclaHoy) anclaHoy = card;
       const platClass = post.platform || 'instagram';
       const platLabel = post.platform === 'instagram' ? '📸 Instagram' : post.platform === 'facebook' ? '👥 Facebook' : '🎵 TikTok';
       const modeClass = agentTargetMode(post);
@@ -8021,6 +8036,7 @@ function renderAgentPlan(plan) {
     });
     container.appendChild(weekDiv);
   });
+  if (anclaHoy && typeof anclaHoy.scrollIntoView === 'function') setTimeout(() => { try { anclaHoy.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (e) {} }, 60);
 }
 
 function goCreatePost(idx) {
