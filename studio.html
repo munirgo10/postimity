@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="2.50.6">
+<meta name="app-version" content="2.50.7">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Postimity Studio — Tu estudio de contenido con IA</title>
 <meta name="description" content="Crea posts, flyers, carruseles y videos profesionales con IA. Describe tu negocio una vez y genera contenido listo para publicar en 20 segundos.">
@@ -2364,7 +2364,7 @@ function persistSlides(imgs) {
 }
 
 // APP_VERSION (S34) — deploy verification. Must match worker /version and all HTML files.
-const APP_VERSION = '2.50.6'; // 2 oct 2026 — S55k: D64 paleta base en el alta, nota de estilo del Agente · antes: 2 oct 2026 — S55k: sin cambios de estudio (FB-125/FB-126 viven en el worker) · antes: 2 oct 2026 — S55k: FB-142 texto del hint, FB-141 enlace sobrevive al login, plan Premium activo · antes: 1 oct 2026 — S55j: FB-137 hint al entrar por codigo, FB-139 foto usada se limpia, FB-140 nota de estilo en el Agente · antes: 30 sep 2026 — S55i/S55j: FB-133 historial, FB-131 campos, FB-135 tipo de flyer obligatorio, D62 hint de giro regulado · antes: 29 sep 2026 — S55h: FB-132 el plan del Agente se recupera tras un corte de red sin re-pedirlo · antes: S55g: D57 tarjetas del Agente con una etiqueta de cada tipo, tarjeta flyer de la oferta y costo antes de generar; S55f: realPhoto en el video (D58)
+const APP_VERSION = '2.50.7'; // 2 oct 2026 — S55k: FB-143 cambiar de cuenta recarga y limpia · antes: 2 oct 2026 — S55k: D64 paleta base en el alta, nota de estilo del Agente · antes: 2 oct 2026 — S55k: sin cambios de estudio (FB-125/FB-126 viven en el worker) · antes: 2 oct 2026 — S55k: FB-142 texto del hint, FB-141 enlace sobrevive al login, plan Premium activo · antes: 1 oct 2026 — S55j: FB-137 hint al entrar por codigo, FB-139 foto usada se limpia, FB-140 nota de estilo en el Agente · antes: 30 sep 2026 — S55i/S55j: FB-133 historial, FB-131 campos, FB-135 tipo de flyer obligatorio, D62 hint de giro regulado · antes: 29 sep 2026 — S55h: FB-132 el plan del Agente se recupera tras un corte de red sin re-pedirlo · antes: S55g: D57 tarjetas del Agente con una etiqueta de cada tipo, tarjeta flyer de la oferta y costo antes de generar; S55f: realPhoto en el video (D58)
 window.APP_VERSION = APP_VERSION;
 // El log de version vive unas lineas mas abajo (console.info). No agregar otro aqui:
 // S38 borro POSTIMITY_VERSION para tener un solo log y este lo volvio a duplicar.
@@ -2375,7 +2375,7 @@ window.BUILD_FIXES = ['s50-agente-abre-lo-que-anuncia','s50-copiar-no-miente','s
   'contador-sincronizado-al-refinar','etiqueta-de-cobro-en-botones',
   'fb27-growth-entra-sin-firma','fb27-la-eleccion-del-usuario-manda',
   's41b-galeria-oculta-y-desarmada-en-flyer-y-testimonio',
-  's55k-d64-paleta-base','s55k-nota-estilo','s55k-fb141-enlace-tras-login','s55k-fb142-hint','s55k-plan-premium','s55h-fb132-agente-recupera-plan','s55g-d57-tarjetas-sin-contradiccion','s55g-d57-flyer-oferta-del-dueno','s55g-d57-costo-antes-de-generar','s55f-d58-realphoto-video','s55i-fb133-historial-guarda','s55i-fb131-campos-limpios','s55j-fb135-tipo-flyer-obligatorio','s55j-d62-hint-regulado','s55j-fb137-regulado-al-entrar','s55j-fb139-foto-usada-se-limpia','s55j-fb140-nota-estilo'];
+  's55k-fb143-cambio-de-cuenta-limpio','s55k-d64-paleta-base','s55k-nota-estilo','s55k-fb141-enlace-tras-login','s55k-fb142-hint','s55k-plan-premium','s55h-fb132-agente-recupera-plan','s55g-d57-tarjetas-sin-contradiccion','s55g-d57-flyer-oferta-del-dueno','s55g-d57-costo-antes-de-generar','s55f-d58-realphoto-video','s55i-fb133-historial-guarda','s55i-fb131-campos-limpios','s55j-fb135-tipo-flyer-obligatorio','s55j-d62-hint-regulado','s55j-fb137-regulado-al-entrar','s55j-fb139-foto-usada-se-limpia','s55j-fb140-nota-estilo'];
 console.info('Postimity Studio v' + APP_VERSION);
 
 // ── FUENTE ÚNICA DE CUOTAS (S38-4) ───────────────────────────────────────
@@ -3013,6 +3013,9 @@ function t(key) { const lang = detectLanguage(); return (T[lang] || T.es)[key] |
 // ── STATE ───────────────────────────────────────────────────
 let mode = 'post', platform = 'instagram', pillar = 'General', flyerMode = 'ai', imageStyle = 'illustrated';
 let brandId = null; // Phase 2: unique brand identifier for KV sync
+// FB-143 (S55k): la pagina recuerda si ya tuvo una sesion. Cambiar de cuenta sobre una pagina usada dejaba a la
+// vista el ultimo resultado, los interruptores y el plan de la cuenta anterior. Lo marca applyBrand, un solo sitio.
+let _sesionEnPagina = false;
 let genCount = 0;   // Phase 2: generation counter for plan limits
 let logoSrc = null, enhanceB64 = null, enhanceMime = 'image/jpeg';
 let originalImageUrl = null; // S23: stores clean image URL for live preview redraws
@@ -3120,6 +3123,12 @@ async function verifyAuthCode() {
     if (!res.ok || !data.success) throw new Error(data.error || 'Código incorrecto');
     // Authenticated! Cookie set by server; token stored for in-app browser fallback (S29)
     if (data.token) setAuthToken(data.token);
+    // FB-143 (S55k): si en este navegador habia otra cuenta, sus datos se van antes de cargar esta; y si esta
+    // pagina ya tuvo una sesion (cierre de sesion o sesion expirada), se recarga en vez de pintar encima: el
+    // arranque carga la marca limpia y aplica el enlace del correo si lo hay (FB-141).
+    const cuentaPrevia = (loadBrand() || {}).brandId || brandId || null;
+    if (cuentaPrevia && cuentaPrevia !== (data.brandId || null)) limpiarDatosDeCuenta();
+    if (_sesionEnPagina) { window.location.reload(); return; }
     if (data.brandId) {
       // Existing user — load their brand
       brandId = data.brandId;
@@ -3259,6 +3268,22 @@ async function checkAuth() {
   }
 }
 
+// FB-143 (S55k): borra del navegador TODO lo de la cuenta. Antes solo se quitaba la marca y el token: quedaban
+// contadores, correos de recordatorio y claves sin marca («recordatorios activos» pasaba de una cuenta a otra).
+// Se conservan el idioma, el token (lo decide quien llama) y la marca de «primera vez», que solo evita contar
+// dos veces un registro en la analitica. Un solo sitio: lo usan cerrar sesion y el cambio de cuenta.
+function limpiarDatosDeCuenta() {
+  try {
+    const ks = [];
+    for (let i = 0; i < localStorage.length; i++) ks.push(localStorage.key(i));
+    ks.forEach(k => {
+      if (!k || k.indexOf('postimity_') !== 0) return;
+      if (k === 'postimity_lang' || k === 'postimity_auth_token' || k.indexOf('postimity_first_brand_') === 0) return;
+      localStorage.removeItem(k);
+    });
+  } catch (e) { console.warn('limpiarDatosDeCuenta:', e && e.message); }
+}
+
 async function doLogout() {
   try {
     await apiFetch(WORKER, {
@@ -3269,9 +3294,11 @@ async function doLogout() {
   } catch(e) { console.warn('Logout request failed:', e.message); }
   brandId = null;
   clearAuthToken();
-  localStorage.removeItem(STORE_KEY);
+  limpiarDatosDeCuenta();
   resetAuthScreen();   // S39-4: sin esto authScreen aparece congelada en "Verificando..."
   showScreen('authScreen');
+  // FB-143: el estado en memoria no se enumera (esa lista se pudre: S38, S39). La pagina se recarga limpia.
+  window.location.replace(window.location.pathname);
 }
 
 // ═══════════════════════════════════════════════════════
@@ -4645,6 +4672,7 @@ function saveBrand() {
 function loadBrand() { try{ return JSON.parse(localStorage.getItem(STORE_KEY)); }catch{ return null; } }
 
 function applyBrand(b) {
+  _sesionEnPagina = true;   // FB-143
   // Brand bar
   document.getElementById('bbName').textContent=b.name;
   document.getElementById('bbLoc').textContent=b.location||b.type;
