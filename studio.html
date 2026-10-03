@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="2.51.0">
+<meta name="app-version" content="2.51.1">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Postimity Studio — Tu estudio de contenido con IA</title>
 <meta name="description" content="Crea posts, flyers, carruseles y videos profesionales con IA. Describe tu negocio una vez y genera contenido listo para publicar en 20 segundos.">
@@ -440,9 +440,9 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
 .carousel-slides-preview::-webkit-scrollbar{height:5px}
 .carousel-slides-preview::-webkit-scrollbar-track{background:var(--bg);border-radius:3px}
 .carousel-slides-preview::-webkit-scrollbar-thumb{background:var(--b);border-radius:3px}
-.cs-preview{flex-shrink:0;width:130px;height:130px;border-radius:10px;overflow:hidden;border:2.5px solid var(--bor);cursor:pointer;position:relative;scroll-snap-align:start;transition:.15s}
+.cs-preview{flex-shrink:0;height:156px;border-radius:10px;overflow:hidden;border:2.5px solid var(--bor);cursor:pointer;position:relative;scroll-snap-align:start;transition:.15s}
 .cs-preview:hover{border-color:var(--b);transform:scale(1.03)}
-.cs-preview img{width:100%;height:100%;object-fit:cover}
+.cs-preview img{height:100%;width:auto;display:block}   /* S55m: la miniatura muestra la lamina ENTERA (4:5 o 9:16); el recorte cuadrado dejaba el numero encima del titulo */
 .cs-preview .cs-num{position:absolute;top:5px;left:5px;background:rgba(0,0,0,.65);color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px}
 .cs-preview .cs-dl{position:absolute;bottom:5px;right:5px;background:var(--b);color:#fff;border:none;border-radius:5px;font-size:11px;padding:4px 8px;cursor:pointer;opacity:0;transition:.15s;font-family:inherit}
 .cs-preview:hover .cs-dl{opacity:1}
@@ -2364,7 +2364,7 @@ function persistSlides(imgs) {
 }
 
 // APP_VERSION (S34) — deploy verification. Must match worker /version and all HTML files.
-const APP_VERSION = '2.51.0'; // 3 oct 2026 — S55m: el lienzo como pieza de diseño (FB-96, FB-100): fuente de marca, jerarquia, color del primario, telefono con formato y voz por giro (D65, D66) · antes: 2 oct 2026 — S55l: semanas reales (lunes a domingo), los primeros días del mes muestran el plan anterior, la fecha especial dice cuándo es · antes: 2 oct 2026 — S55l: FB-112 el plan del mes completo abre en hoy · antes: 2 oct 2026 — S55k: FB-143 cambiar de cuenta recarga y limpia · antes: 2 oct 2026 — S55k: D64 paleta base en el alta, nota de estilo del Agente · antes: 2 oct 2026 — S55k: sin cambios de estudio (FB-125/FB-126 viven en el worker) · antes: 2 oct 2026 — S55k: FB-142 texto del hint, FB-141 enlace sobrevive al login, plan Premium activo · antes: 1 oct 2026 — S55j: FB-137 hint al entrar por codigo, FB-139 foto usada se limpia, FB-140 nota de estilo en el Agente · antes: 30 sep 2026 — S55i/S55j: FB-133 historial, FB-131 campos, FB-135 tipo de flyer obligatorio, D62 hint de giro regulado · antes: 29 sep 2026 — S55h: FB-132 el plan del Agente se recupera tras un corte de red sin re-pedirlo · antes: S55g: D57 tarjetas del Agente con una etiqueta de cada tipo, tarjeta flyer de la oferta y costo antes de generar; S55f: realPhoto en el video (D58)
+const APP_VERSION = '2.51.1'; // 3 oct 2026 — S55m (humo de la version anterior): FB-145 regenerar un flyer conserva su texto, FB-146 campos vacios al cambiar de cuenta, laminas que llenan, renglones parejos · antes: 3 oct 2026 — S55m: el lienzo como pieza de diseño (FB-96, FB-100): fuente de marca, jerarquia, color del primario, telefono con formato y voz por giro (D65, D66) · antes: 2 oct 2026 — S55l: semanas reales (lunes a domingo), los primeros días del mes muestran el plan anterior, la fecha especial dice cuándo es · antes: 2 oct 2026 — S55l: FB-112 el plan del mes completo abre en hoy · antes: 2 oct 2026 — S55k: FB-143 cambiar de cuenta recarga y limpia · antes: 2 oct 2026 — S55k: D64 paleta base en el alta, nota de estilo del Agente · antes: 2 oct 2026 — S55k: sin cambios de estudio (FB-125/FB-126 viven en el worker) · antes: 2 oct 2026 — S55k: FB-142 texto del hint, FB-141 enlace sobrevive al login, plan Premium activo · antes: 1 oct 2026 — S55j: FB-137 hint al entrar por codigo, FB-139 foto usada se limpia, FB-140 nota de estilo en el Agente · antes: 30 sep 2026 — S55i/S55j: FB-133 historial, FB-131 campos, FB-135 tipo de flyer obligatorio, D62 hint de giro regulado · antes: 29 sep 2026 — S55h: FB-132 el plan del Agente se recupera tras un corte de red sin re-pedirlo · antes: S55g: D57 tarjetas del Agente con una etiqueta de cada tipo, tarjeta flyer de la oferta y costo antes de generar; S55f: realPhoto en el video (D58)
 window.APP_VERSION = APP_VERSION;
 // El log de version vive unas lineas mas abajo (console.info). No agregar otro aqui:
 // S38 borro POSTIMITY_VERSION para tener un solo log y este lo volvio a duplicar.
@@ -2375,6 +2375,7 @@ window.BUILD_FIXES = ['s50-agente-abre-lo-que-anuncia','s50-copiar-no-miente','s
   'contador-sincronizado-al-refinar','etiqueta-de-cobro-en-botones',
   'fb27-growth-entra-sin-firma','fb27-la-eleccion-del-usuario-manda',
   's41b-galeria-oculta-y-desarmada-en-flyer-y-testimonio',
+  's55m-fb145-regen-flyer-con-texto','s55m-fb146-campos-vacios-al-cambiar-de-cuenta','s55m-laminas-que-llenan',
   's55m-lienzo-diseno','s55m-voz-por-giro','s55m-telefono-con-formato',
   's55k-fb143-cambio-de-cuenta-limpio','s55k-d64-paleta-base','s55k-nota-estilo','s55k-fb141-enlace-tras-login','s55k-fb142-hint','s55k-plan-premium','s55h-fb132-agente-recupera-plan','s55g-d57-tarjetas-sin-contradiccion','s55g-d57-flyer-oferta-del-dueno','s55g-d57-costo-antes-de-generar','s55f-d58-realphoto-video','s55i-fb133-historial-guarda','s55i-fb131-campos-limpios','s55j-fb135-tipo-flyer-obligatorio','s55j-d62-hint-regulado','s55j-fb137-regulado-al-entrar','s55j-fb139-foto-usada-se-limpia','s55j-fb140-nota-estilo'];
 console.info('Postimity Studio v' + APP_VERSION);
@@ -3131,7 +3132,7 @@ async function verifyAuthCode() {
     // arranque carga la marca limpia y aplica el enlace del correo si lo hay (FB-141).
     const cuentaPrevia = (loadBrand() || {}).brandId || brandId || null;
     if (cuentaPrevia && cuentaPrevia !== (data.brandId || null)) limpiarDatosDeCuenta();
-    if (_sesionEnPagina) { window.location.reload(); return; }
+    if (_sesionEnPagina) { salirLimpio(); window.location.reload(); return; }   // FB-146
     if (data.brandId) {
       // Existing user — load their brand
       brandId = data.brandId;
@@ -3288,6 +3289,35 @@ function limpiarDatosDeCuenta() {
   } catch (e) { console.warn('limpiarDatosDeCuenta:', e && e.message); }
 }
 
+// FB-146 (S55m, humo del 3 oct, Safari): tras cambiar de cuenta, el tipo de flyer y el tema del carrusel de la
+// cuenta anterior seguian escritos. La recarga de FB-143 limpia datos y memoria, pero el navegador puede
+// restaurar lo escrito en los campos. Cada control vuelve a su valor de fabrica ANTES de salir de la pagina,
+// y otra vez al llegar (VACIAR_AL_LLEGAR), por si el navegador los restaura de todos modos.
+const VACIAR_AL_LLEGAR = 'postimity_vaciar_campos';
+function vaciarControles(sel) {
+  document.querySelectorAll(sel || 'input, textarea, select').forEach(el => {
+    try {
+      if (el.tagName === 'SELECT') {
+        let def = -1;
+        Array.from(el.options || []).forEach((o, i) => { if (o.defaultSelected && def < 0) def = i; });
+        el.selectedIndex = def < 0 ? 0 : def;
+      } else if (el.type === 'checkbox' || el.type === 'radio') el.checked = el.defaultChecked;
+      else if (el.type !== 'file') el.value = el.defaultValue;
+    } catch (e) {}
+  });
+}
+function salirLimpio() {
+  vaciarControles();
+  try { sessionStorage.setItem(VACIAR_AL_LLEGAR, '1'); } catch (e) {}
+}
+// Al llegar solo se vacia lo que el dueno ESCRIBE para crear (los siete modos y el ajuste): el formulario de la
+// marca lo llena la carga de la marca y no se toca, para no borrar lo que el arranque ya pinto.
+const CAMPOS_DEL_CREADOR = ['post', 'flyer', 'testimonial', 'carousel', 'enhance', 'video', 'adjust'].map(m => '#' + m + 'Input textarea, #' + m + 'Input input, #' + m + 'Input select, textarea#' + m + 'Input, input#' + m + 'Input').join(', ');
+window.addEventListener('pageshow', function () {
+  try { if (sessionStorage.getItem(VACIAR_AL_LLEGAR) !== '1') return; sessionStorage.removeItem(VACIAR_AL_LLEGAR); } catch (e) { return; }
+  vaciarControles(CAMPOS_DEL_CREADOR);
+});
+
 async function doLogout() {
   try {
     await apiFetch(WORKER, {
@@ -3302,6 +3332,7 @@ async function doLogout() {
   resetAuthScreen();   // S39-4: sin esto authScreen aparece congelada en "Verificando..."
   showScreen('authScreen');
   // FB-143: el estado en memoria no se enumera (esa lista se pudre: S38, S39). La pagina se recarga limpia.
+  salirLimpio();   // FB-146: vaciarControles() y la marca para vaciar tambien al llegar
   window.location.replace(window.location.pathname);
 }
 
@@ -5372,15 +5403,26 @@ function lzWrap(ctx, txt, maxW) {
   if (line) out.push(line);
   return out;
 }
-// Renglones parejos: el mismo numero de lineas, sin dejar una palabra sola al final.
+// Renglones parejos: el mismo numero de lineas que el corte normal, repartidas para que la mas ancha sea lo
+// mas corta posible y la ultima no se quede con una palabra sola («ENTRENAS FUERTE / PERO COMES SIN / ORDEN»,
+// humo del 3 oct). Se prueban todos los cortes: un titulo tiene pocas palabras.
 function lzBalance(ctx, txt, maxW) {
   const base = lzWrap(ctx, txt, maxW);
-  if (base.length < 2) return base;
-  let lo = maxW * 0.45, hi = maxW, best = base;
-  for (let i = 0; i < 12; i++) {
-    const mid = (lo + hi) / 2, l = lzWrap(ctx, txt, mid);
-    if (l.length <= base.length && l.every(x => ctx.measureText(x).width <= maxW)) { best = l; hi = mid; } else lo = mid;
-  }
+  const W = String(txt || '').trim().split(/\s+/).filter(Boolean), n = base.length;
+  if (n < 2 || n > 5 || W.length > 24) return base;   // tope: probar todos los cortes solo es barato en un titulo
+  let best = base, bestCosto = Infinity;
+  const probar = (ini, lineas) => {
+    if (lineas.length === n - 1) {
+      const todas = lineas.concat([W.slice(ini).join(' ')]);
+      const anchos = todas.map(l => ctx.measureText(l).width), mx = Math.max.apply(null, anchos);
+      if (mx > maxW) return;
+      const costo = mx + (mx - anchos[n - 1]) * 0.5 + anchos.reduce((a, w) => a + (mx - w), 0) * 0.05;
+      if (costo < bestCosto) { bestCosto = costo; best = todas; }
+      return;
+    }
+    for (let fin = ini + 1; fin <= W.length - (n - 1 - lineas.length); fin++) probar(fin, lineas.concat([W.slice(ini, fin).join(' ')]));
+  };
+  probar(0, []);
   return best;
 }
 // ACHICAR ANTES DE CORTAR (AR-28): la letra mas grande que cabe en ancho y numero de lineas; si ni a la
@@ -5389,7 +5431,9 @@ function lzFit(ctx, txt, o) {
   let px = o.pxMax, lines = [];
   for (; px >= o.pxMin; px -= 2) {
     ctx.font = lzFont(o.peso, px, o.cursiva, o.fam);
-    lines = (o.balance === false ? lzWrap : lzBalance)(ctx, txt, o.maxW);
+    lines = lzWrap(ctx, txt, o.maxW);
+    if (lines.length > o.maxLines) continue;   // no cabe a este tamano: no se gasta en emparejar
+    if (o.balance !== false) lines = lzBalance(ctx, txt, o.maxW);
     if (lines.length <= o.maxLines && lines.every(l => ctx.measureText(l).width <= o.maxW)) break;
   }
   let cortado = false;
@@ -5493,23 +5537,32 @@ async function renderCarouselSlide(slide, brand, coverImageUrl, totalSlides) {
     ctx.strokeStyle = 'rgba(255,255,255,0.08)'; ctx.lineWidth = 90;
     ctx.beginPath(); ctx.arc(W - 60, H - (story ? 250 : 40), story ? 430 : 330, 0, Math.PI * 2); ctx.stroke();
     const tel = formatoTelefono(brand?.whatsapp);
-    const fT = lzFit(ctx, lzTit(voz, slide.headline), { peso: voz.peso, fam: voz.fam, pxMax: Math.round((story ? 104 : 92) * voz.k), pxMin: 50, lh: voz.lh, maxW: MAXW, maxLines: 4 });
-    const fB = lzFit(ctx, slide.body || '', { peso: 500, pxMax: story ? 46 : 40, pxMin: 30, lh: 1.36, maxW: MAXW, maxLines: 4, balance: false });
-    const hB = fB.lines.length ? fB.h + 30 : 0, hBtn = 112, hTel = tel ? 40 + 30 + 14 + 64 : 0;
+    const txtB = (slide.cta || 'Contáctanos').slice(0, 30) + '  →';
+    const rotulo = tel && !/whatsapp/i.test(txtB);   // si el boton ya dice WhatsApp, no se repite de rotulo (humo del 3 oct)
+    const hBtn = 112, hTel = tel ? 40 + (rotulo ? 30 + 14 : 0) + 64 : 0;
     const top = TOPC, bot = B0 - 60;
-    let y = Math.round(top + Math.max(0, bot - top - (fT.h + hB + 48 + hBtn + hTel)) * 0.46);
+    // La letra crece hasta llenar la lamina (humo del 3 oct: en 4:5 quedaba media lamina vacia).
+    let fT, fB, hB, alto;
+    // Y si ni a su tamano base cabe (titulo de tres lineas mas telefono), se achica: nunca pisa los puntos de avance.
+    for (let s = 1.30; s > 0.64; s -= 0.05) {
+      fT = lzFit(ctx, lzTit(voz, slide.headline), { peso: voz.peso, fam: voz.fam, pxMax: Math.round((story ? 104 : 92) * voz.k * s), pxMin: Math.round(50 * Math.min(1, s)), lh: voz.lh, maxW: MAXW, maxLines: 4 });
+      fB = lzFit(ctx, slide.body || '', { peso: 500, pxMax: Math.round((story ? 46 : 40) * s), pxMin: Math.round(30 * Math.min(1, s)), lh: 1.36, maxW: MAXW, maxLines: 4, balance: false });
+      hB = fB.lines.length ? fB.h + 30 : 0; alto = fT.h + hB + 48 + hBtn + hTel;
+      if (alto <= (bot - top) * (s > 0.99 ? 0.80 : 0.96)) break;
+    }
+    let y = Math.round(top + Math.max(0, bot - top - alto) * 0.46);
     y = lzLineas(ctx, fT, M, y, voz.lh, cTitulo);
     if (fB.lines.length) { y += 30; y = lzLineas(ctx, fB, M, y, 1.36, cCuerpo); }
     y += 48;
-    const txtB = (slide.cta || 'Contáctanos').slice(0, 30) + '  →';
     ctx.font = lzFont(800, 38);
     lzPildora(ctx, M, y, Math.min(MAXW, ctx.measureText(txtB).width + 96), hBtn, pal.acentoOscuro);
     ctx.font = lzFont(800, 38); ctx.fillStyle = lzTintaSobre(pal.acentoOscuro, pal.tinta); ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
     ctx.fillText(txtB, M + 48, y + 70);
     y += hBtn;
     if (tel) {
-      y += 40 + 30; lzVersal(ctx, 'WhatsApp', M, y, 26, cSuave);
-      y += 14 + 64; ctx.font = lzFont(800, 64); ctx.fillStyle = '#ffffff'; ctx.textAlign = 'left';
+      y += 40;
+      if (rotulo) { y += 30; lzVersal(ctx, 'WhatsApp', M, y, 26, cSuave); y += 14; }
+      y += 64; ctx.font = lzFont(800, 64); ctx.fillStyle = '#ffffff'; ctx.textAlign = 'left';
       ctx.fillText(tel, M, y - 8);
     }
     progreso(B0 - 16);
@@ -5522,11 +5575,16 @@ async function renderCarouselSlide(slide, brand, coverImageUrl, totalSlides) {
     ctx.font = lzFont(voz.peso, pxN, false, voz.fam); ctx.textAlign = 'right'; ctx.textBaseline = 'alphabetic';
     ctx.fillStyle = lzMix(pal.P, '#ffffff', 0.80);
     ctx.fillText(num, W + pxN * 0.04, H + pxN * (story ? 0.02 : 0.10));
-    const fT = lzFit(ctx, lzTit(voz, slide.headline), { peso: voz.peso, fam: voz.fam, pxMax: Math.round((story ? 100 : 86) * voz.k), pxMin: 48, lh: voz.lh, maxW: MAXW, maxLines: 4 });
-    const fB = lzFit(ctx, slide.body || '', { peso: 500, pxMax: story ? 48 : 42, pxMin: 30, lh: 1.38, maxW: MAXW, maxLines: 6, balance: false });
-    const hB = fB.lines.length ? fB.h + 34 : 0;
     const top = TOPC, bot = B0 - 60;
-    let y = Math.round(top + Math.max(0, bot - top - (fT.h + 34 + 12 + hB)) * 0.40);
+    // La letra crece hasta llenar la lamina (humo del 3 oct: en 4:5 quedaba media lamina vacia).
+    let fT, fB, hB, alto;
+    for (let s = 1.40; s > 0.64; s -= 0.05) {
+      fT = lzFit(ctx, lzTit(voz, slide.headline), { peso: voz.peso, fam: voz.fam, pxMax: Math.round((story ? 100 : 86) * voz.k * s), pxMin: Math.round(48 * Math.min(1, s)), lh: voz.lh, maxW: MAXW, maxLines: 4 });
+      fB = lzFit(ctx, slide.body || '', { peso: 500, pxMax: Math.round((story ? 48 : 42) * s), pxMin: Math.round(30 * Math.min(1, s)), lh: 1.38, maxW: MAXW, maxLines: 7, balance: false });
+      hB = fB.lines.length ? fB.h + 34 : 0; alto = fT.h + 34 + 12 + hB;
+      if (alto <= (bot - top) * (s > 0.99 ? 0.82 : 0.96)) break;
+    }
+    let y = Math.round(top + Math.max(0, bot - top - alto) * 0.42);
     y = lzLineas(ctx, fT, M, y, voz.lh, cTitulo);
     y += 34; ctx.fillStyle = cAcento; ctx.fillRect(M, y, 96, 12); y += 12;
     if (fB.lines.length) { y += 34; y = lzLineas(ctx, fB, M, y, 1.38, cCuerpo); }
@@ -5771,7 +5829,8 @@ async function generate(opts = {}) {
   const _v = (id) => (document.getElementById(id)?.value || '').trim();
   const _sig = [mode, flyerMode, platform, pillar, enhanceMode, _v('postText'), _v('testText'), _v('enhancePrompt'), _v('carouselTopic')].join('|');
   beginAction(_sig, opts.retry === true);
-  lastInput={mode,platform,pillar,bg,brand,flyerMode};
+  // FB-145 (S55m): los datos del flyer se guardan con la generacion; al regenerar la imagen el formulario puede estar ya vacio (FB-131).
+  lastInput={mode,platform,pillar,bg,brand,flyerMode, flyerData: mode==='flyer' ? getFlyerData() : null};
 
   try {
     if(mode==='post') await genPost(brand,bg);
@@ -9189,6 +9248,11 @@ async function regenImage() {
       if (lastGeneratedData) lastGeneratedData.carouselImages = carouselResults;
       // El slide 0 ya viene horneado: se muestra sin tocar la base limpia.
       await setResultImage(carouselResults[0], { base:false, redraw:false, save:true });
+    } else if (lastInput?.mode === 'flyer' && lastInput.flyerData) {
+      // FB-145 (S55m, humo del 3 oct): «Nueva imagen» en un flyer IA dejaba la foto sola, sin texto, y cobraba.
+      // El flyer se vuelve a componer sobre la imagen nueva, con los datos con los que se genero.
+      const flyerNuevo = await composeFlyerCanvas(imgRes.imageUrl, lastInput.flyerData, loadBrand(), pieceFormat);
+      await setResultImage(flyerNuevo, { save:true });
     } else {
       // S37 / RD-27: una sola llamada reemplaza src + lastResult + lastGeneratedData
       // + originalImageUrl + ovBaked + re-dibujo + re-guardado. Cierra S35-12, S35-13
