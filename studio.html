@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="2.50.8">
+<meta name="app-version" content="2.50.9">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Postimity Studio — Tu estudio de contenido con IA</title>
 <meta name="description" content="Crea posts, flyers, carruseles y videos profesionales con IA. Describe tu negocio una vez y genera contenido listo para publicar en 20 segundos.">
@@ -2364,7 +2364,7 @@ function persistSlides(imgs) {
 }
 
 // APP_VERSION (S34) — deploy verification. Must match worker /version and all HTML files.
-const APP_VERSION = '2.50.8'; // 2 oct 2026 — S55l: FB-112 el plan del mes completo abre en hoy · antes: 2 oct 2026 — S55k: FB-143 cambiar de cuenta recarga y limpia · antes: 2 oct 2026 — S55k: D64 paleta base en el alta, nota de estilo del Agente · antes: 2 oct 2026 — S55k: sin cambios de estudio (FB-125/FB-126 viven en el worker) · antes: 2 oct 2026 — S55k: FB-142 texto del hint, FB-141 enlace sobrevive al login, plan Premium activo · antes: 1 oct 2026 — S55j: FB-137 hint al entrar por codigo, FB-139 foto usada se limpia, FB-140 nota de estilo en el Agente · antes: 30 sep 2026 — S55i/S55j: FB-133 historial, FB-131 campos, FB-135 tipo de flyer obligatorio, D62 hint de giro regulado · antes: 29 sep 2026 — S55h: FB-132 el plan del Agente se recupera tras un corte de red sin re-pedirlo · antes: S55g: D57 tarjetas del Agente con una etiqueta de cada tipo, tarjeta flyer de la oferta y costo antes de generar; S55f: realPhoto en el video (D58)
+const APP_VERSION = '2.50.9'; // 2 oct 2026 — S55l: semanas reales (lunes a domingo), los primeros días del mes muestran el plan anterior, la fecha especial dice cuándo es · antes: 2 oct 2026 — S55l: FB-112 el plan del mes completo abre en hoy · antes: 2 oct 2026 — S55k: FB-143 cambiar de cuenta recarga y limpia · antes: 2 oct 2026 — S55k: D64 paleta base en el alta, nota de estilo del Agente · antes: 2 oct 2026 — S55k: sin cambios de estudio (FB-125/FB-126 viven en el worker) · antes: 2 oct 2026 — S55k: FB-142 texto del hint, FB-141 enlace sobrevive al login, plan Premium activo · antes: 1 oct 2026 — S55j: FB-137 hint al entrar por codigo, FB-139 foto usada se limpia, FB-140 nota de estilo en el Agente · antes: 30 sep 2026 — S55i/S55j: FB-133 historial, FB-131 campos, FB-135 tipo de flyer obligatorio, D62 hint de giro regulado · antes: 29 sep 2026 — S55h: FB-132 el plan del Agente se recupera tras un corte de red sin re-pedirlo · antes: S55g: D57 tarjetas del Agente con una etiqueta de cada tipo, tarjeta flyer de la oferta y costo antes de generar; S55f: realPhoto en el video (D58)
 window.APP_VERSION = APP_VERSION;
 // El log de version vive unas lineas mas abajo (console.info). No agregar otro aqui:
 // S38 borro POSTIMITY_VERSION para tener un solo log y este lo volvio a duplicar.
@@ -2575,6 +2575,7 @@ const T = {
     // ── Agent labels ──
     agentModePost:'📌 Post', agentModeCarousel:'🎠 Carrusel', agentModeVideo:'🎬 Video',
     agentStyleNote:'Fotorrealista o Ilustrado es solo una sugerencia. Toca la tarjeta y elige el que prefieras antes de generar.',
+    agentStartsNote:'Este plan arranca el {date}. Mientras tanto puedes crear publicaciones sueltas desde el estudio.',
     agentStylePhoto:'📷 Fotorrealista', agentStyleIllus:'🖼️ Ilustrado', agentStyleAbstract:'🎨 Abstracto',
     // ── Reminders ──
     remTitle:'Recordatorios automáticos', remSub:'Aviso cálido cada mañana antes de tu post del día',
@@ -2875,6 +2876,7 @@ const T = {
     // ── Agent labels ──
     agentModePost:'📌 Post', agentModeCarousel:'🎠 Carousel', agentModeVideo:'🎬 Video',
     agentStyleNote:'Photorealistic or Illustrated is only a suggestion. Tap the card and pick the one you prefer before generating.',
+    agentStartsNote:'This plan starts on {date}. Meanwhile you can create individual posts from the studio.',
     agentStylePhoto:'📷 Photorealistic', agentStyleIllus:'🖼️ Illustrated', agentStyleAbstract:'🎨 Abstract',
     // ── Reminders ──
     remTitle:'Auto reminders', remSub:'A warm nudge every morning before your daily post',
@@ -7666,6 +7668,19 @@ function getCurrentMonth() {
   return now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
 }
 
+// S55l (operador, 2 oct): semanas reales. El plan de un mes va de su primer lunes al domingo anterior
+// al primer lunes del siguiente, así que los primeros días de un mes son la última semana del plan
+// ANTERIOR. getCurrentMonth() sigue siendo el mes que se GENERA; agentRunningMonth() es el del plan
+// que corre hoy, y agentMonthShown() el del plan que está en pantalla (el de sus recordatorios).
+function agentRunningMonth() {
+  const now = new Date(), y = now.getFullYear(), m = now.getMonth();
+  const lunes = 1 + ((8 - new Date(y, m, 1).getDay()) % 7);
+  if (now.getDate() >= lunes) return y + '-' + String(m + 1).padStart(2, '0');
+  return m === 0 ? (y - 1) + '-12' : y + '-' + String(m).padStart(2, '0');
+}
+let agentShownMonth = null;
+function agentMonthShown() { return (typeof agentShownMonth === 'string' && agentShownMonth) || getCurrentMonth(); }
+
 function getMonthLabel(monthStr) {
   const [y, m] = monthStr.split('-');
   return t('months')[parseInt(m) - 1] + ' ' + y;
@@ -7683,15 +7698,20 @@ function showAgentScreen() {
   // Make sure config is shown (reset state)
   showAgentConfig();
 
-  // Try to load saved plan for this month
+  // Try to load saved plan for this month. S55l: si este mes todavía no tiene plan y aún corre el del
+  // mes anterior (días previos al primer lunes), se muestra ese: su última semana cubre estos días.
   const brand = loadBrand();
+  agentShownMonth = null;
   if(brand?.brandId) {
-    apiFetch(WORKER,{ method:'POST', headers:{'Content-Type':'application/json'}, 
-      body: JSON.stringify({ mode:'get-agent-plan', brandId: brand.brandId, month })
-    }).then(r=>r.json()).then(data => {
-      if(data.success && data.plan) {
-        agentPlan = data.plan;
-        renderAgentPlan(data.plan);
+    const cargar = m => apiFetch(WORKER,{ method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ mode:'get-agent-plan', brandId: brand.brandId, month: m })
+    }).then(r=>r.json()).then(data => ({ data, m }));
+    const corriendo = agentRunningMonth();
+    cargar(month).then(x => (x.data.success && x.data.plan) || corriendo === month ? x : cargar(corriendo)).then(x => {
+      if(x.data.success && x.data.plan) {
+        agentShownMonth = x.m;
+        agentPlan = x.data.plan;
+        renderAgentPlan(x.data.plan);
       }
     }).catch(() => {});
   }
@@ -7748,6 +7768,9 @@ function paintAgentQuote() {
   const el = document.getElementById('agentCostLine');
   if (!el) return;
   const q = agentQuoteState;
+  // S55l: el mes tiene 4 o 5 semanas reales; el rótulo de cada frecuencia dice las publicaciones de ESTE mes
+  try { if (q && (q.weeks === 4 || q.weeks === 5)) document.querySelectorAll('.agent-freq-btn span').forEach(sp => {
+    const fq = Number(sp.parentElement && sp.parentElement.dataset.freq); if (fq) sp.textContent = String(sp.textContent).replace(/~\d+/, '~' + fq * q.weeks); }); } catch (e) {}
   if (!q || !q[agentFreq]) { el.innerHTML = ''; return; }
   // la frecuencia que cabe: la mayor MENOR que la elegida que el servidor marco como que cabe
   const sugiere = [3, 5, 7].filter(f => f < agentFreq && q[f] && q[f].fits === true).pop() || null;
@@ -7874,6 +7897,7 @@ async function generateAgentPlan() {
     }
 
     agentPlan = data;
+    agentShownMonth = month;   // S55l: el plan en pantalla es el recién generado
 
     // Save plan to KV (un plan recuperado ya lo guardo el servidor)
     if(brandId && !recuperado) {
@@ -7936,6 +7960,14 @@ function agentHoy() {
   return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
 }
 
+// S55l (operador): la publicación de una fecha especial va ANTES de la fecha; la tarjeta dice cuándo
+// es («Día de Muertos · 2 nov») para que no se lea como si la fecha fuera el día de la publicación.
+function agentFestWhen(post, monthNames) {
+  const m = /^(\d{4})-(\d\d)-(\d\d)$/.exec(String(post.festivityDate || ''));
+  if (!m || post.festivityDate === post.date) return '';
+  return ' · ' + Number(m[3]) + ' ' + String((monthNames || [])[Number(m[2]) - 1] || '').slice(0, 3).toLowerCase();
+}
+
 function renderAgentPlan(plan) {
   document.getElementById('agentConfigWrap').style.display = 'none';
   document.getElementById('agentPlanWrap').style.display = 'block';
@@ -7971,7 +8003,7 @@ function renderAgentPlan(plan) {
 
   // Reminder toggle card
   const brandForReminder = loadBrand();
-  const remActive = localStorage.getItem('postimity_reminders_' + getCurrentMonth()) === 'on';
+  const remActive = localStorage.getItem('postimity_reminders_' + agentMonthShown()) === 'on';
   // FB-140 (S55j): una sola nota, estatica, debajo de los recordatorios — no una por tarjeta
   container.innerHTML = renderReminderCard(remActive, brandForReminder) + '<div class="agent-style-note" style="font-size:12px;color:var(--t3);line-height:1.5;margin:8px 2px 14px">💡 ' + t('agentStyleNote') + '</div>';
   // S42 / INV-129 — localStorage pinta rapido, pero NO es la fuente de verdad: quien
@@ -7989,6 +8021,15 @@ function renderAgentPlan(plan) {
   const esPasada = post => !!hoy && typeof post.date === 'string' && post.date < hoy;
   const hayPasadas = posts.some(esPasada);
   let anclaHoy = null;
+  // S55l (operador, 2 oct): con semanas reales el plan arranca el primer lunes del mes. Una cuenta nueva
+  // que genera antes de ese lunes ve un plan que todavía no empieza: la pantalla lo dice, con la fecha.
+  if (hoy && posts.length && typeof posts[0].date === 'string' && hoy < posts[0].date) {
+    const p0 = posts[0], d0 = new Date(p0.date + 'T12:00:00'), dn = String(p0.dayName || '').toLowerCase();
+    const cuando = detectLanguage() === 'en'
+      ? ((p0.dayName ? p0.dayName + ', ' : '') + monthNames[d0.getMonth()] + ' ' + d0.getDate())
+      : ((dn ? dn + ' ' : '') + d0.getDate() + ' de ' + String(monthNames[d0.getMonth()] || '').toLowerCase());
+    container.innerHTML += '<div class="agent-starts-note" style="font-size:13px;color:var(--t2);line-height:1.5;margin:-4px 2px 14px;padding:10px 12px;background:var(--bg);border-radius:10px">🗓️ ' + t('agentStartsNote').replace('{date}', cuando) + '</div>';
+  }
 
   Object.keys(weeks).sort().forEach((wKey, wi) => {
     const wPosts = weeks[wKey];
@@ -7997,7 +8038,10 @@ function renderAgentPlan(plan) {
     const lastDate = new Date(wPosts[wPosts.length-1].date + 'T12:00:00');
     const weekDiv = document.createElement('div');
     weekDiv.className = 'agent-week';
-    const range = firstDate.getDate() + ' – ' + lastDate.getDate() + ' ' + monthNames[firstDate.getMonth()];
+    // S55l: la semana es real (lunes a domingo) y puede cruzar de mes: «26 octubre – 1 noviembre»
+    const range = firstDate.getMonth() === lastDate.getMonth()
+      ? firstDate.getDate() + ' – ' + lastDate.getDate() + ' ' + monthNames[firstDate.getMonth()]
+      : firstDate.getDate() + ' ' + monthNames[firstDate.getMonth()] + ' – ' + lastDate.getDate() + ' ' + monthNames[lastDate.getMonth()];
     weekDiv.innerHTML = '<div class="agent-week-label">' + t('agentWeekLabel').replace('{n}', weekNo).replace('{range}', range) + '</div>';
 
     // S28: Render weekly theme if available
@@ -8022,7 +8066,7 @@ function renderAgentPlan(plan) {
         '<span class="apc-pilar">' + (post.pilar||'') + '</span>' +
         '<span class="apc-mode ' + modeClass + '">' + chips.modeLabel + '</span>' +
         (chips.originLabel ? '<span class="apc-style' + (['real', 'real-enhance', 'animada'].includes(chips.origin) ? ' real' : '') + '">' + chips.originLabel + '</span>' : '') +
-        (post.festivity ? '<span class="apc-fest">🎉 ' + post.festivity + '</span>' : '') +
+        (post.festivity ? '<span class="apc-fest">🎉 ' + post.festivity + agentFestWhen(post, monthNames) + '</span>' : '') +
         '</div>' +
         '<div class="apc-topic">' + (post.topic||'') + '</div>' +
         '<div class="apc-prompt">' + (post.prompt||'') + '</div>' +
@@ -8137,7 +8181,7 @@ async function reconcileReminderState(brand) {
     });
     const data = await res.json().catch(() => null);
     if(!res.ok || !data) return;                       // sin respuesta util: no tocar nada
-    const month = getCurrentMonth();
+    const month = agentMonthShown();
     const rem = data.reminder;
     // El worker solo envia si active y el mes coincide (ver handleScheduled). La tarjeta
     // debe reflejar exactamente esa condicion, no una aproximacion.
@@ -8160,7 +8204,7 @@ async function reconcileReminderState(brand) {
 }
 
 function renderReminderCard(active, brand) {
-  const month = getCurrentMonth();
+  const month = agentMonthShown();
   const monthLabel = getMonthLabel(month);
   const bizName = brand?.name || '';
   const savedEmail = localStorage.getItem('postimity_rem_email_' + (brandId||'')) || (brand?.email||'');
@@ -8223,7 +8267,7 @@ async function activateReminders() {
   if(!email) { showToast(t('toastEmailReminder')); return; }
 
   const brand = loadBrand();
-  const month = getCurrentMonth();
+  const month = agentMonthShown();
   const lang = detectLanguage();
 
   // S42 / G2 — quien envia los recordatorios es el WORKER, leyendo KV. localStorage solo
@@ -8264,7 +8308,7 @@ async function activateReminders() {
 // Encender pasa por activateReminders, que exige confirmacion del worker. Esta funcion
 // solo apaga.
 async function toggleReminders() {
-  const month = getCurrentMonth();
+  const month = agentMonthShown();
   const brand = loadBrand();
 
   // S42 — el fallo al APAGAR es el caro. Si el KV no confirma, el worker sigue enviando
