@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="2.51.1">
+<meta name="app-version" content="2.51.3">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Postimity Studio — Tu estudio de contenido con IA</title>
 <meta name="description" content="Crea posts, flyers, carruseles y videos profesionales con IA. Describe tu negocio una vez y genera contenido listo para publicar en 20 segundos.">
@@ -442,7 +442,7 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
 .carousel-slides-preview::-webkit-scrollbar-thumb{background:var(--b);border-radius:3px}
 .cs-preview{flex-shrink:0;height:156px;border-radius:10px;overflow:hidden;border:2.5px solid var(--bor);cursor:pointer;position:relative;scroll-snap-align:start;transition:.15s}
 .cs-preview:hover{border-color:var(--b);transform:scale(1.03)}
-.cs-preview img{height:100%;width:auto;display:block}   /* S55m: la miniatura muestra la lamina ENTERA (4:5 o 9:16); el recorte cuadrado dejaba el numero encima del titulo */
+.cs-preview img{width:100%;height:100%;object-fit:cover;display:block}   /* S55m: la caja lleva la proporcion de la lamina (renderSlideStrip): se ve ENTERA. FB-147: con ancho en auto Safari la pintaba de ancho cero */
 .cs-preview .cs-num{position:absolute;top:5px;left:5px;background:rgba(0,0,0,.65);color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px}
 .cs-preview .cs-dl{position:absolute;bottom:5px;right:5px;background:var(--b);color:#fff;border:none;border-radius:5px;font-size:11px;padding:4px 8px;cursor:pointer;opacity:0;transition:.15s;font-family:inherit}
 .cs-preview:hover .cs-dl{opacity:1}
@@ -2364,7 +2364,7 @@ function persistSlides(imgs) {
 }
 
 // APP_VERSION (S34) — deploy verification. Must match worker /version and all HTML files.
-const APP_VERSION = '2.51.1'; // 3 oct 2026 — S55m (humo de la version anterior): FB-145 regenerar un flyer conserva su texto, FB-146 campos vacios al cambiar de cuenta, laminas que llenan, renglones parejos · antes: 3 oct 2026 — S55m: el lienzo como pieza de diseño (FB-96, FB-100): fuente de marca, jerarquia, color del primario, telefono con formato y voz por giro (D65, D66) · antes: 2 oct 2026 — S55l: semanas reales (lunes a domingo), los primeros días del mes muestran el plan anterior, la fecha especial dice cuándo es · antes: 2 oct 2026 — S55l: FB-112 el plan del mes completo abre en hoy · antes: 2 oct 2026 — S55k: FB-143 cambiar de cuenta recarga y limpia · antes: 2 oct 2026 — S55k: D64 paleta base en el alta, nota de estilo del Agente · antes: 2 oct 2026 — S55k: sin cambios de estudio (FB-125/FB-126 viven en el worker) · antes: 2 oct 2026 — S55k: FB-142 texto del hint, FB-141 enlace sobrevive al login, plan Premium activo · antes: 1 oct 2026 — S55j: FB-137 hint al entrar por codigo, FB-139 foto usada se limpia, FB-140 nota de estilo en el Agente · antes: 30 sep 2026 — S55i/S55j: FB-133 historial, FB-131 campos, FB-135 tipo de flyer obligatorio, D62 hint de giro regulado · antes: 29 sep 2026 — S55h: FB-132 el plan del Agente se recupera tras un corte de red sin re-pedirlo · antes: S55g: D57 tarjetas del Agente con una etiqueta de cada tipo, tarjeta flyer de la oferta y costo antes de generar; S55f: realPhoto en el video (D58)
+const APP_VERSION = '2.51.3'; // 3 oct 2026 — S55m: sin cambios de estudio (FB-148 vive en el worker) · antes: 3 oct 2026 — S55m: FB-147 las miniaturas del carrusel se ven al generarlo, una sola escala de letra por carrusel, el nombre del negocio no se parte · antes: 3 oct 2026 — S55m (humo de la version anterior): FB-145 regenerar un flyer conserva su texto, FB-146 campos vacios al cambiar de cuenta, laminas que llenan, renglones parejos · antes: 3 oct 2026 — S55m: el lienzo como pieza de diseño (FB-96, FB-100): fuente de marca, jerarquia, color del primario, telefono con formato y voz por giro (D65, D66) · antes: 2 oct 2026 — S55l: semanas reales (lunes a domingo), los primeros días del mes muestran el plan anterior, la fecha especial dice cuándo es · antes: 2 oct 2026 — S55l: FB-112 el plan del mes completo abre en hoy · antes: 2 oct 2026 — S55k: FB-143 cambiar de cuenta recarga y limpia · antes: 2 oct 2026 — S55k: D64 paleta base en el alta, nota de estilo del Agente · antes: 2 oct 2026 — S55k: sin cambios de estudio (FB-125/FB-126 viven en el worker) · antes: 2 oct 2026 — S55k: FB-142 texto del hint, FB-141 enlace sobrevive al login, plan Premium activo · antes: 1 oct 2026 — S55j: FB-137 hint al entrar por codigo, FB-139 foto usada se limpia, FB-140 nota de estilo en el Agente · antes: 30 sep 2026 — S55i/S55j: FB-133 historial, FB-131 campos, FB-135 tipo de flyer obligatorio, D62 hint de giro regulado · antes: 29 sep 2026 — S55h: FB-132 el plan del Agente se recupera tras un corte de red sin re-pedirlo · antes: S55g: D57 tarjetas del Agente con una etiqueta de cada tipo, tarjeta flyer de la oferta y costo antes de generar; S55f: realPhoto en el video (D58)
 window.APP_VERSION = APP_VERSION;
 // El log de version vive unas lineas mas abajo (console.info). No agregar otro aqui:
 // S38 borro POSTIMITY_VERSION para tener un solo log y este lo volvio a duplicar.
@@ -2375,6 +2375,7 @@ window.BUILD_FIXES = ['s50-agente-abre-lo-que-anuncia','s50-copiar-no-miente','s
   'contador-sincronizado-al-refinar','etiqueta-de-cobro-en-botones',
   'fb27-growth-entra-sin-firma','fb27-la-eleccion-del-usuario-manda',
   's41b-galeria-oculta-y-desarmada-en-flyer-y-testimonio',
+  's55m-fb147-miniaturas-del-carrusel','s55m-una-escala-por-carrusel',
   's55m-fb145-regen-flyer-con-texto','s55m-fb146-campos-vacios-al-cambiar-de-cuenta','s55m-laminas-que-llenan',
   's55m-lienzo-diseno','s55m-voz-por-giro','s55m-telefono-con-formato',
   's55k-fb143-cambio-de-cuenta-limpio','s55k-d64-paleta-base','s55k-nota-estilo','s55k-fb141-enlace-tras-login','s55k-fb142-hint','s55k-plan-premium','s55h-fb132-agente-recupera-plan','s55g-d57-tarjetas-sin-contradiccion','s55g-d57-flyer-oferta-del-dueno','s55g-d57-costo-antes-de-generar','s55f-d58-realphoto-video','s55i-fb133-historial-guarda','s55i-fb131-campos-limpios','s55j-fb135-tipo-flyer-obligatorio','s55j-d62-hint-regulado','s55j-fb137-regulado-al-entrar','s55j-fb139-foto-usada-se-limpia','s55j-fb140-nota-estilo'];
@@ -5197,6 +5198,10 @@ function renderSlideStrip(images, activeIdx) {
   images.forEach(function(url, i) {
     const div = document.createElement('div');
     div.className = 'cs-preview' + (i === act ? ' active' : '');
+    // FB-147 (S55m): la proporcion de la miniatura es la de la lamina y se declara aqui; no se le deja al navegador.
+    const fmtMini = FORMAT_SIZE[pieceFormat] || FORMAT_SIZE.portrait;
+    div.style.aspectRatio = fmtMini[0] + ' / ' + fmtMini[1];
+    div.style.height = '156px'; div.style.width = Math.round(156 * fmtMini[0] / fmtMini[1]) + 'px';
     div.innerHTML = '<img src="' + url + '" alt="Slide ' + (i+1) + '"><span class="cs-num">' + (i+1) +
       '</span><button class="cs-dl" onclick="event.stopPropagation();downloadCarouselSlide(' + i +
       ')" title="' + t('histDlSlide') + '">⬇</button>';
@@ -5287,7 +5292,7 @@ async function genCarousel(brand, bg) {
       : 'Carousel did not generate correctly. Try a more specific topic.');
   }
   for (let i = 0; i < slides.length; i++) {
-    const dataUrl = await renderCarouselSlide(slides[i], brand, res.coverImage, slides.length);
+    const dataUrl = await renderCarouselSlide(slides[i], brand, res.coverImage, slides.length, slides);
     carouselResults.push(dataUrl);
   }
   setStep(3); setStep(4);
@@ -5315,8 +5320,16 @@ function lzVoz() {
   const v = Object.prototype.hasOwnProperty.call(LZ_VOZ_POR_NICHO, nichoState) ? LZ_VOZ_POR_NICHO[nichoState] : 'moderno';
   return LZ_VOCES[v] || LZ_VOCES.moderno;
 }
-function lzTit(v, txt) {
-  const s = String(txt || '').trim();
+// El nombre del negocio no se parte entre dos lineas («EMPIEZA EN GYM / FIT ESTE SABADO», humo del 3 oct): sus
+// espacios se vuelven de no separacion. Solo nombres cortos: uno largo no cabria en una linea.
+function lzPegar(txt, nombre) {
+  const t = String(txt || ''), n = String(nombre || '').trim();
+  if (!n || n.indexOf(' ') < 0 || n.length > 22 || n.split(/ +/).length > 3) return t;
+  const re = new RegExp(n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/ +/g, ' +'), 'gi');
+  return t.replace(re, m => m.replace(/ +/g, '\u00a0'));
+}
+function lzTit(v, txt, nombre) {
+  const s = lzPegar(String(txt || '').trim(), nombre);
   return v.upper ? s.toUpperCase() : s;
 }
 function lzFont(peso, px, cursiva, fam) {
@@ -5396,7 +5409,7 @@ function formatoTelefono(raw) {
 function lzWrap(ctx, txt, maxW) {
   const out = [];
   let line = '';
-  for (const w of String(txt || '').trim().split(/\s+/).filter(Boolean)) {
+  for (const w of String(txt || '').trim().split(/[ \t\r\n]+/).filter(Boolean)) {   // el espacio de no separacion NO corta
     const test = line ? line + ' ' + w : w;
     if (ctx.measureText(test).width > maxW && line) { out.push(line); line = w; } else line = test;
   }
@@ -5408,7 +5421,7 @@ function lzWrap(ctx, txt, maxW) {
 // humo del 3 oct). Se prueban todos los cortes: un titulo tiene pocas palabras.
 function lzBalance(ctx, txt, maxW) {
   const base = lzWrap(ctx, txt, maxW);
-  const W = String(txt || '').trim().split(/\s+/).filter(Boolean), n = base.length;
+  const W = String(txt || '').trim().split(/[ \t\r\n]+/).filter(Boolean), n = base.length;
   if (n < 2 || n > 5 || W.length > 24) return base;   // tope: probar todos los cortes solo es barato en un titulo
   let best = base, bestCosto = Infinity;
   const probar = (ini, lineas) => {
@@ -5470,7 +5483,7 @@ function lzPildora(ctx, x, y, w, h, color) {
   ctx.beginPath(); ctx.roundRect(x, y, w, h, h / 2); ctx.fill();
 }
 
-async function renderCarouselSlide(slide, brand, coverImageUrl, totalSlides) {
+async function renderCarouselSlide(slide, brand, coverImageUrl, totalSlides, todas) {
   await lzFuenteLista();
   // D42 · S54: las laminas salen en el formato de la pieza (4:5 o 9:16), no en 1:1 (FB-79).
   const fmt = (typeof pieceFormat === 'string' && FORMAT_SIZE[pieceFormat]) ? pieceFormat : 'portrait';
@@ -5511,7 +5524,7 @@ async function renderCarouselSlide(slide, brand, coverImageUrl, totalSlides) {
       const img = coverImageUrl ? await loadImg(coverImageUrl) : null;
       if(img) drawCover(ctx, img, 0, 0, W, H, 0.5);   // D42: la portada ya viene en el formato
     } catch(e) { /* fallback already drawn */ }
-    const fT = lzFit(ctx, lzTit(voz, slide.headline), { peso: voz.peso, fam: voz.fam, pxMax: Math.round((story ? 112 : 104) * voz.k), pxMin: 54, lh: voz.lh, maxW: MAXW, maxLines: 4 });
+    const fT = lzFit(ctx, lzTit(voz, slide.headline, brand?.name), { peso: voz.peso, fam: voz.fam, pxMax: Math.round((story ? 112 : 104) * voz.k), pxMin: 54, lh: voz.lh, maxW: MAXW, maxLines: 4 });
     const fS = lzFit(ctx, slide.subheadline || '', { peso: 500, pxMax: 40, pxMin: 30, lh: 1.3, maxW: MAXW, maxLines: 2, balance: false });
     const hS = fS.lines.length ? fS.h + 22 : 0;
     let y = B0 - (14 + 30 + fT.h + hS + 44 + 76);
@@ -5545,7 +5558,7 @@ async function renderCarouselSlide(slide, brand, coverImageUrl, totalSlides) {
     let fT, fB, hB, alto;
     // Y si ni a su tamano base cabe (titulo de tres lineas mas telefono), se achica: nunca pisa los puntos de avance.
     for (let s = 1.30; s > 0.64; s -= 0.05) {
-      fT = lzFit(ctx, lzTit(voz, slide.headline), { peso: voz.peso, fam: voz.fam, pxMax: Math.round((story ? 104 : 92) * voz.k * s), pxMin: Math.round(50 * Math.min(1, s)), lh: voz.lh, maxW: MAXW, maxLines: 4 });
+      fT = lzFit(ctx, lzTit(voz, slide.headline, brand?.name), { peso: voz.peso, fam: voz.fam, pxMax: Math.round((story ? 104 : 92) * voz.k * s), pxMin: Math.round(50 * Math.min(1, s)), lh: voz.lh, maxW: MAXW, maxLines: 4 });
       fB = lzFit(ctx, slide.body || '', { peso: 500, pxMax: Math.round((story ? 46 : 40) * s), pxMin: Math.round(30 * Math.min(1, s)), lh: 1.36, maxW: MAXW, maxLines: 4, balance: false });
       hB = fB.lines.length ? fB.h + 30 : 0; alto = fT.h + hB + 48 + hBtn + hTel;
       if (alto <= (bot - top) * (s > 0.99 ? 0.80 : 0.96)) break;
@@ -5576,14 +5589,23 @@ async function renderCarouselSlide(slide, brand, coverImageUrl, totalSlides) {
     ctx.fillStyle = lzMix(pal.P, '#ffffff', 0.80);
     ctx.fillText(num, W + pxN * 0.04, H + pxN * (story ? 0.02 : 0.10));
     const top = TOPC, bot = B0 - 60;
-    // La letra crece hasta llenar la lamina (humo del 3 oct: en 4:5 quedaba media lamina vacia).
-    let fT, fB, hB, alto;
-    for (let s = 1.40; s > 0.64; s -= 0.05) {
-      fT = lzFit(ctx, lzTit(voz, slide.headline), { peso: voz.peso, fam: voz.fam, pxMax: Math.round((story ? 100 : 86) * voz.k * s), pxMin: Math.round(48 * Math.min(1, s)), lh: voz.lh, maxW: MAXW, maxLines: 4 });
-      fB = lzFit(ctx, slide.body || '', { peso: 500, pxMax: Math.round((story ? 48 : 42) * s), pxMin: Math.round(30 * Math.min(1, s)), lh: 1.38, maxW: MAXW, maxLines: 7, balance: false });
-      hB = fB.lines.length ? fB.h + 34 : 0; alto = fT.h + 34 + 12 + hB;
-      if (alto <= (bot - top) * (s > 0.99 ? 0.82 : 0.96)) break;
-    }
+    // La letra crece hasta llenar la lamina (en 4:5 quedaba media lamina vacia) y se achica si no cabe.
+    const medirLamina = (sl, s) => {
+      const fT = lzFit(ctx, lzTit(voz, sl.headline, brand?.name), { peso: voz.peso, fam: voz.fam, pxMax: Math.round((story ? 100 : 86) * voz.k * s), pxMin: Math.round(48 * Math.min(1, s)), lh: voz.lh, maxW: MAXW, maxLines: 4 });
+      const fB = lzFit(ctx, sl.body || '', { peso: 500, pxMax: Math.round((story ? 48 : 42) * s), pxMin: Math.round(30 * Math.min(1, s)), lh: 1.38, maxW: MAXW, maxLines: 7, balance: false });
+      const hB = fB.lines.length ? fB.h + 34 : 0;
+      return { fT, fB, hB, alto: fT.h + 34 + 12 + hB };
+    };
+    const escalaDe = (sl) => {
+      for (let i = 28; i > 13; i--) { if (medirLamina(sl, i / 20).alto <= (bot - top) * (i >= 20 ? 0.82 : 0.96)) return i / 20; }
+      return 0.65;
+    };
+    // UNA escala para todas las laminas interiores (humo del 3 oct: cada lamina elegia la suya y el carrusel
+    // salia con letras de tamanos distintos). Manda la lamina mas cargada; una que ni asi cabe se achica sola.
+    const interiores = Array.isArray(todas) ? todas.filter(x => x && x.type !== 'cover' && x.type !== 'cta') : [];
+    const propia = escalaDe(slide);
+    const comun = interiores.length ? Math.max(0.8, Math.min.apply(null, interiores.map(escalaDe))) : propia;   // piso 0.8: una lamina desbordada no achica a todas
+    const { fT, fB, hB, alto } = medirLamina(slide, Math.min(propia, comun));
     let y = Math.round(top + Math.max(0, bot - top - alto) * 0.42);
     y = lzLineas(ctx, fT, M, y, voz.lh, cTitulo);
     y += 34; ctx.fillStyle = cAcento; ctx.fillRect(M, y, 96, 12); y += 12;
@@ -9235,7 +9257,7 @@ async function regenImage() {
       await setResultImage(imgRes.imageUrl, { redraw:false });
       carouselResults = [];
       for (let i = 0; i < lastResult.slides.length; i++) {
-        const dataUrl = await renderCarouselSlide(lastResult.slides[i], loadBrand(), imgRes.imageUrl, lastResult.slides.length);
+        const dataUrl = await renderCarouselSlide(lastResult.slides[i], loadBrand(), imgRes.imageUrl, lastResult.slides.length, lastResult.slides);
         carouselResults.push(dataUrl);
       }
       // Update preview
@@ -10182,7 +10204,7 @@ async function redrawCanvas() {
       const cover = lastGeneratedData.imageUrl || lastResult?.coverImage || null;
       const imgs = [];
       for (let i = 0; i < lastGeneratedData.slides.length; i++) {
-        imgs.push(await renderCarouselSlide(lastGeneratedData.slides[i], brand, cover, lastGeneratedData.slides.length));
+        imgs.push(await renderCarouselSlide(lastGeneratedData.slides[i], brand, cover, lastGeneratedData.slides.length, lastGeneratedData.slides));
       }
       carouselResults = imgs;
       if (lastResult) lastResult.carouselImages = imgs;
@@ -10268,7 +10290,7 @@ async function composeFlyerCanvas(photoSrc, fd, brand, fmt) {
   const tinAc = lzTintaSobre(pal.acentoOscuro, pal.tinta);
   const bloques = [
     { kind:'rule', txt:(fd.title||'').trim(), nombre: story ? '' : (brand?.name||'').trim().slice(0,30), px:24, min:18 },
-    { kind:'titulo', txt:lzTit(voz, fd.title), px:Math.round((story ? 116 : 108) * voz.k), min:50, lh:voz.lh, maxLines:4, peso:voz.peso, fam:voz.fam, color:'#ffffff' },
+    { kind:'titulo', txt:lzTit(voz, fd.title, brand?.name), px:Math.round((story ? 116 : 108) * voz.k), min:50, lh:voz.lh, maxLines:4, peso:voz.peso, fam:voz.fam, color:'#ffffff' },
     { kind:'texto', txt:(fd.subtitle||'').trim(),  px:42, min:28, lh:1.28, maxLines:2, peso:500, color:'rgba(255,255,255,0.92)' },
     { kind:'chips', items:infoItems, precio, txt:infoItems.concat(precio).join(' ').trim(), px:30, min:22 },
     { kind:'cta', txt:telefono, px:36, min:26 },
@@ -10292,7 +10314,7 @@ async function composeFlyerCanvas(photoSrc, fd, brand, fmt) {
     let alto = 0, cortado = false; const plan = [];
     for (const b of bloques) {
       const px = Math.max(b.min, Math.round(b.px * k));
-      if (b.kind === 'rule') { const h = 12 + (b.nombre ? 18 + px : 14); plan.push({ b, px, h }); alto += h + GAP; continue; }   // sin nombre, un respiro: las mayusculas acentuadas tocaban la barra
+      if (b.kind === 'rule') { const h = 12 + (b.nombre ? 28 + px : 14) + (voz.upper ? 8 : 0); plan.push({ b, px, h }); alto += h + GAP; continue; }   // sin nombre, un respiro: las mayusculas acentuadas tocaban la barra
       if (b.kind === 'chips') {
         const filas = medirChips(b, px);
         const h = filas.length * Math.round(px * 2.1) + (filas.length - 1) * CHIP_GAP;
@@ -10353,7 +10375,7 @@ async function composeFlyerCanvas(photoSrc, fd, brand, fmt) {
     if (b.kind === 'rule') {                       // barra de acento sobre el titulo, y el nombre de rotulo
       ctx.fillStyle = pal.acentoOscuro;
       ctx.fillRect(M, y, 96, 12);
-      if (b.nombre) lzVersal(ctx, b.nombre, M, y + 12 + 18 + Math.round(px * 0.82), px, 'rgba(255,255,255,0.86)');
+      if (b.nombre) lzVersal(ctx, b.nombre, M, y + 12 + 28 + Math.round(px * 0.82), px, 'rgba(255,255,255,0.86)');
       y += it.h + GAP; continue;
     }
     if (b.kind === 'chips') {                      // precio (fuerte) · fecha · horario, sueltos
