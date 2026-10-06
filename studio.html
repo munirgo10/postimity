@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="2.51.3">
+<meta name="app-version" content="2.51.4">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Postimity Studio — Tu estudio de contenido con IA</title>
 <meta name="description" content="Crea posts, flyers, carruseles y videos profesionales con IA. Describe tu negocio una vez y genera contenido listo para publicar en 20 segundos.">
@@ -2364,7 +2364,7 @@ function persistSlides(imgs) {
 }
 
 // APP_VERSION (S34) — deploy verification. Must match worker /version and all HTML files.
-const APP_VERSION = '2.51.3'; // 3 oct 2026 — S55m: sin cambios de estudio (FB-148 vive en el worker) · antes: 3 oct 2026 — S55m: FB-147 las miniaturas del carrusel se ven al generarlo, una sola escala de letra por carrusel, el nombre del negocio no se parte · antes: 3 oct 2026 — S55m (humo de la version anterior): FB-145 regenerar un flyer conserva su texto, FB-146 campos vacios al cambiar de cuenta, laminas que llenan, renglones parejos · antes: 3 oct 2026 — S55m: el lienzo como pieza de diseño (FB-96, FB-100): fuente de marca, jerarquia, color del primario, telefono con formato y voz por giro (D65, D66) · antes: 2 oct 2026 — S55l: semanas reales (lunes a domingo), los primeros días del mes muestran el plan anterior, la fecha especial dice cuándo es · antes: 2 oct 2026 — S55l: FB-112 el plan del mes completo abre en hoy · antes: 2 oct 2026 — S55k: FB-143 cambiar de cuenta recarga y limpia · antes: 2 oct 2026 — S55k: D64 paleta base en el alta, nota de estilo del Agente · antes: 2 oct 2026 — S55k: sin cambios de estudio (FB-125/FB-126 viven en el worker) · antes: 2 oct 2026 — S55k: FB-142 texto del hint, FB-141 enlace sobrevive al login, plan Premium activo · antes: 1 oct 2026 — S55j: FB-137 hint al entrar por codigo, FB-139 foto usada se limpia, FB-140 nota de estilo en el Agente · antes: 30 sep 2026 — S55i/S55j: FB-133 historial, FB-131 campos, FB-135 tipo de flyer obligatorio, D62 hint de giro regulado · antes: 29 sep 2026 — S55h: FB-132 el plan del Agente se recupera tras un corte de red sin re-pedirlo · antes: S55g: D57 tarjetas del Agente con una etiqueta de cada tipo, tarjeta flyer de la oferta y costo antes de generar; S55f: realPhoto en el video (D58)
+const APP_VERSION = '2.51.4'; // 6 oct 2026 — S55m: el flyer ya no pinta la etiqueta del tipo; aviso cuando el carrusel sale sin portada (FB-149) · antes: 3 oct 2026 — S55m: sin cambios de estudio (FB-148 vive en el worker) · antes: 3 oct 2026 — S55m: FB-147 las miniaturas del carrusel se ven al generarlo, una sola escala de letra por carrusel, el nombre del negocio no se parte · antes: 3 oct 2026 — S55m (humo de la version anterior): FB-145 regenerar un flyer conserva su texto, FB-146 campos vacios al cambiar de cuenta, laminas que llenan, renglones parejos · antes: 3 oct 2026 — S55m: el lienzo como pieza de diseño (FB-96, FB-100): fuente de marca, jerarquia, color del primario, telefono con formato y voz por giro (D65, D66) · antes: 2 oct 2026 — S55l: semanas reales (lunes a domingo), los primeros días del mes muestran el plan anterior, la fecha especial dice cuándo es · antes: 2 oct 2026 — S55l: FB-112 el plan del mes completo abre en hoy · antes: 2 oct 2026 — S55k: FB-143 cambiar de cuenta recarga y limpia · antes: 2 oct 2026 — S55k: D64 paleta base en el alta, nota de estilo del Agente · antes: 2 oct 2026 — S55k: sin cambios de estudio (FB-125/FB-126 viven en el worker) · antes: 2 oct 2026 — S55k: FB-142 texto del hint, FB-141 enlace sobrevive al login, plan Premium activo · antes: 1 oct 2026 — S55j: FB-137 hint al entrar por codigo, FB-139 foto usada se limpia, FB-140 nota de estilo en el Agente · antes: 30 sep 2026 — S55i/S55j: FB-133 historial, FB-131 campos, FB-135 tipo de flyer obligatorio, D62 hint de giro regulado · antes: 29 sep 2026 — S55h: FB-132 el plan del Agente se recupera tras un corte de red sin re-pedirlo · antes: S55g: D57 tarjetas del Agente con una etiqueta de cada tipo, tarjeta flyer de la oferta y costo antes de generar; S55f: realPhoto en el video (D58)
 window.APP_VERSION = APP_VERSION;
 // El log de version vive unas lineas mas abajo (console.info). No agregar otro aqui:
 // S38 borro POSTIMITY_VERSION para tener un solo log y este lo volvio a duplicar.
@@ -2375,6 +2375,7 @@ window.BUILD_FIXES = ['s50-agente-abre-lo-que-anuncia','s50-copiar-no-miente','s
   'contador-sincronizado-al-refinar','etiqueta-de-cobro-en-botones',
   'fb27-growth-entra-sin-firma','fb27-la-eleccion-del-usuario-manda',
   's41b-galeria-oculta-y-desarmada-en-flyer-y-testimonio',
+  's55m-flyer-sin-etiqueta-de-tipo','s55m-fb149-aviso-carrusel-sin-portada',
   's55m-fb147-miniaturas-del-carrusel','s55m-una-escala-por-carrusel',
   's55m-fb145-regen-flyer-con-texto','s55m-fb146-campos-vacios-al-cambiar-de-cuenta','s55m-laminas-que-llenan',
   's55m-lienzo-diseno','s55m-voz-por-giro','s55m-telefono-con-formato',
@@ -2688,7 +2689,7 @@ const T = {
     fitCrop:'Esta foto se recortará {p}% para salir en {f}. Al ver el resultado puedes mover el encuadre o elegir otra red.',
     fitSmall:'Tiene poca resolución: puede verse borrosa.',
     fitReady:'Listo', fitAdapted:'Adaptada · se recorta {p}%',
-    gallerySaved:'✅ Guardada en tu galería — ya puedes reutilizarla', gallerySaveNoResult:'Primero genera o mejora una imagen: esto guarda el resultado, no la foto que subiste.', gallerySavedAlready:'Esta foto ya está en tu galería', gallerySaveError:'No se pudo guardar en tu galería. Inténtalo de nuevo.', cropTitle:'Encuadra tu foto · {f}', cropHint:'Arrastra para mover · pellizca o usa la barra para acercar', cropSmall:'Así queda chica (menos de 1080 px): se verá borrosa. Aleja el zoom o usa otra foto.', cropOk:'Usar este encuadre', cropCancel:'Cancelar', cropCancelled:'Cancelaste el encuadre. No se descontó nada: vuelve a generar cuando quieras.', otherFmtTiktok:'Esta pieza está en 4:5. Para TikTok (9:16) elige TikTok arriba y genera de nuevo.', otherFmtFeed:'Esta pieza está en 9:16. Para Instagram o Facebook (4:5) elige esa red arriba y genera de nuevo.', frameCtlLabel:'Mover encuadre', frameCtlLabelX:'Mover encuadre ← →', frameCtlLabelY:'Mover encuadre ↑ ↓', flyerTextFail:'No pudimos componer los textos del flyer. Vuelve a intentarlo.',
+    carSinPortada:'No pudimos crear la portada: el carrusel salió sin imagen y no se descontó. Toca «Nueva imagen» para intentarlo otra vez.', gallerySaved:'✅ Guardada en tu galería — ya puedes reutilizarla', gallerySaveNoResult:'Primero genera o mejora una imagen: esto guarda el resultado, no la foto que subiste.', gallerySavedAlready:'Esta foto ya está en tu galería', gallerySaveError:'No se pudo guardar en tu galería. Inténtalo de nuevo.', cropTitle:'Encuadra tu foto · {f}', cropHint:'Arrastra para mover · pellizca o usa la barra para acercar', cropSmall:'Así queda chica (menos de 1080 px): se verá borrosa. Aleja el zoom o usa otra foto.', cropOk:'Usar este encuadre', cropCancel:'Cancelar', cropCancelled:'Cancelaste el encuadre. No se descontó nada: vuelve a generar cuando quieras.', otherFmtTiktok:'Esta pieza está en 4:5. Para TikTok (9:16) elige TikTok arriba y genera de nuevo.', otherFmtFeed:'Esta pieza está en 9:16. Para Instagram o Facebook (4:5) elige esa red arriba y genera de nuevo.', frameCtlLabel:'Mover encuadre', frameCtlLabelX:'Mover encuadre ← →', frameCtlLabelY:'Mover encuadre ↑ ↓', flyerTextFail:'No pudimos componer los textos del flyer. Vuelve a intentarlo.',
     gtHintAvailable:'{n} foto(s) disponible(s)',
     gsTitle:'📷 Foto sugerida — toca para cambiar',
     galleryPhotoLabel:'📷 Tu foto real',
@@ -2988,7 +2989,7 @@ const T = {
     fitCrop:'This photo will be cropped {p}% to fit {f}. On the result you can move the framing or pick another network.',
     fitSmall:'Low resolution: it may look blurry.',
     fitReady:'Ready', fitAdapted:'Adapted · {p}% cropped',
-    gallerySaved:'✅ Saved to your gallery — you can reuse it now', gallerySaveNoResult:'Generate or enhance an image first: this saves the result, not the photo you uploaded.', gallerySavedAlready:'This photo is already in your gallery', gallerySaveError:'Could not save to your gallery. Try again.', cropTitle:'Frame your photo · {f}', cropHint:'Drag to move · pinch or use the slider to zoom', cropSmall:'This is small (under 1080 px): it will look blurry. Zoom out or use another photo.', cropOk:'Use this framing', cropCancel:'Cancel', cropCancelled:'You cancelled the framing. Nothing was deducted: generate again whenever you like.', otherFmtTiktok:'This piece is 4:5. For TikTok (9:16), choose TikTok above and generate again.', otherFmtFeed:'This piece is 9:16. For Instagram or Facebook (4:5), choose that network above and generate again.', frameCtlLabel:'Move framing', frameCtlLabelX:'Move framing ← →', frameCtlLabelY:'Move framing ↑ ↓', flyerTextFail:'We could not compose the flyer text. Please try again.',
+    carSinPortada:'We could not create the cover: the carousel has no image and was not charged. Tap “New image” to try again.', gallerySaved:'✅ Saved to your gallery — you can reuse it now', gallerySaveNoResult:'Generate or enhance an image first: this saves the result, not the photo you uploaded.', gallerySavedAlready:'This photo is already in your gallery', gallerySaveError:'Could not save to your gallery. Try again.', cropTitle:'Frame your photo · {f}', cropHint:'Drag to move · pinch or use the slider to zoom', cropSmall:'This is small (under 1080 px): it will look blurry. Zoom out or use another photo.', cropOk:'Use this framing', cropCancel:'Cancel', cropCancelled:'You cancelled the framing. Nothing was deducted: generate again whenever you like.', otherFmtTiktok:'This piece is 4:5. For TikTok (9:16), choose TikTok above and generate again.', otherFmtFeed:'This piece is 9:16. For Instagram or Facebook (4:5), choose that network above and generate again.', frameCtlLabel:'Move framing', frameCtlLabelX:'Move framing ← →', frameCtlLabelY:'Move framing ↑ ↓', flyerTextFail:'We could not compose the flyer text. Please try again.',
     gtHintAvailable:'{n} photo(s) available',
     gsTitle:'📷 Suggested photo — tap to change',
     galleryPhotoLabel:'📷 Your real photo',
@@ -5283,6 +5284,8 @@ async function genCarousel(brand, bg) {
     coverPhotoB64: coverPhoto, coverPhotoType: coverMime
   }, 90000);
   setStep(2);
+  // FB-149 (S55m): si la portada no se pudo generar, el carrusel sale sin imagen y sin cobro; se dice, no se calla.
+  if (res.degraded) showToast(t('carSinPortada'), 9000);
   // Render all slides using Canvas
   carouselResults = [];
   const slides = res.slides || [];
@@ -10358,16 +10361,9 @@ async function composeFlyerCanvas(photoSrc, fd, brand, fmt) {
   grad.addColorStop(1,lzRgba(pal.hondo, story ? 0.55 : 0.94));
   ctx.fillStyle=grad; ctx.fillRect(0,0,W,H);
 
-  // 3. Arriba ya no hay banda (S55m): el logo va arriba a la izquierda (D45) y la etiqueta del
-  //    tipo arriba a la derecha, a la medida de su texto.
-  if(fd.type){
-    const tipo = fd.type.slice(0,22).toUpperCase();
-    ctx.font = lzFont(700, 24);
-    let tw = 0; for (const ch of tipo) tw += ctx.measureText(ch).width + 24 * 0.14;
-    const wP = Math.round(tw) + 52, xP = W - M - wP, yP = TOPY + (story ? 24 : 56);
-    lzPildora(ctx, xP, yP, wP, 56, pal.acentoOscuro);
-    lzVersal(ctx, tipo, xP + 28, yP + 37, 24, tinAc);
-  }
+  // 3. Arriba de la foto no se pinta nada: el logo y la firma los pone el sello. La etiqueta del tipo se retiro
+  //    (decision del operador, 6 oct): caia sobre la cabeza del sujeto y no hay esquina segura en una foto que
+  //    no elegimos. El tipo se sigue eligiendo: orienta el texto y autoriza palabras en su guarda (FLY-1).
 
   // 4. El bloque promocional
   for (const b of bloques) {
