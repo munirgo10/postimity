@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="2.51.4">
+<meta name="app-version" content="2.51.6">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Postimity Studio — Tu estudio de contenido con IA</title>
 <meta name="description" content="Crea posts, flyers, carruseles y videos profesionales con IA. Describe tu negocio una vez y genera contenido listo para publicar en 20 segundos.">
@@ -1793,8 +1793,9 @@ Ej: 'Wonderik es increíble. Mi hija de 3 años ya lee palabras cortas y su desa
             </div>
           </div>
         </div>
+        <div style="font-size:11px;color:var(--t3);line-height:1.5;margin-bottom:8px" id="videoUnaPersona">👤 Desde cero animamos una persona como máximo. Para grupos o eventos, sube una foto real: esa sí se anima con todos.</div>
         <div style="font-size:11px;color:var(--t3);line-height:1.5;margin-bottom:8px" id="videoHint">💡 El video se genera con IA. Toma ~2-5 minutos.</div>
-        <div style="font-size:11px;color:var(--t3);line-height:1.5;margin-bottom:8px" id="videoPhotoNote">📸 Si subes una foto, el video <b>anima esa foto</b> (movimiento de cámara y luz); no crea una escena nueva. La encuadras en 9:16 antes de generar.</div>
+        <div style="font-size:11px;color:var(--t3);line-height:1.5;margin-bottom:8px" id="videoPhotoNote">📸 Si subes una foto, el video <b>anima esa foto</b> (movimiento suave de lo que ya está en ella; la cámara casi no se mueve); no crea una escena nueva. La encuadras en 9:16 antes de generar.</div>
         <div class="upload-zone" id="videoPhotoZone" onclick="document.getElementById('videoFile').click()" style="margin-bottom:0;padding:14px">
           <input type="file" id="videoFile" accept="image/*" style="display:none" onchange="handleVideoPhoto(this)">
           <div class="uz-icon" style="font-size:20px">📸</div>
@@ -2364,7 +2365,7 @@ function persistSlides(imgs) {
 }
 
 // APP_VERSION (S34) — deploy verification. Must match worker /version and all HTML files.
-const APP_VERSION = '2.51.4'; // 6 oct 2026 — S55m: el flyer ya no pinta la etiqueta del tipo; aviso cuando el carrusel sale sin portada (FB-149) · antes: 3 oct 2026 — S55m: sin cambios de estudio (FB-148 vive en el worker) · antes: 3 oct 2026 — S55m: FB-147 las miniaturas del carrusel se ven al generarlo, una sola escala de letra por carrusel, el nombre del negocio no se parte · antes: 3 oct 2026 — S55m (humo de la version anterior): FB-145 regenerar un flyer conserva su texto, FB-146 campos vacios al cambiar de cuenta, laminas que llenan, renglones parejos · antes: 3 oct 2026 — S55m: el lienzo como pieza de diseño (FB-96, FB-100): fuente de marca, jerarquia, color del primario, telefono con formato y voz por giro (D65, D66) · antes: 2 oct 2026 — S55l: semanas reales (lunes a domingo), los primeros días del mes muestran el plan anterior, la fecha especial dice cuándo es · antes: 2 oct 2026 — S55l: FB-112 el plan del mes completo abre en hoy · antes: 2 oct 2026 — S55k: FB-143 cambiar de cuenta recarga y limpia · antes: 2 oct 2026 — S55k: D64 paleta base en el alta, nota de estilo del Agente · antes: 2 oct 2026 — S55k: sin cambios de estudio (FB-125/FB-126 viven en el worker) · antes: 2 oct 2026 — S55k: FB-142 texto del hint, FB-141 enlace sobrevive al login, plan Premium activo · antes: 1 oct 2026 — S55j: FB-137 hint al entrar por codigo, FB-139 foto usada se limpia, FB-140 nota de estilo en el Agente · antes: 30 sep 2026 — S55i/S55j: FB-133 historial, FB-131 campos, FB-135 tipo de flyer obligatorio, D62 hint de giro regulado · antes: 29 sep 2026 — S55h: FB-132 el plan del Agente se recupera tras un corte de red sin re-pedirlo · antes: S55g: D57 tarjetas del Agente con una etiqueta de cada tipo, tarjeta flyer de la oferta y costo antes de generar; S55f: realPhoto en el video (D58)
+const APP_VERSION = '2.51.6'; // 8 oct 2026 — S55n: la foto del video pide su etiqueta y la camara la sigue; aviso si un movimiento pedido no cabe; hint de una persona · antes: 7 oct 2026 — S55n: FB-150 la firma no depende de la casilla (el primer carrusel de Growth salia firmado); FB-98 el video avisa de la foto subida a mano; BL-8 un «no» de saldo detiene el video en el primer paso · antes: 6 oct 2026 — S55m: el flyer ya no pinta la etiqueta del tipo; aviso cuando el carrusel sale sin portada (FB-149) · antes: 3 oct 2026 — S55m: sin cambios de estudio (FB-148 vive en el worker) · antes: 3 oct 2026 — S55m: FB-147 las miniaturas del carrusel se ven al generarlo, una sola escala de letra por carrusel, el nombre del negocio no se parte · antes: 3 oct 2026 — S55m (humo de la version anterior): FB-145 regenerar un flyer conserva su texto, FB-146 campos vacios al cambiar de cuenta, laminas que llenan, renglones parejos · antes: 3 oct 2026 — S55m: el lienzo como pieza de diseño (FB-96, FB-100): fuente de marca, jerarquia, color del primario, telefono con formato y voz por giro (D65, D66) · antes: 2 oct 2026 — S55l: semanas reales (lunes a domingo), los primeros días del mes muestran el plan anterior, la fecha especial dice cuándo es · antes: 2 oct 2026 — S55l: FB-112 el plan del mes completo abre en hoy · antes: 2 oct 2026 — S55k: FB-143 cambiar de cuenta recarga y limpia · antes: 2 oct 2026 — S55k: D64 paleta base en el alta, nota de estilo del Agente · antes: 2 oct 2026 — S55k: sin cambios de estudio (FB-125/FB-126 viven en el worker) · antes: 2 oct 2026 — S55k: FB-142 texto del hint, FB-141 enlace sobrevive al login, plan Premium activo · antes: 1 oct 2026 — S55j: FB-137 hint al entrar por codigo, FB-139 foto usada se limpia, FB-140 nota de estilo en el Agente · antes: 30 sep 2026 — S55i/S55j: FB-133 historial, FB-131 campos, FB-135 tipo de flyer obligatorio, D62 hint de giro regulado · antes: 29 sep 2026 — S55h: FB-132 el plan del Agente se recupera tras un corte de red sin re-pedirlo · antes: S55g: D57 tarjetas del Agente con una etiqueta de cada tipo, tarjeta flyer de la oferta y costo antes de generar; S55f: realPhoto en el video (D58)
 window.APP_VERSION = APP_VERSION;
 // El log de version vive unas lineas mas abajo (console.info). No agregar otro aqui:
 // S38 borro POSTIMITY_VERSION para tener un solo log y este lo volvio a duplicar.
@@ -2373,7 +2374,7 @@ window.APP_VERSION = APP_VERSION;
 window.BUILD_FIXES = ['s50-agente-abre-lo-que-anuncia','s50-copiar-no-miente','s50-traza-load-failed','rd28-cobro-por-actionid','image-regen-cobra-y-en-medium',
   'video-captions-no-cobra','adjust-y-flyer-captions-cobran','calidad-la-decide-el-servidor',
   'contador-sincronizado-al-refinar','etiqueta-de-cobro-en-botones',
-  'fb27-growth-entra-sin-firma','fb27-la-eleccion-del-usuario-manda',
+  'fb27-growth-entra-sin-firma','fb27-la-eleccion-del-usuario-manda','s55n-fb150-primera-pieza-sin-firma','s55n-d1-camara-por-etiqueta','s55n-d2-hint-una-persona','s55n-fb98-video-con-foto-subida','s55n-bl8-saldo-de-video-antes-de-esperar',
   's41b-galeria-oculta-y-desarmada-en-flyer-y-testimonio',
   's55m-flyer-sin-etiqueta-de-tipo','s55m-fb149-aviso-carrusel-sin-portada',
   's55m-fb147-miniaturas-del-carrusel','s55m-una-escala-por-carrusel',
@@ -2662,6 +2663,9 @@ const T = {
     videoTopicLabel:'🎬 Tema del video', videoDurLabel:'Duración', videoRatioLabel:'Formato',
     vdurNote:'5 seg = 1 video · 10 seg = 2 videos',
     videoHint:'💡 El video se genera con IA. Toma ~2-5 minutos.',
+    videoUnaPersona:'👤 Desde cero animamos una persona como máximo. Para grupos o eventos, sube una foto real: esa sí se anima con todos.',
+    videoTagTitle:'¿Qué muestra esta foto?',
+    videoTagHint:'Con esto elegimos cómo se mueve la cámara en tu video',
     videoGenBtn:'Generar video con IA', genBtn:'Generar contenido con IA',
     videoPhTopic:'Ej: Mostrar el ambiente acogedor de nuestra cafetería con clientes disfrutando...',
     videoPolling:'Generando video... esto toma ~2-5 min',
@@ -2962,6 +2966,9 @@ const T = {
     videoTopicLabel:'🎬 Video topic', videoDurLabel:'Duration', videoRatioLabel:'Format',
     vdurNote:'5 sec = 1 video · 10 sec = 2 videos',
     videoHint:'💡 Video is generated with AI. Takes ~2-5 minutes.',
+    videoUnaPersona:'👤 From scratch we animate one person at most. For groups or events, upload a real photo: that one animates everyone.',
+    videoTagTitle:'What does this photo show?',
+    videoTagHint:'This decides how the camera moves in your video',
     videoGenBtn:'Generate video with AI', genBtn:'Generate content with AI',
     videoPhTopic:'E.g.: Show the cozy atmosphere of our coffee shop with customers enjoying a latte...',
     videoPolling:'Generating video... ~2-5 min',
@@ -3729,6 +3736,7 @@ let _savedToGallery = null;
 // FB-90 (S54f): el worker rechaza una foto sin etiqueta (NO_TAGS) y el estudio mandaba
 // `tags: []`: guardar fallaba siempre. La etiqueta la elige el cliente, como al subir.
 function pickGalleryTag() {
+  const o = arguments[0] || {};   // 2.51.6: el video lo reutiliza con su titulo, su texto y su foto (fuera de la promesa: dentro, arguments es otro)
   return new Promise(function(resolve) {
     const es = detectLanguage() !== 'en';
     ensureOverlayCss();
@@ -3738,14 +3746,15 @@ function pickGalleryTag() {
       + '<div class="crop-hint"></div>'
       + '<div id="tagPick" style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:14px 0"></div>'
       + '<div class="crop-btns"><button class="crop-cancel"></button></div></div>';
-    ov.querySelector('.crop-title').textContent = es ? '¿Qué muestra esta foto ya mejorada?' : 'What does this enhanced photo show?';
-    ov.querySelector('.crop-hint').textContent = es
+    ov.querySelector('.crop-title').textContent = o.titulo || (es ? '¿Qué muestra esta foto ya mejorada?' : 'What does this enhanced photo show?');
+    ov.querySelector('.crop-hint').textContent = o.hint || (es
       ? 'Guardas ESTA imagen en tu galería para reutilizarla después'
-      : 'You are saving THIS image to your gallery to reuse later';
+      : 'You are saving THIS image to your gallery to reuse later');
     // FB-94: se ve la imagen que se va a guardar, para que nadie la confunda con la foto que subio
     const prevEl = ov.querySelector('#tagPickPrev');
     const resImg = document.getElementById('resultImg');
-    if (prevEl && resImg && resImg.src) prevEl.src = resImg.src; else if (prevEl) prevEl.style.display = 'none';
+    if (prevEl && o.src) prevEl.src = o.src;
+    else if (prevEl && resImg && resImg.src) prevEl.src = resImg.src; else if (prevEl) prevEl.style.display = 'none';
     ov.querySelector('.crop-cancel').textContent = t('cropCancel');
     const cont = ov.querySelector('#tagPick');
     VALID_GALLERY_TAGS.forEach(function(tag) {
@@ -6013,6 +6022,7 @@ let videoDuration = '5';
 const videoAspectRatio = '9:16';   // D47: no se elige
 let videoPollingTimer = null;
 let videoPhotoB64 = null;
+let videoPhotoTag = null;   // 2.51.6 (D1): que muestra la foto subida en video; la camara la sigue
 
 function setVideoDur(d, btn) {
   videoDuration = d;
@@ -6034,12 +6044,14 @@ function handleVideoPhoto(input) {
     try {
       const n = await normalizeUpload(e.target.result, file.type);
       const c = await openCropper(n.dataUrl, 'story', true);
-      if (!c) { videoPhotoB64 = null; prev.style.display = 'none'; prev.src = ''; return; }
+      if (!c) { videoPhotoB64 = null; videoPhotoTag = null; prev.style.display = 'none'; prev.src = ''; return; }
       videoPhotoB64 = c.dataUrl;
       prev.src = videoPhotoB64; prev.style.display = 'block';
+      // 2.51.6 (D1): la misma etiqueta que la galeria. Sin elegir, el worker usa la toma prudente (casi fija).
+      videoPhotoTag = await pickGalleryTag({ titulo: t('videoTagTitle'), hint: t('videoTagHint'), src: c.dataUrl });
       document.getElementById('videoPhotoName').textContent = '✓ ' + file.name;
     } catch (err) {
-      videoPhotoB64 = null; showToast(t('errPhotoUnreadable'));
+      videoPhotoB64 = null; videoPhotoTag = null; showToast(t('errPhotoUnreadable'));
     }
   };
   reader.readAsDataURL(file);
@@ -6099,6 +6111,12 @@ async function generateVideo(brand) {
     // Check if gallery photo will be used (need to know before prompt generation)
     const galleryToggle = document.getElementById('galleryToggle');
     const usingGalleryPhoto = galleryToggle && galleryToggle.checked && gallerySelectedPhoto;
+    // S55n · FB-98: hay foto tambien cuando se subio A MANO. Antes solo la de galeria avisaba al worker, y con
+    // la foto subida el prompt se escribia como «escena desde cero» (camara, revelado) para luego animar la foto.
+    const conFoto = !!(usingGalleryPhoto || videoPhotoB64);
+    // 2.51.6 (D1): lo que muestra la foto viaja en los dos pasos; el worker elige la toma de camara con eso.
+    const fotoEtiquetas = usingGalleryPhoto ? (Array.isArray(gallerySelectedPhoto.tags) ? gallerySelectedPhoto.tags.slice(0, 8) : [])
+                        : (videoPhotoB64 && videoPhotoTag ? [videoPhotoTag] : []);
 
     let videoPrompt;
     try {
@@ -6108,9 +6126,13 @@ async function generateVideo(brand) {
         brandData: { name: brand.name, type: brand.type },
         brandGuide: brand.brandGuide,
         platform,
-        useGalleryPhoto: usingGalleryPhoto || false,
+        useGalleryPhoto: conFoto,
+        fotoEtiquetas,
+        duration: videoDuration,   // S55n · BL-8: el servidor valida el saldo de video desde este paso
       }, 25000);
       videoPrompt = promptData.videoPrompt;
+      // 2.51.6 (D1): si el movimiento pedido no cabe en el sujeto de la foto, se aplica la toma de su sujeto y se dice.
+      if (promptData.avisoCamara) showToast('🎥 ' + promptData.avisoCamara, 7000);
       // S26: topicWarning is logged but NOT shown during generation — 
       // user already clicked generate, a toast now is confusing.
       // MA plan should guide content choices BEFORE generation.
@@ -6118,13 +6140,17 @@ async function generateVideo(brand) {
         console.log('Video topic warning (suppressed during gen):', promptData.topicWarning);
       }
     } catch(promptErr) {
-      videoPrompt = usingGalleryPhoto
-        ? 'Subtle cinematic animation of the existing image. Gentle camera movement, soft parallax, elements breathe with life. Keep ALL original elements exactly as they are. ' + topic
-        : 'Professional cinematic short video: ' + topic + '. Smooth camera motion, professional lighting, high quality 4K.';
+      // S55n · BL-8: un «no» del servidor (sin saldo de video, plan, prueba vencida) detiene el video AQUI.
+      // Antes se tragaba, se subia la foto y el mismo «no» llegaba al enviar, tras la espera.
+      if (promptErr && (promptErr.planBlock || promptErr.code === 'VIDEO_LIMIT_DURATION' || promptErr.code === 'VIDEO_DURATION_INVALID')) throw promptErr;
+      // El worker cierra el prompt al enviarlo (camara, encuadre, una persona): aqui solo va la escena.
+      videoPrompt = conFoto
+        ? 'Subtle, natural motion of what is already in the photo.'
+        : 'Professional cinematic short video: ' + topic + '. Professional lighting, high quality.';
     }
-    if(!videoPrompt) videoPrompt = usingGalleryPhoto
-      ? 'Subtle cinematic animation of the existing image. Gentle camera movement. ' + topic
-      : 'Professional cinematic short video: ' + topic + '. Smooth camera, warm lighting, 4K.';
+    if(!videoPrompt) videoPrompt = conFoto
+      ? 'Subtle, natural motion of what is already in the photo.'
+      : 'Professional cinematic short video: ' + topic + '. Warm lighting, high quality.';
 
     // Step 2: Upload photo to R2 if provided (manual upload OR gallery photo)
     let imageUrl = null;
@@ -6161,6 +6187,7 @@ async function generateVideo(brand) {
         aspectRatio: videoAspectRatio,
         brandId,
         imageUrl,
+        fotoEtiquetas,
       }, 30000);
     } catch(submitErr) {
       throw new Error(isES
@@ -6208,6 +6235,9 @@ async function generateVideo(brand) {
     if(inputCard) inputCard.style.display = 'block';
     if(modeCards) modeCards.style.display = '';
     if(cancelBtn) cancelBtn.style.display = 'none';
+    // S55n · BL-8: un bloqueo de plan (sin videos, prueba vencida) ya se dijo en un aviso y abrio los planes
+    // (postWithTimeout, planBlock). Pintar el panel aqui lo dejaba rancio en la pantalla que se acaba de dejar.
+    if (err && err.planBlock) return;
     document.getElementById('errWrap').classList.add('show');
     document.getElementById('errMsg').textContent = err.message;
   }
@@ -8775,6 +8805,7 @@ function applyBilingualUI() {
   st('videoTopicLabel','videoTopicLabel'); sp('videoTopic','videoPhTopic');
   st('videoDurLabel','videoDurLabel'); st('videoRatioLabel','videoRatioLabel'); st('vdurNote','vdurNote');
   const videoHintEl = document.getElementById('videoHint'); if(videoHintEl) videoHintEl.textContent = '💡 ' + t('videoHint').replace('💡 ','');
+  const unaPersonaEl = document.getElementById('videoUnaPersona'); if(unaPersonaEl) unaPersonaEl.textContent = t('videoUnaPersona');
   // Generate button
   st('btnGen','btnGenerate');
   // Loading
@@ -9184,7 +9215,9 @@ async function postWithTimeout(body, timeoutMs=130000) {
     }
     if(!res.ok||!data.success) {
       if (data.rawDebug) console.error('AI raw response:', data.rawDebug);
-      throw new Error(data.error||'Error del servidor');
+      const eSrv = new Error(data.error||'Error del servidor');
+      if (data.code) eSrv.code = data.code;   // S55n · BL-8: quien llama distingue un «no» de negocio de una falla
+      throw eSrv;
     }
     _tr.ok = true;
     return data;
@@ -10056,10 +10089,14 @@ function onWmToggleChange(checked) {
 }
 
 // Sólo Growth y Premium pueden apagar el watermark.
+// S55n · FB-150: la firma se decide por el plan y por lo que el cliente eligio (_wmUserChoice), NO leyendo
+// la casilla. La casilla nace marcada en el HTML y showResult la corrige, pero el carrusel pinta sus laminas
+// ANTES de showResult: el primer carrusel de la sesion en Growth salia firmado con el interruptor apagado,
+// y asi se iba al ZIP. La casilla es solo la vista de esta decision (showResult la pinta con la misma regla).
 function shouldShowWatermark() {
   const plan = loadBrand()?.plan || 'trial';
-  const el = document.getElementById('wmToggle');
-  return !(['growth', 'premium'].includes(plan) && el && !el.checked);
+  if (!['growth', 'premium'].includes(plan)) return true;
+  return _wmUserChoice === true;
 }
 
 // Dibuja logo + watermark sobre un contexto ya pintado.
@@ -10588,6 +10625,7 @@ function resetCreator() {
   currentAdjustMode = 'text';
   // Clear video photo
   videoPhotoB64 = null;
+  videoPhotoTag = null;
   const vPrev = document.getElementById('videoPrev');
   if(vPrev) { vPrev.style.display = 'none'; vPrev.src = ''; }
   const vName = document.getElementById('videoPhotoName');
