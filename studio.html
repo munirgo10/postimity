@@ -2,7 +2,12 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="2.51.6">
+<script>
+/* FB-155 (S55n): ninguna pagina trabaja por http: el worker solo acepta https y http guarda la sesion aparte. Va antes que todo.
+   Etiquetas en lineas propias: el extractor de sintaxis del preflight (G2) lee los scripts por lineas. */
+if(location.protocol==='http:'&&/(^|\.)postimity\.com$/.test(location.hostname))location.replace('https://'+location.host+location.pathname+location.search+location.hash);
+</script>
+<meta name="app-version" content="2.51.7">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Postimity Studio — Tu estudio de contenido con IA</title>
 <meta name="description" content="Crea posts, flyers, carruseles y videos profesionales con IA. Describe tu negocio una vez y genera contenido listo para publicar en 20 segundos.">
@@ -841,7 +846,7 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
 .hint-regulado{font-size:12px;line-height:1.4;color:#6B7280;margin-top:6px}
 </style>
 <script defer data-domain="postimity.com" src="https://plausible.io/js/script.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script><!-- FB-151 (S55n): solo se usa al descargar el ZIP; sin defer bloqueaba el primer pintado -->
 <!-- Meta Pixel -->
 <script>
 !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
@@ -2365,7 +2370,7 @@ function persistSlides(imgs) {
 }
 
 // APP_VERSION (S34) — deploy verification. Must match worker /version and all HTML files.
-const APP_VERSION = '2.51.6'; // 8 oct 2026 — S55n: la foto del video pide su etiqueta y la camara la sigue; aviso si un movimiento pedido no cabe; hint de una persona · antes: 7 oct 2026 — S55n: FB-150 la firma no depende de la casilla (el primer carrusel de Growth salia firmado); FB-98 el video avisa de la foto subida a mano; BL-8 un «no» de saldo detiene el video en el primer paso · antes: 6 oct 2026 — S55m: el flyer ya no pinta la etiqueta del tipo; aviso cuando el carrusel sale sin portada (FB-149) · antes: 3 oct 2026 — S55m: sin cambios de estudio (FB-148 vive en el worker) · antes: 3 oct 2026 — S55m: FB-147 las miniaturas del carrusel se ven al generarlo, una sola escala de letra por carrusel, el nombre del negocio no se parte · antes: 3 oct 2026 — S55m (humo de la version anterior): FB-145 regenerar un flyer conserva su texto, FB-146 campos vacios al cambiar de cuenta, laminas que llenan, renglones parejos · antes: 3 oct 2026 — S55m: el lienzo como pieza de diseño (FB-96, FB-100): fuente de marca, jerarquia, color del primario, telefono con formato y voz por giro (D65, D66) · antes: 2 oct 2026 — S55l: semanas reales (lunes a domingo), los primeros días del mes muestran el plan anterior, la fecha especial dice cuándo es · antes: 2 oct 2026 — S55l: FB-112 el plan del mes completo abre en hoy · antes: 2 oct 2026 — S55k: FB-143 cambiar de cuenta recarga y limpia · antes: 2 oct 2026 — S55k: D64 paleta base en el alta, nota de estilo del Agente · antes: 2 oct 2026 — S55k: sin cambios de estudio (FB-125/FB-126 viven en el worker) · antes: 2 oct 2026 — S55k: FB-142 texto del hint, FB-141 enlace sobrevive al login, plan Premium activo · antes: 1 oct 2026 — S55j: FB-137 hint al entrar por codigo, FB-139 foto usada se limpia, FB-140 nota de estilo en el Agente · antes: 30 sep 2026 — S55i/S55j: FB-133 historial, FB-131 campos, FB-135 tipo de flyer obligatorio, D62 hint de giro regulado · antes: 29 sep 2026 — S55h: FB-132 el plan del Agente se recupera tras un corte de red sin re-pedirlo · antes: S55g: D57 tarjetas del Agente con una etiqueta de cada tipo, tarjeta flyer de la oferta y costo antes de generar; S55f: realPhoto en el video (D58)
+const APP_VERSION = '2.51.7'; // 9 oct 2026 — S55n: FB-155 ninguna pagina trabaja por http; el aviso de navegador integrado solo donde lo es; FB-151 JSZip sin bloquear el primer pintado · antes: 8 oct 2026 — S55n: la foto del video pide su etiqueta y la camara la sigue; aviso si un movimiento pedido no cabe; hint de una persona · antes: 7 oct 2026 — S55n: FB-150 la firma no depende de la casilla (el primer carrusel de Growth salia firmado); FB-98 el video avisa de la foto subida a mano; BL-8 un «no» de saldo detiene el video en el primer paso · antes: 6 oct 2026 — S55m: el flyer ya no pinta la etiqueta del tipo; aviso cuando el carrusel sale sin portada (FB-149) · antes: 3 oct 2026 — S55m: sin cambios de estudio (FB-148 vive en el worker) · antes: 3 oct 2026 — S55m: FB-147 las miniaturas del carrusel se ven al generarlo, una sola escala de letra por carrusel, el nombre del negocio no se parte · antes: 3 oct 2026 — S55m (humo de la version anterior): FB-145 regenerar un flyer conserva su texto, FB-146 campos vacios al cambiar de cuenta, laminas que llenan, renglones parejos · antes: 3 oct 2026 — S55m: el lienzo como pieza de diseño (FB-96, FB-100): fuente de marca, jerarquia, color del primario, telefono con formato y voz por giro (D65, D66) · antes: 2 oct 2026 — S55l: semanas reales (lunes a domingo), los primeros días del mes muestran el plan anterior, la fecha especial dice cuándo es · antes: 2 oct 2026 — S55l: FB-112 el plan del mes completo abre en hoy · antes: 2 oct 2026 — S55k: FB-143 cambiar de cuenta recarga y limpia · antes: 2 oct 2026 — S55k: D64 paleta base en el alta, nota de estilo del Agente · antes: 2 oct 2026 — S55k: sin cambios de estudio (FB-125/FB-126 viven en el worker) · antes: 2 oct 2026 — S55k: FB-142 texto del hint, FB-141 enlace sobrevive al login, plan Premium activo · antes: 1 oct 2026 — S55j: FB-137 hint al entrar por codigo, FB-139 foto usada se limpia, FB-140 nota de estilo en el Agente · antes: 30 sep 2026 — S55i/S55j: FB-133 historial, FB-131 campos, FB-135 tipo de flyer obligatorio, D62 hint de giro regulado · antes: 29 sep 2026 — S55h: FB-132 el plan del Agente se recupera tras un corte de red sin re-pedirlo · antes: S55g: D57 tarjetas del Agente con una etiqueta de cada tipo, tarjeta flyer de la oferta y costo antes de generar; S55f: realPhoto en el video (D58)
 window.APP_VERSION = APP_VERSION;
 // El log de version vive unas lineas mas abajo (console.info). No agregar otro aqui:
 // S38 borro POSTIMITY_VERSION para tener un solo log y este lo volvio a duplicar.
@@ -2374,7 +2379,7 @@ window.APP_VERSION = APP_VERSION;
 window.BUILD_FIXES = ['s50-agente-abre-lo-que-anuncia','s50-copiar-no-miente','s50-traza-load-failed','rd28-cobro-por-actionid','image-regen-cobra-y-en-medium',
   'video-captions-no-cobra','adjust-y-flyer-captions-cobran','calidad-la-decide-el-servidor',
   'contador-sincronizado-al-refinar','etiqueta-de-cobro-en-botones',
-  'fb27-growth-entra-sin-firma','fb27-la-eleccion-del-usuario-manda','s55n-fb150-primera-pieza-sin-firma','s55n-d1-camara-por-etiqueta','s55n-d2-hint-una-persona','s55n-fb98-video-con-foto-subida','s55n-bl8-saldo-de-video-antes-de-esperar',
+  'fb27-growth-entra-sin-firma','fb27-la-eleccion-del-usuario-manda','s55n-fb155-siempre-https','s55n-fb151-jszip-diferido','s55n-fb150-primera-pieza-sin-firma','s55n-d1-camara-por-etiqueta','s55n-d2-hint-una-persona','s55n-fb98-video-con-foto-subida','s55n-bl8-saldo-de-video-antes-de-esperar',
   's41b-galeria-oculta-y-desarmada-en-flyer-y-testimonio',
   's55m-flyer-sin-etiqueta-de-tipo','s55m-fb149-aviso-carrusel-sin-portada',
   's55m-fb147-miniaturas-del-carrusel','s55m-una-escala-por-carrusel',
@@ -2663,6 +2668,7 @@ const T = {
     videoTopicLabel:'🎬 Tema del video', videoDurLabel:'Duración', videoRatioLabel:'Formato',
     vdurNote:'5 seg = 1 video · 10 seg = 2 videos',
     videoHint:'💡 El video se genera con IA. Toma ~2-5 minutos.',
+    errRedAcceso:'No pudimos conectar. Revisa tu internet e inténtalo de nuevo.',
     videoUnaPersona:'👤 Desde cero animamos una persona como máximo. Para grupos o eventos, sube una foto real: esa sí se anima con todos.',
     videoTagTitle:'¿Qué muestra esta foto?',
     videoTagHint:'Con esto elegimos cómo se mueve la cámara en tu video',
@@ -2966,6 +2972,7 @@ const T = {
     videoTopicLabel:'🎬 Video topic', videoDurLabel:'Duration', videoRatioLabel:'Format',
     vdurNote:'5 sec = 1 video · 10 sec = 2 videos',
     videoHint:'💡 Video is generated with AI. Takes ~2-5 minutes.',
+    errRedAcceso:'We could not connect. Check your internet and try again.',
     videoUnaPersona:'👤 From scratch we animate one person at most. For groups or events, upload a real photo: that one animates everyone.',
     videoTagTitle:'What does this photo show?',
     videoTagHint:'This decides how the camera moves in your video',
@@ -3104,12 +3111,15 @@ async function sendAuthCode() {
     if (onStep2) showToast(detectLanguage()==='en' ? '✅ Code resent' : '✅ Código reenviado');
   } catch(e) {
     const isNet = e.message === 'Load failed' || e.message === 'Failed to fetch' || e.name === 'TypeError';
-    if (isNet) {
+    // FB-155 (S55n): el aviso «abre en Safari o Chrome» solo tiene sentido DENTRO de un navegador integrado. En Safari
+    // le decia al cliente que abriera Safari; el error real era la pagina abierta por http (ver la cabecera).
+    const integrado = esNavegadorIntegrado(navigator.userAgent);
+    if (isNet && integrado) {
       // S29: Show in-app browser warning only on actual network failure
       const w = document.getElementById('inAppWarning');
-      if (w) { w.style.display = 'block'; document.getElementById('inAppOpenBtn').href = window.location.href; }
+      if (w) { w.style.display = 'block'; document.getElementById('inAppOpenBtn').href = 'https://' + location.host + location.pathname + location.search; }
     }
-    showAuthError(step, isNet ? (detectLanguage()==='en' ? 'Connection error. Try opening in Safari or Chrome.' : 'Error de conexión. Intenta abrir en Safari o Chrome.') : e.message);
+    showAuthError(step, isNet ? (integrado ? (detectLanguage()==='en' ? 'Connection error. Try opening in Safari or Chrome.' : 'Error de conexión. Intenta abrir en Safari o Chrome.') : t('errRedAcceso')) : e.message);
   } finally {
     btn.disabled = false;
     btn.textContent = btnText;  // el literal 'Enviar código' renombraba "Continuar" para siempre
@@ -3175,7 +3185,7 @@ async function verifyAuthCode() {
     updateGenCounter();
   } catch(e) {
     const isNet = e.message === 'Load failed' || e.message === 'Failed to fetch' || e.name === 'TypeError';
-    showAuthError(2, isNet ? (detectLanguage()==='en' ? 'Connection error. Try opening in Safari or Chrome.' : 'Error de conexión. Intenta abrir en Safari o Chrome.') : e.message);
+    showAuthError(2, isNet ? (esNavegadorIntegrado(navigator.userAgent) ? (detectLanguage()==='en' ? 'Connection error. Try opening in Safari or Chrome.' : 'Error de conexión. Intenta abrir en Safari o Chrome.') : t('errRedAcceso')) : e.message);
   } finally {
     btn.disabled = false;
     btn.textContent = 'Verificar';
@@ -3735,8 +3745,11 @@ async function normalizeUpload(base64, mimeType) {
 let _savedToGallery = null;
 // FB-90 (S54f): el worker rechaza una foto sin etiqueta (NO_TAGS) y el estudio mandaba
 // `tags: []`: guardar fallaba siempre. La etiqueta la elige el cliente, como al subir.
+// FB-155 (S55n): Instagram, Facebook, TikTok, Line y las vistas web de Android abren enlaces en su propio navegador, que
+// tiene limitaciones. Safari y Chrome no lo son. Una funcion de una linea para que el arnes la ejecute con cada agente.
+function esNavegadorIntegrado(ua) { return /FBAN|FBAV|FB_IAB|Instagram|\bLine\/|; wv\)|Snapchat|musical_ly|Bytedance|TikTok/i.test(String(ua || '')); }
 function pickGalleryTag() {
-  const o = arguments[0] || {};   // 2.51.6: el video lo reutiliza con su titulo, su texto y su foto (fuera de la promesa: dentro, arguments es otro)
+  const o = arguments[0] || {};   // S55n: el video lo reutiliza con su titulo, su texto y su foto (fuera de la promesa: dentro, arguments es otro)
   return new Promise(function(resolve) {
     const es = detectLanguage() !== 'en';
     ensureOverlayCss();
@@ -6022,7 +6035,7 @@ let videoDuration = '5';
 const videoAspectRatio = '9:16';   // D47: no se elige
 let videoPollingTimer = null;
 let videoPhotoB64 = null;
-let videoPhotoTag = null;   // 2.51.6 (D1): que muestra la foto subida en video; la camara la sigue
+let videoPhotoTag = null;   // S55n (D1): que muestra la foto subida en video; la camara la sigue
 
 function setVideoDur(d, btn) {
   videoDuration = d;
@@ -6047,7 +6060,7 @@ function handleVideoPhoto(input) {
       if (!c) { videoPhotoB64 = null; videoPhotoTag = null; prev.style.display = 'none'; prev.src = ''; return; }
       videoPhotoB64 = c.dataUrl;
       prev.src = videoPhotoB64; prev.style.display = 'block';
-      // 2.51.6 (D1): la misma etiqueta que la galeria. Sin elegir, el worker usa la toma prudente (casi fija).
+      // S55n (D1): la misma etiqueta que la galeria. Sin elegir, el worker usa la toma prudente (casi fija).
       videoPhotoTag = await pickGalleryTag({ titulo: t('videoTagTitle'), hint: t('videoTagHint'), src: c.dataUrl });
       document.getElementById('videoPhotoName').textContent = '✓ ' + file.name;
     } catch (err) {
@@ -6114,7 +6127,7 @@ async function generateVideo(brand) {
     // S55n · FB-98: hay foto tambien cuando se subio A MANO. Antes solo la de galeria avisaba al worker, y con
     // la foto subida el prompt se escribia como «escena desde cero» (camara, revelado) para luego animar la foto.
     const conFoto = !!(usingGalleryPhoto || videoPhotoB64);
-    // 2.51.6 (D1): lo que muestra la foto viaja en los dos pasos; el worker elige la toma de camara con eso.
+    // S55n (D1): lo que muestra la foto viaja en los dos pasos; el worker elige la toma de camara con eso.
     const fotoEtiquetas = usingGalleryPhoto ? (Array.isArray(gallerySelectedPhoto.tags) ? gallerySelectedPhoto.tags.slice(0, 8) : [])
                         : (videoPhotoB64 && videoPhotoTag ? [videoPhotoTag] : []);
 
@@ -6131,7 +6144,7 @@ async function generateVideo(brand) {
         duration: videoDuration,   // S55n · BL-8: el servidor valida el saldo de video desde este paso
       }, 25000);
       videoPrompt = promptData.videoPrompt;
-      // 2.51.6 (D1): si el movimiento pedido no cabe en el sujeto de la foto, se aplica la toma de su sujeto y se dice.
+      // S55n (D1): si el movimiento pedido no cabe en el sujeto de la foto, se aplica la toma de su sujeto y se dice.
       if (promptData.avisoCamara) showToast('🎥 ' + promptData.avisoCamara, 7000);
       // S26: topicWarning is logged but NOT shown during generation — 
       // user already clicked generate, a toast now is confusing.
