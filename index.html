@@ -3,6 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <script>
+/* FB-155 (S55n): ninguna pagina trabaja por http: el worker solo acepta https y http guarda la sesion aparte. Va antes que todo.
+   Etiquetas en lineas propias: el extractor de sintaxis del preflight (G2) lee los scripts por lineas. */
+if(location.protocol==='http:'&&/(^|\.)postimity\.com$/.test(location.hostname))location.replace('https://'+location.host+location.pathname+location.search+location.hash);
+</script>
+<script>
 // FB-141 (S55k): un enlace de recordatorio ya guardado apunta a la raiz. Si trae marca y modo
 // es para el estudio: se reenvia con sus parametros intactos, antes de pintar la pagina publica.
 function reenviarAlEstudio(loc) {
@@ -11,7 +16,7 @@ function reenviarAlEstudio(loc) {
 }
 try { reenviarAlEstudio(location); } catch (e) {}
 </script>
-<meta name="app-version" content="2.51.6">
+<meta name="app-version" content="2.51.7">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>¿No sabes qué publicar? Postimity sí.</title>
 <meta name="description" content="Postimity crea tu estrategia, planea tu mes y genera posts, flyers, carruseles y videos con la voz de tu marca. Sin diseñador. Sin agencia. Desde $199 MXN/mes.">
