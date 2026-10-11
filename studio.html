@@ -7,7 +7,7 @@
    Etiquetas en lineas propias: el extractor de sintaxis del preflight (G2) lee los scripts por lineas. */
 if(location.protocol==='http:'&&/(^|\.)postimity\.com$/.test(location.hostname))location.replace('https://'+location.host+location.pathname+location.search+location.hash);
 </script>
-<meta name="app-version" content="2.51.8">
+<meta name="app-version" content="2.51.9">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Postimity Studio — Tu estudio de contenido con IA</title>
 <meta name="description" content="Crea posts, flyers, carruseles y videos profesionales con IA. Describe tu negocio una vez y genera contenido listo para publicar en 20 segundos.">
@@ -2120,16 +2120,31 @@ function track(...args) {
   try { if (typeof fbq === 'function') fbq(...args); } catch(e) { /* la analitica nunca bloquea */ }
 }
 
+// FB-158 (S55o · KV-1): cada peticion dice si es la PRIMERA de su accion ('accion') o de su modo dentro de la accion
+// ('modo'). El worker entonces no lee el replay ni la marca de cobro, que todavia no pueden existir: leerlos dejaba en la
+// cache de KV un «no existe» que el reintento, segundos despues, volvia a ver (generaba y cobraba otra vez). Un reintento
+// —el automatico de la red o el del boton— no lleva la marca. Vive aqui porque todo pasa por apiFetch.
+const _enviados = new Set();
+function marcarPrimerEnvio(b) {
+  if (!b || typeof b.actionId !== 'string' || !b.actionId || typeof b.mode !== 'string') return;
+  if (b.mode === 'image' && b.action === 'upload-video-photo') return;   // subir la foto del video no es una generacion
+  const a = 'a|' + b.actionId, am = 'm|' + b.actionId + '|' + b.mode;
+  if (!_enviados.has(a)) b.primerEnvio = 'accion'; else if (!_enviados.has(am)) b.primerEnvio = 'modo'; else delete b.primerEnvio;
+  _enviados.add(a); _enviados.add(am);
+}
 function apiFetch(url, opts = {}) {
   // S30: Inject auth token into the request BODY (not as header).
   // Headers like Authorization trigger CORS preflight which in-app browsers block.
   // Token in body avoids preflight entirely. Worker reads body._authToken as fallback.
   const token = getAuthToken();
-  if (token && opts.body) {
+  if (opts.body) {
     try {
       const b = JSON.parse(opts.body);
-      b._authToken = token;
-      opts.body = JSON.stringify(b);
+      if (b && typeof b === 'object') {
+        if (token) b._authToken = token;
+        marcarPrimerEnvio(b);
+        opts.body = JSON.stringify(b);
+      }
     } catch(e) { /* non-JSON body, skip */ }
   }
   return fetch(url, opts);
@@ -2370,13 +2385,13 @@ function persistSlides(imgs) {
 }
 
 // APP_VERSION (S34) — deploy verification. Must match worker /version and all HTML files.
-const APP_VERSION = '2.51.8'; // 9 oct 2026 — S55n: FB-157 el Brand Guide del alta reintenta si la marca recien creada aun no aparece; la vista previa al compartir usa la imagen vigente ($199, 7 dias); admin sin indexar y sin llave en la direccion · antes: 9 oct 2026 — S55n: FB-155 ninguna pagina trabaja por http; el aviso de navegador integrado solo donde lo es; FB-151 JSZip sin bloquear el primer pintado · antes: 8 oct 2026 — S55n: la foto del video pide su etiqueta y la camara la sigue; aviso si un movimiento pedido no cabe; hint de una persona · antes: 7 oct 2026 — S55n: FB-150 la firma no depende de la casilla (el primer carrusel de Growth salia firmado); FB-98 el video avisa de la foto subida a mano; BL-8 un «no» de saldo detiene el video en el primer paso · antes: 6 oct 2026 — S55m: el flyer ya no pinta la etiqueta del tipo; aviso cuando el carrusel sale sin portada (FB-149) · antes: 3 oct 2026 — S55m: sin cambios de estudio (FB-148 vive en el worker) · antes: 3 oct 2026 — S55m: FB-147 las miniaturas del carrusel se ven al generarlo, una sola escala de letra por carrusel, el nombre del negocio no se parte · antes: 3 oct 2026 — S55m (humo de la version anterior): FB-145 regenerar un flyer conserva su texto, FB-146 campos vacios al cambiar de cuenta, laminas que llenan, renglones parejos · antes: 3 oct 2026 — S55m: el lienzo como pieza de diseño (FB-96, FB-100): fuente de marca, jerarquia, color del primario, telefono con formato y voz por giro (D65, D66) · antes: 2 oct 2026 — S55l: semanas reales (lunes a domingo), los primeros días del mes muestran el plan anterior, la fecha especial dice cuándo es · antes: 2 oct 2026 — S55l: FB-112 el plan del mes completo abre en hoy · antes: 2 oct 2026 — S55k: FB-143 cambiar de cuenta recarga y limpia · antes: 2 oct 2026 — S55k: D64 paleta base en el alta, nota de estilo del Agente · antes: 2 oct 2026 — S55k: sin cambios de estudio (FB-125/FB-126 viven en el worker) · antes: 2 oct 2026 — S55k: FB-142 texto del hint, FB-141 enlace sobrevive al login, plan Premium activo · antes: 1 oct 2026 — S55j: FB-137 hint al entrar por codigo, FB-139 foto usada se limpia, FB-140 nota de estilo en el Agente · antes: 30 sep 2026 — S55i/S55j: FB-133 historial, FB-131 campos, FB-135 tipo de flyer obligatorio, D62 hint de giro regulado · antes: 29 sep 2026 — S55h: FB-132 el plan del Agente se recupera tras un corte de red sin re-pedirlo · antes: S55g: D57 tarjetas del Agente con una etiqueta de cada tipo, tarjeta flyer de la oferta y costo antes de generar; S55f: realPhoto en el video (D58)
+const APP_VERSION = '2.51.9'; // historial en ESTADO.md (§7a.1 y PARTE 10)
 window.APP_VERSION = APP_VERSION;
 // El log de version vive unas lineas mas abajo (console.info). No agregar otro aqui:
 // S38 borro POSTIMITY_VERSION para tener un solo log y este lo volvio a duplicar.
 // S35: lista de fixes de este build. Permite confirmar desde la consola QUÉ está vivo,
 // no sólo el número de versión. Un deploy fallido se detecta al instante.
-window.BUILD_FIXES = ['s50-agente-abre-lo-que-anuncia','s50-copiar-no-miente','s50-traza-load-failed','rd28-cobro-por-actionid','image-regen-cobra-y-en-medium',
+window.BUILD_FIXES = ['s55o-fb158-primer-envio','s55o-fb161-token-del-alta','s55o-kv3-busqueda-plan-192s','s50-agente-abre-lo-que-anuncia','s50-copiar-no-miente','s50-traza-load-failed','rd28-cobro-por-actionid','image-regen-cobra-y-en-medium',
   'video-captions-no-cobra','adjust-y-flyer-captions-cobran','calidad-la-decide-el-servidor',
   'contador-sincronizado-al-refinar','etiqueta-de-cobro-en-botones',
   'fb27-growth-entra-sin-firma','fb27-la-eleccion-del-usuario-manda','s55n-fb157-brand-guide-reintenta','s55n-vista-previa-vigente','s55n-admin-sin-llave-en-url','s55n-fb155-siempre-https','s55n-fb151-jszip-diferido','s55n-fb150-primera-pieza-sin-firma','s55n-d1-camara-por-etiqueta','s55n-d2-hint-una-persona','s55n-fb98-video-con-foto-subida','s55n-bl8-saldo-de-video-antes-de-esperar',
@@ -3564,6 +3579,9 @@ async function syncBrandToCloud(brand, id) {
       return false;
     }
     markPendingSync(false);   // llegó a la nube: ya no hay nada pendiente
+    // FB-161 (S55o): el alta entrega un token que ya lleva la marca. Sin guardarlo, un navegador que bloquea cookies
+    // seguia con el token sin marca y una recarga en el primer minuto volvia al alta.
+    if (data && typeof data.token === 'string' && data.token) setAuthToken(data.token);
     // FB-92 (S55b): el servidor devuelve los topes efectivos al guardar. En el alta es la primera
     // vez que existen (check-auth pregunto antes de la marca): se aplican y se repinta ya.
     if (data && data.limits) { window._srvLimits = data.limits; try { updateGenCounter(); } catch(e) {} }
@@ -8111,7 +8129,9 @@ function toggleAgentPlat(btn) {
 // unos minutos y el siguiente Generar la reusa: el servidor devuelve lo ya entregado (replay) o suprime
 // el segundo cobro (RD-28). La ventana es menor que CHARGE_DEDUP_TTL (10 min) del worker.
 let agentAccion = null;
-const AGENT_RECOVERY = { tries: 15, waitMs: 6000, reuseMs: 9 * 60 * 1000 };
+// S55o (KV-3): 32 x 6 s = 192 s. El Agente puede seguir 120 s despues del corte (su tope es 180 s) y KV puede tardar
+// 60 s en mostrar el plan recien guardado si una busqueda anterior leyo el «no existe». 15 intentos (90 s) no alcanzaban.
+const AGENT_RECOVERY = { tries: 32, waitMs: 6000, reuseMs: 9 * 60 * 1000 };
 async function recuperarPlanAgente(aid, month) {
   for (let k = 0; k < AGENT_RECOVERY.tries; k++) {
     await esperarVisible();
