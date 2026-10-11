@@ -7,7 +7,7 @@
    Etiquetas en lineas propias: el extractor de sintaxis del preflight (G2) lee los scripts por lineas. */
 if(location.protocol==='http:'&&/(^|\.)postimity\.com$/.test(location.hostname))location.replace('https://'+location.host+location.pathname+location.search+location.hash);
 </script>
-<meta name="app-version" content="2.51.9">
+<meta name="app-version" content="2.51.10">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Postimity Studio — Tu estudio de contenido con IA</title>
 <meta name="description" content="Crea posts, flyers, carruseles y videos profesionales con IA. Describe tu negocio una vez y genera contenido listo para publicar en 20 segundos.">
@@ -2385,13 +2385,13 @@ function persistSlides(imgs) {
 }
 
 // APP_VERSION (S34) — deploy verification. Must match worker /version and all HTML files.
-const APP_VERSION = '2.51.9'; // historial en ESTADO.md (§7a.1 y PARTE 10)
+const APP_VERSION = '2.51.10'; // historial en ESTADO.md (§7a.1 y PARTE 10)
 window.APP_VERSION = APP_VERSION;
 // El log de version vive unas lineas mas abajo (console.info). No agregar otro aqui:
 // S38 borro POSTIMITY_VERSION para tener un solo log y este lo volvio a duplicar.
 // S35: lista de fixes de este build. Permite confirmar desde la consola QUÉ está vivo,
 // no sólo el número de versión. Un deploy fallido se detecta al instante.
-window.BUILD_FIXES = ['s55o-fb158-primer-envio','s55o-fb161-token-del-alta','s55o-kv3-busqueda-plan-192s','s50-agente-abre-lo-que-anuncia','s50-copiar-no-miente','s50-traza-load-failed','rd28-cobro-por-actionid','image-regen-cobra-y-en-medium',
+window.BUILD_FIXES = ['s55o-galeria-indice-tolerante','s55o-fb158-primer-envio','s55o-fb161-token-del-alta','s55o-kv3-busqueda-plan-192s','s50-agente-abre-lo-que-anuncia','s50-copiar-no-miente','s50-traza-load-failed','rd28-cobro-por-actionid','image-regen-cobra-y-en-medium',
   'video-captions-no-cobra','adjust-y-flyer-captions-cobran','calidad-la-decide-el-servidor',
   'contador-sincronizado-al-refinar','etiqueta-de-cobro-en-botones',
   'fb27-growth-entra-sin-firma','fb27-la-eleccion-del-usuario-manda','s55n-fb157-brand-guide-reintenta','s55n-vista-previa-vigente','s55n-admin-sin-llave-en-url','s55n-fb155-siempre-https','s55n-fb151-jszip-diferido','s55n-fb150-primera-pieza-sin-firma','s55n-d1-camara-por-etiqueta','s55n-d2-hint-una-persona','s55n-fb98-video-con-foto-subida','s55n-bl8-saldo-de-video-antes-de-esperar',
