@@ -7,7 +7,7 @@
    Etiquetas en lineas propias: el extractor de sintaxis del preflight (G2) lee los scripts por lineas. */
 if(location.protocol==='http:'&&/(^|\.)postimity\.com$/.test(location.hostname))location.replace('https://'+location.host+location.pathname+location.search+location.hash);
 </script>
-<meta name="app-version" content="2.52.1">
+<meta name="app-version" content="2.53.0">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Postimity Studio — Tu estudio de contenido con IA</title>
 <meta name="description" content="Crea posts, flyers, carruseles y videos profesionales con IA. Describe tu negocio una vez y genera contenido listo para publicar en 20 segundos.">
@@ -105,6 +105,16 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
 .bg-section{display:none;margin-top:14px}
 .bg-section.show{display:block}
 .bg-label{font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px}
+/* S57c · el giro confirmado sin clics: una linea bajo el campo; con confianza baja, 2-3 opciones de un toque */
+.giro-sug{font-size:12px;color:var(--t2);margin-top:6px;line-height:1.5;min-height:0}
+.giro-sug b{color:var(--t1)}
+.giro-sug .giro-link{background:none;border:0;padding:0;color:var(--pk);font-weight:700;cursor:pointer;font-size:12px;text-decoration:underline}
+.giro-sug .giro-ops{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.giro-sug .giro-op{border:1px solid var(--bor);background:var(--bg2);color:var(--t1);border-radius:999px;padding:5px 10px;font-size:12px;cursor:pointer;max-width:100%;white-space:normal;text-align:left}
+.giro-sug .giro-op:hover{border-color:var(--pk)}
+.giro-sug select{margin-top:6px;width:100%;max-width:100%;font-size:13px;padding:6px;border-radius:8px;border:1px solid var(--bor)}
+.bg-giro{font-size:12px;color:var(--t2);margin:-6px 0 12px;line-height:1.5}
+.bg-giro:empty{display:none}
 .bg-area{width:100%;min-height:180px;padding:12px;border:1.5px solid var(--bor);border-radius:10px;font-size:12px;font-family:inherit;color:var(--t2);line-height:1.7;resize:vertical;outline:none;transition:border .15s}
 .bg-area:focus{border-color:var(--b)}
 /* States */
@@ -1302,7 +1312,8 @@ fbq('track', 'PageView');
         </div>
         <div class="fg-item span2">
           <div class="fg-label">Tipo de negocio <span style="color:var(--pk)">*</span></div>
-          <input type="text" id="bType" placeholder="Ej: Kinder privado, Restaurante de comida italiana, Salón de belleza, Gym...">
+          <input type="text" id="bType" oninput="giroAlEscribir()" placeholder="Ej: Kinder privado, Restaurante de comida italiana, Salón de belleza, Gym...">
+          <div id="giroSugerido" class="giro-sug" aria-live="polite"></div>
         </div>
       </div>
     </div>
@@ -1430,6 +1441,7 @@ fbq('track', 'PageView');
     <!-- Card 5: Brand Guide -->
     <div class="scard">
       <div class="scard-title">🤖 Brand Guide con IA</div>
+      <div id="bgGiro" class="bg-giro"></div>
       <p style="font-size:13px;color:var(--t3);margin-bottom:14px;line-height:1.6">La IA analizará tu negocio y generará la estrategia de contenido completa: pilares, voz de marca, estrategia por plataforma y hashtags. Puedes editarlo antes de guardar.</p>
       <button class="btn btn-primary btn-full" id="btnGenBG" onclick="ensureBrandThenGuide()" disabled>✨ Generar Brand Guide con IA</button>
       <div id="bgNeedsSave" style="font-size:12px;color:var(--t3);margin-top:8px;text-align:center;line-height:1.5">
@@ -2388,13 +2400,13 @@ function persistSlides(imgs) {
 }
 
 // APP_VERSION (S34) — deploy verification. Must match worker /version and all HTML files.
-const APP_VERSION = '2.52.1'; // historial en ESTADO.md (§7a.1 y PARTE 10)
+const APP_VERSION = '2.53.0'; // historial en ESTADO.md (§7a.1 y PARTE 10)
 window.APP_VERSION = APP_VERSION;
 // El log de version vive unas lineas mas abajo (console.info). No agregar otro aqui:
 // S38 borro POSTIMITY_VERSION para tener un solo log y este lo volvio a duplicar.
 // S35: lista de fixes de este build. Permite confirmar desde la consola QUÉ está vivo,
 // no sólo el número de versión. Un deploy fallido se detecta al instante.
-window.BUILD_FIXES = ['s55o-galeria-indice-tolerante','s55o-fb158-primer-envio','s55o-fb161-token-del-alta','s55o-kv3-busqueda-plan-192s','s50-agente-abre-lo-que-anuncia','s50-copiar-no-miente','s50-traza-load-failed','rd28-cobro-por-actionid','image-regen-cobra-y-en-medium',
+window.BUILD_FIXES = ['s57c-giro-confirmado-sin-clics','s57c-zona-horaria-por-partes','s55o-galeria-indice-tolerante','s55o-fb158-primer-envio','s55o-fb161-token-del-alta','s55o-kv3-busqueda-plan-192s','s50-agente-abre-lo-que-anuncia','s50-copiar-no-miente','s50-traza-load-failed','rd28-cobro-por-actionid','image-regen-cobra-y-en-medium',
   'video-captions-no-cobra','adjust-y-flyer-captions-cobran','calidad-la-decide-el-servidor',
   'contador-sincronizado-al-refinar','etiqueta-de-cobro-en-botones',
   'fb27-growth-entra-sin-firma','fb27-la-eleccion-del-usuario-manda','s55n-fb157-brand-guide-reintenta','s55n-vista-previa-vigente','s55n-admin-sin-llave-en-url','s55n-fb155-siempre-https','s55n-fb151-jszip-diferido','s55n-fb150-primera-pieza-sin-firma','s55n-d1-camara-por-etiqueta','s55n-d2-hint-una-persona','s55n-fb98-video-con-foto-subida','s55n-bl8-saldo-de-video-antes-de-esperar',
@@ -3272,6 +3284,7 @@ async function refreshServerState({ esperarCambioDePlan = false, planPrevio = nu
     if (auth.agentQuote && typeof auth.agentQuote === 'object') agentQuoteState = auth.agentQuote;   // D57 · B
     adoptarNicho(auth.nicho);   // D66 (S55m): la voz del lienzo
     adoptarRegulado(auth.regulado);   // D62
+    adoptarGiro(auth.giro);   // S57c
     if (auth.limits) window._srvLimits = auth.limits;
     try { updateCapLabels(); applyAgentFreqGate(); updateGenCounter(); } catch(e) {}
     if (!esperarCambioDePlan) break;
@@ -3481,9 +3494,11 @@ function detectLanguage() {
   // 3. Timezone — LATAM timezones default to ES (exclude US, Canada, Brazil)
   try {
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    const enZones = ['New_York','Chicago','Denver','Phoenix','Los_Angeles','Anchorage','Honolulu','Adak','Boise','Indiana','Kentucky','Menominee','Nome','North_Dakota','Sitka','Yakutat','Toronto','Vancouver','Edmonton','Winnipeg','Halifax','St_Johns','Regina','Whitehorse','Yellowknife','Iqaluit','Moncton','Goose_Bay','Glace_Bay','Rankin_Inlet','Resolute','Atikokan','Nipigon','Thunder_Bay','Pangnirtung','Cambridge_Bay','Inuvik','Dawson','Dawson_Creek','Creston','Fort_Nelson','Swift_Current','Rainy_River','Blanc-Sablon'];
-    const brZones = ['Sao_Paulo','Bahia','Belem','Fortaleza','Recife','Manaus','Porto_Velho','Boa_Vista','Campo_Grande','Cuiaba','Maceio','Araguaina','Santarem','Rio_Branco','Noronha','Eirunepe'];
-    if(tz.startsWith('America/') && !enZones.some(z => tz.includes(z)) && !brZones.some(z => tz.includes(z))) return 'es';
+    const EN_ZONES = ['New_York','Chicago','Denver','Phoenix','Los_Angeles','Anchorage','Honolulu','Adak','Boise','Indiana','Kentucky','Menominee','Nome','North_Dakota','Sitka','Yakutat','Toronto','Vancouver','Edmonton','Winnipeg','Halifax','St_Johns','Regina','Whitehorse','Yellowknife','Iqaluit','Moncton','Goose_Bay','Glace_Bay','Rankin_Inlet','Resolute','Atikokan','Nipigon','Thunder_Bay','Pangnirtung','Cambridge_Bay','Inuvik','Dawson','Dawson_Creek','Creston','Fort_Nelson','Swift_Current','Rainy_River','Blanc-Sablon'];
+    const BR_ZONES = ['Sao_Paulo','Bahia','Belem','Fortaleza','Recife','Manaus','Porto_Velho','Boa_Vista','Campo_Grande','Cuiaba','Maceio','Araguaina','Santarem','Rio_Branco','Noronha','Eirunepe'];
+    // S57c (COINC-1): por partes de la zona, no por pedazos («America/Indiana/Knox» → «Indiana»)
+    const partes = tz.split('/');
+    if(tz.startsWith('America/') && !partes.some(z => EN_ZONES.includes(z)) && !partes.some(z => BR_ZONES.includes(z))) return 'es';
   } catch(e) { console.warn('Timezone detection failed:', e.message); }
   // 4. Browser language fallback
   const bl = navigator.language?.slice(0,2);
@@ -3592,6 +3607,7 @@ async function syncBrandToCloud(brand, id) {
     if (data && data.limits) { window._srvLimits = data.limits; try { updateGenCounter(); } catch(e) {} }
     if (data) adoptarRegulado(data.regulado);   // FB-137: cambiar el giro actualiza el hint
     if (data) adoptarNicho(data.nicho);   // D66 (S55m): cambiar el giro cambia la voz del lienzo
+    if (data) adoptarGiro(data.giro);   // S57c: lo que guardo el servidor es lo que se ve
     // S46 — el resultado se DEVUELVE. Antes los cuatro caminos volvian undefined,
     // asi que quien llamaba no podia distinguir "guardado" de "rechazado". Generar
     // la guia sobre una marca que no llego al almacen da "Marca no encontrada", y
@@ -3688,6 +3704,7 @@ async function loadBrandFromCloud(id) {
     if (data.found && data.brand) {
       adoptarNicho(data.nicho);   // D66 (S55m): la voz del lienzo
       adoptarRegulado(data.regulado);   // FB-137: el login con codigo no pasa por check-auth
+      adoptarGiro(data.giro, true);   // S57c: el login con codigo tambien recibe el giro (y su aviso)
       // Sync server-side gen counts to localStorage (server is source of truth)
       // D7 fix (Session 19): Server is source of truth — always overwrite localStorage
       if (typeof data.genCount === 'number') {
@@ -4061,6 +4078,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   if (auth.agentQuote && typeof auth.agentQuote === 'object') agentQuoteState = auth.agentQuote;   // D57 · B
   adoptarNicho(auth.nicho);   // D66 (S55m): la voz del lienzo
   adoptarRegulado(auth.regulado);   // D62
+  adoptarGiro(auth.giro, true);   // S57c: al entrar, aviso discreto si nadie ha confirmado el giro
   try { updateCapLabels(); applyAgentFreqGate(); } catch(e) {}
 
   // Authenticated — load brand if exists
@@ -4692,6 +4710,7 @@ function saveBrand() {
     ...prev,
     name: bNameVal,
     type: bTypeVal,
+    giro: giroParaGuardar(bTypeVal, prev.giro),   // S57c: la sugerencia aceptada, la opcion elegida o el cambio del dueno
     whatsapp: bWaVal,
     email: bEmailVal,
     commsConsent: document.getElementById('chkComms')?.checked || false,
@@ -4819,6 +4838,7 @@ function goToEdit() {
   if(b){
     document.getElementById('bName').value = b.name||'';
     const bTypeEl=document.getElementById('bType'); if(bTypeEl) bTypeEl.value=b.type||'';
+    try { giroDesdeMarca(b); } catch(e) {}   // S57c
     const bDiffEl=document.getElementById('bDiff'); if(bDiffEl) bDiffEl.value=b.differentiator||'';
     const bAudEl=document.getElementById('bAudience'); if(bAudEl) bAudEl.value=b.audience||'';
     const bToneEl=document.getElementById('bTone'); if(bToneEl) bToneEl.value=b.tone||'Cálido, moderno y cercano';
@@ -5053,6 +5073,94 @@ function limpiarFoto(slot) {
   const ti = document.getElementById(z.title);
   if (ti) ti.textContent = slot === 'enhance' ? t('uploadDrag') : (ti.dataset.def || ti.textContent);
   const nm = document.getElementById(z.name); if (nm) nm.textContent = '';
+}
+// ═══ S57c · EL GIRO SE CONFIRMA SIN CLICS (firma 2 del operador, 12 oct) ═══
+// Al escribir el giro, el servidor sugiere UNA clase de su taxonomia (modelo + palabras) y aqui se pinta ya definida:
+// «Tu giro: … · cambiar». Si el dueno no la cambia, queda aceptada (sugerido-aceptado). Solo con confianza baja se piden
+// 2 o 3 opciones de un toque. El giro se ve en el encabezado del Brand Guide. La clase la valida el servidor al guardar.
+let giroState = null;   // { clase, nombre, scian, confianza, opciones:[{clase,nombre}], texto, origen }
+let giroCatalogo = null, _giroTimer = null, _giroPedido = 0;
+function giroAlEscribir() {
+  clearTimeout(_giroTimer);
+  const texto = (document.getElementById('bType')?.value || '').trim();
+  if (giroState && giroState.texto === texto) return;
+  if (texto.length < 3) { giroState = null; pintarGiro(); return; }
+  _giroTimer = setTimeout(() => pedirGiro(texto), 700);
+}
+async function pedirGiro(texto) {
+  const n = ++_giroPedido;
+  try {
+    const res = await apiFetch(WORKER, { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mode: 'clasificar-giro', texto, nombre: document.getElementById('bName')?.value || '', lang: detectLanguage(), catalogo: !giroCatalogo }) });
+    const d = await res.json();
+    if (n !== _giroPedido || !d || !d.clase) return;   // llego tarde: el dueno ya escribio otra cosa
+    if (Array.isArray(d.catalogo)) giroCatalogo = d.catalogo;
+    giroState = { clase: d.clase, nombre: d.nombre, scian: d.scian, confianza: d.confianza, opciones: d.opciones || [], texto, origen: d.confianza === 'alta' ? 'sugerido-aceptado' : 'sin-confirmar' };
+    pintarGiro();
+  } catch (e) { /* sin red no se sugiere: el servidor lee el giro por palabras al guardar */ }
+}
+function escGiro(x) { return String(x || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
+function pintarGiro() {
+  const es = detectLanguage() !== 'en', box = document.getElementById('giroSugerido'), bg = document.getElementById('bgGiro');
+  const g = giroState;
+  if (bg) bg.innerHTML = g && g.clase && g.clase !== 'general' && g.confianza !== 'baja' ? (es ? 'Giro: <b>' : 'Industry: <b>') + escGiro(g.nombre) + '</b>' + (g.scian ? ' · SCIAN ' + escGiro(g.scian) : '') : '';
+  if (!box) return;
+  if (!g || !g.clase) { box.innerHTML = ''; return; }
+  if (g.abrirCatalogo) {
+    const opts = (giroCatalogo || []).map(x => '<option value="' + escGiro(x.clase) + '"' + (x.clase === g.clase ? ' selected' : '') + '>' + escGiro(x.nombre) + '</option>').join('');
+    box.innerHTML = (es ? 'Elige tu giro:' : 'Choose your industry:') + '<select onchange="elegirGiro(this.value, this.options[this.selectedIndex].text, \'cambiado\')"><option value="">—</option>' + opts + '</select>';
+    return;
+  }
+  if (g.confianza === 'baja' && g.origen === 'sin-confirmar') {
+    box.innerHTML = (es ? '¿Cuál describe mejor tu negocio?' : 'Which one best describes your business?') + '<div class="giro-ops">'
+      + (g.opciones || []).slice(0, 3).map(o => '<button type="button" class="giro-op" onclick="elegirGiro(\'' + escGiro(o.clase) + '\', \'' + escGiro(o.nombre) + '\', \'elegido\')">' + escGiro(o.nombre) + '</button>').join('')
+      + '<button type="button" class="giro-link" onclick="abrirCatalogoGiro()">' + (es ? 'otro…' : 'other…') + '</button></div>';
+    return;
+  }
+  box.innerHTML = (es ? 'Tu giro: <b>' : 'Your industry: <b>') + escGiro(g.nombre) + '</b> · <button type="button" class="giro-link" onclick="abrirCatalogoGiro()">' + (es ? 'cambiar' : 'change') + '</button>';
+}
+async function abrirCatalogoGiro() {
+  if (!giroCatalogo) { try { const res = await apiFetch(WORKER, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mode: 'clasificar-giro', texto: (document.getElementById('bType')?.value || 'x').trim() || 'x', lang: detectLanguage(), catalogo: true }) }); const d = await res.json(); if (Array.isArray(d.catalogo)) giroCatalogo = d.catalogo; } catch (e) {} }
+  giroState = Object.assign({}, giroState || {}, { abrirCatalogo: true, texto: (document.getElementById('bType')?.value || '').trim() });
+  pintarGiro();
+}
+function elegirGiro(clase, nombre, origen) {
+  if (!clase) return;
+  giroState = { clase, nombre, confianza: 'confirmada', opciones: [], texto: (document.getElementById('bType')?.value || '').trim(), origen: origen || 'elegido' };
+  pintarGiro();
+}
+// Lo que viaja en save-brand: la sugerencia (aceptada si no se cambio), la eleccion o el cambio, SOLO si es del texto que
+// quedo escrito. Si el dueno edito el giro despues, se manda el que ya tenia la marca para ese mismo texto, o nada.
+function giroParaGuardar(tipo, previo) {
+  const t = String(tipo || '').trim();
+  if (giroState && giroState.clase && giroState.texto === t && !giroState.abrirCatalogo) return { clase: giroState.clase, origen: giroState.origen || 'sugerido-aceptado', confianza: giroState.confianza, texto: t };
+  if (previo && previo.clase && String(previo.texto || '').trim() === t) return previo;
+  return null;
+}
+// El formulario de edicion abre con el giro guardado de la marca.
+function giroDesdeMarca(b) {
+  if (b && b.giro && b.giro.clase && b.giro.texto === (b.type || '').trim() && giroState === null) {
+    giroState = { clase: b.giro.clase, nombre: (b.giro.nombre || ''), scian: b.giro.scian, confianza: b.giro.confianza, opciones: [], texto: b.giro.texto, origen: b.giro.origen };
+  }
+  pintarGiro();
+}
+// Un solo escritor del giro que publica el servidor (check-auth, get-brand, save-brand). Al entrar (`alEntrar`), una marca
+// cuyo giro nadie confirmo recibe un aviso discreto, una vez: sin clic obligatorio; se cambia en Mi Cuenta.
+function adoptarGiro(x, alEntrar) {
+  if (!x || typeof x !== 'object' || !x.clase) return;
+  const tipo = (document.getElementById('bType')?.value || '').trim();
+  giroState = { clase: x.clase, nombre: x.nombre, scian: x.scian, confianza: x.confianza, opciones: [], texto: tipo || (giroState && giroState.texto) || '', origen: x.origen };
+  try { pintarGiro(); } catch (e) {}
+  if (alEntrar) setTimeout(() => { try { avisoGiro(x); } catch (e) {} }, 2500);
+}
+function avisoGiro(x) {
+  if (!x || (x.origen !== 'automatico' && x.origen !== 'sin-confirmar')) return;
+  const es = detectLanguage() !== 'en', llave = 'postimity_giro_aviso:' + (brandId || '') + ':' + x.clase;
+  try { if (localStorage.getItem(llave)) return; localStorage.setItem(llave, '1'); } catch (e) { /* sin almacenamiento: se avisa igual, una vez por sesion */ }
+  const msg = x.confianza === 'baja' || x.clase === 'general'
+    ? (es ? '🧭 No reconocimos tu giro con seguridad. Confírmalo en Mi Cuenta → Editar para que tus imágenes y textos sean de tu negocio.' : '🧭 We could not recognize your industry with confidence. Confirm it in My Account → Edit.')
+    : (es ? '🧭 Reconocimos tu giro como «' + x.nombre + '». Si no es, cámbialo en Mi Cuenta → Editar.' : '🧭 We recognized your industry as «' + x.nombre + '». If it is wrong, change it in My Account → Edit.');
+  showToast(msg, 8000);
 }
 // D62 (S55j): el servidor dice si el giro es regulado (check-auth); el cliente solo pinta. Sin dato, nada.
 let reguladoState = [];
