@@ -7,7 +7,7 @@
    Etiquetas en lineas propias: el extractor de sintaxis del preflight (G2) lee los scripts por lineas. */
 if(location.protocol==='http:'&&/(^|\.)postimity\.com$/.test(location.hostname))location.replace('https://'+location.host+location.pathname+location.search+location.hash);
 </script>
-<meta name="app-version" content="2.51.10">
+<meta name="app-version" content="2.52.1">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Postimity Studio — Tu estudio de contenido con IA</title>
 <meta name="description" content="Crea posts, flyers, carruseles y videos profesionales con IA. Describe tu negocio una vez y genera contenido listo para publicar en 20 segundos.">
@@ -92,9 +92,12 @@ input::placeholder,textarea::placeholder{color:var(--t3)}
 textarea{resize:vertical;min-height:72px;line-height:1.5}
 select{cursor:pointer}
 /* Colors */
-.color-row{display:flex;gap:8px}
-.color-pick{flex:1;display:flex;align-items:center;gap:8px;padding:8px 10px;border:1.5px solid var(--bor);border-radius:8px;background:var(--w)}
-.color-pick label{font-size:11px;font-weight:600;color:var(--t2);cursor:pointer}
+/* FB-163 (S57a): en Android con letra grande la fila no cabia y «Acento» salia del recuadro. Un hijo flex no baja de su
+   ancho de contenido sin min-width:0; la fila pasa a dos renglones antes de desbordar. */
+.color-row{display:flex;flex-wrap:wrap;gap:8px}
+.color-pick{flex:1 1 96px;min-width:0;display:flex;align-items:center;gap:8px;padding:8px 10px;border:1.5px solid var(--bor);border-radius:8px;background:var(--w)}
+.color-pick input[type=color]{flex:0 0 28px}
+.color-pick label{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px;font-weight:600;color:var(--t2);cursor:pointer}
 .palette-btn{display:inline-flex;align-items:center;gap:4px;padding:5px 8px;border:1.5px solid var(--bor);border-radius:8px;background:var(--w);cursor:pointer;font-size:13px;font-family:inherit;transition:border-color .2s}
 .palette-btn:hover{border-color:var(--b)}
 input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:pointer;padding:0;background:none}
@@ -2385,7 +2388,7 @@ function persistSlides(imgs) {
 }
 
 // APP_VERSION (S34) — deploy verification. Must match worker /version and all HTML files.
-const APP_VERSION = '2.51.10'; // historial en ESTADO.md (§7a.1 y PARTE 10)
+const APP_VERSION = '2.52.1'; // historial en ESTADO.md (§7a.1 y PARTE 10)
 window.APP_VERSION = APP_VERSION;
 // El log de version vive unas lineas mas abajo (console.info). No agregar otro aqui:
 // S38 borro POSTIMITY_VERSION para tener un solo log y este lo volvio a duplicar.
@@ -3257,7 +3260,9 @@ function resetAuthScreen() {
 // Ademas reintenta: el plan lo activa el WEBHOOK de Stripe, que tarda lo que
 // tarda. Un unico sondeo a los 2 segundos es una apuesta, no una comprobacion.
 async function refreshServerState({ esperarCambioDePlan = false, planPrevio = null } = {}) {
-  const esperas = esperarCambioDePlan ? [0, 1500, 3000, 5000, 8000] : [0];
+  // FB-162 (S57a): con el plan en D1, lo que escribe el webhook se ve en la siguiente pregunta; la espera cubre un webhook
+  // lento (~1 min) en vez de 17 s.
+  const esperas = esperarCambioDePlan ? [0, 1500, 3000, 5000, 8000, 10000, 15000, 15000] : [0];
   let auth = null;
   for (const ms of esperas) {
     if (ms) await new Promise(r => setTimeout(r, ms));
@@ -5376,7 +5381,7 @@ const LZ_FAM = "'Plus Jakarta Sans', sans-serif";
 const LZ_FUENTE_TOPE_MS = 2000;   // decision del operador: una pieza con la letra del sistema es mejor que una generacion colgada
 // D66 · LA VOZ DEL GIRO: misma posicion y mismo motor para todos; cambia la letra del TITULO. El cuerpo es siempre la de marca.
 const LZ_VOCES = { moderno: { fam: null, peso: 800, upper: false, lh: 1.06, k: 1.00 }, impacto: { fam: "'Anton'", peso: 400, upper: true, lh: 1.12, k: 1.10 }, elegante: { fam: "'Playfair Display'", peso: 700, upper: false, lh: 1.10, k: 1.00 }, amable: { fam: "'Fredoka'", peso: 600, upper: false, lh: 1.08, k: 1.02 } };
-const LZ_VOZ_POR_NICHO = { fitness: 'impacto', home_services: 'impacto', automotive: 'impacto', beauty: 'elegante', hospitality: 'elegante', realestate: 'elegante', health: 'elegante', restaurant: 'amable', pets: 'amable', events: 'amable', neighborhood: 'amable', education: 'moderno', services: 'moderno', saas_platform: 'moderno', retail: 'moderno', general: 'moderno' };
+const LZ_VOZ_POR_NICHO = { fitness: 'impacto', home_services: 'impacto', automotive: 'impacto', logistics: 'impacto', beauty: 'elegante', hospitality: 'elegante', realestate: 'elegante', health: 'elegante', restaurant: 'amable', pets: 'amable', events: 'amable', neighborhood: 'amable', education: 'moderno', services: 'moderno', saas_platform: 'moderno', retail: 'moderno', general: 'moderno' };
 // El giro lo reconoce el servidor (un solo reconocedor, RD-35) y llega por check-auth, get-brand y save-brand.
 let nichoState = '';
 function adoptarNicho(x) {
