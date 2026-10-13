@@ -7,7 +7,7 @@
    Etiquetas en lineas propias: el extractor de sintaxis del preflight (G2) lee los scripts por lineas. */
 if(location.protocol==='http:'&&/(^|\.)postimity\.com$/.test(location.hostname))location.replace('https://'+location.host+location.pathname+location.search+location.hash);
 </script>
-<meta name="app-version" content="2.53.0">
+<meta name="app-version" content="2.54.0">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Postimity Studio — Tu estudio de contenido con IA</title>
 <meta name="description" content="Crea posts, flyers, carruseles y videos profesionales con IA. Describe tu negocio una vez y genera contenido listo para publicar en 20 segundos.">
@@ -2202,8 +2202,96 @@ function beginAction(sig, retry) {
   _actionT0 = Date.now();
   return newActionId();
 }
+// La firma de la entrada de una accion: un reintento conserva su actionId solo si la entrada no cambio.
+function firmaDeEntrada() {
+  const _v = (id) => (document.getElementById(id)?.value || '').trim();
+  return [mode, flyerMode, platform, pillar, enhanceMode, _v('postText'), _v('testText'), _v('enhancePrompt'), _v('carouselTopic')].join('|');
+}
+function firmaDeVideo() {
+  return ['video', (document.getElementById('videoTopic')?.value || '').trim(), videoDuration, !!videoPhotoB64].join('|');
+}
 function puedeReintentar() {
   return !!currentActionId && (Date.now() - _actionT0) < RETRY_WINDOW_MS;
+}
+
+// ── FB-71 (S57b · INV-283 · PR-110): recargar a media generacion no la pierde ──
+// Modo avion a media generacion, wifi y RECARGAR: el servidor ya habia entregado y cobrado, y la recarga perdia el
+// actionId. Ahora la accion en curso se recuerda en el navegador (por cuenta, dentro de RETRY_WINDOW_MS) y al volver a
+// cargar se OFRECE recuperarla: misma entrada y MISMO actionId, asi que el servidor devuelve lo ya entregado (replay) y
+// suprime el cobro repetido (D1-4). Nunca se hereda sola: una generacion nueva nace con su propio id (devolveria la
+// pieza vieja). La foto no se guarda (no cabe y es del cliente): si la pieza la usaba, se pide elegirla otra vez.
+const PENDIENTE_KEY = 'postimity_pendiente';
+const CAMPOS_ACCION = ['postText', 'testText', 'enhancePrompt', 'carouselTopic', 'videoTopic', 'flyerType', 'flyerStyle', 'flyerTitle2', 'flyerSub', 'flyerTag', 'flyerDates', 'flyerPrice', 'flyerSched', 'flyerExtra'];
+let _recuperacionArmada = null;   // actionId recuperado que espera a que el cliente vuelva a elegir su foto
+function fotoDeLaAccion(m) {
+  const gt = document.getElementById('galleryToggle');
+  return m === 'enhance' || (m === 'flyer' && flyerMode === 'photo') || (m === 'testimonial' && !!testPhotoB64)
+    || (m === 'video' && !!videoPhotoB64) || !!(gt && gt.checked && gallerySelectedPhoto);
+}
+function fotoEnMemoria(p) {
+  if (p.mode === 'enhance') return typeof enhanceB64 !== 'undefined' && !!enhanceB64;
+  if (p.mode === 'flyer' && p.flyerMode === 'photo') return !!flyerPhotoB64;
+  if (p.mode === 'testimonial') return !!testPhotoB64 || !!gallerySelectedPhoto;
+  if (p.mode === 'video') return !!videoPhotoB64 || !!gallerySelectedPhoto;
+  return !!gallerySelectedPhoto;
+}
+function guardarPendiente() {
+  try {
+    const campos = {};
+    CAMPOS_ACCION.forEach(id => { const el = document.getElementById(id); if (el && el.value) campos[id] = el.value; });
+    localStorage.setItem(PENDIENTE_KEY, JSON.stringify({ aid: currentActionId, sig: _actionSig, t0: _actionT0, brandId: brandId || null,
+      mode, flyerMode, platform, pillar, enhanceMode, imageStyle, videoDuration, foto: fotoDeLaAccion(mode), campos }));
+  } catch (e) { /* sin almacenamiento la recarga pierde la accion, como antes */ }
+}
+function borrarPendiente() { try { localStorage.removeItem(PENDIENTE_KEY); } catch (e) {} }
+function leerPendiente() {
+  try {
+    const p = JSON.parse(localStorage.getItem(PENDIENTE_KEY) || 'null');
+    if (!p || !p.aid || !p.brandId || p.brandId !== brandId || !(Date.now() - p.t0 < RETRY_WINDOW_MS)) return null;
+    return p;
+  } catch (e) { return null; }
+}
+function restaurarEntrada(p) {
+  if (p.mode && p.mode !== mode) setMode(p.mode);
+  if (p.mode === 'flyer' && p.flyerMode) setFlyerMode(p.flyerMode);
+  if (p.platform) setPlatformByName(p.platform);
+  if (p.pillar) setPillarByName(p.pillar);
+  if (p.enhanceMode) enhanceMode = p.enhanceMode;
+  if (p.imageStyle) imageStyle = p.imageStyle;
+  if (p.videoDuration) videoDuration = p.videoDuration;
+  Object.keys(p.campos || {}).forEach(id => { const el = document.getElementById(id); if (el) el.value = p.campos[id]; });
+}
+function ofrecerRecuperacion() {
+  let b = document.getElementById('recuperarBar');
+  const p = (_inFlight && _inFlight.size) ? null : leerPendiente();   // una generacion viva en ESTA pagina no se ofrece
+  if (!p) { if (b) b.style.display = 'none'; return; }
+  if (!b) { b = document.createElement('div'); b.id = 'recuperarBar'; document.body.appendChild(b); }
+  const isES = detectLanguage() !== 'en';
+  b.style.cssText = 'position:fixed;left:12px;right:12px;bottom:16px;z-index:9999;display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:#111827;color:#fff;padding:12px 14px;border-radius:12px;font-size:14px;box-shadow:0 6px 24px rgba(0,0,0,.25);max-width:560px;margin:0 auto';
+  b.innerHTML = '<span style="flex:1 1 220px">' + (isES ? 'Tu última generación se interrumpió al recargar la página.' : 'Your last generation was interrupted when the page reloaded.') + '</span>' +
+    '<button type="button" onclick="recuperarPendiente()" style="background:#2979FF;color:#fff;border:0;border-radius:8px;padding:8px 14px;font-weight:700">' + (isES ? 'Recuperar' : 'Recover') + '</button>' +
+    '<button type="button" onclick="descartarPendiente()" style="background:transparent;color:#cbd5e1;border:1px solid #475569;border-radius:8px;padding:8px 12px">' + (isES ? 'Descartar' : 'Dismiss') + '</button>';
+  b.style.display = 'flex';
+}
+function descartarPendiente() {
+  borrarPendiente();
+  const b = document.getElementById('recuperarBar'); if (b) b.style.display = 'none';
+}
+async function recuperarPendiente() {
+  const p = leerPendiente();
+  const b = document.getElementById('recuperarBar'); if (b) b.style.display = 'none';
+  const isES = detectLanguage() !== 'en';
+  if (!p) { showToast(isES ? 'Pasaron más de 8 minutos: esa generación ya no se puede recuperar.' : 'More than 8 minutes passed: that generation can no longer be recovered.', 6000); return; }
+  restaurarEntrada(p);
+  // La firma es la de la entrada YA restaurada, no la guardada: si algo no se pudo restituir igual (un pilar que ya no
+  // existe), la recuperacion conserva su actionId de todos modos. Lo que el cliente cambie despues si la rompe.
+  currentActionId = p.aid; _actionSig = p.mode === 'video' ? firmaDeVideo() : firmaDeEntrada(); _actionT0 = p.t0;
+  if (p.foto && !fotoEnMemoria(p)) {
+    _recuperacionArmada = p.aid;
+    showToast(isES ? '📷 Esa pieza usaba una foto: vuelve a elegir la misma foto y toca Generar. No se te cobra otra vez.' : '📷 That piece used a photo: pick the same photo again and tap Generate. You will not be charged again.', 9000);
+    return;
+  }
+  await generate({ retry: true });
 }
 function retryLastAction() {
   // Sin red, el panel se queda: si se cerrara, el usuario volveria a Generar y
@@ -2232,13 +2320,7 @@ function syncCounters(data) {
     agentQuoteState = data.agentQuote;
     try { paintAgentQuote(); } catch(e) {}
   }
-  if (typeof data.genCount === 'number') {
-    localStorage.setItem(genMonthKey(), String(data.genCount));
-    genCount = data.genCount;
-  }
-  if (typeof data.videoCount === 'number') {
-    localStorage.setItem(videoMonthKey(), String(data.videoCount));
-  }
+  adoptarSaldo(data);   // FB-59: lo que dice el servidor, tal cual
   updateGenCounter();
 }
 
@@ -2400,7 +2482,7 @@ function persistSlides(imgs) {
 }
 
 // APP_VERSION (S34) — deploy verification. Must match worker /version and all HTML files.
-const APP_VERSION = '2.53.0'; // historial en ESTADO.md (§7a.1 y PARTE 10)
+const APP_VERSION = '2.54.0'; // historial en ESTADO.md (§7a.1 y PARTE 10)
 window.APP_VERSION = APP_VERSION;
 // El log de version vive unas lineas mas abajo (console.info). No agregar otro aqui:
 // S38 borro POSTIMITY_VERSION para tener un solo log y este lo volvio a duplicar.
@@ -3066,21 +3148,28 @@ let brandId = null; // Phase 2: unique brand identifier for KV sync
 // FB-143 (S55k): la pagina recuerda si ya tuvo una sesion. Cambiar de cuenta sobre una pagina usada dejaba a la
 // vista el ultimo resultado, los interruptores y el plan de la cuenta anterior. Lo marca applyBrand, un solo sitio.
 let _sesionEnPagina = false;
-let genCount = 0;   // Phase 2: generation counter for plan limits
 let logoSrc = null, enhanceB64 = null, enhanceMime = 'image/jpeg';
 let originalImageUrl = null; // S23: stores clean image URL for live preview redraws
 let flyerPhotoB64 = null, flyerPhotoMime = 'image/jpeg';
 let testPhotoB64 = null, testPhotoMime = 'image/jpeg';
 let lastResult = null, lastInput = null;
 
-// ── Per-brand gen counter keys (Fix #9) ──────────────────
-function genMonthKey() {
-  const id = brandId || 'global';
-  return 'postimity_gens_' + id + '_' + new Date().toISOString().slice(0,7);
+// ── FB-59 (S57b · INV-173 · PR-107): el saldo vive en memoria y lo escribe SOLO adoptarSaldo, con lo que dice el servidor ──
+// Antes vivia en localStorage: la carga siguiente pintaba el numero de otra sesion (FB-16), Mi cuenta y la barra caian a
+// tablas de topes copiadas (RD-35) y al terminar un video se sumaba +1 aunque el servidor cobra 10 s = 2. Sin dato, null:
+// no se pinta un numero (SALDO-1). Cualquier respuesta que traiga genCount, videoCount o limits pasa por aqui.
+const saldo = { gens: null, vgens: null };
+function adoptarSaldo(data) {
+  if (!data || typeof data !== 'object') return;
+  if (typeof data.genCount === 'number') saldo.gens = data.genCount;
+  if (typeof data.videoCount === 'number') saldo.vgens = data.videoCount;
+  if (data.limits && typeof data.limits === 'object') window._srvLimits = data.limits;
 }
-function videoMonthKey() {
-  const id = brandId || 'global';
-  return 'postimity_videos_' + id + '_' + new Date().toISOString().slice(0,7);
+// Lo que queda de una bolsa, o null si el servidor todavia no lo ha dicho.
+function saldoRestante(bolsa) {
+  const srv = window._srvLimits, usado = saldo[bolsa];
+  if (!srv || typeof srv[bolsa] !== 'number' || typeof usado !== 'number') return null;
+  return Math.max(0, srv[bolsa] - usado);
 }
 
 // ═══════════════════════════════════════════════════════
@@ -3285,7 +3374,7 @@ async function refreshServerState({ esperarCambioDePlan = false, planPrevio = nu
     adoptarNicho(auth.nicho);   // D66 (S55m): la voz del lienzo
     adoptarRegulado(auth.regulado);   // D62
     adoptarGiro(auth.giro);   // S57c
-    if (auth.limits) window._srvLimits = auth.limits;
+    adoptarSaldo(auth);   // FB-59: saldo y topes tras volver de pagar
     try { updateCapLabels(); applyAgentFreqGate(); updateGenCounter(); } catch(e) {}
     if (!esperarCambioDePlan) break;
     if (auth.plan && auth.plan !== planPrevio) break;   // el webhook ya aplico el plan
@@ -3507,28 +3596,14 @@ function detectLanguage() {
 }
 
 function updateGenCounter() {
-  const brand = loadBrand();
-  const plan = brand?.plan || 'trial';
-  // S46 — los topes efectivos vienen del SERVIDOR (check-auth → limits).
-  //
-  // Resolver GEN_LIMITS[plan] aqui basta mientras el plan determine el tope, y
-  // dejo de bastar con el estado "sin prueba" del Contrato 4.4: la cuenta tiene
-  // cero cuota y esta barra mostraba "25 gen · 2 videos restantes". El usuario se
-  // enteraba chocando contra el error, que es lo que PR-147 y PR-171 prohiben.
-  //
-  // Las tablas locales quedan como respaldo para cuando aun no ha llegado la
-  // respuesta del servidor, no como fuente.
-  const srv = window._srvLimits;
-  const limit = (srv && typeof srv.gens === 'number') ? srv.gens : (GEN_LIMITS[plan] || GEN_LIMITS['trial']);
-  const used = parseInt(localStorage.getItem(genMonthKey()) || '0');
-  const remaining = Math.max(0, limit - used);
-  // Video counter
-  const videosUsed = parseInt(localStorage.getItem(videoMonthKey()) || '0');
-  const videoLimit = (srv && typeof srv.vgens === 'number') ? srv.vgens : (VIDEO_LIMITS[plan] || VIDEO_LIMITS.trial);
-  const videosRemaining = Math.max(0, videoLimit - videosUsed);
+  // S46 — los topes efectivos vienen del SERVIDOR (check-auth → limits): con el estado "sin prueba" del Contrato 4.4
+  // la cuenta tiene cero cuota y una tabla local mostraba "25 gen · 2 videos restantes" (PR-147, PR-171).
+  // FB-59 (S57b): lo usado tambien. Sin respuesta del servidor no hay tabla de respaldo: no se pinta un numero.
+  const remaining = saldoRestante('gens'), videosRemaining = saldoRestante('vgens');
   const el = document.getElementById('genCounterBadge');
   if (el) {
     const isES = detectLanguage() === 'es';
+    if (remaining === null || videosRemaining === null) { el.textContent = '— gen · — ' + (isES ? 'videos' : 'videos'); el.style.background = '#F1F3F5'; el.style.color = '#6B7280'; return; }
     el.textContent = remaining + ' gen · ' + videosRemaining + (isES ? ' videos restantes' : ' videos left');
     el.style.background = remaining <= 3 ? '#FDECEA' : remaining <= 8 ? '#FDF0DC' : '#EAF3DE';
     el.style.color = remaining <= 3 ? '#C0392B' : remaining <= 8 ? '#854F0B' : '#3B6D11';
@@ -3604,7 +3679,8 @@ async function syncBrandToCloud(brand, id) {
     if (data && typeof data.token === 'string' && data.token) setAuthToken(data.token);
     // FB-92 (S55b): el servidor devuelve los topes efectivos al guardar. En el alta es la primera
     // vez que existen (check-auth pregunto antes de la marca): se aplican y se repinta ya.
-    if (data && data.limits) { window._srvLimits = data.limits; try { updateGenCounter(); } catch(e) {} }
+    // FB-92 (S55b) · FB-59 (S57b): el alta trae sus topes y lo usado del mes; se adoptan y se repinta ya
+    if (data) { adoptarSaldo(data); try { updateGenCounter(); } catch(e) {} }
     if (data) adoptarRegulado(data.regulado);   // FB-137: cambiar el giro actualiza el hint
     if (data) adoptarNicho(data.nicho);   // D66 (S55m): cambiar el giro cambia la voz del lienzo
     if (data) adoptarGiro(data.giro);   // S57c: lo que guardo el servidor es lo que se ve
@@ -3705,17 +3781,7 @@ async function loadBrandFromCloud(id) {
       adoptarNicho(data.nicho);   // D66 (S55m): la voz del lienzo
       adoptarRegulado(data.regulado);   // FB-137: el login con codigo no pasa por check-auth
       adoptarGiro(data.giro, true);   // S57c: el login con codigo tambien recibe el giro (y su aviso)
-      // Sync server-side gen counts to localStorage (server is source of truth)
-      // D7 fix (Session 19): Server is source of truth — always overwrite localStorage
-      if (typeof data.genCount === 'number') {
-        const mk = genMonthKey();
-        localStorage.setItem(mk, String(data.genCount));
-        genCount = data.genCount;
-      }
-      if (typeof data.videoCount === 'number') {
-        const vk = videoMonthKey();
-        localStorage.setItem(vk, String(data.videoCount));
-      }
+      adoptarSaldo(data);   // FB-59: el saldo del servidor, en memoria
       // S25: Sync plan from server — critical for Stripe upgrades and admin overrides
       // Server plan ALWAYS wins over localStorage plan
       // S38-5: aqui se llamaba saveBrand(localBrand). saveBrand NO recibe parametros:
@@ -4059,15 +4125,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   // Math.max was causing client inflation — if client got ahead (failed requests),
   // the count could never go back down. Server-side validateGeneration() already
   // enforces limits, so anti-rollback protection is not needed client-side.
-  if (typeof auth.genCount === 'number') {
-    const mk = genMonthKey();
-    localStorage.setItem(mk, String(auth.genCount));
-    genCount = auth.genCount;
-  }
-  if (typeof auth.videoCount === 'number') {
-    const vk = videoMonthKey();
-    localStorage.setItem(vk, String(auth.videoCount));
-  }
+  adoptarSaldo(auth);   // FB-59: el saldo y los topes del servidor, en memoria
   // Los topes llegan en la MISMA respuesta de check-auth, pero este bloque lee campo
   // por campo y `caps` no estaba en la lista: se descartaba. Las etiquetas quedaban en
   // blanco hasta que el usuario hiciera una llamada, o sea justo hasta despues de
@@ -4815,6 +4873,7 @@ function applyBrand(b) {
   if(b.logo){ cl.innerHTML=`<img src="${b.logo}" alt="">`; } else { cl.textContent=b.name.charAt(0).toUpperCase(); }
   // Pillars
   buildPillarBtns(b.pillars||[]);
+  setTimeout(() => { try { ofrecerRecuperacion(); } catch (e) {} }, 0);   // FB-71
 }
 
 function buildPillarBtns(pillars) {
@@ -6021,16 +6080,18 @@ async function generate(opts = {}) {
   }
 
   // Video mode has its own flow (async)
-  if(mode==='video') { generateVideo(brand); return; }
+  if(mode==='video') { generateVideo(brand, opts); return; }
 
   showLoading(true);
   _genCancelled = false;   // S41-4: cada generacion nueva parte de cero
   const bg=brand.brandGuide||(detectLanguage()==='en'?`Business: ${brand.name}. Differentiator: ${brand.differentiator}. Audience: ${brand.audience}.`:`Negocio: ${brand.name}. Diferenciador: ${brand.differentiator}. Audiencia: ${brand.audience}.`);
   // S37/L2 · RD-28: una accion del usuario = un actionId. S52b: un reintento desde el
   // panel de error conserva el suyo si la entrada no cambio (beginAction).
-  const _v = (id) => (document.getElementById(id)?.value || '').trim();
-  const _sig = [mode, flyerMode, platform, pillar, enhanceMode, _v('postText'), _v('testText'), _v('enhancePrompt'), _v('carouselTopic')].join('|');
-  beginAction(_sig, opts.retry === true);
+  const _sig = firmaDeEntrada();
+  // FB-71: una recuperacion que esperaba la foto conserva su actionId (solo esa accion y solo una vez)
+  const _armada = !!_recuperacionArmada && _recuperacionArmada === currentActionId; _recuperacionArmada = null;
+  beginAction(_sig, opts.retry === true || _armada);
+  guardarPendiente();   // FB-71: si la pagina se recarga antes de entregar, se puede recuperar
   // FB-145 (S55m): los datos del flyer se guardan con la generacion; al regenerar la imagen el formulario puede estar ya vacio (FB-131).
   lastInput={mode,platform,pillar,bg,brand,flyerMode, flyerData: mode==='flyer' ? getFlyerData() : null};
 
@@ -6041,8 +6102,10 @@ async function generate(opts = {}) {
     else if(mode==='flyer'&&flyerMode==='photo') await genFlyerPhoto(brand,bg);
     else if(mode==='testimonial') await genTestimonial(brand,bg);
     else if(mode==='carousel') await genCarousel(brand,bg);
+    borrarPendiente();   // FB-71: entregada
   } catch(err) {
     showLoading(false);
+    if (err.planBlock) borrarPendiente();   // un «no» del servidor no cobro: no hay nada que recuperar
     // S38-2: el bloqueo por plan ya se comunico con toast y ya llevo al usuario a
     // Mi Cuenta. Pintar tambien el panel de error dejaria un mensaje viejo esperando
     // en la pantalla del creador.
@@ -6225,7 +6288,7 @@ function handleVideoPhoto(input) {
   reader.readAsDataURL(file);
 }
 
-async function generateVideo(brand) {
+async function generateVideo(brand, opts = {}) {
   const topic = document.getElementById('videoTopic').value.trim();
   if(!topic) return;
 
@@ -6233,8 +6296,10 @@ async function generateVideo(brand) {
   // elegida, no contra 1. Sin esto el cliente dejaba pasar un clip de 10 s con una
   // sola unidad libre y el usuario esperaba ~25 s para que el worker lo rechazara.
   const plan = brand?.plan || 'trial';
-  const videoLimit = VIDEO_LIMITS[plan] || VIDEO_LIMITS.trial;   // S46 — RD-46
-  const videosUsed = parseInt(localStorage.getItem(videoMonthKey()) || '0');
+  // FB-59: el aviso previo usa el saldo y el tope que dijo el servidor; sin ellos no se adivina (el servidor valida igual)
+  const srvV = window._srvLimits;
+  const videoLimit = (srvV && typeof srvV.vgens === 'number') ? srvV.vgens : Infinity;
+  const videosUsed = typeof saldo.vgens === 'number' ? saldo.vgens : 0;
   const videoCost = VIDEO_COST[String(videoDuration)];
   if(!videoCost) { alert(detectLanguage()==='en' ? 'Invalid video duration.' : 'Duración de video no válida.'); return; }
   if(videosUsed >= videoLimit) {
@@ -6271,8 +6336,11 @@ async function generateVideo(brand) {
 
   try {
     // Step 1: el prompt del video lo redacta el modelo de texto del proveedor
-    newActionId(); // S37/L2: video-prompt, image, video-submit y video-captions
-                   // comparten actionId. El cobro ocurre una sola vez, en video-submit.
+    // S37/L2: video-prompt, image, video-submit y video-captions comparten actionId. El cobro ocurre una sola vez,
+    // en video-submit. FB-71 (S57b): nace con beginAction para que recuperar tras una recarga conserve el id.
+    const _armadaV = !!_recuperacionArmada && _recuperacionArmada === currentActionId; _recuperacionArmada = null;
+    beginAction(firmaDeVideo(), opts.retry === true || _armadaV);
+    guardarPendiente();
     setStep(1);
     document.getElementById('loadTitle').textContent = isES ? '🎬 Creando dirección del video...' : '🎬 Creating video direction...';
 
@@ -6436,10 +6504,9 @@ function startVideoPolling(requestId, endpoint, statusUrl, responseUrl, brand, t
 
       if(data.status === 'COMPLETED') {
         clearInterval(videoPollingTimer);
+        borrarPendiente();   // FB-71: entregado
         if(data.videoUrl) {
-          // Count video usage
-          const vkUsed = parseInt(localStorage.getItem(videoMonthKey()) || '0');
-          localStorage.setItem(videoMonthKey(), String(vkUsed + 1));
+          // FB-59: el video ya se cobro al enviarlo (5 s = 1, 10 s = 2) y su respuesta trajo el saldo: aqui no se suma nada
           // Show video result — unwrap captionsBox (by now the fetch should have completed)
           try {
             showVideoResult(data.videoUrl, topic, captionsBox.data);
@@ -6949,9 +7016,12 @@ function renderCuenta() {
   const brand = loadBrand();
   const planKey = brand?.plan || 'trial';
   const pc = getPlanConfig(); const plan = pc[planKey] || pc.trial;
-  const limit = GEN_LIMITS[planKey] || GEN_LIMITS.trial;   // S46 — decia ||20 y el trial son 25 (RD-46)
-  const used = parseInt(localStorage.getItem(genMonthKey()) || '0');
-  const pct = Math.min(100, Math.round((used / limit) * 100));
+  // FB-59: usado y tope del SERVIDOR (una cuenta sin prueba tiene tope 0); sin dato, «—» y la barra vacia
+  const srvC = window._srvLimits;
+  const limit = (srvC && typeof srvC.gens === 'number') ? srvC.gens : null;
+  const used = typeof saldo.gens === 'number' ? saldo.gens : null;
+  const pct = (used === null || !limit) ? 0 : Math.min(100, Math.round((used / limit) * 100));
+  const planLimit = GEN_LIMITS[planKey] || GEN_LIMITS.trial;   // lo que OFRECE el plan (tarjeta), no el saldo
   const barColor = pct >= 90 ? '#C0392B' : pct >= 70 ? '#E8961A' : '#2979FF';
 
   // Plan card
@@ -6961,7 +7031,7 @@ function renderCuenta() {
     planCard.innerHTML = '<div class="plan-card ' + plan.color + '">' +
       '<span class="plan-badge">' + plan.badge + '</span>' +
       '<div class="plan-name">' + plan.name + '</div>' +
-      '<div class="plan-desc">' + plan.price + (planKey === 'trial' ? ' · ' + t('planTrialAllModes') : ' · ' + limit + ' ' + t('genPerMonth') + (plan.videos > 0 ? ' + ' + plan.videos + ' videos' : '')) + '</div>' +
+      '<div class="plan-desc">' + plan.price + (planKey === 'trial' ? ' · ' + t('planTrialAllModes') : ' · ' + planLimit + ' ' + t('genPerMonth') + (plan.videos > 0 ? ' + ' + plan.videos + ' videos' : '')) + '</div>' +
       (daysLeft !== null ? '<div class="plan-days">' + t('dashTrialDays').replace('{n}', daysLeft) + '</div>' : '') +
       // S38-10: el texto iba en var(--g3) (#EEF7E6) sobre la tarjeta verde claro de
       // Growth. Solo se veia el emoji, que trae color propio. Ahora usa var(--g2).
@@ -6977,21 +7047,21 @@ function renderCuenta() {
   const limitEl = document.getElementById('cuentaGensLimit');
   const barEl = document.getElementById('cuentaGenBar');
   const renewEl = document.getElementById('cuentaRenewal');
-  if(usedEl) usedEl.textContent = used;
-  if(limitEl) limitEl.textContent = limit;
+  if(usedEl) usedEl.textContent = used === null ? '—' : used;
+  if(limitEl) limitEl.textContent = limit === null ? '—' : limit;
   if(barEl) { barEl.style.width = pct + '%'; barEl.style.background = barColor; }
   if(renewEl) renewEl.textContent = t('dashRenewal').replace('{date}', getNextRenewalDate());
 
   // Video counter
-  const videoLimit = VIDEO_LIMITS[planKey] || VIDEO_LIMITS.trial;   // S46 — RD-46
-  const videosUsed = parseInt(localStorage.getItem(videoMonthKey()) || '0');
-  const videoPct = Math.min(100, Math.round((videosUsed / videoLimit) * 100));
+  const videoLimit = (srvC && typeof srvC.vgens === 'number') ? srvC.vgens : null;
+  const videosUsed = typeof saldo.vgens === 'number' ? saldo.vgens : null;
+  const videoPct = (videosUsed === null || !videoLimit) ? 0 : Math.min(100, Math.round((videosUsed / videoLimit) * 100));
   const videoBarColor = videoPct >= 90 ? '#C0392B' : videoPct >= 70 ? '#E8961A' : '#7C4DFF';
   const vUsedEl = document.getElementById('cuentaVideosUsed');
   const vLimitEl = document.getElementById('cuentaVideosLimit');
   const vBarEl = document.getElementById('cuentaVideoBar');
-  if(vUsedEl) vUsedEl.textContent = videosUsed;
-  if(vLimitEl) vLimitEl.textContent = videoLimit;
+  if(vUsedEl) vUsedEl.textContent = videosUsed === null ? '—' : videosUsed;
+  if(vLimitEl) vLimitEl.textContent = videoLimit === null ? '—' : videoLimit;
   if(vBarEl) { vBarEl.style.width = videoPct + '%'; vBarEl.style.background = videoBarColor; }
 
   // Brand info
@@ -9364,10 +9434,8 @@ async function postWithTimeout(body, timeoutMs=130000) {
     if (data.code === 'TRIAL_EXPIRED' || data.code === 'GEN_LIMIT' || data.code === 'VIDEO_LIMIT' || data.code === 'FEATURE_LOCKED' || data.code === 'NO_TRIAL') {
       // B3 (Session 18): Meta Pixel — upgrade intent from server-side blocks
       track('track', 'AddToCart', { content_name: 'server_block_' + data.code, currency: 'USD' });
-      // S38-2: el 403 trae los contadores reales de KV. Se adoptan como verdad:
-      // esto cura solo un localStorage desincronizado, en vez de dejarlo mintiendo.
-      if (typeof data.genCount === 'number') localStorage.setItem(genMonthKey(), String(data.genCount));
-      if (typeof data.videoCount === 'number') localStorage.setItem(videoMonthKey(), String(data.videoCount));
+      // S38-2: el 403 trae los contadores reales del servidor. Se adoptan como verdad (FB-59: en memoria).
+      adoptarSaldo(data);
       updateGenCounter();
       // El mensaje va en toast, NO en el panel de error: showUpgradeInfo() cambia de
       // pantalla y el panel vive en la del creador, asi que el usuario nunca lo veia.
@@ -9390,6 +9458,7 @@ async function postWithTimeout(body, timeoutMs=130000) {
       throw eSrv;
     }
     _tr.ok = true;
+    adoptarSaldo(data);   // FB-59: toda respuesta que cobra trae el saldo que el servidor escribio
     return data;
   } catch(e) {
     clearTimeout(timer);
@@ -9690,19 +9759,8 @@ function showResult(data) {
   // S37 / RD-27: la segunda copia del enganche de overlays vivía aquí. Eliminada:
   // setResultImage ya esperó el load y llamó a redrawCanvas. Dos enganches sobre el
   // mismo evento eran la causa de que el resultado se horneara dos veces en móvil.
-  // S32: Use server-authoritative genCount if available, fallback to local +1
-  const gmk = genMonthKey();
-  if (typeof data.genCount === 'number') {
-    localStorage.setItem(gmk, String(data.genCount));
-    genCount = data.genCount;
-  } else {
-    localStorage.setItem(gmk, String(parseInt(localStorage.getItem(gmk)||'0') + 1));
-    genCount = parseInt(localStorage.getItem(gmk));
-  }
-  // Video counter sync
-  if (typeof data.videoCount === 'number') {
-    localStorage.setItem(videoMonthKey(), String(data.videoCount));
-  }
+  // FB-59: el saldo es el que trae la respuesta; sin el, se queda el ultimo que dijo el servidor (nunca un +1 local)
+  adoptarSaldo(data);
   // Auto-save to cloud history (non-blocking)
   autoSavePost(data);
   // Show gen count in cloud bar
