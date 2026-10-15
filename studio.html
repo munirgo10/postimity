@@ -7,7 +7,7 @@
    Etiquetas en lineas propias: el extractor de sintaxis del preflight (G2) lee los scripts por lineas. */
 if(location.protocol==='http:'&&/(^|\.)postimity\.com$/.test(location.hostname))location.replace('https://'+location.host+location.pathname+location.search+location.hash);
 </script>
-<meta name="app-version" content="2.54.1">
+<meta name="app-version" content="2.54.2">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Postimity Studio — Tu estudio de contenido con IA</title>
 <meta name="description" content="Crea posts, flyers, carruseles y videos profesionales con IA. Describe tu negocio una vez y genera contenido listo para publicar en 20 segundos.">
@@ -1454,17 +1454,18 @@ fbq('track', 'PageView');
         <div id="bgAIDisclaimer" style="font-size:12px;line-height:1.55;margin-top:8px;padding:10px 12px;background:var(--bg2);border:1px solid var(--bor);border-left:3px solid var(--pk);border-radius:8px;color:var(--t2)">
           ⚠️ <strong>Revisa esta guía antes de guardarla.</strong> La IA la redacta a partir de lo que escribiste y <strong>puede afirmar cosas que no son ciertas de tu negocio</strong>.
           Presta atención a frases como «somos los únicos» o «los mejores»: ese tipo de afirmación está regulada en publicidad y respondes tú por ella.
+          <strong>No tiene que quedar perfecta hoy:</strong> puedes regresar cuando quieras con el botón «✏️ Editar marca» de tu estudio.
         </div>
-        <p style="font-size:11px;color:var(--t3);margin-top:5px">Este texto guía a la IA en cada post. Edita cualquier cosa que quieras ajustar.</p>
+        <p style="font-size:11px;color:var(--t3);margin-top:5px">Este texto guía a la IA en cada post. A mano, corrige solo frases; para pilares y porcentajes, pídeselo a la IA aquí abajo.</p>
         <!-- Editing guide + AI update -->
         <div class="bg-edit-guide" id="bgEditGuide" style="display:none">
-          <button class="beg-toggle" onclick="toggleBGGuide()">📋 ¿Cómo editar el Brand Guide? <span id="begChevron">▼</span></button>
+          <button class="beg-toggle" onclick="toggleBGGuide()">📋 ¿Cómo cambiar tu Brand Guide? <span id="begChevron">▼</span></button>
           <div class="beg-body" id="begBody">
-            <div>✅ <strong>Puedes cambiar libremente:</strong> % de pilares, descripciones, tono, hashtags</div>
-            <div>➕ <strong>Agregar pilar:</strong> <code>5. Nombre (XX%) — descripción en 1 línea</code></div>
-            <div>✏️ <strong>Modificar pilar:</strong> Cambia el nombre, % o descripción directamente</div>
-            <div>🗑️ <strong>Eliminar pilar:</strong> Borra la línea completa del pilar</div>
-            <div>⚠️ <strong>Importante:</strong> Usa el formato <code>N. Nombre (XX%) —</code> para que los botones se actualicen</div>
+            <div>🤖 <strong>Pilares, porcentajes, tono o temas:</strong> pídeselo a la IA en el recuadro de abajo. Así queda en el formato que usa el Marketing Agent para armar tu plan</div>
+            <div>💬 <strong>Ejemplos:</strong> «Sube Promociones a 30%», «Agrega un pilar de Eventos al 15%», «Quita el pilar de Recetas»</div>
+            <div>✏️ <strong>A mano, solo frases:</strong> corrige una palabra o algo que no sea cierto de tu negocio</div>
+            <div>🔁 <strong>Puedes volver cuando quieras:</strong> botón «✏️ Editar marca» de tu estudio</div>
+            <div>ℹ️ Cada cambio con IA usa 1 de tus cambios de Brand Guide del mes</div>
           </div>
         </div>
         <div class="bg-ai-update" id="bgAIUpdate">
@@ -1549,7 +1550,7 @@ fbq('track', 'PageView');
       <div class="mode-card" id="mc2" onclick="handleModeClick('enhance')">
         <div class="mc-icon">🖼️</div>
         <div class="mc-title">Estudio Pro</div>
-        <div class="mc-desc">Tu foto → versión publicitaria</div>
+        <div class="mc-desc">Toma una foto → versión publicitaria</div>
       </div>
       <div class="mode-card" id="mc3" onclick="handleModeClick('flyer')">
         <div class="mc-icon">📄</div>
@@ -2482,7 +2483,7 @@ function persistSlides(imgs) {
 }
 
 // APP_VERSION (S34) — deploy verification. Must match worker /version and all HTML files.
-const APP_VERSION = '2.54.1'; // historial en ESTADO.md (§7a.1 y PARTE 10)
+const APP_VERSION = '2.54.2'; // historial en ESTADO.md (§7a.1 y PARTE 10)
 window.APP_VERSION = APP_VERSION;
 // El log de version vive unas lineas mas abajo (console.info). No agregar otro aqui:
 // S38 borro POSTIMITY_VERSION para tener un solo log y este lo volvio a duplicar.
@@ -2561,13 +2562,13 @@ const T = {
     colorCardTitle:'🎨 Colores de marca', paletteSuggestLabel:'💡 Paletas sugeridas por giro:',
     bgCardDesc:'La IA analizará tu negocio y generará la estrategia de contenido completa: pilares, voz de marca, estrategia por plataforma y hashtags. Puedes editarlo antes de guardar.',
     bgGenBtn:'✨ Generar Brand Guide con IA', bgGenerating:'Generando tu Brand Guide...', bgGenerated:'✅ Brand Guide generado',
-    bgLabel:'📋 Brand Guide generado — puedes editarlo', bgHint:'Este texto guía a la IA en cada post. Edita cualquier cosa que quieras ajustar.',
-    bgEditToggle:'📋 ¿Cómo editar el Brand Guide?',
-    bgEditFree:'✅ <strong>Puedes cambiar libremente:</strong> % de pilares, descripciones, tono, hashtags',
-    bgEditAdd:'➕ <strong>Agregar pilar:</strong> <code>5. Nombre (XX%) — descripción en 1 línea</code>',
-    bgEditModify:'✏️ <strong>Modificar pilar:</strong> Cambia el nombre, % o descripción directamente',
-    bgEditDelete:'🗑️ <strong>Eliminar pilar:</strong> Borra la línea completa del pilar',
-    bgEditFormat:'⚠️ <strong>Importante:</strong> Usa el formato <code>N. Nombre (XX%) —</code> para que los botones se actualicen',
+    bgLabel:'📋 Brand Guide generado — puedes editarlo', bgHint:'Este texto guía a la IA en cada post. A mano, corrige solo frases; para pilares y porcentajes, pídeselo a la IA aquí abajo.',
+    bgEditToggle:'📋 ¿Cómo cambiar tu Brand Guide?',
+    bgEditFree:'🤖 <strong>Pilares, porcentajes, tono o temas:</strong> pídeselo a la IA en el recuadro de abajo. Así queda en el formato que usa el Marketing Agent para armar tu plan',
+    bgEditAdd:'💬 <strong>Ejemplos:</strong> «Sube Promociones a 30%», «Agrega un pilar de Eventos al 15%», «Quita el pilar de Recetas»',
+    bgEditModify:'✏️ <strong>A mano, solo frases:</strong> corrige una palabra o algo que no sea cierto de tu negocio',
+    bgEditDelete:'🔁 <strong>Puedes volver cuando quieras:</strong> botón «✏️ Editar marca» de tu estudio',
+    bgEditFormat:'ℹ️ Cada cambio con IA usa 1 de tus cambios de Brand Guide del mes',
     bgAILabel:'🤖 Pedir a la IA que haga el cambio por ti',
     bgAIPlaceholder:'Ej: "Cambia Neurociencia a 25% y agrega pilar de Eventos al 15%"', bgAIBtn:'Aplicar →',
     bgLoaded:'✅ Brand Guide cargado — puedes regenerar',
@@ -2578,7 +2579,7 @@ const T = {
     brandBarEdit:'✏️ Editar marca',
     pillarLabel:'¿Para qué pilar es este contenido?',
     mcPost:'Post', mcPostDesc:'Texto → imagen con IA + captions',
-    mcEnhance:'Estudio Pro', mcEnhanceDesc:'Tu foto → versión publicitaria',
+    mcEnhance:'Estudio Pro', mcEnhanceDesc:'Toma una foto → versión publicitaria',
     mcFlyer:'Flyer', mcFlyerDesc:'Gráfico promocional completo',
     mcTestimonial:'Testimonio', mcTestimonialDesc:'Reseña → post profesional',
     mcCarousel:'Carrusel', mcCarouselDesc:'Multi-slide educativo',
@@ -2866,13 +2867,13 @@ const T = {
     colorCardTitle:'🎨 Brand Colors', paletteSuggestLabel:'💡 Suggested palettes by industry:',
     bgCardDesc:'The AI will analyze your business and generate the complete content strategy: pillars, brand voice, platform strategy and hashtags. You can edit before saving.',
     bgGenBtn:'✨ Generate Brand Guide with AI', bgGenerating:'Generating your Brand Guide...', bgGenerated:'✅ Brand Guide generated',
-    bgLabel:'📋 Brand Guide generated — you can edit it', bgHint:'This text guides the AI in every post. Edit anything you want to adjust.',
-    bgEditToggle:'📋 How to edit the Brand Guide?',
-    bgEditFree:'✅ <strong>You can freely change:</strong> pillar %, descriptions, tone, hashtags',
-    bgEditAdd:'➕ <strong>Add pillar:</strong> <code>5. Name (XX%) — description in 1 line</code>',
-    bgEditModify:'✏️ <strong>Modify pillar:</strong> Change name, % or description directly',
-    bgEditDelete:'🗑️ <strong>Delete pillar:</strong> Delete the entire pillar line',
-    bgEditFormat:'⚠️ <strong>Important:</strong> Use the format <code>N. Name (XX%) —</code> so buttons update',
+    bgLabel:'📋 Brand Guide generated — you can edit it', bgHint:'This text guides the AI in every post. By hand, fix only wording; for pillars and percentages, ask the AI below.',
+    bgEditToggle:'📋 How to change your Brand Guide?',
+    bgEditFree:'🤖 <strong>Pillars, percentages, tone or topics:</strong> ask the AI in the box below. That keeps the format the Marketing Agent uses to build your plan',
+    bgEditAdd:'💬 <strong>Examples:</strong> “Raise Promotions to 30%”, “Add an Events pillar at 15%”, “Remove the Recipes pillar”',
+    bgEditModify:'✏️ <strong>By hand, wording only:</strong> fix a word or anything that is not true about your business',
+    bgEditDelete:'🔁 <strong>You can come back anytime:</strong> the «✏️ Edit brand» button in your studio',
+    bgEditFormat:'ℹ️ Each AI change uses 1 of your monthly Brand Guide changes',
     bgAILabel:'🤖 Ask AI to make the change for you',
     bgAIPlaceholder:'E.g.: "Change Neuroscience to 25% and add Events pillar at 15%"', bgAIBtn:'Apply →',
     bgLoaded:'✅ Brand Guide loaded — you can regenerate',
@@ -2883,7 +2884,7 @@ const T = {
     brandBarEdit:'✏️ Edit brand',
     pillarLabel:'Which pillar is this content for?',
     mcPost:'Post', mcPostDesc:'Text → AI image + captions',
-    mcEnhance:'Studio Pro', mcEnhanceDesc:'Your photo → ad-quality version',
+    mcEnhance:'Studio Pro', mcEnhanceDesc:'Take a photo → ad-quality version',
     mcFlyer:'Flyer', mcFlyerDesc:'Complete promotional graphic',
     mcTestimonial:'Testimonial', mcTestimonialDesc:'Review → professional post',
     mcCarousel:'Carousel', mcCarouselDesc:'Multi-slide educational',
@@ -5916,6 +5917,15 @@ function setAdjustMode(adjustModeVal) {
   if(inp) { inp.value = ''; inp.focus(); }
 }
 
+// La imagen que se puede mandar a editar: la base limpia, sin logo ni firma. La vista previa solo si no esta horneada.
+function baseEditable() {
+  const imgEl = document.getElementById('resultImg');
+  if (originalImageUrl) return originalImageUrl;
+  const v = imgEl && imgEl.src;
+  if (!v || v === window.location.href || (imgEl.dataset && imgEl.dataset.ovBaked)) return null;
+  return v;
+}
+
 async function adjustResult() {
   const adjustment = document.getElementById('adjustInput')?.value.trim();
   if(!adjustment) { showToast(t('toastAdjustEmpty')); return; }
@@ -5930,9 +5940,10 @@ async function adjustResult() {
   newActionId(); // S37/L2: ajustar (texto o imagen) es una accion propia (PU-2)
   if (currentAdjustMode === 'image') {
     // ── IMAGE ADJUST: ajusta la imagen ya generada via el editor del proveedor ──
-    const imgEl = document.getElementById('resultImg');
-    const imageUrl = imgEl?.src;
-    if (!imageUrl || imageUrl === window.location.href) {
+    // FB-169 (demo del 15 oct): se edita la BASE LIMPIA, nunca la vista previa. resultImg trae el logo y la firma ya
+    // horneados (D19): la IA los pintaba dentro de la imagen editada, a otro tamano, y el sello salia dos veces.
+    const imageUrl = baseEditable();
+    if (!imageUrl) {
       showToast(isES ? 'No hay imagen para ajustar' : 'No image to adjust');
       return;
     }
@@ -6846,6 +6857,7 @@ async function showCuentaScreen() {
   document.querySelectorAll('.screen').forEach(s => { s.classList.remove('active'); s.style.display = ''; });
   const el = document.getElementById('cuentaScreen');
   if(el) { el.classList.add('active'); el.style.display = 'block'; }
+  marcarSubpantalla('cuentaScreen');   // FB-170
   window.scrollTo(0, 0);
   renderCuenta(); // Show immediately with cached data
   // S32: Sync from server THEN re-render with fresh data
@@ -6859,11 +6871,36 @@ async function showCuentaScreen() {
   updateChangeEmailDisplay();
 }
 
-function showCreatorFromCuenta() {
-  const el = document.getElementById('cuentaScreen');
-  if(el) { el.classList.remove('active'); el.style.display = ''; }
+function showCreatorFromCuenta() { volverDeSubpantalla('cuentaScreen'); }
+
+// ── FB-170 (demo del 15 oct): el «atrás» del navegador regresa al estudio ──
+// Mi cuenta, Historial y el Agente no dejaban entrada en el historial del navegador: quien regresaba con «atrás»
+// salía del estudio a la página pública y no sabía volver. Cada una deja UNA entrada (si se pasa de una a otra, se
+// reemplaza); «atrás» la cierra. El botón «Volver» regresa por el mismo camino para no dejar entradas viejas.
+const SUBPANTALLAS = ['cuentaScreen', 'historialScreen', 'agentScreen'];
+let _atrasInstalado = false;
+function marcarSubpantalla(id) {
+  try {
+    if (history.state && history.state.subpantalla) history.replaceState({ subpantalla: id }, '', location.href);
+    else history.pushState({ subpantalla: id }, '', location.href);
+  } catch (e) { /* sin historial: el botón «Volver» sigue funcionando */ }
+}
+function pantallaActiva() { const a = document.querySelector('.screen.active'); return a ? a.id : null; }
+function cerrarSubpantalla(id) {
+  const el = document.getElementById(id);
+  if (el) { el.classList.remove('active'); el.style.display = ''; }
   showScreen('creatorScreen');
 }
+function volverDeSubpantalla(id) {
+  try { if (history.state && history.state.subpantalla) { history.back(); return; } } catch (e) {}
+  cerrarSubpantalla(id);
+}
+function instalarAtras() {
+  if (_atrasInstalado) return;
+  _atrasInstalado = true;
+  window.addEventListener('popstate', function () { const v = pantallaActiva(); if (SUBPANTALLAS.indexOf(v) > -1) cerrarSubpantalla(v); });
+}
+instalarAtras();
 
 function goEditBrand() {
   showCreatorFromCuenta();
@@ -7748,16 +7785,13 @@ async function showHistorialScreen() {
   document.querySelectorAll('.screen').forEach(s => { s.classList.remove('active'); s.style.display = ''; });
   const el = document.getElementById('historialScreen');
   if(el) { el.classList.add('active'); el.style.display = 'block'; }
+  marcarSubpantalla('historialScreen');   // FB-170
   window.scrollTo(0, 0);
   // Load history from KV
   await loadHistorial();
 }
 
-function showCreatorFromHistorial() {
-  const el = document.getElementById('historialScreen');
-  if(el) { el.classList.remove('active'); el.style.display = ''; }
-  showScreen('creatorScreen');
-}
+function showCreatorFromHistorial() { volverDeSubpantalla('historialScreen'); }
 
 async function loadHistorial() {
   if(!brandId) {
@@ -8215,14 +8249,11 @@ function showAgentScreen() {
     agentEl.classList.add('active');
     agentEl.style.display = 'block';
   }
+  marcarSubpantalla('agentScreen');   // FB-170
   window.scrollTo(0, 0);
 }
 
-function showCreatorFromAgent() {
-  const agentEl = document.getElementById('agentScreen');
-  if(agentEl) { agentEl.classList.remove('active'); agentEl.style.display = ''; }
-  showScreen('creatorScreen');
-}
+function showCreatorFromAgent() { volverDeSubpantalla('agentScreen'); }
 
 function showAgentConfig() {
   document.getElementById('agentConfigWrap').style.display = 'block';
