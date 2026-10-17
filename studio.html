@@ -7,7 +7,7 @@
    Etiquetas en lineas propias: el extractor de sintaxis del preflight (G2) lee los scripts por lineas. */
 if(location.protocol==='http:'&&/(^|\.)postimity\.com$/.test(location.hostname))location.replace('https://'+location.host+location.pathname+location.search+location.hash);
 </script>
-<meta name="app-version" content="2.54.2">
+<meta name="app-version" content="2.54.3">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Postimity Studio — Tu estudio de contenido con IA</title>
 <meta name="description" content="Crea posts, flyers, carruseles y videos profesionales con IA. Describe tu negocio una vez y genera contenido listo para publicar en 20 segundos.">
@@ -1264,6 +1264,7 @@ fbq('track', 'PageView');
   <!-- ═══════════════ SETUP SCREEN ═══════════════ -->
 <div id="setupScreen" class="screen">
   <div class="setup-wrap">
+    <button class="hist-back" id="setupBack" style="display:none;margin-bottom:12px" onclick="volverDeSubpantalla('setupScreen')">← Volver al estudio</button>
     <div class="setup-hero">
       <div class="setup-icon">✨</div>
       <h1 id="setupH1">Configura tu marca</h1>
@@ -2483,7 +2484,7 @@ function persistSlides(imgs) {
 }
 
 // APP_VERSION (S34) — deploy verification. Must match worker /version and all HTML files.
-const APP_VERSION = '2.54.2'; // historial en ESTADO.md (§7a.1 y PARTE 10)
+const APP_VERSION = '2.54.3'; // historial en ESTADO.md (§7a.1 y PARTE 10)
 window.APP_VERSION = APP_VERSION;
 // El log de version vive unas lineas mas abajo (console.info). No agregar otro aqui:
 // S38 borro POSTIMITY_VERSION para tener un solo log y este lo volvio a duplicar.
@@ -4219,6 +4220,10 @@ function showScreen(id) {
   // (el token si se borraba) pero la pantalla vieja seguia encima; lo unico
   // visible era el scrollTo(0,0) de tres lineas mas abajo.
   // Limpiar AMBOS mecanismos aqui hace de showScreen el unico punto de verdad.
+  // FB-174: salir del formulario de edicion al estudio por otro camino que el «atras» (p. ej. guardar) consume su
+  // entrada del historial; si no, «atras» habria que picarlo dos veces para salir del estudio.
+  try { if (id === 'creatorScreen' && history.state && history.state.subpantalla === 'setupScreen') history.back(); } catch (e) {}
+  if (id === 'setupScreen') { const sb = document.getElementById('setupBack'); if (sb) sb.style.display = 'none'; }   // solo goToEdit lo muestra
   document.querySelectorAll('.screen').forEach(s=>{ s.classList.remove('active'); s.style.display=''; });
   document.getElementById(id).classList.add('active');
   window.scrollTo(0,0);
@@ -4929,6 +4934,11 @@ function goToEdit() {
     }
   }
   showScreen('setupScreen');
+  // S57b · FB-174 (uso real del 16 oct): «Editar marca» no tenia salida. Con marca, boton «Volver al estudio» y una
+  // entrada en el historial (como Mi cuenta, NAV-1); en el alta no hay estudio al que volver.
+  const atras = document.getElementById('setupBack');
+  if (atras) { atras.style.display = b ? '' : 'none'; atras.textContent = detectLanguage()==='en' ? '← Back to studio' : '← Volver al estudio'; }
+  if (b) marcarSubpantalla('setupScreen');
 }
 
 // ═══════════════════════════════════════════════════════
@@ -6877,7 +6887,7 @@ function showCreatorFromCuenta() { volverDeSubpantalla('cuentaScreen'); }
 // Mi cuenta, Historial y el Agente no dejaban entrada en el historial del navegador: quien regresaba con «atrás»
 // salía del estudio a la página pública y no sabía volver. Cada una deja UNA entrada (si se pasa de una a otra, se
 // reemplaza); «atrás» la cierra. El botón «Volver» regresa por el mismo camino para no dejar entradas viejas.
-const SUBPANTALLAS = ['cuentaScreen', 'historialScreen', 'agentScreen'];
+const SUBPANTALLAS = ['cuentaScreen', 'historialScreen', 'agentScreen', 'setupScreen'];   // FB-174: setupScreen solo deja entrada al EDITAR (goToEdit)
 let _atrasInstalado = false;
 function marcarSubpantalla(id) {
   try {
@@ -6904,7 +6914,7 @@ instalarAtras();
 
 function goEditBrand() {
   showCreatorFromCuenta();
-  setTimeout(() => showScreen('setupScreen'), 100);
+  setTimeout(goToEdit, 100);   // FB-174: el mismo camino que «Editar marca» (datos, boton y entrada en el historial)
 }
 
 // ── Email Change Flow (Session 15 worker endpoints, Session 20 frontend) ──
