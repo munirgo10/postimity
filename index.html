@@ -16,7 +16,7 @@ function reenviarAlEstudio(loc) {
 }
 try { reenviarAlEstudio(location); } catch (e) {}
 </script>
-<meta name="app-version" content="2.54.3">
+<meta name="app-version" content="2.54.4">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>¿No sabes qué publicar? Postimity sí.</title>
 <meta name="description" content="Postimity crea tu estrategia, planea tu mes y genera posts, flyers, carruseles y videos con la voz de tu marca. Sin diseñador. Sin agencia. Desde $199 MXN/mes.">
@@ -547,7 +547,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   applyLang(detectLang());
   // Meta Pixel: track CTA clicks to studio
   document.querySelectorAll('a[href="studio.html"]').forEach(a=>{
-    a.addEventListener('click',()=>{ track('track','InitiateCheckout',{content_name:'CTA to Studio'}); });
+    a.addEventListener('click',()=>{ track('trackCustom','CTAStudio',{content_name:'CTA to Studio'}); });   // FB-175: InitiateCheckout es solo abrir Stripe
   });
 });
 </script>
