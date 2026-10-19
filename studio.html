@@ -7,7 +7,7 @@
    Etiquetas en lineas propias: el extractor de sintaxis del preflight (G2) lee los scripts por lineas. */
 if(location.protocol==='http:'&&/(^|\.)postimity\.com$/.test(location.hostname))location.replace('https://'+location.host+location.pathname+location.search+location.hash);
 </script>
-<meta name="app-version" content="2.54.3">
+<meta name="app-version" content="2.54.4">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Postimity Studio — Tu estudio de contenido con IA</title>
 <meta name="description" content="Crea posts, flyers, carruseles y videos profesionales con IA. Describe tu negocio una vez y genera contenido listo para publicar en 20 segundos.">
@@ -2484,7 +2484,7 @@ function persistSlides(imgs) {
 }
 
 // APP_VERSION (S34) — deploy verification. Must match worker /version and all HTML files.
-const APP_VERSION = '2.54.3'; // historial en ESTADO.md (§7a.1 y PARTE 10)
+const APP_VERSION = '2.54.4'; // historial en ESTADO.md (§7a.1 y PARTE 10)
 window.APP_VERSION = APP_VERSION;
 // El log de version vive unas lineas mas abajo (console.info). No agregar otro aqui:
 // S38 borro POSTIMITY_VERSION para tener un solo log y este lo volvio a duplicar.
@@ -3299,7 +3299,7 @@ async function verifyAuthCode() {
       }
     } else {
       // New user — go to brand setup
-      track('track', 'CompleteRegistration', { content_name: authEmail });
+      track('track', 'CompleteRegistration', { content_name: 'signup' });   // FB-175: nunca el correo (política de Meta, LFPDPPP)
       showScreen('setupScreen');
     }
     applyBilingualUI();
@@ -4857,7 +4857,7 @@ function saveBrand() {
     localStorage.setItem(firstBrandKey, '1');
     setTimeout(() => showToast(t('toastBGReady')), 600);
     // Meta Pixel: Lead event on first brand creation
-    track('track', 'Lead', { content_name: brand.name, content_category: brand.type });
+    track('track', 'Lead', { content_name: 'brand_created', content_category: brand.type });   // FB-175: sin el nombre del negocio
   }
 }
 
@@ -6327,7 +6327,7 @@ async function generateVideo(brand, opts = {}) {
     const msg = detectLanguage()==='en'
       ? `You've reached your limit of ${videoLimit} videos this month.`
       : `Llegaste al límite de ${videoLimit} videos este mes.`;
-    track('track', 'AddToCart', { content_name: 'upgrade_video_' + plan, value: plan === 'trial' ? 9 : 19, currency: 'USD' });
+    track('trackCustom', 'LimitReached', { kind: 'video', plan: plan });   // FB-175: un tope no es un carrito
     alert(msg); return;
   }
   // Tiene saldo pero no el suficiente para ESTA duracion. Mensaje distinto del de
@@ -7760,8 +7760,10 @@ function handleStripeRedirect() {
     const plan = params.get('plan') || '';
     const isES = detectLanguage() === 'es';
     // S28: Meta Pixel — Purchase event
-    const planValues = { starter: 9, growth: 19, premium: 45 };
-    track('track', 'Purchase', { content_name: plan, value: planValues[plan] || 9, currency: 'USD' });
+    // FB-175: los precios de la landing, en la moneda en que se pago (el worker la manda en &cur=). Antes: 9/19/45 USD.
+    const pagoUSD = (params.get('cur') || 'mxn').toLowerCase() === 'usd';
+    const planValues = pagoUSD ? { starter: 11, growth: 22, premium: 50 } : { starter: 199, growth: 399, premium: 899 };
+    track('track', 'Purchase', { content_name: plan, value: planValues[plan] || planValues.starter, currency: pagoUSD ? 'USD' : 'MXN' });
     setTimeout(() => {
       showToast(isES ? '🎉 ¡Pago exitoso! Tu plan ' + plan.charAt(0).toUpperCase() + plan.slice(1) + ' está activo.' : '🎉 Payment successful! Your ' + plan.charAt(0).toUpperCase() + plan.slice(1) + ' plan is now active.', 8000);
     }, 1500);
@@ -9474,7 +9476,7 @@ async function postWithTimeout(body, timeoutMs=130000) {
     // FB-92 (S55b): NO_TRIAL es un bloqueo por plan (contrato 4.4, PR-209: se sale contratando), no un fallo.
     if (data.code === 'TRIAL_EXPIRED' || data.code === 'GEN_LIMIT' || data.code === 'VIDEO_LIMIT' || data.code === 'FEATURE_LOCKED' || data.code === 'NO_TRIAL') {
       // B3 (Session 18): Meta Pixel — upgrade intent from server-side blocks
-      track('track', 'AddToCart', { content_name: 'server_block_' + data.code, currency: 'USD' });
+      track('trackCustom', 'LimitReached', { kind: data.code });   // FB-175: un tope no es un carrito
       // S38-2: el 403 trae los contadores reales del servidor. Se adoptan como verdad (FB-59: en memoria).
       adoptarSaldo(data);
       updateGenCounter();
