@@ -7,7 +7,7 @@
    Etiquetas en lineas propias: el extractor de sintaxis del preflight (G2) lee los scripts por lineas. */
 if(location.protocol==='http:'&&/(^|\.)postimity\.com$/.test(location.hostname))location.replace('https://'+location.host+location.pathname+location.search+location.hash);
 </script>
-<meta name="app-version" content="2.54.4">
+<meta name="app-version" content="2.54.5">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Postimity Studio — Tu estudio de contenido con IA</title>
 <meta name="description" content="Crea posts, flyers, carruseles y videos profesionales con IA. Describe tu negocio una vez y genera contenido listo para publicar en 20 segundos.">
@@ -347,7 +347,10 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
 .ab-chevron{transition:transform .2s;font-size:10px}
 .ab-body{display:none;padding:0 14px 14px;font-size:12px;color:var(--t3);line-height:1.8}
 .ab-body.open{display:block}
-.ab-row{display:flex;justify-content:space-between;padding:4px 0;border-bottom:0.5px solid var(--bor)}
+.ab-row{display:flex;flex-direction:column;gap:1px;padding:6px 0;border-bottom:0.5px solid var(--bor);line-height:1.45}
+.ab-steps{margin:8px 0 4px;padding-left:18px;color:var(--t2);font-size:12.5px;line-height:1.5}
+.ab-steps li{margin:5px 0}
+.ab-steps-t{font-weight:700;color:var(--t1);margin-top:6px}
 .ab-row:last-child{border:none}
 .ab-k{font-weight:600;color:var(--t2)}
 .ab-budget{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
@@ -2024,15 +2027,17 @@ Ej: 'Wonderik es increíble. Mi hija de 3 años ya lee palabras cortas y su desa
       <!-- Ad Brief -->
       <div class="ad-brief-wrap" id="adBriefWrap" style="display:none">
         <button class="ab-toggle" onclick="toggleAdBrief()">
-          <span>💡 ¿Vas a invertir dinero en este post? Ver recomendaciones de targeting</span>
+          <span>💡 ¿Quieres que más gente vea este post? Así lo impulsas</span>
           <span class="ab-chevron" id="abChevron">▼</span>
         </button>
         <div class="ab-body" id="abBody">
+          <div class="ab-steps-t" id="abStepsT">Cómo hacerlo desde Instagram (2 minutos):</div>
+          <ol class="ab-steps" id="abSteps"></ol>
           <div class="ab-row"><span class="ab-k">👥 Audiencia</span><span id="abAudience"></span></div>
           <div class="ab-row"><span class="ab-k">🎯 Intereses</span><span id="abInterests"></span></div>
           <div class="ab-row"><span class="ab-k">🎯 Objetivo de campaña</span><span id="abObjective"></span></div>
           <div class="ab-row"><span class="ab-k">⏱️ Duración</span><span id="abDuration"></span></div>
-          <div class="ab-row"><span class="ab-k">📱 Placements</span><span id="abPlacements"></span></div>
+          <div class="ab-row"><span class="ab-k">📱 Dónde se ve</span><span id="abPlacements"></span></div>
           <div class="ab-budget">
             <div class="ab-b-card ab-b-min">
               <div class="ab-b-val" id="abBudgetMin">—</div>
@@ -2043,7 +2048,7 @@ Ej: 'Wonderik es increíble. Mi hija de 3 años ya lee palabras cortas y su desa
               <div class="ab-b-desc">⭐ Presupuesto óptimo</div>
             </div>
           </div>
-          <button class="ab-copy-btn" onclick="copyAdBrief()">📋 Copiar parámetros para Meta Ads Manager</button>
+          <button class="ab-copy-btn" onclick="copyAdBrief(event)">📋 Copiar los pasos</button>
         </div>
       </div>
 
@@ -2484,7 +2489,7 @@ function persistSlides(imgs) {
 }
 
 // APP_VERSION (S34) — deploy verification. Must match worker /version and all HTML files.
-const APP_VERSION = '2.54.4'; // historial en ESTADO.md (§7a.1 y PARTE 10)
+const APP_VERSION = '2.54.5'; // historial en ESTADO.md (§7a.1 y PARTE 10)
 window.APP_VERSION = APP_VERSION;
 // El log de version vive unas lineas mas abajo (console.info). No agregar otro aqui:
 // S38 borro POSTIMITY_VERSION para tener un solo log y este lo volvio a duplicar.
@@ -2645,9 +2650,9 @@ const T = {
     amtTextLabel:'📝 Texto', amtImageLabel:'🖼️ Imagen',
     adjUrgencyVal:'Agrega más urgencia y llamada a la acción', adjCTAVal:'Cambia el CTA por uno más directo', adjEmojiVal:'Añade 2-3 emojis relevantes',
     // ── Ad Brief ──
-    adBriefToggle:'💡 ¿Vas a invertir dinero en este post? Ver recomendaciones de targeting',
-    abAudience:'👥 Audiencia', abInterests:'🎯 Intereses', abObjective:'🎯 Objetivo de campaña', abDuration:'⏱️ Duración', abPlacements:'📱 Placements',
-    abBudgetMin:'Presupuesto mínimo', abBudgetOpt:'⭐ Presupuesto óptimo', abCopy:'📋 Copiar parámetros para Meta Ads Manager',
+    adBriefToggle:'💡 ¿Quieres que más gente vea este post? Así lo impulsas', abStepsT:'Cómo hacerlo desde Instagram (2 minutos):',
+    abAudience:'👥 Audiencia', abInterests:'🎯 Intereses', abObjective:'🎯 Objetivo', abDuration:'⏱️ Duración', abPlacements:'📱 Dónde se ve',
+    abBudgetMin:'Presupuesto mínimo', abBudgetOpt:'⭐ Recomendado', abCopy:'📋 Copiar los pasos',
     resultBack:'← Crear otro post', resultCopyAll:'📋 Copiar todo',
     // ── Creator bar ──
     barUniqueLink:'Tu enlace único:', barGenRemaining:'{n} gen restantes', barMyAccount:'👤 Mi cuenta', barHistory:'📚 Historial',
@@ -2736,7 +2741,7 @@ const T = {
     toastModePreloaded:'✅ Modo y pilar pre-cargados — ajusta el texto y genera',
     toastFirstPost:'🎉 ¡Tu primer post está listo! Toca Instagram, Facebook o TikTok para publicarlo — copiamos el caption y descargamos la imagen por ti.',
     toastAllCopied:'✓ ¡Todo copiado!', toastCopyAll:'📋 Copiar todo',
-    toastAdCopied:'✓ Copiado!', toastAdCopyBtn:'📋 Copiar parámetros para Meta Ads Manager',
+    toastAdCopied:'✓ Copiado!', toastAdCopyBtn:'📋 Copiar los pasos',
     toastAdjustEmpty:'Escribe qué quieres ajustar', toastGenFirst:'Primero genera contenido',
     toastEmailReminder:'Ingresa tu email para recibir recordatorios', toastWAReminder:'Ingresa tu WhatsApp para recibir recordatorios',
     // ── Alerts ──
@@ -2950,9 +2955,9 @@ const T = {
     adjImgBrighterVal:'Make it brighter and more vibrant', adjImgBgVal:'Change the background to a more eye-catching color', adjImgContrastVal:'Add more contrast and depth', adjImgWarmVal:'Make it warmer with golden tones', adjImgTextVal:'Change the main text to SPECIAL OFFER', adjImgSimplifyVal:'Simplify the composition, fewer elements',
     amtTextLabel:'📝 Text', amtImageLabel:'🖼️ Image',
     // ── Ad Brief ──
-    adBriefToggle:'💡 Investing money on this post? See targeting recommendations',
-    abAudience:'👥 Audience', abInterests:'🎯 Interests', abObjective:'🎯 Campaign objective', abDuration:'⏱️ Duration', abPlacements:'📱 Placements',
-    abBudgetMin:'Minimum budget', abBudgetOpt:'⭐ Optimal budget', abCopy:'📋 Copy settings for Meta Ads Manager',
+    adBriefToggle:'💡 Want more people to see this post? Here is how to boost it', abStepsT:'How to do it from Instagram (2 minutes):',
+    abAudience:'👥 Audience', abInterests:'🎯 Interests', abObjective:'🎯 Goal', abDuration:'⏱️ Duration', abPlacements:'📱 Where it shows',
+    abBudgetMin:'Minimum budget', abBudgetOpt:'⭐ Recommended', abCopy:'📋 Copy the steps',
     resultBack:'← Create another post', resultCopyAll:'📋 Copy all',
     // ── Creator bar ──
     barUniqueLink:'Your unique link:', barGenRemaining:'{n} gen remaining', barMyAccount:'👤 My account', barHistory:'📚 History',
@@ -3041,7 +3046,7 @@ const T = {
     toastModePreloaded:'✅ Mode and pillar pre-loaded — adjust the text and generate',
     toastFirstPost:'🎉 Your first post is ready! Tap Instagram, Facebook or TikTok to publish it — we copy the caption and download the image for you.',
     toastAllCopied:'✓ All copied!', toastCopyAll:'📋 Copy all',
-    toastAdCopied:'✓ Copied!', toastAdCopyBtn:'📋 Copy settings for Meta Ads Manager',
+    toastAdCopied:'✓ Copied!', toastAdCopyBtn:'📋 Copy the steps',
     toastAdjustEmpty:'Enter what you want to adjust', toastGenFirst:'Generate content first',
     toastEmailReminder:'Enter your email to receive reminders', toastWAReminder:'Enter your WhatsApp to receive reminders',
     // ── Alerts ──
@@ -9861,6 +9866,11 @@ function fillAdBrief(ab) {
   document.getElementById('abPlacements').textContent=ab.placements||'—';
   document.getElementById('abBudgetMin').textContent=ab.budgetMin||'—';
   document.getElementById('abBudgetOpt').textContent=ab.budgetOptimal||'—';
+  // FB-178 / D75: los pasos para «Promocionar» los arma el servidor por giro y ciudad.
+  const ol=document.getElementById('abSteps'), st=document.getElementById('abStepsT');
+  const pasos=Array.isArray(ab.pasos)?ab.pasos:[];
+  if(ol){ ol.innerHTML=''; pasos.forEach(p=>{ const li=document.createElement('li'); li.textContent=String(p); ol.appendChild(li); }); ol.style.display=pasos.length?'':'none'; }
+  if(st){ st.style.display=pasos.length?'':'none'; st.textContent=t('abStepsT'); }
 }
 
 // ═══════════════════════════════════════════════════════
@@ -9911,10 +9921,14 @@ function copyAll() {
     showToast(t('toastCaptionCopied'));
   }).catch(()=>{ showToast(t('toastCopyError')); });
 }
-function copyAdBrief() {
-  const lbl = detectLanguage()==='en' ? 'RECOMMENDED TARGETING' : 'TARGETING RECOMENDADO';
-  const txt=`${lbl}:\n${t('abAudience')}: ${document.getElementById('abAudience').textContent}\n${t('abInterests')}: ${document.getElementById('abInterests').textContent}\n${t('abObjective')}: ${document.getElementById('abObjective').textContent}\n${t('abDuration')}: ${document.getElementById('abDuration').textContent}\n${t('abPlacements')}: ${document.getElementById('abPlacements').textContent}\n${t('abBudgetMin')}: ${document.getElementById('abBudgetMin').textContent}\n${t('abBudgetOpt')}: ${document.getElementById('abBudgetOpt').textContent}`;
-  navigator.clipboard.writeText(txt).then(()=>{ const btn=event.target; btn.textContent=t('toastAdCopied'); setTimeout(()=>btn.textContent=t('abCopy'),2500); });
+function copyAdBrief(ev) {
+  // FB-178: se copian los pasos para «Promocionar» (ya no «parámetros para Ads Manager», que no se pueden pegar).
+  const pasos=[...document.querySelectorAll('#abSteps li')].map((li,i)=>(i+1)+'. '+li.textContent);
+  const g=id=>document.getElementById(id).textContent;
+  const txt=(pasos.length?t('abStepsT')+'\n'+pasos.join('\n')+'\n\n':'')+
+    `${t('abAudience')}: ${g('abAudience')}\n${t('abInterests')}: ${g('abInterests')}\n${t('abObjective')}: ${g('abObjective')}\n${t('abDuration')}: ${g('abDuration')}\n${t('abPlacements')}: ${g('abPlacements')}\n${t('abBudgetMin')}: ${g('abBudgetMin')}\n${t('abBudgetOpt')}: ${g('abBudgetOpt')}`;
+  const btn=(ev&&ev.target)||document.querySelector('.ab-copy-btn');
+  navigator.clipboard.writeText(txt).then(()=>{ if(btn){ btn.textContent=t('toastAdCopied'); setTimeout(()=>btn.textContent=t('abCopy'),2500); } }).catch(()=>{ try{ showToast(t('toastAdCopied')); }catch(e){} });
 }
 function toggleAdBrief() {
   const body=document.getElementById('abBody'), chev=document.getElementById('abChevron');
