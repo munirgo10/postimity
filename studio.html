@@ -7,7 +7,7 @@
    Etiquetas en lineas propias: el extractor de sintaxis del preflight (G2) lee los scripts por lineas. */
 if(location.protocol==='http:'&&/(^|\.)postimity\.com$/.test(location.hostname))location.replace('https://'+location.host+location.pathname+location.search+location.hash);
 </script>
-<meta name="app-version" content="2.54.5">
+<meta name="app-version" content="2.54.6">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Postimity Studio — Tu estudio de contenido con IA</title>
 <meta name="description" content="Crea posts, flyers, carruseles y videos profesionales con IA. Describe tu negocio una vez y genera contenido listo para publicar en 20 segundos.">
@@ -2489,7 +2489,7 @@ function persistSlides(imgs) {
 }
 
 // APP_VERSION (S34) — deploy verification. Must match worker /version and all HTML files.
-const APP_VERSION = '2.54.5'; // historial en ESTADO.md (§7a.1 y PARTE 10)
+const APP_VERSION = '2.54.6'; // historial en ESTADO.md (§7a.1 y PARTE 10)
 window.APP_VERSION = APP_VERSION;
 // El log de version vive unas lineas mas abajo (console.info). No agregar otro aqui:
 // S38 borro POSTIMITY_VERSION para tener un solo log y este lo volvio a duplicar.
@@ -5790,10 +5790,13 @@ async function renderCarouselSlide(slide, brand, coverImageUrl, totalSlides, tod
     y = lzLineas(ctx, fT, M, y, voz.lh, '#ffffff');
     if (fS.lines.length) { y += 22; y = lzLineas(ctx, fS, M, y, 1.3, 'rgba(255,255,255,0.88)'); }
     y += 44;
-    const sw = (slide.swipe || 'Desliza').replace(/\s*[→>»]+\s*$/, '').slice(0, 26) + '  →';
-    ctx.font = lzFont(700, 30);
+    // FB-180 (20 oct): se cortaba a 26 caracteres a media palabra («Desliza si te has visto aq»). Ahora palabra completa
+    // y la letra baja hasta que la pastilla cabe en el ancho.
+    const sw = lzRecorte((slide.swipe || 'Desliza').replace(/\s*[→>»]+\s*$/, ''), 34) + '  →';
+    let pxSw = 30; ctx.font = lzFont(700, pxSw);
+    while (pxSw > 22 && ctx.measureText(sw).width + 64 > MAXW) { pxSw -= 1; ctx.font = lzFont(700, pxSw); }
     lzPildora(ctx, M, y, ctx.measureText(sw).width + 64, 76, pal.acentoOscuro);
-    ctx.font = lzFont(700, 30); ctx.fillStyle = lzTintaSobre(pal.acentoOscuro, pal.tinta); ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+    ctx.font = lzFont(700, pxSw); ctx.fillStyle = lzTintaSobre(pal.acentoOscuro, pal.tinta); ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
     ctx.fillText(sw, M + 32, y + 49);
 
   } else if (slide.type === 'cta') {
@@ -5805,7 +5808,7 @@ async function renderCarouselSlide(slide, brand, coverImageUrl, totalSlides, tod
     ctx.strokeStyle = 'rgba(255,255,255,0.08)'; ctx.lineWidth = 90;
     ctx.beginPath(); ctx.arc(W - 60, H - (story ? 250 : 40), story ? 430 : 330, 0, Math.PI * 2); ctx.stroke();
     const tel = formatoTelefono(brand?.whatsapp);
-    const txtB = (slide.cta || 'Contáctanos').slice(0, 30) + '  →';
+    const txtB = lzRecorte(slide.cta || 'Contáctanos', 38) + '  →';   // FB-180: palabra completa
     const rotulo = tel && !/whatsapp/i.test(txtB);   // si el boton ya dice WhatsApp, no se repite de rotulo (humo del 3 oct)
     const hBtn = 112, hTel = tel ? 40 + (rotulo ? 30 + 14 : 0) + 64 : 0;
     const top = TOPC, bot = B0 - 60;
@@ -5822,9 +5825,10 @@ async function renderCarouselSlide(slide, brand, coverImageUrl, totalSlides, tod
     y = lzLineas(ctx, fT, M, y, voz.lh, cTitulo);
     if (fB.lines.length) { y += 30; y = lzLineas(ctx, fB, M, y, 1.36, cCuerpo); }
     y += 48;
-    ctx.font = lzFont(800, 38);
+    let pxB = 38; ctx.font = lzFont(800, pxB);   // FB-180: la letra baja hasta que el boton cabe en el ancho
+    while (pxB > 26 && ctx.measureText(txtB).width + 96 > MAXW) { pxB -= 1; ctx.font = lzFont(800, pxB); }
     lzPildora(ctx, M, y, Math.min(MAXW, ctx.measureText(txtB).width + 96), hBtn, pal.acentoOscuro);
-    ctx.font = lzFont(800, 38); ctx.fillStyle = lzTintaSobre(pal.acentoOscuro, pal.tinta); ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+    ctx.font = lzFont(800, pxB); ctx.fillStyle = lzTintaSobre(pal.acentoOscuro, pal.tinta); ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
     ctx.fillText(txtB, M + 48, y + 70);
     y += hBtn;
     if (tel) {
@@ -10573,6 +10577,21 @@ function blobToDataUrl(blob) {
     r.onerror = () => rej(new Error('read failed'));
     r.readAsDataURL(blob);
   });
+}
+
+// FB-180: recorta a la ultima palabra completa que cabe en `max` caracteres (sin signos sueltos al final).
+// Una sola palabra mas larga que `max` se deja entera: la letra se ajusta al ancho donde se dibuja.
+function lzRecorte(t, max) {
+  t = String(t || '').replace(/\s+/g, ' ').trim();
+  if (t.length <= max) return t;
+  const pal = t.split(' ');
+  let out = '';
+  for (const p of pal) { const c = out ? out + ' ' + p : p; if (c.length > max) break; out = c; }
+  if (!out) out = pal[0];
+  // No termina en una palabra que deja la frase colgando («Escríbenos por WhatsApp para»).
+  const colgantes = /\s+(para|por|de|del|a|al|en|y|o|con|sin|tu|tus|su|sus|el|la|los|las|un|una|que|si|te|se|mas|más)$/i;
+  for (let i = 0; i < 3 && colgantes.test(out) && out.split(' ').length > 2; i++) out = out.replace(colgantes, '');
+  return out.replace(/[\s,;:.\-–—]+$/, '');
 }
 
 async function composeFlyerCanvas(photoSrc, fd, brand, fmt) {
