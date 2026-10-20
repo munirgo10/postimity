@@ -8,7 +8,7 @@
 if(location.protocol==='http:'&&/(^|\.)postimity\.com$/.test(location.hostname))location.replace('https://'+location.host+location.pathname+location.search+location.hash);
 </script>
 <meta name="robots" content="noindex, nofollow"><!-- S55n: el panel no aparece en buscadores -->
-<meta name="app-version" content="2.54.5">
+<meta name="app-version" content="2.54.6">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Postimity Admin</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232979FF'/%3E%3Cg transform='translate(16,16)' fill='%23fff'%3E%3Ccircle r='1.8'/%3E%3Ccircle cx='2.8' cy='1' r='1.5'/%3E%3Ccircle cx='-2.2' cy='2' r='1.4'/%3E%3Ccircle cx='1' cy='-3' r='1.4'/%3E%3Ccircle cx='-3' cy='-1.2' r='1.3'/%3E%3Ccircle cx='2' cy='3' r='1.2'/%3E%3Ccircle cx='-1.2' cy='-3.2' r='1.1'/%3E%3Ccircle cx='3.5' cy='-1.5' r='1.1'/%3E%3Ccircle cx='-3.5' cy='1' r='1'/%3E%3Ccircle cx='5.5' cy='2' r='1.1'/%3E%3Ccircle cx='-1.5' cy='6' r='1'/%3E%3Ccircle cx='4' cy='-4.5' r='1'/%3E%3Ccircle cx='-5.5' cy='-3' r='1'/%3E%3Ccircle cx='-4.8' cy='4' r='.9'/%3E%3Ccircle cx='2.5' cy='-6' r='.9'/%3E%3Ccircle cx='6' cy='-1' r='.9'/%3E%3Ccircle cx='-6' cy='2' r='.8'/%3E%3Ccircle cx='1' cy='6.2' r='.9'/%3E%3Ccircle cx='5.5' cy='4.5' r='.8'/%3E%3Ccircle cx='-4' cy='-5.5' r='.8'/%3E%3Ccircle cx='4.8' cy='-4' r='.7'/%3E%3Ccircle cx='-5' cy='5' r='.7'/%3E%3Ccircle cx='8' cy='1.5' r='.8'/%3E%3Ccircle cx='-2.5' cy='8.5' r='.7'/%3E%3Ccircle cx='6' cy='-7' r='.7'/%3E%3Ccircle cx='-8' cy='-3.5' r='.7'/%3E%3Ccircle cx='-7' cy='5.5' r='.6'/%3E%3Ccircle cx='3.5' cy='-8.5' r='.6'/%3E%3Ccircle cx='8.5' cy='-3' r='.6'/%3E%3Ccircle cx='-8.5' cy='3' r='.5'/%3E%3Ccircle cx='2' cy='8.5' r='.6'/%3E%3Ccircle cx='7' cy='6' r='.5'/%3E%3Ccircle cx='-6' cy='-7.5' r='.5'/%3E%3Ccircle cx='-3' cy='-8.5' r='.5'/%3E%3Ccircle cx='8' cy='4' r='.5'/%3E%3Ccircle cx='-8' cy='6' r='.5'/%3E%3Ccircle cx='5' cy='8' r='.4'/%3E%3Ccircle cx='-7.5' cy='-6' r='.4'/%3E%3Ccircle cx='10' cy='2.5' r='.5'/%3E%3Ccircle cx='-3' cy='10.5' r='.4'/%3E%3Ccircle cx='7.5' cy='-9' r='.4'/%3E%3Ccircle cx='-10' cy='-4' r='.4'/%3E%3Ccircle cx='-9' cy='7' r='.4'/%3E%3Ccircle cx='4.5' cy='-10.5' r='.4'/%3E%3Ccircle cx='10.5' cy='-3.5' r='.4'/%3E%3Ccircle cx='2.5' cy='10' r='.4'/%3E%3Ccircle cx='9' cy='-6' r='.3'/%3E%3Ccircle cx='-10' cy='3' r='.3'/%3E%3Ccircle cx='6' cy='10' r='.3'/%3E%3Ccircle cx='-9' cy='-8' r='.3'/%3E%3C/g%3E%3C/svg%3E">
@@ -227,6 +227,15 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
     <div style="max-height:400px;overflow-y:auto" id="fbListWrap">
       <div style="text-align:center;padding:20px;color:var(--t3);font-size:12px" id="fbEmpty">No feedback yet</div>
     </div>
+  </div>
+  <!-- Stripe (FB-179) -->
+  <div class="section">
+    <div class="section-title">💳 Pagos — revisar Stripe</div>
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+      <button onclick="revisarStripe()" style="padding:8px 18px;border-radius:8px;background:var(--b2);color:#fff;border:none;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">Revisar Stripe</button>
+      <span id="stripeStatus" style="font-size:11px;color:var(--t3)">Compara precios, modo, montos y webhook contra Stripe. No muestra llaves.</span>
+    </div>
+    <div id="stripeOut" style="margin-top:10px;font-size:12px;line-height:1.6"></div>
   </div>
   <!-- Backup (R06) -->
   <div class="section">
@@ -530,6 +539,25 @@ function filterFb(type,btn){
   document.querySelectorAll('.fb-filter').forEach(b=>{b.style.background='var(--w)';b.style.color='var(--t2)';b.classList.remove('active')});
   btn.style.background='var(--b3)';btn.style.color='var(--b2)';btn.classList.add('active');
   renderFb();
+}
+
+// ── Stripe (FB-179) ──
+async function revisarStripe(){
+  const st=document.getElementById('stripeStatus'), out=document.getElementById('stripeOut');
+  const adminKey=sessionStorage.getItem('admin_key');
+  if(!adminKey){st.textContent='❌ Not authenticated';st.style.color='var(--r)';return;}
+  st.textContent='⏳ Consultando a Stripe...';st.style.color='var(--b2)';out.innerHTML='';
+  try{
+    const res=await fetch(WORKER,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mode:'admin-stripe-check',adminKey})});
+    const d=await res.json();
+    if(!d.success){st.textContent='❌ '+(d.error||'Error');st.style.color='var(--r)';return;}
+    st.textContent=(d.ok?'✅ Todo listo para cobrar':'❌ Hay '+d.problemas.length+' problema(s)')+' · modo '+(d.modo||'—');
+    st.style.color=d.ok?'#2E7D32':'var(--r)';
+    const li=(a,c)=>a.map(x=>'<li style="color:'+c+'">'+esc(x)+'</li>').join('');
+    out.innerHTML=(d.problemas.length?'<b>Problemas</b><ul>'+li(d.problemas,'var(--r)')+'</ul>':'')
+      +(d.avisos.length?'<b>Avisos</b><ul>'+li(d.avisos,'var(--t2)')+'</ul>':'')
+      +'<b>Precios</b><ul>'+(d.precios||[]).map(p=>'<li>'+(p.ok?'✅ ':'❌ ')+esc(p.variable)+(p.monto!=null?' — $'+p.monto+' '+esc(p.moneda||'')+' · '+esc(p.tipo||''):'')+'</li>').join('')+'</ul>';
+  }catch(e){st.textContent='❌ Error: '+e.message;st.style.color='var(--r)';}
 }
 
 // ── Backup (R06) ──
