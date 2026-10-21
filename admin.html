@@ -8,7 +8,7 @@
 if(location.protocol==='http:'&&/(^|\.)postimity\.com$/.test(location.hostname))location.replace('https://'+location.host+location.pathname+location.search+location.hash);
 </script>
 <meta name="robots" content="noindex, nofollow"><!-- S55n: el panel no aparece en buscadores -->
-<meta name="app-version" content="2.56.0">
+<meta name="app-version" content="2.56.1">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Postimity · Administración</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232979FF'/%3E%3Ccircle cx='16' cy='16' r='5' fill='%23fff'/%3E%3C/svg%3E">
@@ -79,6 +79,7 @@ a{color:var(--b2)}
 .est.riesgo{background:var(--r3);color:var(--r)}
 .est.override{background:var(--y3);color:var(--y)}
 .est.cancelada{background:#F3F4F6;color:var(--t2)}
+.est.sin-cobro{background:var(--r3);color:var(--r)}
 .sev{font-size:10px;font-weight:800;padding:2px 6px;border-radius:5px}
 .sev.P0{background:var(--r);color:#fff}
 .sev.P1{background:var(--y3);color:var(--y)}
@@ -219,7 +220,7 @@ a{color:var(--b2)}
     </div>
     <div class="section">
       <div class="section-title">🔥 Costo estimado de proveedores</div>
-      <div class="section-sub">Estimado con el costo de referencia por modo y el historial guardado (hasta 200 generaciones por cuenta). El costo real por periodo llega en F4.</div>
+      <div class="section-sub">Estimado con el costo de referencia por modo y el historial guardado (hasta 200 generaciones por cuenta). El costo real por periodo llega en F4. Tipo de cambio USD→MXN: <input id="fxInput" type="number" min="1" step="0.01" style="width:80px;padding:3px 6px;border:1px solid var(--bor);border-radius:6px;font-family:inherit" onchange="guardarFx()"> (lo fijas tú; se guarda en este navegador).</div>
       <div class="grid2"><div id="costoModo"></div><div id="costoCuenta"></div></div>
     </div>
     <div class="section">
@@ -326,8 +327,8 @@ const WORKER='https://api.postimity.com/';
 const GEN_LIMITS={trial:20,starter:40,growth:100,premium:250};
 const VIDEO_LIMITS={trial:2,starter:2,growth:8,premium:20};
 const DIA=86400000;
-const ESTADOS={prueba:'En prueba','prueba-vencida':'Prueba vencida','sin-prueba':'Sin prueba',pagando:'Pagando',riesgo:'Pago en riesgo',override:'Override',cancelada:'Canceló'};
-const ACCIONES={plan:'Cambio de plan',giro:'Giro fijado',borrar:'Cuenta borrada',pago:'Pago','pago-fallido':'Pago fallido','pago-recuperado':'Pago recuperado',cancelacion:'Cancelación','cambio-plan':'Cambio de plan (portal)','oxxo-vencido':'OXXO vencido'};
+const ESTADOS={'sin-cobro':'Sin cobro (Stripe)',prueba:'En prueba','prueba-vencida':'Prueba vencida','sin-prueba':'Sin prueba',pagando:'Pagando',riesgo:'Pago en riesgo',override:'Override',cancelada:'Canceló'};
+const ACCIONES={'dar-prueba':'Prueba devuelta',plan:'Cambio de plan',giro:'Giro fijado',borrar:'Cuenta borrada',pago:'Pago','pago-fallido':'Pago fallido','pago-recuperado':'Pago recuperado',cancelacion:'Cancelación','cambio-plan':'Cambio de plan (portal)','oxxo-vencido':'OXXO vencido'};
 const DESCUADRES={
   'servicio-sin-cobro':['Servicio sin cobro','Tiene plan pagado y Stripe ya no cobra. Revisa en Stripe; si canceló, regresa la cuenta a trial con «Plan».'],
   'cobra-sin-servicio':['Cobra sin servicio','Stripe cobra y la cuenta está en prueba. Asigna el plan con «Plan» o reembolsa en Stripe.'],
@@ -354,6 +355,26 @@ function nombreDe(id){const b=adminData&&(adminData.brandList||[]).find(x=>x.bra
 function diaMX(iso){const t=Date.parse(iso);return isNaN(t)?'':new Date(t-6*3600000).toISOString().slice(0,10)}
 // De donde llego una cuenta (ADM-4). fbclid sin utm es un anuncio de Meta.
 function fuenteDe(b){const o=b&&b.origen;if(!o)return 'sin dato';if(o.source)return String(o.source).toLowerCase();if(o.fbclid)return 'meta';if(o.gclid)return 'google';if(o.ref)return String(o.ref);return 'directo'}
+// FB-186: la conciliacion manda sobre el plan de D1. Una cuenta que D1 da por pagada y Stripe no cobra pasa a «sin cobro».
+// Devuelve una lista nueva: la de adminData no se toca. Sin conciliacion, la lista queda igual.
+function conLaConciliacion(lista,conc){
+  if(!conc||!conc.success)return (lista||[]).slice();
+  const sin=new Set((conc.descuadres||[]).filter(x=>x.tipo==='servicio-sin-cobro'&&x.brandId).map(x=>x.brandId));
+  return (lista||[]).map(b=>sin.has(b.brandId)?Object.assign({},b,{estado:'sin-cobro',estadoD1:b.estado}):b);
+}
+// FB-186: las cifras de dinero del panel. El MRR principal es el de Stripe; sin conciliar es null («sin dato»), nunca el de lista.
+function kpisDinero(d,conc){
+  const L=conLaConciliacion((d&&d.brandList)||[],conc), ok=!!(conc&&conc.success);
+  return {pagando:L.filter(b=>b.estado==='pagando'||b.estado==='riesgo').length,sinCobro:L.filter(b=>b.estado==='sin-cobro').length,override:L.filter(b=>b.estado==='override').length,
+    riesgo:L.filter(b=>b.estado==='riesgo').length,mrrReal:ok?(conc.mrr||{MXN:0,USD:0}):null,mrrLista:(d&&d.hoy&&d.hoy.mrrLista)||{MXN:0,USD:0},vivas:ok?(conc.suscripcionesVivas||0):null};
+}
+// Los proveedores cobran en USD: el costo se muestra en USD y en MXN con el tipo de cambio que fija el operador.
+function costo(usd,fx){const u=Number(usd)||0,t=Number(fx)>0?Number(fx):tipoCambio();return '$'+u.toFixed(2)+' USD · $'+(u*t).toFixed(1)+' MXN'}
+function tipoCambio(){try{const v=Number(localStorage.getItem('pm_fx'));return v>0?v:18.3}catch(e){return 18.3}}
+function guardarFx(){const v=Number(document.getElementById('fxInput').value);if(v>0){try{localStorage.setItem('pm_fx',String(v))}catch(e){}renderDinero();filterBrands();renderTop()}}
+// Quien puso el plan de la cuenta (FB-186): sin esto no se sabe por que una cuenta cuenta como cliente.
+function origenPlan(b){const m={admin:'administración',stripe:'pago en Stripe','stripe-portal':'portal de Stripe','stripe-cancelled':'cancelación en Stripe','oxxo-expired':'OXXO vencido'};return b&&b.planChangedBy?(m[b.planChangedBy]||b.planChangedBy):'alta (sin cambios)'}
+function listaVista(){return conLaConciliacion((adminData&&adminData.brandList)||[],concData)}
 // ADM-5: pruebas que vencen en los proximos `dias`, con el fin que manda el servidor (trialFin), la mas proxima primero.
 function pruebasPorVencer(lista,ahora,dias){
   const lim=ahora+dias*86400000;
@@ -433,6 +454,7 @@ async function doAuth(){
     try{sessionStorage.setItem('admin_key',key)}catch(e){}
     renderDashboard();
     loadFeedback();
+    conciliar();   // FB-186: el dinero del panel lo dice Stripe; se concilia al entrar
   }catch(e){document.getElementById('loadingScreen').style.display='none';document.getElementById('authScreen').style.display='block';err.style.display='block';err.textContent='Error: '+e.message}
 }
 function recargar(){const k=llave();if(!k)return;document.getElementById('authKey').value=k;doAuth()}
@@ -467,15 +489,16 @@ function renderDashboard(){
 }
 function kpi(label,val,sub,cls){return '<div class="kpi '+(cls||'')+'"><div class="kpi-label">'+label+'</div><div class="kpi-val">'+val+'</div><div class="kpi-sub">'+(sub||'')+'</div></div>'}
 function renderHoy(){
-  const d=adminData, h=d.hoy||{porEstado:{},mrrLista:{}}, pe=h.porEstado||{}, m=h.mrrLista||{};
-  const lista=d.brandList||[], ahora=Date.now();
+  const d=adminData, h=d.hoy||{porEstado:{},mrrLista:{}}, pe=h.porEstado||{};
+  const lista=listaVista(), ahora=Date.now(), k=kpisDinero(d,concData), ml=k.mrrLista;
+  const conc=concData&&concData.success, falla=concData&&!concData.success;
   document.getElementById('kpisHoy').innerHTML=
     kpi('Cuentas',h.marcas||lista.length,(h.registrosDia||0)+' registro(s) hoy','blue')+
     kpi('En prueba',pe.prueba||0,(pe['prueba-vencida']||0)+' vencidas sin pago')+
-    kpi('Pagando',(pe.pagando||0)+(pe.riesgo||0),(pe.override||0)+' override · '+(pe.cancelada||0)+' cancelaron','green')+
-    kpi('Pago en riesgo',pe.riesgo||0,'contactar antes del 2.º reintento',(pe.riesgo?'red':''))+
-    kpi('MRR de lista',dinero(m.MXN,'MXN'),(m.USD?dinero(m.USD,'USD')+' · ':'')+(concData&&concData.mrr?'real: '+dinero(concData.mrr.MXN,'MXN'):'real: concilia'),'green')+
-    kpi('Conversión',pct((pe.pagando||0)+(pe.riesgo||0)+(pe.cancelada||0),lista.length),'cuentas que han pagado / total');
+    kpi('Pagando',conc?k.pagando:'—',conc?(k.sinCobro?k.sinCobro+' sin cobro en Stripe · ':'')+k.override+' override':(falla?'Stripe no respondió':'conciliando con Stripe…'),'green')+
+    kpi('Pago en riesgo',conc?k.riesgo:'—','contactar antes del 2.º reintento',(k.riesgo?'red':''))+
+    kpi('MRR real (Stripe)',k.mrrReal?dinero(k.mrrReal.MXN,'MXN'):'—',(k.mrrReal&&k.mrrReal.USD?dinero(k.mrrReal.USD,'USD')+' · ':'')+'de lista según D1 (sin verificar): '+dinero(ml.MXN,'MXN'),'green')+
+    kpi('Conversión',pct(lista.filter(b=>b.estado==='pagando'||b.estado==='riesgo'||b.estado==='cancelada').length,lista.length),'cuentas que han pagado / total');
   const items=[];
   if(concData&&concData.success){
     for(const x of (concData.descuadres||[]).filter(x=>x.severidad==='P0'||x.severidad==='P1')){
@@ -531,28 +554,30 @@ function renderMeses(){
   for(const x of d.bitacora||[])if(x.accion==='cancelacion'&&x.creado)m(diaMX(new Date(x.creado*1000).toISOString()).slice(0,7)).cancelaciones++;
   for(const f of d.fotos||[])if(f.dia)m(f.dia.slice(0,7)).foto=f;
   const rows=Object.values(meses).filter(r=>r.mes).sort((a,b)=>b.mes.localeCompare(a.mes));
-  document.getElementById('mesesTabla').innerHTML='<table class="admin-table"><thead><tr><th>Mes</th><th class="num">Registros</th><th class="num">Activadas</th><th class="num">Primeros pagos</th><th class="num">Cancelaciones</th><th class="num">Pagando al cierre</th><th class="num">En prueba al cierre</th><th class="num">MRR de lista al cierre</th></tr></thead><tbody>'
+  document.getElementById('mesesTabla').innerHTML='<table class="admin-table"><thead><tr><th>Mes</th><th class="num">Registros</th><th class="num">Activadas</th><th class="num">Primeros pagos</th><th class="num">Cancelaciones</th><th class="num">Pagando al cierre</th><th class="num">En prueba al cierre</th><th class="num">MRR real al cierre</th><th class="num">MRR de lista al cierre</th></tr></thead><tbody>'
     +(rows.length?rows.map(r=>{const f=r.foto,pe=(f&&f.porEstado)||{},ml=(f&&f.mrrLista)||{};
-      return '<tr><td>'+esc(r.mes)+(f?' <span class="small">(foto '+esc(f.dia)+')</span>':'')+'</td><td class="num">'+r.registros+'</td><td class="num">'+r.activadas+'</td><td class="num">'+r.pagos+'</td><td class="num">'+r.cancelaciones+'</td><td class="num">'+(f?(pe.pagando||0)+(pe.riesgo||0):'—')+'</td><td class="num">'+(f?pe.prueba||0:'—')+'</td><td class="num">'+(f?dinero(ml.MXN,'MXN')+(ml.USD?' + '+dinero(ml.USD,'USD'):''):'—')+'</td></tr>'}).join(''):'<tr><td colspan="8" class="muted">Sin datos.</td></tr>')+'</tbody></table>';
+      return '<tr><td>'+esc(r.mes)+(f?' <span class="small">(foto '+esc(f.dia)+')</span>':'')+'</td><td class="num">'+r.registros+'</td><td class="num">'+r.activadas+'</td><td class="num">'+r.pagos+'</td><td class="num">'+r.cancelaciones+'</td><td class="num">'+(f?(pe.pagando||0)+(pe.riesgo||0):'—')+'</td><td class="num">'+(f?pe.prueba||0:'—')+'</td><td class="num">'+(f&&f.mrrReal?dinero(f.mrrReal.MXN,'MXN')+(f.mrrReal.USD?' + '+dinero(f.mrrReal.USD,'USD'):''):'—')+'</td><td class="num">'+(f?dinero(ml.MXN,'MXN')+(ml.USD?' + '+dinero(ml.USD,'USD'):''):'—')+'</td></tr>'}).join(''):'<tr><td colspan="9" class="muted">Sin datos.</td></tr>')+'</tbody></table>';
 }
 
 // ── Dinero ──
 function renderDinero(){
-  const d=adminData, h=d.hoy||{}, ml=h.mrrLista||{}, pp=h.porPlan||{}, lista=d.brandList||[];
-  const real=concData&&concData.success?concData.mrr||{}:null;
+  const d=adminData, lista=listaVista(), k=kpisDinero(d,concData), ml=k.mrrLista, real=k.mrrReal;
+  const pagan=lista.filter(b=>b.estado==='pagando'||b.estado==='riesgo');
   document.getElementById('ingresos').innerHTML=
-    '<div class="fin-row"><div class="fin-label">MRR real (Stripe)</div><div class="fin-val" style="color:var(--g2)">'+(real?dinero(real.MXN,'MXN')+(real.USD?' + '+dinero(real.USD,'USD'):''):'<span class="muted">concilia para verlo</span>')+'</div></div>'
+    '<div class="fin-row"><div class="fin-label"><b>MRR real (Stripe)</b></div><div class="fin-val" style="color:var(--g2)">'+(real?dinero(real.MXN,'MXN')+(real.USD?' + '+dinero(real.USD,'USD'):''):'<span class="muted">sin dato: concilia</span>')+'</div></div>'
     +(real?'<div class="fin-row"><div class="fin-label">Suscripciones vivas · se cancelan al fin del periodo</div><div class="fin-val">'+(concData.suscripcionesVivas||0)+' · '+(concData.cancelando||0)+'</div></div>':'')
-    +'<div class="fin-row"><div class="fin-label">MRR de lista (cuentas que pagan × precio)</div><div class="fin-val">'+dinero(ml.MXN,'MXN')+(ml.USD?' + '+dinero(ml.USD,'USD'):'')+'</div></div>'
-    +['starter','growth','premium'].map(p=>'<div class="fin-row"><div class="fin-label">'+p[0].toUpperCase()+p.slice(1)+'</div><div class="fin-val">'+(pp[p]||0)+' cuenta(s)</div></div>').join('')
-    +'<div class="fin-row"><div class="fin-label">Overrides de administración (sin cobro)</div><div class="fin-val">'+lista.filter(b=>b.estado==='override').length+'</div></div>';
+    +['starter','growth','premium'].map(p=>'<div class="fin-row"><div class="fin-label">'+p[0].toUpperCase()+p.slice(1)+' (pagando según Stripe)</div><div class="fin-val">'+(real?pagan.filter(b=>b.plan===p).length:'—')+'</div></div>').join('')
+    +'<div class="fin-row"><div class="fin-label">Sin cobro: D1 dice pagada y Stripe no cobra</div><div class="fin-val" style="color:'+(k.sinCobro?'var(--r)':'inherit')+'">'+(real?k.sinCobro:'—')+'</div></div>'
+    +'<div class="fin-row"><div class="fin-label">Overrides de administración (sin cobro, a propósito)</div><div class="fin-val">'+k.override+'</div></div>'
+    +'<div class="fin-row"><div class="fin-label muted">MRR de lista según D1 (sin verificar)</div><div class="fin-val muted">'+dinero(ml.MXN,'MXN')+(ml.USD?' + '+dinero(ml.USD,'USD'):'')+'</div></div>';
+  document.getElementById('fxInput').value=tipoCambio();
   const ries=lista.filter(b=>b.estado==='riesgo');
   document.getElementById('riesgoLista').innerHTML=ries.length?ries.map(b=>'<div class="pend"><div class="pend-main"><div class="pend-t">'+esc(b.name)+' <span class="tag plan-tag '+esc(b.plan)+'">'+esc(b.plan)+'</span></div><div class="pend-d">Desde '+fecha(b.paymentAtRiskSince)+'</div><div class="pend-a">'+contacto(b,'Tu pago de Postimity')+'</div></div></div>').join(''):'<div class="ok-line">✅ Ningún pago en riesgo.</div>';
   const modos={post:'Post',enhance:'Estudio Pro',flyer:'Flyer',testimonial:'Testimonio',carousel:'Carrusel',video:'Video'}, ac=d.apiCosts||{};
-  document.getElementById('costoModo').innerHTML=Object.entries(d.modeCounts||{}).map(([k,c])=>'<div class="fin-row"><div class="fin-label">'+(modos[k]||k)+' ('+c+' × $'+(ac[k]||0.05).toFixed(3)+')</div><div class="fin-val">$'+((ac[k]||0.05)*c).toFixed(2)+' USD</div></div>').join('')
-    +'<div class="fin-row" style="font-weight:800"><div class="fin-label">Total estimado</div><div class="fin-val">$'+(d.totalApiCost||0).toFixed(2)+' USD</div></div>';
+  document.getElementById('costoModo').innerHTML=Object.entries(d.modeCounts||{}).map(([m,c])=>'<div class="fin-row"><div class="fin-label">'+(modos[m]||m)+' ('+c+' × $'+(ac[m]||0.05).toFixed(3)+' USD)</div><div class="fin-val">'+costo((ac[m]||0.05)*c)+'</div></div>').join('')
+    +'<div class="fin-row" style="font-weight:800"><div class="fin-label">Total estimado</div><div class="fin-val">'+costo(d.totalApiCost||0)+'</div></div>';
   const top=lista.filter(b=>b.cost>0).sort((a,b)=>b.cost-a.cost).slice(0,8);
-  document.getElementById('costoCuenta').innerHTML=top.length?top.map(b=>'<div class="fin-row"><div class="fin-label">'+esc(b.name)+' <span class="tag est '+esc(b.estado)+'">'+esc(ESTADOS[b.estado]||b.estado)+'</span></div><div class="fin-val">$'+b.cost.toFixed(2)+' USD</div></div>').join(''):'<div class="muted">Sin generaciones.</div>';
+  document.getElementById('costoCuenta').innerHTML=top.length?top.map(b=>'<div class="fin-row"><div class="fin-label">'+esc(b.name)+' <span class="tag est '+esc(b.estado)+'">'+esc(ESTADOS[b.estado]||b.estado)+'</span></div><div class="fin-val">'+costo(b.cost)+'</div></div>').join(''):'<div class="muted">Sin generaciones.</div>';
 }
 async function conciliar(){
   const st=document.getElementById('concStatus'), out=document.getElementById('concOut');
@@ -560,7 +585,7 @@ async function conciliar(){
   try{
     const r=await fetch(WORKER,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mode:'admin-conciliar',adminKey:llave()})});
     const c=await r.json();
-    if(!c.success){st.textContent='❌ '+(c.error||('Error '+r.status));st.style.color='var(--r)';return;}
+    if(!c.success){concData={success:false,error:c.error};st.textContent='❌ '+(c.error||('Error '+r.status));st.style.color='var(--r)';renderHoy();return;}
     concData=c;
     const graves=(c.descuadres||[]).filter(x=>x.severidad==='P0'||x.severidad==='P1').length;
     st.textContent=(c.ok?'✅ Todo cuadra':'❌ '+graves+' descuadre(s) que piden acción')+' · '+c.revisadas+' suscripciones revisadas · '+c.cuentas+' cuentas'+(c.incompleta?' · ⚠️ lectura incompleta':'');
@@ -569,8 +594,8 @@ async function conciliar(){
     out.innerHTML=(c.descuadres||[]).length?'<div class="scroll"><table class="admin-table"><thead><tr><th></th><th>Descuadre</th><th>Cuenta</th><th>Detalle y qué hacer</th><th></th></tr></thead><tbody>'+c.descuadres.map(x=>{
       const n=DESCUADRES[x.tipo]||[x.tipo,''], b=lista.find(z=>z.brandId===x.brandId)||{brandId:x.brandId,stripeCustomerId:x.customer};
       return '<tr><td><span class="sev '+esc(x.severidad)+'">'+esc(x.severidad)+'</span></td><td style="font-weight:700">'+esc(n[0])+'</td><td>'+(x.brandId?esc(nombreDe(x.brandId)):'<span class="muted">—</span>')+(x.subId?'<div class="small">'+esc(x.subId)+'</div>':'')+'</td><td>'+esc(x.detalle)+'<div class="small">'+esc(n[1])+'</div></td><td class="pend-a" style="margin:0">'+(x.brandId?contacto(b,'Tu cuenta de Postimity'):(x.customer?'<a class="btn sm" href="https://dashboard.stripe.com/customers/'+encodeURIComponent(x.customer)+'" target="_blank" rel="noopener">Stripe</a>':''))+'</td></tr>'}).join('')+'</tbody></table></div>':'<div class="ok-line">✅ Cada suscripción viva corresponde a una cuenta con el mismo plan.</div>';
-    renderHoy();renderDinero();
-  }catch(e){st.textContent='❌ Error: '+e.message;st.style.color='var(--r)';}
+    renderHoy();renderDinero();filterBrands();llenarFiltros();
+  }catch(e){concData={success:false,error:e.message};st.textContent='❌ Error: '+e.message;st.style.color='var(--r)';renderHoy();}
 }
 
 // ── Cuentas ──
@@ -580,7 +605,7 @@ function opciones(id,valores,etiqueta){
   sel.value=actual;
 }
 function llenarFiltros(){
-  const L=adminData.brandList||[], cuenta=(f)=>{const o={};L.forEach(b=>{const k=f(b);if(k)o[k]=(o[k]||0)+1});return Object.entries(o).sort((a,b)=>b[1]-a[1])};
+  const L=listaVista(), cuenta=(f)=>{const o={};L.forEach(b=>{const k=f(b);if(k)o[k]=(o[k]||0)+1});return Object.entries(o).sort((a,b)=>b[1]-a[1])};
   opciones('estadoFilter',cuenta(b=>b.estado),v=>(ESTADOS[v[0]]||v[0])+' ('+v[1]+')');
   opciones('paisFilter',cuenta(b=>b.country),v=>v[0]+' ('+v[1]+')');
   opciones('giroFilter',cuenta(b=>b.giro&&b.giro.clase).map(v=>{const b=L.find(x=>x.giro&&x.giro.clase===v[0]);return [v[0],(b&&b.giro.nombre||v[0])+' ('+v[1]+')']}));
@@ -591,7 +616,7 @@ function filterBrands(){
   if(!adminData)return;
   const q=(document.getElementById('brandSearch').value||'').toLowerCase().trim();
   const f={estado:document.getElementById('estadoFilter').value,plan:document.getElementById('planFilter').value,pais:document.getElementById('paisFilter').value,giro:document.getElementById('giroFilter').value,fuente:document.getElementById('fuenteFilter').value,mes:document.getElementById('mesFilter').value};
-  const filtered=(adminData.brandList||[]).filter(b=>{
+  const filtered=listaVista().filter(b=>{
     if(f.estado&&b.estado!==f.estado)return false;
     if(f.plan&&(b.plan||'trial')!==f.plan)return false;
     if(f.pais&&b.country!==f.pais)return false;
@@ -608,13 +633,13 @@ function filterBrands(){
     const giro=b.giro&&b.giro.nombre?b.giro.nombre+(b.giro.scian?' · SCIAN '+b.giro.scian:'')+' · '+(b.giro.confianza||''):(b.nicho||'general');
     const o=b.origen||{};
     return '<tr><td style="font-weight:600;min-width:180px">'+esc(b.name||'Sin nombre')+'<div class="small">'+esc(b.email||'')+(b.whatsapp?' · '+esc(b.whatsapp):'')+'</div><div class="small" title="Giro que escribió el dueño → giro que reconoce el servidor (FB-164)">'+esc(b.type||'—')+' → '+esc(giro)+'</div></td>'
-      +'<td><span class="tag est '+esc(b.estado)+'">'+esc(ESTADOS[b.estado]||b.estado||'—')+'</span><div style="margin-top:3px"><span class="tag plan-tag '+esc(plan)+'">'+esc(plan)+'</span></div>'+(b.estado==='override'&&b.planChangedAt?'<div class="small">desde '+fecha(b.planChangedAt)+'</div>':'')+'</td>'
+      +'<td><span class="tag est '+esc(b.estado)+'">'+esc(ESTADOS[b.estado]||b.estado||'—')+'</span><div style="margin-top:3px"><span class="tag plan-tag '+esc(plan)+'">'+esc(plan)+'</span></div>'+'<div class="small">puso el plan: '+esc(origenPlan(b))+(b.planChangedAt?' · '+fecha(b.planChangedAt):'')+'</div>'+(b.estadoD1?'<div class="small" style="color:var(--r)">D1 dice «'+esc(ESTADOS[b.estadoD1]||b.estadoD1)+'»</div>':'')+'</td>'
       +'<td style="white-space:nowrap">'+fecha(b.createdAt)+'<div class="small">'+esc(b.country||'')+'</div></td>'
       +'<td style="white-space:nowrap">'+per+(b.primerPagoAt?'<div class="small">1.er pago '+fecha(b.primerPagoAt)+'</div>':'')+'</td>'
       +'<td class="num" style="min-width:80px">'+uso+'</td>'
       +'<td>'+esc(fuenteDe(b))+(o.campaign?'<div class="small">'+esc(o.campaign)+'</div>':'')+'</td>'
-      +'<td class="num">'+(b.cost>0?'$'+b.cost.toFixed(2):'—')+'</td>'
-      +'<td style="white-space:nowrap"><button class="btn sm" data-bid="'+esc(b.brandId)+'" onclick="openPlanModal(this.dataset.bid)">Plan</button> <button class="btn sm del" data-bid="'+esc(b.brandId)+'" onclick="deleteBrand(this.dataset.bid)">🗑</button>'+(b.stripeCustomerId?' <a class="btn sm" href="https://dashboard.stripe.com/customers/'+encodeURIComponent(b.stripeCustomerId)+'" target="_blank" rel="noopener">Stripe</a>':'')+'</td></tr>';
+      +'<td class="num" style="white-space:nowrap">'+(b.cost>0?costo(b.cost):'—')+'</td>'
+      +'<td style="white-space:nowrap">'+(b.estado==='sin-prueba'?'<button class="btn sm pri" data-bid="'+esc(b.brandId)+'" onclick="darPrueba(this.dataset.bid)">Dar prueba</button> ':'')+'<button class="btn sm" data-bid="'+esc(b.brandId)+'" onclick="openPlanModal(this.dataset.bid)">Plan</button> <button class="btn sm del" data-bid="'+esc(b.brandId)+'" onclick="deleteBrand(this.dataset.bid)">🗑</button>'+(b.stripeCustomerId?' <a class="btn sm" href="https://dashboard.stripe.com/customers/'+encodeURIComponent(b.stripeCustomerId)+'" target="_blank" rel="noopener">Stripe</a>':'')+'</td></tr>';
   }).join('');
   document.getElementById('brandCount').textContent='Mostrando '+Math.min(filtered.length,200)+' de '+filtered.length+' cuentas';
 }
@@ -645,14 +670,15 @@ async function fijarGiro(brandId){
 }
 function renderTop(){
   document.querySelector('#topUsersTable tbody').innerHTML=(adminData.topUsers||[]).map((u,i)=>{const gl=GEN_LIMITS[u.plan]||GEN_LIMITS.trial,vl=VIDEO_LIMITS[u.plan]||VIDEO_LIMITS.trial;
-    return '<tr><td style="font-weight:800;color:var(--b)">'+(i+1)+'</td><td style="font-weight:600">'+esc(u.name)+'</td><td><span class="tag plan-tag '+esc(u.plan)+'">'+esc(u.plan)+'</span></td><td class="num">'+(u.monthlyGens||0)+'<span class="small"> /'+gl+'</span></td><td class="num">'+(u.monthlyVideos||0)+'<span class="small"> /'+vl+'</span></td><td class="num">$'+(u.cost||0).toFixed(2)+'</td></tr>'}).join('');
+    return '<tr><td style="font-weight:800;color:var(--b)">'+(i+1)+'</td><td style="font-weight:600">'+esc(u.name)+'</td><td><span class="tag plan-tag '+esc(u.plan)+'">'+esc(u.plan)+'</span></td><td class="num">'+(u.monthlyGens||0)+'<span class="small"> /'+gl+'</span></td><td class="num">'+(u.monthlyVideos||0)+'<span class="small"> /'+vl+'</span></td><td class="num" style="white-space:nowrap">'+costo(u.cost||0)+'</td></tr>'}).join('');
 }
 
 // ── Cambiar plan (override) con motivo ──
-let pmBrandId=null, pmCurrentPlan=null, pmSelectedPlan=null;
+let pmBrandId=null, pmCurrentPlan=null, pmSelectedPlan=null, pmMarcable=false;
 function openPlanModal(brandId){
   const b=(adminData.brandList||[]).find(x=>x.brandId===brandId); if(!b)return;
   pmBrandId=brandId; pmCurrentPlan=b.plan||'trial'; pmSelectedPlan=null;
+  pmMarcable=pmCurrentPlan!=='trial'&&b.planChangedBy!=='admin';   // FB-186: el mismo plan se puede marcar como override
   document.getElementById('pmBrand').textContent=(b.name||'Sin nombre')+' ('+brandId.slice(0,8)+'…) · '+(ESTADOS[b.estado]||b.estado);
   document.getElementById('pmWarn').style.display=(b.estado==='pagando'||b.estado==='riesgo')?'block':'none';
   document.getElementById('pmStatus').textContent='';
@@ -660,13 +686,13 @@ function openPlanModal(brandId){
   document.getElementById('pmConfirm').disabled=true;document.getElementById('pmConfirm').textContent='Aplicar';
   const plans=[{key:'trial',name:'Trial',price:'Gratis'},{key:'starter',name:'Starter',price:'$199 MXN'},{key:'growth',name:'Growth',price:'$399 MXN'},{key:'premium',name:'Premium',price:'$899 MXN'}];
   document.getElementById('pmOptions').innerHTML=plans.map(p=>{const cur=p.key===pmCurrentPlan;
-    return '<div class="pm-opt'+(cur?' current':'')+'" onclick="selectPlan(\''+p.key+'\',this)" data-plan="'+p.key+'"><div class="pm-opt-name">'+p.name+(cur?' ✓':'')+'</div><div class="pm-opt-price">'+p.price+'</div></div>'}).join('');
+    return '<div class="pm-opt'+(cur?' current':'')+'" onclick="selectPlan(\''+p.key+'\',this)" data-plan="'+p.key+'"><div class="pm-opt-name">'+p.name+(cur?' ✓':'')+'</div><div class="pm-opt-price">'+(cur&&pmMarcable?'tocar = marcar override':p.price)+'</div></div>'}).join('');
   document.getElementById('planModal').classList.add('show');
 }
 function closePlanModal(){document.getElementById('planModal').classList.remove('show');pmBrandId=null;pmSelectedPlan=null}
 function validarPlan(){document.getElementById('pmConfirm').disabled=!(pmSelectedPlan&&document.getElementById('pmMotivo').value.trim().length>=4)}
 function selectPlan(plan,el){
-  if(plan===pmCurrentPlan)return;
+  if(plan===pmCurrentPlan&&!pmMarcable)return;
   pmSelectedPlan=plan;
   document.querySelectorAll('.pm-opt').forEach(o=>o.classList.toggle('active',o.dataset.plan===plan));
   validarPlan();
@@ -687,6 +713,18 @@ async function confirmPlanChange(){
   }catch(e){status.textContent='❌ '+e.message;status.style.color='var(--r)';btn.textContent='Aplicar';btn.disabled=false;}
 }
 
+// ── Dar prueba (FB-188): a una cuenta que entro «sin prueba», con motivo y bitacora ──
+async function darPrueba(brandId){
+  const b=(adminData.brandList||[]).find(x=>x.brandId===brandId)||{name:brandId};
+  const motivo=(prompt('Devolver la prueba a "'+b.name+'". Corre desde su alta.\n\nMotivo (queda en la bitácora):','prueba negada por huella duplicada (FB-188)')||'').trim();
+  if(!motivo)return;
+  try{
+    const res=await fetch(WORKER,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mode:'admin-dar-prueba',adminKey:llave(),brandId,motivo})});
+    const data=await res.json();
+    alert((data.success?'✅ ':'❌ ')+(data.message||data.error||'No se pudo')+(data.bitacora===false?'\n⚠️ No quedó en la bitácora: anótalo a mano.':''));
+    if(data.success)recargar();
+  }catch(e){alert('❌ Error: '+e.message)}
+}
 // ── Borrar cuenta (con motivo) ──
 async function deleteBrand(brandId){
   const b=(adminData.brandList||[]).find(x=>x.brandId===brandId)||{name:brandId};
