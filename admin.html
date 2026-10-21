@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
 <meta charset="UTF-8">
 <script>
@@ -8,578 +8,781 @@
 if(location.protocol==='http:'&&/(^|\.)postimity\.com$/.test(location.hostname))location.replace('https://'+location.host+location.pathname+location.search+location.hash);
 </script>
 <meta name="robots" content="noindex, nofollow"><!-- S55n: el panel no aparece en buscadores -->
-<meta name="app-version" content="2.55.1">
+<meta name="app-version" content="2.56.0">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Postimity Admin</title>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232979FF'/%3E%3Cg transform='translate(16,16)' fill='%23fff'%3E%3Ccircle r='1.8'/%3E%3Ccircle cx='2.8' cy='1' r='1.5'/%3E%3Ccircle cx='-2.2' cy='2' r='1.4'/%3E%3Ccircle cx='1' cy='-3' r='1.4'/%3E%3Ccircle cx='-3' cy='-1.2' r='1.3'/%3E%3Ccircle cx='2' cy='3' r='1.2'/%3E%3Ccircle cx='-1.2' cy='-3.2' r='1.1'/%3E%3Ccircle cx='3.5' cy='-1.5' r='1.1'/%3E%3Ccircle cx='-3.5' cy='1' r='1'/%3E%3Ccircle cx='5.5' cy='2' r='1.1'/%3E%3Ccircle cx='-1.5' cy='6' r='1'/%3E%3Ccircle cx='4' cy='-4.5' r='1'/%3E%3Ccircle cx='-5.5' cy='-3' r='1'/%3E%3Ccircle cx='-4.8' cy='4' r='.9'/%3E%3Ccircle cx='2.5' cy='-6' r='.9'/%3E%3Ccircle cx='6' cy='-1' r='.9'/%3E%3Ccircle cx='-6' cy='2' r='.8'/%3E%3Ccircle cx='1' cy='6.2' r='.9'/%3E%3Ccircle cx='5.5' cy='4.5' r='.8'/%3E%3Ccircle cx='-4' cy='-5.5' r='.8'/%3E%3Ccircle cx='4.8' cy='-4' r='.7'/%3E%3Ccircle cx='-5' cy='5' r='.7'/%3E%3Ccircle cx='8' cy='1.5' r='.8'/%3E%3Ccircle cx='-2.5' cy='8.5' r='.7'/%3E%3Ccircle cx='6' cy='-7' r='.7'/%3E%3Ccircle cx='-8' cy='-3.5' r='.7'/%3E%3Ccircle cx='-7' cy='5.5' r='.6'/%3E%3Ccircle cx='3.5' cy='-8.5' r='.6'/%3E%3Ccircle cx='8.5' cy='-3' r='.6'/%3E%3Ccircle cx='-8.5' cy='3' r='.5'/%3E%3Ccircle cx='2' cy='8.5' r='.6'/%3E%3Ccircle cx='7' cy='6' r='.5'/%3E%3Ccircle cx='-6' cy='-7.5' r='.5'/%3E%3Ccircle cx='-3' cy='-8.5' r='.5'/%3E%3Ccircle cx='8' cy='4' r='.5'/%3E%3Ccircle cx='-8' cy='6' r='.5'/%3E%3Ccircle cx='5' cy='8' r='.4'/%3E%3Ccircle cx='-7.5' cy='-6' r='.4'/%3E%3Ccircle cx='10' cy='2.5' r='.5'/%3E%3Ccircle cx='-3' cy='10.5' r='.4'/%3E%3Ccircle cx='7.5' cy='-9' r='.4'/%3E%3Ccircle cx='-10' cy='-4' r='.4'/%3E%3Ccircle cx='-9' cy='7' r='.4'/%3E%3Ccircle cx='4.5' cy='-10.5' r='.4'/%3E%3Ccircle cx='10.5' cy='-3.5' r='.4'/%3E%3Ccircle cx='2.5' cy='10' r='.4'/%3E%3Ccircle cx='9' cy='-6' r='.3'/%3E%3Ccircle cx='-10' cy='3' r='.3'/%3E%3Ccircle cx='6' cy='10' r='.3'/%3E%3Ccircle cx='-9' cy='-8' r='.3'/%3E%3C/g%3E%3C/svg%3E">
+<title>Postimity · Administración</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232979FF'/%3E%3Ccircle cx='16' cy='16' r='5' fill='%23fff'/%3E%3C/svg%3E">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<script defer data-domain="postimity.com" src="https://plausible.io/js/script.js"></script>
+<!-- S58: sin analitica en el panel (no hay nada que medir aqui y la sesion de administracion no sale del navegador) -->
 <style>
-:root{--b:#2979FF;--b2:#1565C0;--b3:#E3F0FF;--g:#76C442;--g2:#5A9E2F;--r:#E53935;--y:#F9A825;--t1:#111827;--t2:#374151;--t3:#6B7280;--t4:#9CA3AF;--bg:#F5F5F3;--w:#fff;--bor:#E5E7EB;--radius:14px}
+:root{--b:#2979FF;--b2:#1565C0;--b3:#E3F0FF;--g:#76C442;--g2:#2E7D32;--g3:#E8F5E9;--r:#D32F2F;--r3:#FFEBEE;--y:#B26A00;--y3:#FFF4E0;--t1:#111827;--t2:#374151;--t3:#6B7280;--t4:#9CA3AF;--bg:#F5F5F3;--w:#fff;--bor:#E5E7EB;--radius:14px}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--t1);min-height:100vh}
-.nav{background:rgba(255,255,255,.92);backdrop-filter:blur(16px);border-bottom:1px solid rgba(0,0,0,.06);height:56px;padding:0 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--t1);min-height:100vh;font-size:13px}
+a{color:var(--b2)}
+.nav{background:rgba(255,255,255,.94);backdrop-filter:blur(16px);border-bottom:1px solid rgba(0,0,0,.06);min-height:56px;padding:8px 20px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;position:sticky;top:0;z-index:100}
 .nav-left{display:flex;align-items:center;gap:10px}
 .logo-sq{width:28px;height:28px;border-radius:8px;background:var(--b);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800}
-.nav-title{font-size:15px;font-weight:800;color:var(--t1)}
-.nav-badge{font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;background:#FEF3C7;color:#92400E}
+.nav-title{font-size:15px;font-weight:800}
+.nav-badge{font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;background:var(--y3);color:var(--y)}
+.nav-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .nav-time{font-size:11px;color:var(--t3);font-weight:500}
-.wrap{max-width:1100px;margin:0 auto;padding:20px 16px 60px}
+.btn{padding:7px 12px;border:1px solid var(--bor);border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;background:var(--w);color:var(--t2);font-family:inherit;white-space:nowrap}
+.btn:hover{border-color:var(--b);color:var(--b2)}
+.btn.pri{background:var(--b2);color:#fff;border-color:var(--b2)}
+.btn.pri:hover{background:var(--b)}
+.btn.sm{padding:3px 8px;font-size:10px;border-radius:6px}
+.btn.del{color:var(--r)}
+.wrap{max-width:1180px;margin:0 auto;padding:16px 16px 60px}
 .auth-wrap{max-width:380px;margin:80px auto;text-align:center}
 .auth-wrap h2{font-size:20px;font-weight:800;margin-bottom:6px}
 .auth-wrap p{font-size:13px;color:var(--t3);margin-bottom:20px}
 .auth-input{width:100%;padding:12px 14px;border:1.5px solid var(--bor);border-radius:10px;font-size:14px;font-family:inherit;outline:none}
 .auth-input:focus{border-color:var(--b)}
 .auth-btn{width:100%;padding:12px;border:none;border-radius:10px;background:var(--b);color:#fff;font-size:14px;font-weight:700;cursor:pointer;margin-top:10px;font-family:inherit}
-.auth-btn:hover{background:var(--b2)}
 .auth-error{color:var(--r);font-size:12px;margin-top:8px;display:none}
-.loading-wrap{text-align:center;padding:60px 20px}
-.loading-wrap .spinner{display:inline-block;width:32px;height:32px;border:3px solid var(--bor);border-top-color:var(--b);border-radius:50%;animation:spin .7s linear infinite}
+.loading-wrap{text-align:center;padding:60px 20px;color:var(--t3)}
+.spinner{display:inline-block;width:32px;height:32px;border:3px solid var(--bor);border-top-color:var(--b);border-radius:50%;animation:spin .7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-.loading-wrap p{margin-top:12px;font-size:13px;color:var(--t3)}
-.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:12px}
-.kpi{background:var(--w);border:1px solid var(--bor);border-radius:var(--radius);padding:16px 14px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.tabs{display:flex;gap:4px;margin-bottom:14px;overflow-x:auto;border-bottom:1px solid var(--bor)}
+.tab-btn{padding:9px 14px;border:none;background:none;font-family:inherit;font-size:13px;font-weight:700;color:var(--t3);cursor:pointer;border-bottom:2.5px solid transparent;white-space:nowrap}
+.tab-btn.on{color:var(--b2);border-bottom-color:var(--b2)}
+.tab-btn .cnt{display:inline-block;min-width:18px;padding:0 5px;margin-left:4px;border-radius:9px;background:var(--r);color:#fff;font-size:10px;line-height:18px}
+.tab{display:none}
+.tab.on{display:block}
+.kpi-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:12px}
+.kpi{background:var(--w);border:1px solid var(--bor);border-radius:var(--radius);padding:14px 12px}
 .kpi-label{font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
-.kpi-val{font-size:26px;font-weight:800;color:var(--t1);line-height:1}
-.kpi-sub{font-size:11px;color:var(--t3);margin-top:3px;font-weight:500}
+.kpi-val{font-size:24px;font-weight:800;line-height:1}
+.kpi-sub{font-size:11px;color:var(--t3);margin-top:4px}
 .kpi.green .kpi-val{color:var(--g2)}
 .kpi.red .kpi-val{color:var(--r)}
 .kpi.blue .kpi-val{color:var(--b2)}
-.section{background:var(--w);border:1px solid var(--bor);border-radius:var(--radius);padding:16px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
-.section-title{font-size:13px;font-weight:700;color:var(--t1);margin-bottom:12px;display:flex;align-items:center;gap:6px}
-.plan-bars{display:flex;flex-direction:column;gap:8px}
-.plan-bar-row{display:flex;align-items:center;gap:8px}
-.plan-bar-label{width:65px;font-size:11px;font-weight:700;color:var(--t2)}
-.plan-bar-track{flex:1;height:26px;background:var(--bg);border-radius:7px;overflow:hidden;position:relative}
-.plan-bar-fill{height:100%;border-radius:7px;display:flex;align-items:center;padding:0 8px;font-size:10px;font-weight:700;color:#fff;min-width:fit-content;transition:width .6s ease}
-.plan-bar-count{font-size:11px;font-weight:700;color:var(--t2);width:35px;text-align:right}
-.mode-bars{display:flex;flex-direction:column;gap:7px}
-.mode-row{display:flex;align-items:center;gap:7px}
-.mode-icon{font-size:15px;width:22px;text-align:center}
-.mode-name{width:85px;font-size:11px;font-weight:600;color:var(--t2)}
-.mode-bar-track{flex:1;height:20px;background:var(--bg);border-radius:6px;overflow:hidden}
-.mode-bar-fill{height:100%;border-radius:6px;display:flex;align-items:center;padding:0 6px;font-size:9px;font-weight:700;color:#fff;transition:width .6s ease}
-.mode-count{width:40px;text-align:right;font-size:11px;font-weight:600;color:var(--t3)}
-.mode-cost{width:55px;text-align:right;font-size:10px;font-weight:500;color:var(--t4)}
+.section{background:var(--w);border:1px solid var(--bor);border-radius:var(--radius);padding:16px;margin-bottom:12px}
+.section-title{font-size:14px;font-weight:800;margin-bottom:4px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.section-sub{font-size:11px;color:var(--t3);margin-bottom:12px;line-height:1.5}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .admin-table{width:100%;border-collapse:collapse;font-size:12px}
-.admin-table th{text-align:left;font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.4px;padding:7px 8px;border-bottom:1.5px solid var(--bor)}
-.admin-table td{padding:7px 8px;border-bottom:1px solid var(--bor);color:var(--t2);vertical-align:middle}
+.admin-table th{text-align:left;font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.4px;padding:7px 8px;border-bottom:1.5px solid var(--bor);white-space:nowrap}
+.admin-table td{padding:7px 8px;border-bottom:1px solid var(--bor);color:var(--t2);vertical-align:top}
 .admin-table tr:last-child td{border-bottom:none}
-.admin-table .rank{font-weight:800;color:var(--b);width:28px}
-.plan-tag{display:inline-block;font-size:9px;font-weight:700;padding:2px 6px;border-radius:5px;text-transform:uppercase}
-.plan-tag.trial{background:#FEF3C7;color:#92400E}
+.admin-table td.num,.admin-table th.num{text-align:right;font-variant-numeric:tabular-nums}
+.scroll{overflow-x:auto}
+.tag{display:inline-block;font-size:9px;font-weight:700;padding:2px 6px;border-radius:5px;text-transform:uppercase;white-space:nowrap}
+.plan-tag.trial{background:var(--y3);color:var(--y)}
 .plan-tag.starter{background:var(--b3);color:var(--b2)}
-.plan-tag.growth{background:#E8F5E9;color:#2E7D32}
+.plan-tag.growth{background:var(--g3);color:var(--g2)}
 .plan-tag.premium{background:#F3E5F5;color:#6A1B9A}
-.search-row{display:flex;gap:8px;margin-bottom:12px}
-.search-input{flex:1;padding:9px 12px;border:1.5px solid var(--bor);border-radius:8px;font-size:13px;font-family:inherit;outline:none}
-.search-input:focus{border-color:var(--b)}
-.filter-sel{padding:9px;border:1.5px solid var(--bor);border-radius:8px;font-size:12px;font-family:inherit;cursor:pointer;background:var(--w);outline:none}
-.country-grid{display:flex;flex-wrap:wrap;gap:5px}
-.country-chip{padding:4px 8px;border-radius:7px;background:var(--bg);font-size:10px;font-weight:600;color:var(--t2);border:1px solid var(--bor)}
-.country-chip span{font-weight:800;color:var(--b)}
+.est.prueba{background:var(--b3);color:var(--b2)}
+.est.prueba-vencida{background:#F3F4F6;color:var(--t3)}
+.est.sin-prueba{background:#F3F4F6;color:var(--t3)}
+.est.pagando{background:var(--g3);color:var(--g2)}
+.est.riesgo{background:var(--r3);color:var(--r)}
+.est.override{background:var(--y3);color:var(--y)}
+.est.cancelada{background:#F3F4F6;color:var(--t2)}
+.sev{font-size:10px;font-weight:800;padding:2px 6px;border-radius:5px}
+.sev.P0{background:var(--r);color:#fff}
+.sev.P1{background:var(--y3);color:var(--y)}
+.sev.P2{background:#F3F4F6;color:var(--t2)}
+.sev.info{background:var(--b3);color:var(--b2)}
+.pend{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--bor)}
+.pend:last-child{border-bottom:none}
+.pend-main{flex:1;min-width:0}
+.pend-t{font-weight:700;color:var(--t1)}
+.pend-d{font-size:11px;color:var(--t3);margin-top:2px;line-height:1.5}
+.pend-a{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.muted{color:var(--t3)}
+.small{font-size:10px;color:var(--t4)}
+.ok-line{font-size:12px;color:var(--g2);font-weight:600}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.search-input{flex:1;min-width:180px;padding:8px 11px;border:1.5px solid var(--bor);border-radius:8px;font-size:12px;font-family:inherit;outline:none}
+.filter-sel{padding:8px;border:1.5px solid var(--bor);border-radius:8px;font-size:12px;font-family:inherit;cursor:pointer;background:var(--w);outline:none;max-width:200px}
 .fin-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bor);font-size:12px}
 .fin-row:last-child{border-bottom:none}
-.fin-label{color:var(--t3);font-weight:500}
-.fin-val{font-weight:700;color:var(--t1)}
-.fin-val.green{color:var(--g2)}
-.fin-val.red{color:var(--r)}
-.btn-plan{padding:3px 7px;border:1px solid var(--bor);border-radius:5px;font-size:10px;font-weight:700;cursor:pointer;background:var(--w);color:var(--b);font-family:inherit;white-space:nowrap}
-.btn-plan:hover{background:var(--b3);border-color:var(--b)}
-.btn-del{padding:3px 7px;border:1px solid var(--bor);border-radius:5px;font-size:10px;font-weight:700;cursor:pointer;background:var(--w);color:var(--r);font-family:inherit;white-space:nowrap}
-.btn-del:hover{background:#FFEBEE;border-color:var(--r)}
-.plan-modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.35);z-index:500;align-items:center;justify-content:center}
+.fin-label{color:var(--t3)}
+.fin-val{font-weight:700}
+.bar{height:6px;border-radius:3px;background:var(--bg);overflow:hidden;margin-top:3px;min-width:60px}
+.bar>i{display:block;height:100%;background:var(--b)}
+.plan-modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:500;align-items:center;justify-content:center}
 .plan-modal-overlay.show{display:flex}
-.plan-modal{background:var(--w);border-radius:16px;padding:24px;max-width:380px;width:90%;box-shadow:0 8px 32px rgba(0,0,0,.18)}
+.plan-modal{background:var(--w);border-radius:16px;padding:22px;max-width:420px;width:92%;box-shadow:0 8px 32px rgba(0,0,0,.18)}
 .plan-modal h3{font-size:16px;font-weight:800;margin-bottom:4px}
-.plan-modal .pm-sub{font-size:12px;color:var(--t3);margin-bottom:16px}
-.plan-modal .pm-brand{font-size:13px;font-weight:700;color:var(--b);margin-bottom:12px}
-.pm-options{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
-.pm-opt{padding:10px;border:2px solid var(--bor);border-radius:10px;text-align:center;cursor:pointer;transition:.15s}
-.pm-opt:hover{border-color:var(--b);background:var(--b3)}
+.pm-sub{font-size:12px;color:var(--t3);margin-bottom:12px;line-height:1.5}
+.pm-brand{font-size:13px;font-weight:700;color:var(--b);margin-bottom:10px}
+.pm-warn{display:none;font-size:11px;background:var(--y3);color:var(--y);padding:8px 10px;border-radius:8px;margin-bottom:10px;line-height:1.5}
+.pm-options{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.pm-opt{padding:10px;border:2px solid var(--bor);border-radius:10px;text-align:center;cursor:pointer}
 .pm-opt.active{border-color:var(--b);background:var(--b3)}
-.pm-opt.current{border-color:var(--g);background:#E8F5E9}
+.pm-opt.current{border-color:var(--g);background:var(--g3)}
 .pm-opt-name{font-size:13px;font-weight:700}
 .pm-opt-price{font-size:10px;color:var(--t3)}
+.pm-motivo{width:100%;padding:9px;border:1.5px solid var(--bor);border-radius:8px;font-family:inherit;font-size:12px;resize:vertical;min-height:54px;margin-bottom:10px}
 .pm-btns{display:flex;gap:8px}
 .pm-btns button{flex:1;padding:10px;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit}
 .pm-cancel{background:var(--bg);color:var(--t2)}
 .pm-confirm{background:var(--b);color:#fff}
-.pm-confirm:hover{background:var(--b2)}
 .pm-confirm:disabled{opacity:.5;cursor:not-allowed}
 .pm-status{font-size:11px;color:var(--t3);text-align:center;margin-top:8px;min-height:16px}
-@media(max-width:640px){
-  .kpi-grid{grid-template-columns:repeat(2,1fr)}
-}
+@media(max-width:900px){.kpi-grid{grid-template-columns:repeat(3,1fr)}.grid2{grid-template-columns:1fr}}
+@media(max-width:560px){.kpi-grid{grid-template-columns:repeat(2,1fr)}.nav{padding:8px 12px}}
 </style>
 </head>
 <body>
 <div class="nav">
   <div class="nav-left">
     <div class="logo-sq">✦</div>
-    <span class="nav-title">Postimity Admin</span>
-    <span class="nav-badge">INTERNAL</span>
+    <span class="nav-title">Postimity · Administración</span>
+    <span class="nav-badge">INTERNO</span>
   </div>
-  <span class="nav-time" id="navTime"></span>
+  <div class="nav-right">
+    <span class="nav-time" id="navTime"></span>
+    <button class="btn" onclick="recargar()">↻ Actualizar</button>
+    <button class="btn" onclick="descargarResumen()" title="Archivo para analizar fuera del panel: sin correos, nombres, teléfonos ni ids de Stripe">⬇ Resumen anónimo</button>
+  </div>
 </div>
 <div id="authScreen" class="wrap" style="display:block">
   <div class="auth-wrap">
-    <h2>🔐 Admin Access</h2>
-    <p>Enter admin key to view dashboard</p>
-    <input type="password" class="auth-input" id="authKey" placeholder="Admin key" onkeydown="if(event.key==='Enter')doAuth()">
-    <button class="auth-btn" onclick="doAuth()">Enter →</button>
-    <div class="auth-error" id="authError">Invalid key. Try again.</div>
+    <h2>🔐 Administración</h2>
+    <p>Escribe la llave de administración. Viaja solo en el cuerpo de la petición, nunca en la dirección.</p>
+    <input type="password" class="auth-input" id="authKey" placeholder="Llave de administración" autocomplete="current-password" onkeydown="if(event.key==='Enter')doAuth()">
+    <button class="auth-btn" onclick="doAuth()">Entrar →</button>
+    <div class="auth-error" id="authError">Llave incorrecta.</div>
   </div>
 </div>
 <div id="loadingScreen" class="wrap" style="display:none">
-  <div class="loading-wrap"><div class="spinner"></div><p>Scanning KV namespace...</p></div>
+  <div class="loading-wrap"><div class="spinner"></div><p style="margin-top:12px">Leyendo cuentas, uso y bitácora…</p></div>
 </div>
 <div id="dashboard" class="wrap" style="display:none">
-  <!-- KPIs Row 1: Users & Revenue -->
-  <div class="kpi-grid">
-    <div class="kpi"><div class="kpi-label">Total Users</div><div class="kpi-val" id="kpiTotal">—</div><div class="kpi-sub" id="kpiActive">—</div></div>
-    <div class="kpi green"><div class="kpi-label">MRR (USD)</div><div class="kpi-val" id="kpiMRR">—</div><div class="kpi-sub" id="kpiMRRmxn">—</div></div>
-    <div class="kpi"><div class="kpi-label">Paying Users</div><div class="kpi-val" id="kpiPaying">—</div><div class="kpi-sub" id="kpiPayingPct">—</div></div>
-    <div class="kpi blue"><div class="kpi-label">Text Generations</div><div class="kpi-val" id="kpiGens">—</div><div class="kpi-sub" id="kpiGensDetail">—</div></div>
+  <div class="tabs" id="tabs">
+    <button class="tab-btn on" data-tab="hoy" onclick="verTab('hoy')">Hoy <span class="cnt" id="cntHoy" style="display:none"></span></button>
+    <button class="tab-btn" data-tab="embudo" onclick="verTab('embudo')">Embudo y meses</button>
+    <button class="tab-btn" data-tab="dinero" onclick="verTab('dinero')">Dinero</button>
+    <button class="tab-btn" data-tab="cuentas" onclick="verTab('cuentas')">Cuentas</button>
+    <button class="tab-btn" data-tab="bitacora" onclick="verTab('bitacora')">Bitácora</button>
+    <button class="tab-btn" data-tab="sistema" onclick="verTab('sistema')">Sistema</button>
   </div>
-  <!-- KPIs Row 2: Video + Financial -->
-  <div class="kpi-grid">
-    <div class="kpi" style="border-left:3px solid #E53935"><div class="kpi-label">🎬 Videos Generated</div><div class="kpi-val" id="kpiVideos">—</div><div class="kpi-sub" id="kpiVideoCost">—</div></div>
-    <div class="kpi red"><div class="kpi-label">API Cost (all time)</div><div class="kpi-val" id="kpiApiCost">—</div><div class="kpi-sub" id="kpiCostPerGen">—</div></div>
-    <div class="kpi green"><div class="kpi-label">Net Revenue (est)</div><div class="kpi-val" id="kpiNet">—</div><div class="kpi-sub" id="kpiNetMxn">—</div></div>
-    <div class="kpi"><div class="kpi-label">Gross Margin</div><div class="kpi-val" id="kpiMargin">—</div><div class="kpi-sub" id="kpiMarginDetail">—</div></div>
-  </div>
-  <!-- KPIs Row 3: Stripe -->
-  <div class="kpi-grid" style="margin-bottom:16px;grid-template-columns:repeat(2,1fr)">
-    <div class="kpi"><div class="kpi-label">Stripe Fees (est)</div><div class="kpi-val" id="kpiStripe">—</div><div class="kpi-sub">2.9% + $0.30/txn</div></div>
-    <div class="kpi"><div class="kpi-label">Cost Breakdown</div><div class="kpi-val" id="kpiCostSplit">—</div><div class="kpi-sub" id="kpiCostSplitDetail">—</div></div>
-  </div>
-  <!-- Charts row -->
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+
+  <!-- ══ HOY: lo que pide acción ══ -->
+  <section class="tab on" id="tab-hoy">
+    <div class="kpi-grid" id="kpisHoy"></div>
     <div class="section">
-      <div class="section-title">📊 Users by plan</div>
-      <div class="plan-bars" id="planBars"></div>
+      <div class="section-title">📋 Pendientes de hoy</div>
+      <div class="section-sub">Lo que pide una acción, lo más grave primero. Cada fila trae su botón. Los descuadres con Stripe aparecen después de conciliar (pestaña Dinero o el botón de abajo).</div>
+      <div id="hoyLista"></div>
+    </div>
+  </section>
+
+  <!-- ══ EMBUDO Y MESES ══ -->
+  <section class="tab" id="tab-embudo">
+    <div class="section">
+      <div class="section-title">🔻 Embudo: registro → activada → pagó</div>
+      <div class="section-sub">Activada = hizo al menos una generación. Pagó = primer pago real en Stripe (no cuenta los overrides). La fuente se guarda desde el 21 oct 2026 (S58); los registros anteriores salen como «sin dato». Días en hora de México.</div>
+      <div class="filters">
+        <select class="filter-sel" id="embAgrupar" onchange="renderEmbudo()">
+          <option value="fuente">Por fuente</option><option value="campana">Por campaña</option><option value="dia">Por día</option><option value="mes">Por mes</option>
+        </select>
+        <select class="filter-sel" id="embPeriodo" onchange="renderEmbudo()">
+          <option value="0">Todo el historial</option><option value="7">Últimos 7 días</option><option value="30" selected>Últimos 30 días</option><option value="90">Últimos 90 días</option>
+        </select>
+        <input class="search-input" id="embGasto" type="number" min="0" step="1" placeholder="Gasto en Meta del periodo (MXN) → costo por registro y por pago" oninput="renderEmbudo()" style="max-width:380px">
+      </div>
+      <div class="scroll" id="embudoTabla"></div>
     </div>
     <div class="section">
-      <div class="section-title">🎨 Generations by mode + cost</div>
-      <div class="mode-bars" id="modeBars"></div>
+      <div class="section-title">📅 Mes a mes</div>
+      <div class="section-sub">Registros, activaciones y primeros pagos salen de cada cuenta; cancelaciones, de la bitácora; «al cierre», de la foto diaria (existe desde S58, oct 2026: los meses anteriores no la tienen).</div>
+      <div class="scroll" id="mesesTabla"></div>
     </div>
-  </div>
-  <!-- Financial breakdown -->
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+  </section>
+
+  <!-- ══ DINERO ══ -->
+  <section class="tab" id="tab-dinero">
     <div class="section">
-      <div class="section-title">💰 Revenue by plan</div>
-      <div id="revByPlan"></div>
+      <div class="section-title">⚖️ Conciliación Stripe ↔ Postimity</div>
+      <div class="section-sub">Lee todas las suscripciones de Stripe y las compara con el plan de cada cuenta. Solo lee: no cambia nada. Corrige desde Stripe o con «Plan» en Cuentas (queda en la bitácora).</div>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+        <button class="btn pri" onclick="conciliar()">Conciliar ahora</button>
+        <span id="concStatus" class="muted">Sin correr en esta sesión.</span>
+      </div>
+      <div id="concOut" style="margin-top:12px"></div>
+    </div>
+    <div class="grid2">
+      <div class="section">
+        <div class="section-title">💰 Ingresos</div>
+        <div class="section-sub">MRR real = lo que Stripe cobra (sale de la conciliación). MRR de lista = cuentas que pagan × precio de su moneda.</div>
+        <div id="ingresos"></div>
+      </div>
+      <div class="section">
+        <div class="section-title">⚠️ Pagos en riesgo</div>
+        <div class="section-sub">Stripe reintenta a los 4 y 7 días y luego cancela. Contactar antes del segundo reintento.</div>
+        <div id="riesgoLista"></div>
+      </div>
     </div>
     <div class="section">
-      <div class="section-title">🔥 API cost by mode</div>
-      <div id="costByMode"></div>
+      <div class="section-title">🔥 Costo estimado de proveedores</div>
+      <div class="section-sub">Estimado con el costo de referencia por modo y el historial guardado (hasta 200 generaciones por cuenta). El costo real por periodo llega en F4.</div>
+      <div class="grid2"><div id="costoModo"></div><div id="costoCuenta"></div></div>
     </div>
-  </div>
-  <!-- Countries -->
-  <div class="section">
-    <div class="section-title">🌎 Countries</div>
-    <div class="country-grid" id="countryGrid"></div>
-  </div>
-  <!-- Top Users -->
-  <div class="section">
-    <div class="section-title">🏆 Top 20 users <span style="font-size:11px;color:var(--t3);font-weight:400">(este mes)</span></div>
-    <table class="admin-table" id="topUsersTable">
-      <thead><tr><th>#</th><th>Brand</th><th>Plan</th><th>Gens</th><th>🎬</th><th>Cost</th></tr></thead>
-      <tbody></tbody>
-    </table>
-  </div>
-  <!-- S57c · Giros por revisar: confianza baja, sin confirmar o «general». El operador fija la clase; nada bloquea al cliente. -->
-  <div class="section">
-    <div class="section-title">🧭 Giros por revisar <span id="giroRevisarCount" style="font-size:11px;font-weight:600;color:var(--t3);margin-left:4px"></span></div>
-    <div style="font-size:11px;color:var(--t3);margin-bottom:8px">Marcas cuyo giro el servidor leyó con confianza baja o que nadie ha confirmado. Mientras tanto usan «general» con sus propias palabras (o el estilo que comparten todas sus lecturas posibles).</div>
-    <div style="max-height:300px;overflow-y:auto" id="giroRevisar"></div>
-  </div>
-  <!-- Brand Search -->
-  <div class="section">
-    <div class="section-title">🔍 Brand search</div>
-    <div class="search-row">
-      <input type="text" class="search-input" id="brandSearch" placeholder="Search by name, email, or country..." oninput="filterBrands()">
-      <select class="filter-sel" id="planFilter" onchange="filterBrands()">
-        <option value="">All plans</option>
-        <option value="trial">Trial</option>
-        <option value="starter">Starter</option>
-        <option value="growth">Growth</option>
-        <option value="premium">Premium</option>
-      </select>
+    <div class="section">
+      <div class="section-title">💳 Revisar la configuración de Stripe</div>
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+        <button class="btn" onclick="revisarStripe()">Revisar Stripe</button>
+        <span id="stripeStatus" class="muted">Compara precios, modo, montos y webhook contra Stripe. No muestra llaves.</span>
+      </div>
+      <div id="stripeOut" style="margin-top:10px;font-size:12px;line-height:1.6"></div>
     </div>
-    <div style="max-height:360px;overflow-y:auto">
-      <table class="admin-table" id="brandTable">
-        <thead><tr><th>Brand</th><th>Plan</th><th>Country</th><th>Gens</th><th>Cost</th><th>Last Gen</th><th>Actions</th></tr></thead>
-        <tbody></tbody>
-      </table>
+  </section>
+
+  <!-- ══ CUENTAS ══ -->
+  <section class="tab" id="tab-cuentas">
+    <div class="section">
+      <div class="section-title">🔍 Cuentas</div>
+      <div class="filters">
+        <input type="text" class="search-input" id="brandSearch" placeholder="Nombre, correo, WhatsApp o id…" oninput="filterBrands()">
+        <select class="filter-sel" id="estadoFilter" onchange="filterBrands()"><option value="">Todos los estados</option></select>
+        <select class="filter-sel" id="planFilter" onchange="filterBrands()">
+          <option value="">Todos los planes</option><option value="trial">Trial</option><option value="starter">Starter</option><option value="growth">Growth</option><option value="premium">Premium</option>
+        </select>
+        <select class="filter-sel" id="paisFilter" onchange="filterBrands()"><option value="">Todos los países</option></select>
+        <select class="filter-sel" id="giroFilter" onchange="filterBrands()"><option value="">Todos los giros</option></select>
+        <select class="filter-sel" id="fuenteFilter" onchange="filterBrands()"><option value="">Todas las fuentes</option></select>
+        <select class="filter-sel" id="mesFilter" onchange="filterBrands()"><option value="">Cualquier mes de alta</option></select>
+      </div>
+      <div class="scroll" style="max-height:560px;overflow-y:auto">
+        <table class="admin-table" id="brandTable">
+          <thead><tr><th>Marca</th><th>Estado</th><th>Alta</th><th>Prueba / periodo</th><th class="num">Uso</th><th>Fuente</th><th class="num">Costo</th><th>Acciones</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="small" style="margin-top:6px" id="brandCount"></div>
     </div>
-    <div style="font-size:10px;color:var(--t3);margin-top:6px" id="brandCount"></div>
-  </div>
-  <!-- Feedback -->
-  <div class="section">
-    <div class="section-title">💬 User Feedback <span id="fbCount" style="font-size:11px;font-weight:600;color:var(--t3);margin-left:4px"></span></div>
-    <div style="display:flex;gap:6px;margin-bottom:10px">
-      <button class="fb-filter active" onclick="filterFb('all',this)" style="padding:4px 10px;border:1px solid var(--bor);border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;background:var(--b3);color:var(--b2);font-family:inherit">All</button>
-      <button class="fb-filter" onclick="filterFb('suggestion',this)" style="padding:4px 10px;border:1px solid var(--bor);border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;background:var(--w);color:var(--t2);font-family:inherit">💡 Suggestions</button>
-      <button class="fb-filter" onclick="filterFb('issue',this)" style="padding:4px 10px;border:1px solid var(--bor);border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;background:var(--w);color:var(--t2);font-family:inherit">🛠️ Issues</button>
+    <!-- S57c · Giros por revisar: confianza baja, sin confirmar o «general». El operador fija la clase; nada bloquea al cliente. -->
+    <div class="section">
+      <div class="section-title">🧭 Giros por revisar <span id="giroRevisarCount" class="muted" style="font-size:11px"></span></div>
+      <div class="section-sub">Marcas cuyo giro el servidor leyó con confianza baja o que nadie ha confirmado. Mientras tanto usan «general» con sus propias palabras.</div>
+      <div style="max-height:300px;overflow-y:auto" id="giroRevisar"></div>
     </div>
-    <div style="max-height:400px;overflow-y:auto" id="fbListWrap">
-      <div style="text-align:center;padding:20px;color:var(--t3);font-size:12px" id="fbEmpty">No feedback yet</div>
+    <div class="section">
+      <div class="section-title">🏆 Más activas en su periodo</div>
+      <div class="scroll"><table class="admin-table" id="topUsersTable"><thead><tr><th>#</th><th>Marca</th><th>Plan</th><th class="num">Gens</th><th class="num">🎬</th><th class="num">Costo</th></tr></thead><tbody></tbody></table></div>
     </div>
-  </div>
-  <!-- Stripe (FB-179) -->
-  <div class="section">
-    <div class="section-title">💳 Pagos — revisar Stripe</div>
-    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-      <button onclick="revisarStripe()" style="padding:8px 18px;border-radius:8px;background:var(--b2);color:#fff;border:none;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">Revisar Stripe</button>
-      <span id="stripeStatus" style="font-size:11px;color:var(--t3)">Compara precios, modo, montos y webhook contra Stripe. No muestra llaves.</span>
+  </section>
+
+  <!-- ══ BITÁCORA ══ -->
+  <section class="tab" id="tab-bitacora">
+    <div class="section">
+      <div class="section-title">🧾 Bitácora</div>
+      <div class="section-sub">Quién cambió qué cuenta, cuándo y por qué: administración, Stripe y el sistema (vencimientos). Sin nombres ni correos; se conserva 25 meses.</div>
+      <div class="filters">
+        <select class="filter-sel" id="bitActor" onchange="renderBitacora()"><option value="">Todos</option><option value="admin">Administración</option><option value="stripe">Stripe</option><option value="sistema">Sistema</option></select>
+      </div>
+      <div class="scroll" id="bitacoraTabla"></div>
     </div>
-    <div id="stripeOut" style="margin-top:10px;font-size:12px;line-height:1.6"></div>
-  </div>
-  <!-- Backup (R06) -->
-  <div class="section">
-    <div class="section-title">💾 KV Backup</div>
-    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-      <button onclick="runBackup()" style="padding:8px 18px;border-radius:8px;background:var(--b2);color:#fff;border:none;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">Run Backup Now</button>
-      <span id="backupStatus" style="font-size:11px;color:var(--t3)">Auto-backup runs every Sunday</span>
+  </section>
+
+  <!-- ══ SISTEMA ══ -->
+  <section class="tab" id="tab-sistema">
+    <div class="section">
+      <div class="section-title">💬 Comentarios de usuarios <span id="fbCount" class="muted" style="font-size:11px"></span></div>
+      <div style="display:flex;gap:6px;margin-bottom:10px">
+        <button class="btn sm fb-filter" onclick="filterFb('all',this)">Todos</button>
+        <button class="btn sm fb-filter" onclick="filterFb('suggestion',this)">💡 Sugerencias</button>
+        <button class="btn sm fb-filter" onclick="filterFb('issue',this)">🛠️ Problemas</button>
+      </div>
+      <div style="max-height:420px;overflow-y:auto" id="fbListWrap"><div class="muted" style="text-align:center;padding:20px" id="fbEmpty">Sin comentarios</div></div>
     </div>
-  </div>
+    <div class="section">
+      <div class="section-title">💾 Respaldo</div>
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+        <button class="btn" onclick="runBackup()">Respaldar ahora</button>
+        <span id="backupStatus" class="muted">El respaldo automático corre cada domingo.</span>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-title">🩺 Estado</div>
+      <div id="sistemaEstado" class="muted"></div>
+    </div>
+  </section>
 </div>
+
 <div class="plan-modal-overlay" id="planModal">
   <div class="plan-modal">
-    <h3>⚙️ Change Plan</h3>
-    <div class="pm-sub">Admin override — no payment required</div>
+    <h3>⚙️ Cambiar plan</h3>
+    <div class="pm-sub">Override de administración: sin cobro y queda en la bitácora con su motivo.</div>
     <div class="pm-brand" id="pmBrand">—</div>
+    <div class="pm-warn" id="pmWarn">Esta cuenta paga en Stripe. Cambiar el plan aquí NO cambia lo que Stripe cobra: quedará como override y la conciliación lo señalará. Para cambiar lo que paga, hazlo en Stripe.</div>
     <div class="pm-options" id="pmOptions"></div>
+    <textarea class="pm-motivo" id="pmMotivo" maxlength="200" placeholder="Motivo (obligatorio): p. ej. «prueba piloto con el cliente», «regresar mi cuenta de prueba»" oninput="validarPlan()"></textarea>
     <div class="pm-btns">
-      <button class="pm-cancel" onclick="closePlanModal()">Cancel</button>
-      <button class="pm-confirm" id="pmConfirm" onclick="confirmPlanChange()" disabled>Apply</button>
+      <button class="pm-cancel" onclick="closePlanModal()">Cancelar</button>
+      <button class="pm-confirm" id="pmConfirm" onclick="confirmPlanChange()" disabled>Aplicar</button>
     </div>
     <div class="pm-status" id="pmStatus"></div>
   </div>
 </div>
 <script>
 const WORKER='https://api.postimity.com/';
-// S22-2: Plan limits for display context (must match worker + studio)
-// S46 — decia trial:20 cuando el contrato, el worker y el estudio dicen 25, y
-// los fallbacks eran ||20 y ||2 escritos a mano (RD-46). El panel de
-// administracion mostraba una cuota que no existe. INV-063 comparaba index,
-// studio, contrato y Stripe: admin.html nunca estuvo en esa lista.
+// S22-2: tablas de limites para mostrar contexto (deben coincidir con el worker: MD-30). S58: cada cuenta ya trae su limite
+// (limiteGens / limiteVideos) desde el servidor; estas quedan solo como respaldo de la tabla de las mas activas.
 const GEN_LIMITS={trial:20,starter:40,growth:100,premium:250};
 const VIDEO_LIMITS={trial:2,starter:2,growth:8,premium:20};
-let adminData=null;
+const DIA=86400000;
+const ESTADOS={prueba:'En prueba','prueba-vencida':'Prueba vencida','sin-prueba':'Sin prueba',pagando:'Pagando',riesgo:'Pago en riesgo',override:'Override',cancelada:'Canceló'};
+const ACCIONES={plan:'Cambio de plan',giro:'Giro fijado',borrar:'Cuenta borrada',pago:'Pago','pago-fallido':'Pago fallido','pago-recuperado':'Pago recuperado',cancelacion:'Cancelación','cambio-plan':'Cambio de plan (portal)','oxxo-vencido':'OXXO vencido'};
+const DESCUADRES={
+  'servicio-sin-cobro':['Servicio sin cobro','Tiene plan pagado y Stripe ya no cobra. Revisa en Stripe; si canceló, regresa la cuenta a trial con «Plan».'],
+  'cobra-sin-servicio':['Cobra sin servicio','Stripe cobra y la cuenta está en prueba. Asigna el plan con «Plan» o reembolsa en Stripe.'],
+  'doble-suscripcion':['Doble suscripción','Se le cobra dos veces. Cancela una en Stripe y reembolsa.'],
+  'suscripcion-huerfana':['Suscripción sin cuenta','Stripe cobra a alguien que no tiene marca. Búscalo por correo en Stripe.'],
+  'plan-distinto':['Plan distinto','Stripe cobra otro plan. Iguala la cuenta con «Plan» (motivo: conciliación).'],
+  'override-con-suscripcion':['Override sobre cliente que paga','Administración fijó un plan distinto a lo que paga. Decide si se queda.'],
+  'precio-desconocido':['Precio desconocido','El precio no está en las variables STRIPE_PRICE_*. Revisa la configuración.'],
+  'riesgo-sin-marcar':['Riesgo sin marcar','Stripe tiene el pago vencido y la cuenta no lo sabe. Contacta al cliente.'],
+  'riesgo-viejo':['Riesgo viejo','La marca de riesgo quedó tras un pago exitoso. Informativo.'],
+  'oxxo-vencido':['OXXO vencido','El pago único venció y la cuenta conserva el plan. El cron diario debería retirarlo.'],
+  'cortesia-admin':['Cortesía de administración','Plan sin cobro fijado por administración. Revisa si sigue vigente.']
+};
+let adminData=null, concData=null, fbData=[], fbFilterType='all';
+
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function llave(){try{return sessionStorage.getItem('admin_key')||''}catch(e){return ''}}
+function fecha(iso){const t=Date.parse(iso);return isNaN(t)?'—':new Date(t).toLocaleDateString('es-MX',{day:'numeric',month:'short',year:'2-digit'})}
+function fechaHora(iso){const t=Date.parse(iso);return isNaN(t)?'—':new Date(t).toLocaleString('es-MX',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}
+function dinero(n,mon){return '$'+Math.round(Number(n)||0).toLocaleString('es-MX')+' '+(mon||'MXN')}
+function pct(a,b){return b>0?Math.round(a/b*100)+'%':'—'}
+function nombreDe(id){const b=adminData&&(adminData.brandList||[]).find(x=>x.brandId===id);return b?(b.name||id.slice(0,8)):(id?id.slice(0,8)+'…':'—')}
+// El dia de Mexico (UTC-6): el embudo cuenta por el dia del operador, no por el de Greenwich.
+function diaMX(iso){const t=Date.parse(iso);return isNaN(t)?'':new Date(t-6*3600000).toISOString().slice(0,10)}
+// De donde llego una cuenta (ADM-4). fbclid sin utm es un anuncio de Meta.
+function fuenteDe(b){const o=b&&b.origen;if(!o)return 'sin dato';if(o.source)return String(o.source).toLowerCase();if(o.fbclid)return 'meta';if(o.gclid)return 'google';if(o.ref)return String(o.ref);return 'directo'}
+// ADM-5: pruebas que vencen en los proximos `dias`, con el fin que manda el servidor (trialFin), la mas proxima primero.
+function pruebasPorVencer(lista,ahora,dias){
+  const lim=ahora+dias*86400000;
+  return (lista||[]).filter(b=>b.estado==='prueba'&&b.trialFin&&Date.parse(b.trialFin)>ahora&&Date.parse(b.trialFin)<=lim).sort((a,b)=>Date.parse(a.trialFin)-Date.parse(b.trialFin));
+}
+// ADM-5: el embudo agrupado por fuente, campana, dia o mes (de Mexico). Pago = primer pago real o cuenta que hoy paga.
+function embudoPor(lista,clave){
+  const g={};
+  for(const b of lista||[]){
+    const k=clave==='fuente'?fuenteDe(b):clave==='campana'?((b.origen&&b.origen.campaign)||'—'):clave==='mes'?diaMX(b.createdAt).slice(0,7):diaMX(b.createdAt);
+    const r=g[k]||(g[k]={grupo:k,registros:0,activadas:0,pagaron:0});
+    r.registros++;
+    if(b.activada)r.activadas++;
+    if(b.primerPagoAt||b.estado==='pagando'||b.estado==='riesgo')r.pagaron++;
+  }
+  const rows=Object.values(g);
+  return (clave==='dia'||clave==='mes')?rows.sort((a,b)=>String(b.grupo).localeCompare(String(a.grupo))):rows.sort((a,b)=>b.registros-a.registros);
+}
+// ADM-7: el resumen para analizar fuera del panel. Alias estables (M01, M02… por fecha de alta); nunca correo, nombre,
+// telefono, ids de Stripe, brandId ni el texto libre de los motivos.
+function resumenAnonimo(d,conc,ahora){
+  const t=typeof ahora==='number'?ahora:Date.now();
+  const lista=((d&&d.brandList)||[]).slice().sort((a,b)=>String(a.createdAt||'').localeCompare(String(b.createdAt||'')));
+  const alias={};
+  lista.forEach((b,i)=>{alias[b.brandId]='M'+String(i+1).padStart(2,'0')});
+  const al=id=>(id&&alias[id])||'M??';
+  const cuenta=b=>({alias:al(b.brandId),estado:b.estado||null,plan:b.plan||'trial',pais:b.country||null,giro:(b.giro&&b.giro.clase)||'general',fuente:fuenteDe(b),campana:(b.origen&&b.origen.campaign)||null,
+    alta:diaMX(b.createdAt)||null,finPrueba:b.trialFin?diaMX(b.trialFin):null,primerPago:b.primerPagoAt?diaMX(b.primerPagoAt):null,riesgoDesde:b.paymentAtRiskSince?diaMX(b.paymentAtRiskSince):null,
+    usoPeriodo:Number(b.monthlyGens)||0,limite:b.limiteGens||null,videos:Number(b.monthlyVideos)||0,activada:!!b.activada,costoEstimadoUSD:Number(b.cost)||0});
+  const conteo=(arr,f)=>arr.reduce((o,x)=>{const k=f(x);o[k]=(o[k]||0)+1;return o},{});
+  return {
+    tipo:'postimity-resumen',version:1,generado:new Date(t).toISOString(),datosDel:(d&&d.generatedAt)||null,duracionPruebaDias:(d&&d.trialDias)||null,
+    totales:{cuentas:lista.length,porEstado:conteo(lista,b=>b.estado||'?'),porPlan:conteo(lista,b=>b.plan||'trial'),porPais:conteo(lista,b=>b.country||'?'),porFuente:conteo(lista,fuenteDe)},
+    embudo:{porFuente:embudoPor(lista,'fuente'),porCampana:embudoPor(lista,'campana'),porDia:embudoPor(lista,'dia').slice(0,45),porMes:embudoPor(lista,'mes')},
+    pruebasPorVencer:pruebasPorVencer(lista,t,3).map(cuenta),
+    cuentas:lista.map(cuenta),
+    hoy:(d&&d.hoy)||null,
+    fotos:((d&&d.fotos)||[]).slice(-120),
+    bitacora:((d&&d.bitacora)||[]).slice(0,150).map(x=>({dia:x.creado?diaMX(new Date(x.creado*1000).toISOString()):null,actor:x.actor,accion:x.accion,cuenta:x.brand_id?al(x.brand_id):null,antes:x.antes||null,despues:x.despues||null})),
+    conciliacion:conc?{ok:!!conc.ok,mrrReal:conc.mrr||null,suscripcionesVivas:conc.suscripcionesVivas||0,cancelando:conc.cancelando||0,
+      descuadres:(conc.descuadres||[]).map(x=>({tipo:x.tipo,severidad:x.severidad,cuenta:x.brandId?al(x.brandId):null}))}:null
+  };
+}
+function waLink(b){
+  let n=String(b.whatsapp||'').replace(/\D/g,'');
+  if(!n)return '';
+  if(n.length===10&&/m[eé]xico|^mx$/i.test(String(b.country||'')))n='52'+n;
+  return 'https://wa.me/'+n;
+}
+function contacto(b,asunto){
+  let h='';
+  if(b.email)h+='<a class="btn sm" href="mailto:'+esc(b.email)+'?subject='+encodeURIComponent(asunto||'Postimity')+'">✉ Correo</a>';
+  const w=waLink(b);
+  if(w)h+='<a class="btn sm" href="'+esc(w)+'" target="_blank" rel="noopener">WhatsApp</a>';
+  if(b.stripeCustomerId)h+='<a class="btn sm" href="https://dashboard.stripe.com/customers/'+encodeURIComponent(b.stripeCustomerId)+'" target="_blank" rel="noopener">Stripe</a>';
+  h+='<button class="btn sm" data-bid="'+esc(b.brandId)+'" onclick="verCuenta(this.dataset.bid)">Ver cuenta</button>';
+  return h;
+}
+
+// ── Acceso ──
 async function doAuth(){
   const key=document.getElementById('authKey').value.trim();
   if(!key)return;
   document.getElementById('authScreen').style.display='none';
   document.getElementById('loadingScreen').style.display='block';
+  const err=document.getElementById('authError');
   try{
     const resp=await fetch(WORKER+'admin-stats',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({adminKey:key})});
-    if(resp.status===401){document.getElementById('loadingScreen').style.display='none';document.getElementById('authScreen').style.display='block';document.getElementById('authError').style.display='block';return}
+    if(resp.status===401||resp.status===429){
+      document.getElementById('loadingScreen').style.display='none';document.getElementById('authScreen').style.display='block';
+      err.style.display='block';err.textContent=resp.status===429?'Demasiados intentos desde esta conexión. Espera una hora.':'Llave incorrecta.';
+      try{sessionStorage.removeItem('admin_key')}catch(e){}
+      return;
+    }
     adminData=await resp.json();
     if(adminData.error)throw new Error(adminData.error);
-    sessionStorage.setItem('admin_key',key);
+    try{sessionStorage.setItem('admin_key',key)}catch(e){}
     renderDashboard();
     loadFeedback();
-  }catch(e){document.getElementById('loadingScreen').style.display='none';document.getElementById('authScreen').style.display='block';document.getElementById('authError').style.display='block';document.getElementById('authError').textContent='Error: '+e.message}
+  }catch(e){document.getElementById('loadingScreen').style.display='none';document.getElementById('authScreen').style.display='block';err.style.display='block';err.textContent='Error: '+e.message}
 }
+function recargar(){const k=llave();if(!k)return;document.getElementById('authKey').value=k;doAuth()}
+function verTab(id){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.id==='tab-'+id));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('on',b.dataset.tab===id));
+  window.scrollTo(0,0);
+}
+function verCuenta(brandId){
+  verTab('cuentas');
+  ['estadoFilter','planFilter','paisFilter','giroFilter','fuenteFilter','mesFilter'].forEach(id=>{document.getElementById(id).value=''});
+  document.getElementById('brandSearch').value=brandId;
+  filterBrands();
+}
+
+// ── Render general ──
 function renderDashboard(){
   document.getElementById('loadingScreen').style.display='none';
   document.getElementById('dashboard').style.display='block';
   const d=adminData;
-  document.getElementById('navTime').textContent='Data: '+new Date(d.generatedAt).toLocaleString();
-  // KPIs Row 1
-  document.getElementById('kpiTotal').textContent=d.totalUsers;
-  document.getElementById('kpiActive').textContent=d.activeUsers+' active (30d)';
-  document.getElementById('kpiMRR').textContent='$'+d.mrr;
-  document.getElementById('kpiMRRmxn').textContent='~$'+Math.round(d.mrr*17.5)+' MXN'+(d.totalAdminOverrides>0?' · '+d.totalAdminOverrides+' admin excl.':'');
-  const ao=d.adminOverrides||{};
-  const paying=((d.planCounts.starter||0)-(ao.starter||0))+((d.planCounts.growth||0)-(ao.growth||0))+((d.planCounts.premium||0)-(ao.premium||0));
-  document.getElementById('kpiPaying').textContent=paying;
-  document.getElementById('kpiPayingPct').textContent=(d.totalUsers>0?Math.round(paying/d.totalUsers*100):0)+'% conversion'+(d.totalAdminOverrides>0?' · '+d.totalAdminOverrides+' admin':'');
-  var textGens=d.totalGens-(d.totalVideos||0);
-  document.getElementById('kpiGens').textContent=textGens.toLocaleString();
-  document.getElementById('kpiGensDetail').textContent=d.totalGens+' total (incl. '+( d.totalVideos||0)+' videos)';
-  // Video KPI
-  document.getElementById('kpiVideos').textContent=(d.totalVideos||0);
-  document.getElementById('kpiVideoCost').textContent='$'+(d.videoApiCost||0).toFixed(2)+' API cost ($0.71/video)';
-  // Financial KPIs
-  document.getElementById('kpiApiCost').textContent='$'+(d.totalApiCost||0).toFixed(2);
-  document.getElementById('kpiCostPerGen').textContent='$'+(d.costPerGen||0).toFixed(3)+'/gen avg';
-  document.getElementById('kpiStripe').textContent='$'+(d.stripeCommission||0).toFixed(2);
-  document.getElementById('kpiNet').textContent='$'+(d.netRevenue||0).toFixed(2);
-  document.getElementById('kpiNetMxn').textContent='~$'+Math.round((d.netRevenue||0)*17.5)+' MXN';
-  document.getElementById('kpiMargin').textContent=(d.grossMargin||0).toFixed(1)+'%';
-  var textCost=(d.totalApiCost||0)-(d.videoApiCost||0);
-  document.getElementById('kpiMarginDetail').textContent='Text $'+textCost.toFixed(2)+' + Video $'+(d.videoApiCost||0).toFixed(2);
-  document.getElementById('kpiCostSplit').textContent='Text: $'+textCost.toFixed(2);
-  var videoPct=d.totalApiCost>0?((d.videoApiCost||0)/d.totalApiCost*100):0;
-  document.getElementById('kpiCostSplitDetail').textContent='Video: $'+(d.videoApiCost||0).toFixed(2)+' ('+videoPct.toFixed(0)+'% of API cost)';
-  // Plan bars
-  const planColors={trial:'#F9A825',starter:'#2979FF',growth:'#76C442',premium:'#7C4DFF'};
-  const planNames={trial:'Trial',starter:'Starter',growth:'Growth',premium:'Premium'};
-  const maxPlan=Math.max(...Object.values(d.planCounts),1);
-  document.getElementById('planBars').innerHTML=Object.entries(d.planCounts).map(([p,c])=>{
-    const pct=Math.max(5,(c/maxPlan)*100);
-    const adminCount=(ao[p]||0);
-    const adminLabel=adminCount>0?' <span style="font-size:9px;opacity:.7">('+adminCount+' admin)</span>':'';
-    return '<div class="plan-bar-row"><div class="plan-bar-label">'+(planNames[p]||p)+'</div><div class="plan-bar-track"><div class="plan-bar-fill" style="width:'+pct+'%;background:'+(planColors[p]||'#999')+'">'+c+'</div></div><div class="plan-bar-count">'+c+adminLabel+'</div></div>';
-  }).join('');
-  // Mode bars with cost column
-  const modeInfo={post:{icon:'✍️',name:'Post',color:'#2979FF'},enhance:{icon:'🖼️',name:'Estudio Pro',color:'#7C4DFF'},flyer:{icon:'📄',name:'Flyer',color:'#E91E8C'},testimonial:{icon:'⭐',name:'Testimonio',color:'#F9A825'},carousel:{icon:'🎠',name:'Carrusel',color:'#76C442'},video:{icon:'🎬',name:'Video AI',color:'#E53935'}};
-  const apiCosts=d.apiCosts||{};
-  const maxMode=Math.max(...Object.values(d.modeCounts),1);
-  document.getElementById('modeBars').innerHTML=Object.entries(d.modeCounts).map(([m,c])=>{
-    const info=modeInfo[m]||{icon:'?',name:m,color:'#999'};
-    const pct=Math.max(3,(c/maxMode)*100);
-    const cost=((apiCosts[m]||0.05)*c).toFixed(2);
-    return '<div class="mode-row"><div class="mode-icon">'+info.icon+'</div><div class="mode-name">'+info.name+'</div><div class="mode-bar-track"><div class="mode-bar-fill" style="width:'+pct+'%;background:'+info.color+'">'+c+'</div></div><div class="mode-count">'+c+'</div><div class="mode-cost">$'+cost+'</div></div>';
-  }).join('');
-  // Revenue by plan (exclude admin overrides)
-  // S52 (INV-179): la tabla viene del worker. Aqui decia 9/19/45, precios de antes
-  // de S51, y las filas no sumaban el Total MRR que el worker calcula con 11/22/50.
-  const planPrices=d.planPricesUSD||{};
-  document.getElementById('revByPlan').innerHTML=Object.entries(d.planCounts).map(([p,c])=>{
-    const adminCount=(ao[p]||0);
-    const paidCount=c-adminCount;
-    const rev=(planPrices[p]||0)*paidCount;
-    const adminNote=adminCount>0?' <span style="font-size:9px;color:var(--t4)">('+adminCount+' admin excl.)</span>':'';
-    return '<div class="fin-row"><div class="fin-label">'+(planNames[p]||p)+' ('+paidCount+' paid / '+c+' total)'+adminNote+'</div><div class="fin-val'+(rev>0?' green':'')+'">$'+rev.toFixed(2)+'/mo</div></div>';
-  }).join('')+'<div class="fin-row" style="font-weight:700;border-top:2px solid var(--bor);margin-top:4px;padding-top:8px"><div class="fin-label">Total MRR</div><div class="fin-val green">$'+d.mrr+'/mo</div></div>';
-  // Cost by mode
-  document.getElementById('costByMode').innerHTML=Object.entries(d.modeCounts).map(([m,c])=>{
-    const info=modeInfo[m]||{icon:'?',name:m};
-    const cost=((apiCosts[m]||0.05)*c);
-    const perUnit=(apiCosts[m]||0.05);
-    return '<div class="fin-row"><div class="fin-label">'+info.icon+' '+info.name+' ('+c+' × $'+perUnit.toFixed(3)+')</div><div class="fin-val red">$'+cost.toFixed(2)+'</div></div>';
-  }).join('')+'<div class="fin-row" style="font-weight:700;border-top:2px solid var(--bor);margin-top:4px;padding-top:8px"><div class="fin-label">Total API cost</div><div class="fin-val red">$'+(d.totalApiCost||0).toFixed(2)+'</div></div>';
-  // Countries
-  const sortedC=Object.entries(d.countryCounts).sort((a,b)=>b[1]-a[1]);
-  document.getElementById('countryGrid').innerHTML=sortedC.map(([c,n])=>'<div class="country-chip">'+esc(c)+' <span>'+n+'</span></div>').join('');
-  // Top Users
-  document.querySelector('#topUsersTable tbody').innerHTML=d.topUsers.map((u,i)=>{const gl=GEN_LIMITS[u.plan]||GEN_LIMITS.trial;const mg=u.monthlyGens!==undefined?u.monthlyGens:u.gens;const vl=VIDEO_LIMITS[u.plan]||VIDEO_LIMITS.trial;const mv=u.monthlyVideos!==undefined?u.monthlyVideos:(u.videos||0);return '<tr><td class="rank">'+(i+1)+'</td><td style="font-weight:600">'+esc(u.name)+'</td><td><span class="plan-tag '+u.plan+'">'+u.plan+'</span></td><td style="font-weight:700">'+mg+'<span style="color:var(--t4);font-size:9px"> /'+gl+'</span></td><td style="font-size:11px;color:#E53935">'+mv+'<span style="color:var(--t4);font-size:9px"> /'+vl+'</span></td><td style="font-size:11px;color:var(--r)">$'+(u.cost||0).toFixed(2)+'</td></tr>';}).join('');
+  document.getElementById('navTime').textContent='Datos: '+fechaHora(d.generatedAt)+(d.almacen&&d.almacen!=='d1'?' · ⚠️ '+d.almacen:'');
+  llenarFiltros();
+  renderHoy();
+  renderEmbudo();
+  renderMeses();
+  renderDinero();
   filterBrands();
   renderGiroRevisar();
+  renderTop();
+  renderBitacora();
+  renderSistema();
+}
+function kpi(label,val,sub,cls){return '<div class="kpi '+(cls||'')+'"><div class="kpi-label">'+label+'</div><div class="kpi-val">'+val+'</div><div class="kpi-sub">'+(sub||'')+'</div></div>'}
+function renderHoy(){
+  const d=adminData, h=d.hoy||{porEstado:{},mrrLista:{}}, pe=h.porEstado||{}, m=h.mrrLista||{};
+  const lista=d.brandList||[], ahora=Date.now();
+  document.getElementById('kpisHoy').innerHTML=
+    kpi('Cuentas',h.marcas||lista.length,(h.registrosDia||0)+' registro(s) hoy','blue')+
+    kpi('En prueba',pe.prueba||0,(pe['prueba-vencida']||0)+' vencidas sin pago')+
+    kpi('Pagando',(pe.pagando||0)+(pe.riesgo||0),(pe.override||0)+' override · '+(pe.cancelada||0)+' cancelaron','green')+
+    kpi('Pago en riesgo',pe.riesgo||0,'contactar antes del 2.º reintento',(pe.riesgo?'red':''))+
+    kpi('MRR de lista',dinero(m.MXN,'MXN'),(m.USD?dinero(m.USD,'USD')+' · ':'')+(concData&&concData.mrr?'real: '+dinero(concData.mrr.MXN,'MXN'):'real: concilia'),'green')+
+    kpi('Conversión',pct((pe.pagando||0)+(pe.riesgo||0)+(pe.cancelada||0),lista.length),'cuentas que han pagado / total');
+  const items=[];
+  if(concData&&concData.success){
+    for(const x of (concData.descuadres||[]).filter(x=>x.severidad==='P0'||x.severidad==='P1')){
+      const b=lista.find(z=>z.brandId===x.brandId)||{brandId:x.brandId,stripeCustomerId:x.customer};
+      const n=DESCUADRES[x.tipo]||[x.tipo,''];
+      items.push({nivel:x.severidad,t:n[0]+(x.brandId?' · '+nombreDe(x.brandId):''),dd:esc(x.detalle)+' <span class="small">'+esc(n[1])+'</span>',a:x.brandId?contacto(b,'Tu cuenta de Postimity'):(x.customer?'<a class="btn sm" href="https://dashboard.stripe.com/customers/'+encodeURIComponent(x.customer)+'" target="_blank" rel="noopener">Stripe</a>':'')});
+    }
+  }else{
+    items.push({nivel:'P1',t:'Conciliación con Stripe sin correr en esta sesión',dd:'Compara lo que Stripe cobra con el plan de cada cuenta (habría detectado FB-182).',a:'<button class="btn sm pri" onclick="conciliar()">Conciliar ahora</button>'});
+  }
+  for(const b of lista.filter(b=>b.estado==='riesgo')){
+    const desde=b.paymentAtRiskSince?Math.max(0,Math.floor((ahora-Date.parse(b.paymentAtRiskSince))/DIA)):null;
+    items.push({nivel:'P1',t:'Pago en riesgo · '+esc(b.name||b.brandId),dd:esc(b.plan)+(desde!==null?' · desde hace '+desde+' día(s)':'')+' · Stripe reintenta y cancela si no paga.',a:contacto(b,'Tu pago de Postimity')});
+  }
+  for(const b of pruebasPorVencer(lista,ahora,3)){
+    items.push({nivel:'P2',t:'Prueba vence '+fechaHora(b.trialFin)+' · '+esc(b.name||b.brandId),dd:'Uso '+(b.monthlyGens||0)+'/'+(b.limiteGens||'?')+' generaciones'+(b.activada?'':' · <b>no ha generado nada</b>')+' · fuente: '+esc(fuenteDe(b)),a:contacto(b,'Tu prueba de Postimity')});
+  }
+  for(const b of lista.filter(b=>b.estado==='prueba-vencida'&&b.trialFin&&ahora-Date.parse(b.trialFin)<=7*DIA)){
+    items.push({nivel:'P2',t:'Prueba vencida sin pago · '+esc(b.name||b.brandId),dd:'Venció '+fecha(b.trialFin)+' · usó '+(b.monthlyGens||0)+'/'+(b.limiteGens||'?')+' · fuente: '+esc(fuenteDe(b)),a:contacto(b,'¿Seguimos con Postimity?')});
+  }
+  const giros=lista.filter(b=>b.giro&&b.giro.revisar).length;
+  if(giros)items.push({nivel:'info',t:giros+' giro(s) por revisar',dd:'Marcas con giro de confianza baja.',a:'<button class="btn sm" onclick="verTab(\'cuentas\')">Revisar</button>'});
+  const nuevos=fbData.filter(f=>f.status==='new').length;
+  if(nuevos)items.push({nivel:'info',t:nuevos+' comentario(s) de usuarios',dd:'Sugerencias y problemas reportados desde el estudio.',a:'<button class="btn sm" onclick="verTab(\'sistema\')">Leer</button>'});
+  const orden={P0:0,P1:1,P2:2,info:3};
+  items.sort((a,b)=>orden[a.nivel]-orden[b.nivel]);
+  const urg=items.filter(x=>x.nivel==='P0'||x.nivel==='P1').length, cnt=document.getElementById('cntHoy');
+  cnt.style.display=urg?'inline-block':'none';cnt.textContent=urg;
+  document.getElementById('hoyLista').innerHTML=items.length?items.map(x=>'<div class="pend"><span class="sev '+x.nivel+'">'+x.nivel+'</span><div class="pend-main"><div class="pend-t">'+x.t+'</div><div class="pend-d">'+x.dd+'</div><div class="pend-a">'+(x.a||'')+'</div></div></div>').join(''):'<div class="ok-line">✅ Nada pendiente hoy.</div>';
+}
+
+// ── Embudo y meses ──
+function renderEmbudo(){
+  if(!adminData)return;
+  const clave=document.getElementById('embAgrupar').value, dias=Number(document.getElementById('embPeriodo').value)||0;
+  const gasto=Number(document.getElementById('embGasto').value)||0;
+  const desde=dias?diaMX(new Date(Date.now()-dias*DIA).toISOString()):'';
+  const lista=(adminData.brandList||[]).filter(b=>!desde||diaMX(b.createdAt)>=desde);
+  const rows=embudoPor(lista,clave);
+  const tot=rows.reduce((s,r)=>({registros:s.registros+r.registros,activadas:s.activadas+r.activadas,pagaron:s.pagaron+r.pagaron}),{registros:0,activadas:0,pagaron:0});
+  const max=Math.max(1,...rows.map(r=>r.registros));
+  const conGasto=gasto>0&&clave==='fuente';
+  const fila=(r,neg)=>'<tr'+(neg?' style="font-weight:800"':'')+'><td>'+esc(r.grupo||'—')+(neg?'':'<div class="bar"><i style="width:'+Math.round(r.registros/max*100)+'%"></i></div>')+'</td><td class="num">'+r.registros+'</td><td class="num">'+r.activadas+' <span class="small">'+pct(r.activadas,r.registros)+'</span></td><td class="num">'+r.pagaron+' <span class="small">'+pct(r.pagaron,r.registros)+'</span></td>'
+    +(conGasto?'<td class="num">'+(r.grupo==='meta'&&r.registros?dinero(gasto/r.registros):'')+'</td><td class="num">'+(r.grupo==='meta'&&r.pagaron?dinero(gasto/r.pagaron):'')+'</td>':'')+'</tr>';
+  document.getElementById('embudoTabla').innerHTML='<table class="admin-table"><thead><tr><th>'+({fuente:'Fuente',campana:'Campaña',dia:'Día',mes:'Mes'}[clave])+'</th><th class="num">Registros</th><th class="num">Activadas</th><th class="num">Pagaron</th>'+(conGasto?'<th class="num">Costo / registro</th><th class="num">Costo / pago</th>':'')+'</tr></thead><tbody>'
+    +(rows.length?rows.map(r=>fila(r)).join('')+fila(Object.assign({grupo:'Total'},tot),true):'<tr><td colspan="6" class="muted">Sin registros en el periodo.</td></tr>')+'</tbody></table>'
+    +(conGasto?'<div class="small" style="margin-top:6px">El costo se calcula solo para la fila «meta» con el gasto que escribiste. Compáralo con el costo por registro que reporta Meta: si Postimity cuenta menos registros, faltan parámetros utm en el anuncio.</div>':'');
+}
+function renderMeses(){
+  const d=adminData, lista=d.brandList||[], meses={};
+  const m=k=>meses[k]||(meses[k]={mes:k,registros:0,activadas:0,pagos:0,cancelaciones:0,foto:null});
+  for(const b of lista){const k=diaMX(b.createdAt).slice(0,7);if(k){m(k).registros++;if(b.activada)m(k).activadas++}if(b.primerPagoAt)m(diaMX(b.primerPagoAt).slice(0,7)).pagos++}
+  for(const x of d.bitacora||[])if(x.accion==='cancelacion'&&x.creado)m(diaMX(new Date(x.creado*1000).toISOString()).slice(0,7)).cancelaciones++;
+  for(const f of d.fotos||[])if(f.dia)m(f.dia.slice(0,7)).foto=f;
+  const rows=Object.values(meses).filter(r=>r.mes).sort((a,b)=>b.mes.localeCompare(a.mes));
+  document.getElementById('mesesTabla').innerHTML='<table class="admin-table"><thead><tr><th>Mes</th><th class="num">Registros</th><th class="num">Activadas</th><th class="num">Primeros pagos</th><th class="num">Cancelaciones</th><th class="num">Pagando al cierre</th><th class="num">En prueba al cierre</th><th class="num">MRR de lista al cierre</th></tr></thead><tbody>'
+    +(rows.length?rows.map(r=>{const f=r.foto,pe=(f&&f.porEstado)||{},ml=(f&&f.mrrLista)||{};
+      return '<tr><td>'+esc(r.mes)+(f?' <span class="small">(foto '+esc(f.dia)+')</span>':'')+'</td><td class="num">'+r.registros+'</td><td class="num">'+r.activadas+'</td><td class="num">'+r.pagos+'</td><td class="num">'+r.cancelaciones+'</td><td class="num">'+(f?(pe.pagando||0)+(pe.riesgo||0):'—')+'</td><td class="num">'+(f?pe.prueba||0:'—')+'</td><td class="num">'+(f?dinero(ml.MXN,'MXN')+(ml.USD?' + '+dinero(ml.USD,'USD'):''):'—')+'</td></tr>'}).join(''):'<tr><td colspan="8" class="muted">Sin datos.</td></tr>')+'</tbody></table>';
+}
+
+// ── Dinero ──
+function renderDinero(){
+  const d=adminData, h=d.hoy||{}, ml=h.mrrLista||{}, pp=h.porPlan||{}, lista=d.brandList||[];
+  const real=concData&&concData.success?concData.mrr||{}:null;
+  document.getElementById('ingresos').innerHTML=
+    '<div class="fin-row"><div class="fin-label">MRR real (Stripe)</div><div class="fin-val" style="color:var(--g2)">'+(real?dinero(real.MXN,'MXN')+(real.USD?' + '+dinero(real.USD,'USD'):''):'<span class="muted">concilia para verlo</span>')+'</div></div>'
+    +(real?'<div class="fin-row"><div class="fin-label">Suscripciones vivas · se cancelan al fin del periodo</div><div class="fin-val">'+(concData.suscripcionesVivas||0)+' · '+(concData.cancelando||0)+'</div></div>':'')
+    +'<div class="fin-row"><div class="fin-label">MRR de lista (cuentas que pagan × precio)</div><div class="fin-val">'+dinero(ml.MXN,'MXN')+(ml.USD?' + '+dinero(ml.USD,'USD'):'')+'</div></div>'
+    +['starter','growth','premium'].map(p=>'<div class="fin-row"><div class="fin-label">'+p[0].toUpperCase()+p.slice(1)+'</div><div class="fin-val">'+(pp[p]||0)+' cuenta(s)</div></div>').join('')
+    +'<div class="fin-row"><div class="fin-label">Overrides de administración (sin cobro)</div><div class="fin-val">'+lista.filter(b=>b.estado==='override').length+'</div></div>';
+  const ries=lista.filter(b=>b.estado==='riesgo');
+  document.getElementById('riesgoLista').innerHTML=ries.length?ries.map(b=>'<div class="pend"><div class="pend-main"><div class="pend-t">'+esc(b.name)+' <span class="tag plan-tag '+esc(b.plan)+'">'+esc(b.plan)+'</span></div><div class="pend-d">Desde '+fecha(b.paymentAtRiskSince)+'</div><div class="pend-a">'+contacto(b,'Tu pago de Postimity')+'</div></div></div>').join(''):'<div class="ok-line">✅ Ningún pago en riesgo.</div>';
+  const modos={post:'Post',enhance:'Estudio Pro',flyer:'Flyer',testimonial:'Testimonio',carousel:'Carrusel',video:'Video'}, ac=d.apiCosts||{};
+  document.getElementById('costoModo').innerHTML=Object.entries(d.modeCounts||{}).map(([k,c])=>'<div class="fin-row"><div class="fin-label">'+(modos[k]||k)+' ('+c+' × $'+(ac[k]||0.05).toFixed(3)+')</div><div class="fin-val">$'+((ac[k]||0.05)*c).toFixed(2)+' USD</div></div>').join('')
+    +'<div class="fin-row" style="font-weight:800"><div class="fin-label">Total estimado</div><div class="fin-val">$'+(d.totalApiCost||0).toFixed(2)+' USD</div></div>';
+  const top=lista.filter(b=>b.cost>0).sort((a,b)=>b.cost-a.cost).slice(0,8);
+  document.getElementById('costoCuenta').innerHTML=top.length?top.map(b=>'<div class="fin-row"><div class="fin-label">'+esc(b.name)+' <span class="tag est '+esc(b.estado)+'">'+esc(ESTADOS[b.estado]||b.estado)+'</span></div><div class="fin-val">$'+b.cost.toFixed(2)+' USD</div></div>').join(''):'<div class="muted">Sin generaciones.</div>';
+}
+async function conciliar(){
+  const st=document.getElementById('concStatus'), out=document.getElementById('concOut');
+  st.textContent='⏳ Leyendo Stripe…';st.style.color='var(--b2)';
+  try{
+    const r=await fetch(WORKER,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mode:'admin-conciliar',adminKey:llave()})});
+    const c=await r.json();
+    if(!c.success){st.textContent='❌ '+(c.error||('Error '+r.status));st.style.color='var(--r)';return;}
+    concData=c;
+    const graves=(c.descuadres||[]).filter(x=>x.severidad==='P0'||x.severidad==='P1').length;
+    st.textContent=(c.ok?'✅ Todo cuadra':'❌ '+graves+' descuadre(s) que piden acción')+' · '+c.revisadas+' suscripciones revisadas · '+c.cuentas+' cuentas'+(c.incompleta?' · ⚠️ lectura incompleta':'');
+    st.style.color=c.ok?'var(--g2)':'var(--r)';
+    const lista=adminData.brandList||[];
+    out.innerHTML=(c.descuadres||[]).length?'<div class="scroll"><table class="admin-table"><thead><tr><th></th><th>Descuadre</th><th>Cuenta</th><th>Detalle y qué hacer</th><th></th></tr></thead><tbody>'+c.descuadres.map(x=>{
+      const n=DESCUADRES[x.tipo]||[x.tipo,''], b=lista.find(z=>z.brandId===x.brandId)||{brandId:x.brandId,stripeCustomerId:x.customer};
+      return '<tr><td><span class="sev '+esc(x.severidad)+'">'+esc(x.severidad)+'</span></td><td style="font-weight:700">'+esc(n[0])+'</td><td>'+(x.brandId?esc(nombreDe(x.brandId)):'<span class="muted">—</span>')+(x.subId?'<div class="small">'+esc(x.subId)+'</div>':'')+'</td><td>'+esc(x.detalle)+'<div class="small">'+esc(n[1])+'</div></td><td class="pend-a" style="margin:0">'+(x.brandId?contacto(b,'Tu cuenta de Postimity'):(x.customer?'<a class="btn sm" href="https://dashboard.stripe.com/customers/'+encodeURIComponent(x.customer)+'" target="_blank" rel="noopener">Stripe</a>':''))+'</td></tr>'}).join('')+'</tbody></table></div>':'<div class="ok-line">✅ Cada suscripción viva corresponde a una cuenta con el mismo plan.</div>';
+    renderHoy();renderDinero();
+  }catch(e){st.textContent='❌ Error: '+e.message;st.style.color='var(--r)';}
+}
+
+// ── Cuentas ──
+function opciones(id,valores,etiqueta){
+  const sel=document.getElementById(id), actual=sel.value, primera=sel.options[0].outerHTML;
+  sel.innerHTML=primera+valores.map(v=>'<option value="'+esc(v[0])+'">'+esc(etiqueta?etiqueta(v):v[1])+'</option>').join('');
+  sel.value=actual;
+}
+function llenarFiltros(){
+  const L=adminData.brandList||[], cuenta=(f)=>{const o={};L.forEach(b=>{const k=f(b);if(k)o[k]=(o[k]||0)+1});return Object.entries(o).sort((a,b)=>b[1]-a[1])};
+  opciones('estadoFilter',cuenta(b=>b.estado),v=>(ESTADOS[v[0]]||v[0])+' ('+v[1]+')');
+  opciones('paisFilter',cuenta(b=>b.country),v=>v[0]+' ('+v[1]+')');
+  opciones('giroFilter',cuenta(b=>b.giro&&b.giro.clase).map(v=>{const b=L.find(x=>x.giro&&x.giro.clase===v[0]);return [v[0],(b&&b.giro.nombre||v[0])+' ('+v[1]+')']}));
+  opciones('fuenteFilter',cuenta(fuenteDe),v=>v[0]+' ('+v[1]+')');
+  opciones('mesFilter',cuenta(b=>diaMX(b.createdAt).slice(0,7)).sort((a,b)=>b[0].localeCompare(a[0])),v=>v[0]+' ('+v[1]+')');
+}
+function filterBrands(){
+  if(!adminData)return;
+  const q=(document.getElementById('brandSearch').value||'').toLowerCase().trim();
+  const f={estado:document.getElementById('estadoFilter').value,plan:document.getElementById('planFilter').value,pais:document.getElementById('paisFilter').value,giro:document.getElementById('giroFilter').value,fuente:document.getElementById('fuenteFilter').value,mes:document.getElementById('mesFilter').value};
+  const filtered=(adminData.brandList||[]).filter(b=>{
+    if(f.estado&&b.estado!==f.estado)return false;
+    if(f.plan&&(b.plan||'trial')!==f.plan)return false;
+    if(f.pais&&b.country!==f.pais)return false;
+    if(f.giro&&!(b.giro&&b.giro.clase===f.giro))return false;
+    if(f.fuente&&fuenteDe(b)!==f.fuente)return false;
+    if(f.mes&&diaMX(b.createdAt).slice(0,7)!==f.mes)return false;
+    if(q&&![b.name,b.email,b.whatsapp,b.brandId,b.country].some(x=>String(x||'').toLowerCase().includes(q)))return false;
+    return true;
+  });
+  document.querySelector('#brandTable tbody').innerHTML=filtered.slice(0,200).map(b=>{
+    const plan=b.plan||'trial', gl=b.limiteGens||GEN_LIMITS[plan]||GEN_LIMITS.trial, vl=b.limiteVideos||VIDEO_LIMITS[plan]||VIDEO_LIMITS.trial;
+    const uso=(b.monthlyGens||0)+'<span class="small"> /'+gl+'</span>'+(b.monthlyVideos?'<div class="small">🎬 '+b.monthlyVideos+'/'+vl+'</div>':'')+'<div class="bar"><i style="width:'+Math.min(100,Math.round((b.monthlyGens||0)/gl*100))+'%"></i></div>';
+    const per=b.estado==='prueba'||b.estado==='prueba-vencida'?(b.trialFin?'Prueba hasta '+fecha(b.trialFin):'—'):(plan!=='trial'?'Renueva '+fecha(b.periodoFin):'—');
+    const giro=b.giro&&b.giro.nombre?b.giro.nombre+(b.giro.scian?' · SCIAN '+b.giro.scian:'')+' · '+(b.giro.confianza||''):(b.nicho||'general');
+    const o=b.origen||{};
+    return '<tr><td style="font-weight:600;min-width:180px">'+esc(b.name||'Sin nombre')+'<div class="small">'+esc(b.email||'')+(b.whatsapp?' · '+esc(b.whatsapp):'')+'</div><div class="small" title="Giro que escribió el dueño → giro que reconoce el servidor (FB-164)">'+esc(b.type||'—')+' → '+esc(giro)+'</div></td>'
+      +'<td><span class="tag est '+esc(b.estado)+'">'+esc(ESTADOS[b.estado]||b.estado||'—')+'</span><div style="margin-top:3px"><span class="tag plan-tag '+esc(plan)+'">'+esc(plan)+'</span></div>'+(b.estado==='override'&&b.planChangedAt?'<div class="small">desde '+fecha(b.planChangedAt)+'</div>':'')+'</td>'
+      +'<td style="white-space:nowrap">'+fecha(b.createdAt)+'<div class="small">'+esc(b.country||'')+'</div></td>'
+      +'<td style="white-space:nowrap">'+per+(b.primerPagoAt?'<div class="small">1.er pago '+fecha(b.primerPagoAt)+'</div>':'')+'</td>'
+      +'<td class="num" style="min-width:80px">'+uso+'</td>'
+      +'<td>'+esc(fuenteDe(b))+(o.campaign?'<div class="small">'+esc(o.campaign)+'</div>':'')+'</td>'
+      +'<td class="num">'+(b.cost>0?'$'+b.cost.toFixed(2):'—')+'</td>'
+      +'<td style="white-space:nowrap"><button class="btn sm" data-bid="'+esc(b.brandId)+'" onclick="openPlanModal(this.dataset.bid)">Plan</button> <button class="btn sm del" data-bid="'+esc(b.brandId)+'" onclick="deleteBrand(this.dataset.bid)">🗑</button>'+(b.stripeCustomerId?' <a class="btn sm" href="https://dashboard.stripe.com/customers/'+encodeURIComponent(b.stripeCustomerId)+'" target="_blank" rel="noopener">Stripe</a>':'')+'</td></tr>';
+  }).join('');
+  document.getElementById('brandCount').textContent='Mostrando '+Math.min(filtered.length,200)+' de '+filtered.length+' cuentas';
 }
 // S57c: la cola del operador. Cada fila: lo que escribio el dueno, lo que leyo el servidor y un selector con la taxonomia.
 function renderGiroRevisar(){
   const box=document.getElementById('giroRevisar'); if(!box||!adminData)return;
   const cola=(adminData.brandList||[]).filter(b=>b.giro&&b.giro.revisar);
   document.getElementById('giroRevisarCount').textContent=cola.length?'('+cola.length+')':'';
-  if(!cola.length){box.innerHTML='<div style="font-size:12px;color:var(--t3)">✅ Ninguna marca por revisar.</div>';return;}
+  if(!cola.length){box.innerHTML='<div class="ok-line">✅ Ninguna marca por revisar.</div>';return;}
   const cat=Array.isArray(adminData.catalogoGiros)?adminData.catalogoGiros:[];
   const opts=cat.map(g=>'<option value="'+esc(g.clase)+'">'+esc(g.nombre)+'</option>').join('');
   box.innerHTML='<table class="admin-table"><thead><tr><th>Marca</th><th>Escribió</th><th>Leído</th><th>Fijar giro</th></tr></thead><tbody>'+cola.slice(0,100).map(b=>
-    '<tr><td style="font-weight:600">'+esc(b.name)+'<div style="font-size:9px;color:var(--t4)">'+esc(b.email||'')+'</div></td><td style="font-size:11px">'+esc(b.type||'—')+'</td>'
-    +'<td style="font-size:11px">'+esc(b.giro.nombre||'General')+'<div style="font-size:9px;color:var(--t4)">'+esc(b.giro.confianza||'')+' · '+esc(b.giro.origen||'')+'</div></td>'
+    '<tr><td style="font-weight:600">'+esc(b.name)+'<div class="small">'+esc(b.email||'')+'</div></td><td style="font-size:11px">'+esc(b.type||'—')+'</td>'
+    +'<td style="font-size:11px">'+esc(b.giro.nombre||'General')+'<div class="small">'+esc(b.giro.confianza||'')+' · '+esc(b.giro.origen||'')+'</div></td>'
     +'<td style="white-space:nowrap"><select class="filter-sel" id="gsel-'+esc(b.brandId)+'"><option value="">— Elegir —</option>'+opts+'</select> '
-    +'<button class="btn-plan" data-bid="'+esc(b.brandId)+'" onclick="fijarGiro(this.dataset.bid)">Fijar</button></td></tr>').join('')+'</tbody></table>';
+    +'<button class="btn sm" data-bid="'+esc(b.brandId)+'" onclick="fijarGiro(this.dataset.bid)">Fijar</button></td></tr>').join('')+'</tbody></table>';
 }
 async function fijarGiro(brandId){
   const sel=document.getElementById('gsel-'+brandId); const clase=sel&&sel.value; if(!clase){alert('Elige un giro de la lista.');return;}
   try{
-    const key=sessionStorage.getItem('admin_key');
-    const res=await fetch(WORKER,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mode:'admin-set-giro',adminKey:key,brandId,clase})});
+    const res=await fetch(WORKER,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mode:'admin-set-giro',adminKey:llave(),brandId,clase,motivo:'cola por revisar'})});
     const data=await res.json();
     if(!data.success){alert('No se pudo: '+(data.error||res.status));return;}
     const b=(adminData.brandList||[]).find(x=>x.brandId===brandId); if(b)b.giro=data.giro;
     renderGiroRevisar(); filterBrands();
+    if(data.bitacora===false)alert('El giro se fijó, pero NO quedó en la bitácora. Anótalo a mano.');
   }catch(e){alert('Error de red: '+e.message);}
 }
-function filterBrands(){
-  if(!adminData)return;
-  const q=(document.getElementById('brandSearch').value||'').toLowerCase();
-  const pf=document.getElementById('planFilter').value;
-  const filtered=adminData.brandList.filter(b=>{
-    if(pf&&(b.plan||'trial')!==pf)return false;
-    if(q&&!((b.name||'').toLowerCase().includes(q)||(b.email||'').toLowerCase().includes(q)||(b.country||'').toLowerCase().includes(q)))return false;
-    return true;
-  });
-  document.querySelector('#brandTable tbody').innerHTML=filtered.slice(0,100).map(b=>{
-    const lastGen=b.lastGen?new Date(b.lastGen).toLocaleDateString():'—';
-    const costStr=b.cost>0?'$'+b.cost.toFixed(2):'—';
-    const gl=GEN_LIMITS[b.plan||'trial']||GEN_LIMITS.trial;const vl=VIDEO_LIMITS[b.plan||'trial']||VIDEO_LIMITS.trial;
-    const genStr=b.monthlyGens!==undefined?'<span title="Este mes / Límite plan (Total histórico: '+b.gens+')">'+b.monthlyGens+'<span style="color:var(--t4);font-size:9px"> /'+gl+'</span></span>'+(b.monthlyVideos>0?' <span title="Videos: '+b.monthlyVideos+'/'+vl+'" style="color:#E53935;font-size:9px">('+b.monthlyVideos+'/'+vl+'🎬)</span>':''):(b.gens>0?b.gens+(b.videos>0?' <span style="color:#E53935;font-size:9px">('+b.videos+'🎬)</span>':''):'0');
-    const adminBadge=b.adminOverride?' <span style="font-size:8px;padding:1px 4px;border-radius:3px;background:#FEF3C7;color:#92400E;font-weight:700">ADMIN</span>':'';
-    return '<tr><td style="font-weight:600">'+esc(b.name)+'<div style="font-size:9px;color:var(--t4)">'+esc(b.email||'')+'</div><div style="font-size:9px;color:var(--t4)" title="Giro que escribio el dueno → giro que reconoce el servidor (FB-164)">'+esc(b.type||'—')+' → '+esc(b.giro&&b.giro.nombre?b.giro.nombre+(b.giro.scian?' · SCIAN '+b.giro.scian:'')+' · '+b.giro.confianza+(b.giro.origen?' · '+b.giro.origen:''):(b.nicho||'general'))+'</div></td><td><span class="plan-tag '+(b.plan||'trial')+'">'+(b.plan||'trial')+'</span>'+adminBadge+'</td><td style="font-size:11px">'+esc(b.country)+'</td><td style="font-size:11px;font-weight:600">'+genStr+'</td><td style="font-size:11px;color:var(--r)">'+costStr+'</td><td style="font-size:10px;color:var(--t3)">'+lastGen+'</td><td style="white-space:nowrap"><button class="btn-plan" data-bid="'+esc(b.brandId)+'" data-bname="'+esc(b.name)+'" data-plan="'+(b.plan||'trial')+'" onclick="openPlanModal(this.dataset.bid,this.dataset.bname,this.dataset.plan)">Plan</button> <button class="btn-del" data-bid="'+esc(b.brandId)+'" data-bname="'+esc(b.name)+'" onclick="deleteBrand(this.dataset.bid,this.dataset.bname)">🗑</button></td></tr>';
-  }).join('');
-  document.getElementById('brandCount').textContent='Showing '+Math.min(filtered.length,100)+' of '+filtered.length+' brands';
+function renderTop(){
+  document.querySelector('#topUsersTable tbody').innerHTML=(adminData.topUsers||[]).map((u,i)=>{const gl=GEN_LIMITS[u.plan]||GEN_LIMITS.trial,vl=VIDEO_LIMITS[u.plan]||VIDEO_LIMITS.trial;
+    return '<tr><td style="font-weight:800;color:var(--b)">'+(i+1)+'</td><td style="font-weight:600">'+esc(u.name)+'</td><td><span class="tag plan-tag '+esc(u.plan)+'">'+esc(u.plan)+'</span></td><td class="num">'+(u.monthlyGens||0)+'<span class="small"> /'+gl+'</span></td><td class="num">'+(u.monthlyVideos||0)+'<span class="small"> /'+vl+'</span></td><td class="num">$'+(u.cost||0).toFixed(2)+'</td></tr>'}).join('');
 }
-function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
 
-// ── Plan Change Modal ──
+// ── Cambiar plan (override) con motivo ──
 let pmBrandId=null, pmCurrentPlan=null, pmSelectedPlan=null;
-function openPlanModal(brandId,brandName,currentPlan){
-  pmBrandId=brandId; pmCurrentPlan=currentPlan; pmSelectedPlan=null;
-  document.getElementById('pmBrand').textContent=brandName+' ('+brandId.slice(0,8)+'…)';
+function openPlanModal(brandId){
+  const b=(adminData.brandList||[]).find(x=>x.brandId===brandId); if(!b)return;
+  pmBrandId=brandId; pmCurrentPlan=b.plan||'trial'; pmSelectedPlan=null;
+  document.getElementById('pmBrand').textContent=(b.name||'Sin nombre')+' ('+brandId.slice(0,8)+'…) · '+(ESTADOS[b.estado]||b.estado);
+  document.getElementById('pmWarn').style.display=(b.estado==='pagando'||b.estado==='riesgo')?'block':'none';
   document.getElementById('pmStatus').textContent='';
-  document.getElementById('pmConfirm').disabled=true;
-  const plans=[
-    {key:'trial',name:'Trial',price:'Free'},
-    {key:'starter',name:'Starter',price:'$199 MXN'},
-    {key:'growth',name:'Growth',price:'$399 MXN'},
-    {key:'premium',name:'Premium',price:'$899 MXN'}
-  ];
-  document.getElementById('pmOptions').innerHTML=plans.map(p=>{
-    const isCurrent=p.key===currentPlan;
-    return '<div class="pm-opt'+(isCurrent?' current':'')+'" onclick="selectPlan(\''+p.key+'\',this)" data-plan="'+p.key+'">'+
-      '<div class="pm-opt-name">'+p.name+(isCurrent?' ✓':'')+'</div>'+
-      '<div class="pm-opt-price">'+p.price+'</div></div>';
-  }).join('');
+  document.getElementById('pmMotivo').value='';
+  document.getElementById('pmConfirm').disabled=true;document.getElementById('pmConfirm').textContent='Aplicar';
+  const plans=[{key:'trial',name:'Trial',price:'Gratis'},{key:'starter',name:'Starter',price:'$199 MXN'},{key:'growth',name:'Growth',price:'$399 MXN'},{key:'premium',name:'Premium',price:'$899 MXN'}];
+  document.getElementById('pmOptions').innerHTML=plans.map(p=>{const cur=p.key===pmCurrentPlan;
+    return '<div class="pm-opt'+(cur?' current':'')+'" onclick="selectPlan(\''+p.key+'\',this)" data-plan="'+p.key+'"><div class="pm-opt-name">'+p.name+(cur?' ✓':'')+'</div><div class="pm-opt-price">'+p.price+'</div></div>'}).join('');
   document.getElementById('planModal').classList.add('show');
 }
-function closePlanModal(){
-  document.getElementById('planModal').classList.remove('show');
-  pmBrandId=null; pmSelectedPlan=null;
-}
+function closePlanModal(){document.getElementById('planModal').classList.remove('show');pmBrandId=null;pmSelectedPlan=null}
+function validarPlan(){document.getElementById('pmConfirm').disabled=!(pmSelectedPlan&&document.getElementById('pmMotivo').value.trim().length>=4)}
 function selectPlan(plan,el){
   if(plan===pmCurrentPlan)return;
   pmSelectedPlan=plan;
-  document.querySelectorAll('.pm-opt').forEach(o=>{
-    o.classList.toggle('active',o.dataset.plan===plan);
-  });
-  document.getElementById('pmConfirm').disabled=false;
+  document.querySelectorAll('.pm-opt').forEach(o=>o.classList.toggle('active',o.dataset.plan===plan));
+  validarPlan();
 }
 async function confirmPlanChange(){
-  if(!pmBrandId||!pmSelectedPlan)return;
-  const btn=document.getElementById('pmConfirm');
-  const status=document.getElementById('pmStatus');
-  btn.disabled=true; btn.textContent='Applying...';
-  status.textContent='';
+  const motivo=document.getElementById('pmMotivo').value.trim();
+  if(!pmBrandId||!pmSelectedPlan||motivo.length<4)return;
+  const btn=document.getElementById('pmConfirm'), status=document.getElementById('pmStatus');
+  btn.disabled=true; btn.textContent='Aplicando…'; status.textContent='';
   try{
-    const key=sessionStorage.getItem('admin_key');
-    const res=await fetch(WORKER,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mode:'admin-set-plan',adminKey:key,brandId:pmBrandId,plan:pmSelectedPlan})});
+    const res=await fetch(WORKER,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mode:'admin-set-plan',adminKey:llave(),brandId:pmBrandId,plan:pmSelectedPlan,motivo})});
     const data=await res.json();
     if(data.success){
-      status.textContent='✅ '+data.message;
-      status.style.color='var(--g2)';
-      btn.textContent='Done';
-      // Refresh dashboard after a beat
-      setTimeout(async()=>{closePlanModal();doAuth();},1200);
-    }else{
-      status.textContent='❌ '+(data.error||'Failed');
-      status.style.color='var(--r)';
-      btn.textContent='Apply'; btn.disabled=false;
-    }
-  }catch(e){
-    status.textContent='❌ '+e.message;
-    status.style.color='var(--r)';
-    btn.textContent='Apply'; btn.disabled=false;
-  }
+      status.textContent='✅ '+data.message+(data.bitacora===false?' · ⚠️ no quedó en la bitácora: anótalo a mano':'');
+      status.style.color='var(--g2)'; btn.textContent='Listo';
+      setTimeout(()=>{closePlanModal();recargar();},1400);
+    }else{status.textContent='❌ '+(data.error||'No se pudo');status.style.color='var(--r)';btn.textContent='Aplicar';btn.disabled=false;}
+  }catch(e){status.textContent='❌ '+e.message;status.style.color='var(--r)';btn.textContent='Aplicar';btn.disabled=false;}
 }
 
-// ── Delete Brand ──
-async function deleteBrand(brandId,brandName){
-  const msg='⚠️ ELIMINAR permanentemente:\n\n"'+brandName+'"\n\nSe borra: datos, historial, galería, planes, recordatorios.\n\nEscribe BORRAR para confirmar:';
-  const inp=prompt(msg);
+// ── Borrar cuenta (con motivo) ──
+async function deleteBrand(brandId){
+  const b=(adminData.brandList||[]).find(x=>x.brandId===brandId)||{name:brandId};
+  const inp=prompt('⚠️ ELIMINAR permanentemente:\n\n"'+b.name+'"\n\nSe borran datos, historial, galería, planes y recordatorios. Queda solo el rastro en la bitácora (sin nombre ni correo).\n\nEscribe BORRAR para confirmar:');
   if(!inp||inp.trim().toUpperCase()!=='BORRAR')return;
+  const motivo=(prompt('Motivo del borrado (queda en la bitácora):','solicitud del titular')||'').trim();
+  if(!motivo)return;
   try{
-    const key=sessionStorage.getItem('admin_key');
-    const res=await fetch(WORKER,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mode:'admin-delete-brand',adminKey:key,brandId})});
+    const res=await fetch(WORKER,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mode:'admin-delete-brand',adminKey:llave(),brandId,motivo})});
     const data=await res.json();
-    if(data.success){
-      alert('✅ '+data.message);
-      doAuth(); // Refresh
-    }else{
-      alert('❌ '+(data.error||'Delete failed'));
-    }
+    if(data.success){alert('✅ '+data.message+(data.bitacora===false?'\n⚠️ No quedó en la bitácora: anótalo a mano.':''));recargar();}
+    else alert('❌ '+(data.error||'No se pudo borrar'));
   }catch(e){alert('❌ Error: '+e.message)}
 }
 
-// ── Feedback ──
-let fbData=[];
-let fbFilterType='all';
+// ── Bitácora ──
+function renderBitacora(){
+  const actor=document.getElementById('bitActor').value;
+  const rows=(adminData.bitacora||[]).filter(x=>!actor||x.actor===actor);
+  const corto=s=>{if(!s)return '—';try{const o=JSON.parse(s);return Object.entries(o).map(([k,v])=>k+': '+v).join(' · ')}catch(e){return String(s)}};
+  document.getElementById('bitacoraTabla').innerHTML='<table class="admin-table"><thead><tr><th>Cuándo</th><th>Quién</th><th>Qué</th><th>Cuenta</th><th>Antes → después</th><th>Motivo</th></tr></thead><tbody>'
+    +(rows.length?rows.map(x=>'<tr><td style="white-space:nowrap">'+fechaHora(new Date((x.creado||0)*1000).toISOString())+'</td><td>'+esc(x.actor)+'</td><td style="font-weight:600">'+esc(ACCIONES[x.accion]||x.accion)+'</td><td>'+(x.brand_id?'<a href="#" data-bid="'+esc(x.brand_id)+'" onclick="verCuenta(this.dataset.bid);return false">'+esc(nombreDe(x.brand_id))+'</a>':'—')+'</td><td>'+esc(corto(x.antes))+' → '+esc(corto(x.despues))+'</td><td>'+esc(x.motivo||'')+'</td></tr>').join(''):'<tr><td colspan="6" class="muted">Sin movimientos todavía (la bitácora existe desde S58, oct 2026).</td></tr>')+'</tbody></table>';
+}
+
+// ── Resumen anónimo (ADM-7) ──
+function descargarResumen(){
+  if(!adminData){alert('Entra primero.');return;}
+  const r=resumenAnonimo(adminData,concData,Date.now());
+  const blob=new Blob([JSON.stringify(r,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='postimity_resumen_'+diaMX(new Date().toISOString())+'.json';
+  document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+}
+
+// ── Sistema ──
+function renderSistema(){
+  const d=adminData, f=d.fotos||[];
+  document.getElementById('sistemaEstado').innerHTML='Almacén: <b>'+esc(d.almacen||'—')+'</b> · Fotos diarias guardadas: <b>'+f.length+'</b>'+(f.length?' (la última: '+esc(f[f.length-1].dia)+')':' (la primera se toma en el próximo cron diario)')+' · Bitácora: <b>'+(d.bitacora||[]).length+'</b> movimiento(s) · Prueba: <b>'+(d.trialDias||'?')+' días</b>';
+}
 async function loadFeedback(){
   try{
-    const key=sessionStorage.getItem('admin_key');
-    const res=await fetch(WORKER,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mode:'get-feedback',adminKey:key})});
+    const res=await fetch(WORKER,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mode:'get-feedback',adminKey:llave()})});
     const data=await res.json();
-    if(data.success&&data.feedback){fbData=data.feedback;renderFb();}
+    if(data.success&&data.feedback){fbData=data.feedback;renderFb();renderHoy();}
   }catch(e){console.warn('Feedback load failed:',e)}
 }
 function renderFb(){
   const filtered=fbFilterType==='all'?fbData:fbData.filter(f=>f.type===fbFilterType);
   document.getElementById('fbCount').textContent='('+fbData.length+')';
   const wrap=document.getElementById('fbListWrap');
-  // S38-11: fbEmpty vivia DENTRO de fbListWrap y mas abajo se hace wrap.innerHTML=...,
-  // que borra a todos sus hijos — incluido fbEmpty. La funcion destruia el elemento
-  // del que dependia, asi que el SEGUNDO render tronaba con "reading 'style' of null".
-  // Latente mientras no hubo feedback: sin datos nunca se ejecutaba la rama que borra.
-  // Es decir, el panel se rompia justo cuando dejaba de estar vacio. Ahora el estado
-  // vacio se pinta como contenido de wrap, no como un elemento aparte que sobreviva.
-  if(filtered.length===0){
-    wrap.innerHTML='<div style="text-align:center;padding:20px;color:var(--t3);font-size:12px" id="fbEmpty">'+
-      (fbFilterType==='all'?'No feedback yet':'No '+fbFilterType+'s yet')+'</div>';
-    return;
-  }
+  // S38-11: el estado vacio se pinta como contenido de wrap, no como un elemento aparte que sobreviva al innerHTML.
+  if(filtered.length===0){wrap.innerHTML='<div class="muted" style="text-align:center;padding:20px" id="fbEmpty">Sin comentarios</div>';return;}
   const typeIcon={suggestion:'💡',issue:'🛠️'};
-  // S38-9: 'multibrand' y 'more-quota' llegan del techo de Growth. Sin color propio
-  // se confundian con el resto: son las dos respuestas que deciden si multimarca se
-  // construye, asi que tienen que saltar a la vista en este panel.
-  const catColors={'new-feature':'#7C4DFF','mode-request':'#2979FF',improvement:'#76C442',bug:'#E53935',ux:'#F9A825',quality:'#FF6D00',billing:'#1565C0',other:'#6B7280','multibrand':'#00897B','more-quota':'#F4511E'};
-  wrap.innerHTML=filtered.map(f=>{
-    const date=new Date(f.createdAt).toLocaleDateString()+' '+new Date(f.createdAt).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
-    return '<div class="fb-card" style="border:1px solid var(--bor);border-radius:10px;padding:12px;margin-bottom:8px">'+
-      '<div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">'+
-        '<span style="font-size:14px">'+(typeIcon[f.type]||'💬')+'</span>'+
-        '<span style="font-size:12px;font-weight:700;color:var(--t1)">'+esc(f.brandName||'Anonymous')+'</span>'+
-        '<span style="font-size:10px;padding:2px 6px;border-radius:4px;background:'+(catColors[f.category]||'#6B7280')+'15;color:'+(catColors[f.category]||'#6B7280')+';font-weight:700">'+(f.category||'other')+'</span>'+
-        '<span style="font-size:10px;padding:2px 6px;border-radius:4px;background:#F5F5F3;color:var(--t3);font-weight:600">'+(f.plan||'trial')+'</span>'+
-        '<span style="flex:1"></span>'+
-        '<span style="font-size:10px;color:var(--t4)">'+date+'</span>'+
-      '</div>'+
-      '<div style="font-size:12px;color:var(--t2);line-height:1.6;white-space:pre-wrap">'+esc(f.message)+'</div>'+
-      (f.email?'<div style="font-size:10px;color:var(--t3);margin-top:4px">📧 '+esc(f.email)+'</div>':'')+
-    '</div>';
-  }).join('');
+  wrap.innerHTML=filtered.map(f=>'<div style="border:1px solid var(--bor);border-radius:10px;padding:12px;margin-bottom:8px"><div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;flex-wrap:wrap"><span>'+(typeIcon[f.type]||'💬')+'</span><b>'+esc(f.brandName||'Anónimo')+'</b><span class="tag est cancelada">'+esc(f.category||'other')+'</span><span class="tag plan-tag '+esc(f.plan||'trial')+'">'+esc(f.plan||'trial')+'</span><span style="flex:1"></span><span class="small">'+fechaHora(f.createdAt)+'</span></div><div style="white-space:pre-wrap;line-height:1.6">'+esc(f.message)+'</div>'+(f.email?'<div class="small" style="margin-top:4px">📧 '+esc(f.email)+'</div>':'')+'</div>').join('');
 }
 function filterFb(type,btn){
   fbFilterType=type;
-  document.querySelectorAll('.fb-filter').forEach(b=>{b.style.background='var(--w)';b.style.color='var(--t2)';b.classList.remove('active')});
-  btn.style.background='var(--b3)';btn.style.color='var(--b2)';btn.classList.add('active');
+  document.querySelectorAll('.fb-filter').forEach(b=>b.classList.remove('pri'));
+  btn.classList.add('pri');
   renderFb();
 }
-
 // ── Stripe (FB-179) ──
 async function revisarStripe(){
   const st=document.getElementById('stripeStatus'), out=document.getElementById('stripeOut');
-  const adminKey=sessionStorage.getItem('admin_key');
-  if(!adminKey){st.textContent='❌ Not authenticated';st.style.color='var(--r)';return;}
-  st.textContent='⏳ Consultando a Stripe...';st.style.color='var(--b2)';out.innerHTML='';
+  if(!llave()){st.textContent='❌ Sin sesión';st.style.color='var(--r)';return;}
+  st.textContent='⏳ Consultando a Stripe…';st.style.color='var(--b2)';out.innerHTML='';
   try{
-    const res=await fetch(WORKER,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mode:'admin-stripe-check',adminKey})});
+    const res=await fetch(WORKER,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mode:'admin-stripe-check',adminKey:llave()})});
     const d=await res.json();
     if(!d.success){st.textContent='❌ '+(d.error||'Error');st.style.color='var(--r)';return;}
     st.textContent=(d.ok?'✅ Todo listo para cobrar':'❌ Hay '+d.problemas.length+' problema(s)')+' · modo '+(d.modo||'—');
-    st.style.color=d.ok?'#2E7D32':'var(--r)';
+    st.style.color=d.ok?'var(--g2)':'var(--r)';
     const li=(a,c)=>a.map(x=>'<li style="color:'+c+'">'+esc(x)+'</li>').join('');
-    out.innerHTML=(d.problemas.length?'<b>Problemas</b><ul>'+li(d.problemas,'var(--r)')+'</ul>':'')
-      +(d.avisos.length?'<b>Avisos</b><ul>'+li(d.avisos,'var(--t2)')+'</ul>':'')
-      +'<b>Precios</b><ul>'+(d.precios||[]).map(p=>'<li>'+(p.ok?'✅ ':'❌ ')+esc(p.variable)+(p.monto!=null?' — $'+p.monto+' '+esc(p.moneda||'')+' · '+esc(p.tipo||''):'')+'</li>').join('')+'</ul>';
+    out.innerHTML=(d.problemas.length?'<b>Problemas</b><ul style="margin-left:18px">'+li(d.problemas,'var(--r)')+'</ul>':'')
+      +(d.avisos.length?'<b>Avisos</b><ul style="margin-left:18px">'+li(d.avisos,'var(--t2)')+'</ul>':'')
+      +'<b>Precios</b><ul style="margin-left:18px">'+(d.precios||[]).map(p=>'<li>'+(p.ok?'✅ ':'❌ ')+esc(p.variable)+(p.monto!=null?' — $'+p.monto+' '+esc(p.moneda||'')+' · '+esc(p.tipo||''):'')+'</li>').join('')+'</ul>';
   }catch(e){st.textContent='❌ Error: '+e.message;st.style.color='var(--r)';}
 }
-
-// ── Backup (R06) ──
+// ── Respaldo (R06) ──
 async function runBackup(){
   const st=document.getElementById('backupStatus');
-  const adminKey=sessionStorage.getItem('admin_key');
-  if(!adminKey){st.textContent='❌ Not authenticated';st.style.color='var(--r)';return;}
-  st.textContent='⏳ Running backup...';st.style.color='var(--b2)';
+  if(!llave()){st.textContent='❌ Sin sesión';st.style.color='var(--r)';return;}
+  st.textContent='⏳ Respaldando…';st.style.color='var(--b2)';
   try{
-    const res=await fetch(WORKER,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mode:'admin-backup',adminKey})});
+    const res=await fetch(WORKER,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mode:'admin-backup',adminKey:llave()})});
     const data=await res.json();
-    if(data.success){
-      const stats=Object.entries(data.stats).map(([k,v])=>k+': '+v).join(', ');
-      st.textContent='✅ '+data.message+' ('+stats+')';st.style.color='#2E7D32';
-    }else{st.textContent='❌ '+data.error;st.style.color='var(--r)';}
+    if(data.success){st.textContent='✅ '+data.message+' ('+Object.entries(data.stats||{}).map(([k,v])=>k+': '+v).join(', ')+')';st.style.color='var(--g2)';}
+    else{st.textContent='❌ '+data.error;st.style.color='var(--r)';}
   }catch(e){st.textContent='❌ Error: '+e.message;st.style.color='var(--r)';}
 }
 
 window.addEventListener('DOMContentLoaded',()=>{
-  const params=new URLSearchParams(window.location.search);
-  // S55n: la llave ya no se lee de la direccion (?key=): quedaba en el historial del navegador y podia llegar a la analitica.
-  const key=sessionStorage.getItem('admin_key');
+  // S55n: la llave ya no se lee de la direccion: quedaba en el historial del navegador y podia llegar a la analitica.
+  const key=llave();
   if(key){document.getElementById('authKey').value=key;doAuth()}
 });
 </script>
