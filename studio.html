@@ -7,7 +7,7 @@
    Etiquetas en lineas propias: el extractor de sintaxis del preflight (G2) lee los scripts por lineas. */
 if(location.protocol==='http:'&&/(^|\.)postimity\.com$/.test(location.hostname))location.replace('https://'+location.host+location.pathname+location.search+location.hash);
 </script>
-<meta name="app-version" content="2.56.0">
+<meta name="app-version" content="2.56.1">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Postimity Studio — Tu estudio de contenido con IA</title>
 <meta name="description" content="Crea posts, flyers, carruseles y videos profesionales con IA. Describe tu negocio una vez y genera contenido listo para publicar en 20 segundos.">
@@ -861,7 +861,6 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
 .auth-error{color:var(--r);font-size:13px;margin-top:10px;display:none;padding:8px 12px;background:rgba(239,68,68,.08);border-radius:8px;line-height:1.4}
 .hint-regulado{font-size:12px;line-height:1.4;color:#6B7280;margin-top:6px}
 </style>
-<script defer data-domain="postimity.com" src="https://plausible.io/js/script.js"></script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script><!-- FB-151 (S55n): solo se usa al descargar el ZIP; sin defer bloqueaba el primer pintado -->
 <script>
 // S58 (ADM-4): de donde llego la persona, para medir que anuncio trae registros. Cuenta el ULTIMO anuncio (utm_*, fbclid,
@@ -2519,7 +2518,7 @@ function persistSlides(imgs) {
 }
 
 // APP_VERSION (S34) — deploy verification. Must match worker /version and all HTML files.
-const APP_VERSION = '2.56.0'; // historial en ESTADO.md (§7a.1 y PARTE 10)
+const APP_VERSION = '2.56.1'; // historial en ESTADO.md (§7a.1 y PARTE 10)
 window.APP_VERSION = APP_VERSION;
 // El log de version vive unas lineas mas abajo (console.info). No agregar otro aqui:
 // S38 borro POSTIMITY_VERSION para tener un solo log y este lo volvio a duplicar.
@@ -3531,21 +3530,18 @@ function generateBrandId() {
 }
 
 // R14 (Session 20): Browser fingerprint to prevent trial abuse with different emails
+// FB-188 (S58): la huella era un hash de pantalla, idioma, nucleos, zona horaria y plataforma: dos personas con el mismo
+// modelo de celular en Mexico daban el mismo valor y la segunda entraba «sin prueba». Ahora es un identificador aleatorio
+// de ESTE navegador: solo frena una segunda cuenta desde el mismo navegador. Sin almacenamiento no hay huella.
 function getBrowserFingerprint() {
   try {
-    const raw = [
-      screen.width, screen.height, screen.colorDepth,
-      navigator.language, navigator.hardwareConcurrency || 0,
-      Intl.DateTimeFormat().resolvedOptions().timeZone,
-      navigator.platform || '',
-      new Date().getTimezoneOffset()
-    ].join('|');
-    // Simple hash (djb2)
-    let hash = 5381;
-    for (let i = 0; i < raw.length; i++) {
-      hash = ((hash << 5) + hash + raw.charCodeAt(i)) >>> 0;
+    let id = localStorage.getItem('pm_dispositivo');
+    if (!id) {
+      id = (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : (Date.now().toString(36) + Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2));
+      localStorage.setItem('pm_dispositivo', id);
+      if (localStorage.getItem('pm_dispositivo') !== id) return null;
     }
-    return hash.toString(36);
+    return id;
   } catch(e) { return null; }
 }
 
@@ -3666,6 +3662,8 @@ function showToast(msg, duration) {
 // Sync brand to Cloudflare KV
 // ─── KV / CLOUD SYNC ──────────────────────────────────
 async function syncBrandToCloud(brand, id) {
+  // FB-189 (S58): una marca sin nombre nunca sale del navegador (nacia una cuenta vacia en el servidor)
+  if (!brand || !String(brand.name || '').trim()) return false;
   const isES = detectLanguage() === 'es';
   const failMsg = isES
     ? '⚠️ Se guardó en este dispositivo pero NO en la nube. Revisa tu conexión y guarda de nuevo.'
@@ -4729,7 +4727,7 @@ async function generateBrandGuide() {
     data=await res.json();
     if (data && data.success === false && data.code === 'BRAND_NOT_FOUND' && intento < ESPERAS_MARCA.length) {
       btn.innerHTML = '<div class="spin-sm"></div> ' + (detectLanguage()==='en' ? 'Finishing saving your brand…' : 'Terminando de guardar tu marca…');
-      try { await syncBrandToCloud(loadBrand() || {}, brandId); } catch (e) { /* el reintento lo dira */ }
+      try { const local = loadBrand(); if (local && local.name) await syncBrandToCloud(local, brandId); } catch (e) { /* el reintento lo dira */ }   // FB-189
       await esperarMs(ESPERAS_MARCA[intento]);
       btn.innerHTML = '<div class="spin-sm"></div> ' + t('bgGenerating');
       continue;
