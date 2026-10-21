@@ -2,6 +2,11 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
+<script>
+/* FB-155 (S55n): ninguna pagina trabaja por http: el worker solo acepta https y http guarda la sesion aparte. Va antes que todo.
+   Etiquetas en lineas propias: el extractor de sintaxis del preflight (G2) lee los scripts por lineas. */
+if(location.protocol==='http:'&&/(^|\.)postimity\.com$/.test(location.hostname))location.replace('https://'+location.host+location.pathname+location.search+location.hash);
+</script>
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Postimity — Términos y Condiciones</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Crect width='32' height='32' rx='8' fill='%232979FF'/%3E%3Ctext x='8.5' y='22' font-family='sans-serif' font-size='16' font-weight='800' fill='white'%3E%E2%9C%A6%3C/text%3E%3C/svg%3E">
@@ -35,12 +40,12 @@ a{color:var(--blue)}
 <nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo"><div class="nav-logo-sq">✦</div><span class="nav-logo-text">Postimity</span></a></div></nav>
 <div class="content">
 <h1>Términos y Condiciones de Uso</h1>
-<p class="subtitle">Última actualización: Julio 2026 · Versión 1.0</p>
+<p class="subtitle">Última actualización: Octubre 2026 · Versión 1.1</p>
 
 <div class="highlight">Al acceder o usar Postimity, aceptas estos Términos y Condiciones en su totalidad. Si no estás de acuerdo con alguno de estos términos, no utilices el servicio.</div>
 
 <h2>1. Definiciones</h2>
-<p><strong>"Postimity"</strong>, <strong>"nosotros"</strong>, <strong>"nuestro"</strong>: se refiere a la plataforma operada por HandHeaven LLC, sus propietarios, operadores y representantes.</p>
+<p><strong>"Postimity"</strong>, <strong>"nosotros"</strong>, <strong>"nuestro"</strong>: se refiere a la plataforma operada por Munir Lutfi González, persona física, y sus colaboradores y representantes.</p>
 <p><strong>"Servicio"</strong>: la plataforma Postimity disponible en postimity.com, incluyendo todas sus funcionalidades de generación de contenido con inteligencia artificial.</p>
 <p><strong>"Usuario"</strong>, <strong>"tú"</strong>, <strong>"tu"</strong>: cualquier persona que acceda, se registre o utilice el Servicio.</p>
 <p><strong>"Contenido Generado"</strong>: cualquier texto, imagen, diseño, video u otro material creado a través del Servicio usando modelos de inteligencia artificial.</p>
@@ -52,7 +57,7 @@ a{color:var(--blue)}
 <p>Para usar Postimity debes tener al menos 18 años de edad o la mayoría de edad en tu jurisdicción. Al registrarte, declaras que la información que proporcionas es veraz y actual. Eres responsable de mantener la confidencialidad de tu enlace de acceso y credenciales.</p>
 
 <h2>4. Planes, pagos y facturación</h2>
-<p><strong>Trial gratuito:</strong> Postimity ofrece un periodo de prueba de 14 días con funcionalidades limitadas. No requiere tarjeta de crédito.</p>
+<p><strong>Trial gratuito:</strong> Postimity ofrece un periodo de prueba de 7 días con funcionalidades limitadas. No requiere tarjeta de crédito.</p>
 <p><strong>Planes de pago:</strong> Al contratar un plan de pago, autorizas el cobro recurrente mensual a través de Stripe. Los precios se muestran en Pesos Mexicanos (MXN) o Dólares Estadounidenses (USD) según tu ubicación y pueden estar sujetos a impuestos aplicables.</p>
 <p><strong>Cancelación:</strong> Puedes cancelar tu suscripción en cualquier momento. La cancelación será efectiva al final del periodo de facturación vigente. No se otorgan reembolsos por periodos parciales.</p>
 <p><strong>Cambios de precio:</strong> Nos reservamos el derecho de modificar los precios con un aviso previo de 30 días. El precio vigente al momento de tu renovación será el aplicable.</p>
@@ -91,13 +96,13 @@ a{color:var(--blue)}
 <h2>8. Limitación de responsabilidad</h2>
 <p><strong>En la máxima medida permitida por la ley aplicable:</strong></p>
 <ul>
-<li>Postimity, HandHeaven LLC, sus directores, empleados, agentes y afiliados no serán responsables por daños directos, indirectos, incidentales, especiales, consecuentes o punitivos que resulten del uso o la imposibilidad de uso del Servicio.</li>
+<li>Postimity, su titular y sus colaboradores y representantes no serán responsables por daños directos, indirectos, incidentales, especiales, consecuentes o punitivos que resulten del uso o la imposibilidad de uso del Servicio.</li>
 <li>Nuestra responsabilidad total acumulada por cualquier reclamación relacionada con el Servicio no excederá el monto que hayas pagado a Postimity en los 12 meses anteriores al evento que dio lugar a la reclamación, o $1,000 MXN, lo que sea mayor.</li>
 <li>No somos responsables por pérdidas de negocio, pérdidas de datos, daños reputacionales, oportunidades perdidas o cualquier daño indirecto derivado del uso del Contenido Generado.</li>
 </ul>
 
 <h2>9. Indemnización</h2>
-<p>Aceptas indemnizar, defender y mantener indemne a Postimity, HandHeaven LLC, y sus directores, empleados y agentes de cualquier reclamación, daño, obligación, pérdida, responsabilidad, costo o deuda que surja de: (a) tu uso del Servicio; (b) tu violación de estos Términos; (c) el contenido que generes, publiques o distribuyas utilizando el Servicio; (d) tu violación de cualquier ley o derecho de terceros.</p>
+<p>Aceptas indemnizar, defender y mantener indemne a Postimity, a su titular y a sus colaboradores y representantes de cualquier reclamación, daño, obligación, pérdida, responsabilidad, costo o deuda que surja de: (a) tu uso del Servicio; (b) tu violación de estos Términos; (c) el contenido que generes, publiques o distribuyas utilizando el Servicio; (d) tu violación de cualquier ley o derecho de terceros.</p>
 
 <h2>10. Modificaciones al servicio y a estos términos</h2>
 <p>Nos reservamos el derecho de modificar, suspender o discontinuar el Servicio (o cualquier parte del mismo) en cualquier momento. Podemos actualizar estos Términos periódicamente. Te notificaremos de cambios materiales a través del email registrado con al menos 15 días de anticipación. El uso continuado del Servicio después de la notificación constituye tu aceptación de los nuevos términos.</p>
@@ -139,12 +144,12 @@ herramienta.</p>
 <p>Para cualquier pregunta sobre estos Términos:</p>
 <ul>
 <li><strong>Email:</strong> hello@postimity.com</li>
-<li><strong>Operado por:</strong> HandHeaven LLC</li>
+<li><strong>Operado por:</strong> Munir Lutfi González</li>
 </ul>
 </div>
 <footer class="footer">
 <p>✦ Postimity · <a href="privacy.html">Aviso de Privacidad</a> · <a href="terms.html">Términos</a> · <a href="/">Inicio</a></p>
-<p style="margin-top:8px">© 2026 Postimity. Operado por HandHeaven LLC.</p>
+<p style="margin-top:8px">© 2026 Postimity. Operado por Munir Lutfi González.</p>
 </footer>
 </body>
 </html>
