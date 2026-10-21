@@ -16,7 +16,7 @@ function reenviarAlEstudio(loc) {
 }
 try { reenviarAlEstudio(location); } catch (e) {}
 </script>
-<meta name="app-version" content="2.55.1">
+<meta name="app-version" content="2.56.0">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>¿No sabes qué publicar? Postimity sí.</title>
 <meta name="description" content="Postimity crea tu estrategia, planea tu mes y genera posts, flyers, carruseles y videos con la voz de tu marca. Sin diseñador. Sin agencia. Desde $199 MXN/mes.">
@@ -255,6 +255,36 @@ body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--bg);c
 }
 </style>
 <script defer data-domain="postimity.com" src="https://plausible.io/js/script.js"></script>
+<script>
+// S58 (ADM-4): de donde llego la persona, para medir que anuncio trae registros. Cuenta el ULTIMO anuncio (utm_*, fbclid,
+// gclid); sin anuncio, el sitio que la trajo, solo si no habia nada guardado. Vive 30 dias en este navegador y el alta lo
+// manda una vez. fbclid y gclid se guardan como si/no: su valor identifica a la persona. Misma funcion en landing y estudio.
+function capturarOrigen(loc, ref, store, ahora) {
+  try {
+    var t = typeof ahora === 'number' ? ahora : Date.now();
+    var q = new URLSearchParams((loc && loc.search) || ''), o = {}, anuncio = false;
+    ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'].forEach(function (k) { var v = q.get(k); if (v) { o[k] = String(v).slice(0, 80); anuncio = true; } });
+    if (q.get('fbclid')) { o.fbclid = true; anuncio = true; }
+    if (q.get('gclid')) { o.gclid = true; anuncio = true; }
+    var host = '';
+    try { host = ref ? new URL(ref).hostname : ''; } catch (e) { host = ''; }
+    if (host && !/(^|\.)postimity\.com$/.test(host)) o.ref = host;
+    if (!anuncio && (!o.ref || leerOrigen(store, t))) return;
+    o.landing = String((loc && loc.pathname) || '/').slice(0, 80);
+    o.t = new Date(t).toISOString();
+    store.setItem('pm_origen', JSON.stringify(o));
+  } catch (e) { /* sin almacenamiento del navegador: no se mide y nada se rompe */ }
+}
+function leerOrigen(store, ahora) {
+  try {
+    var o = JSON.parse(store.getItem('pm_origen') || 'null');
+    var t = typeof ahora === 'number' ? ahora : Date.now();
+    if (!o || !o.t || t - Date.parse(o.t) > 30 * 86400000) return null;
+    return o;
+  } catch (e) { return null; }
+}
+try { capturarOrigen(location, document.referrer, localStorage); } catch (e) { /* sin almacenamiento: no se mide */ }
+</script>
 <!-- Meta Pixel -->
 <script>
 !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
