@@ -7,7 +7,7 @@
    Etiquetas en lineas propias: el extractor de sintaxis del preflight (G2) lee los scripts por lineas. */
 if(location.protocol==='http:'&&/(^|\.)postimity\.com$/.test(location.hostname))location.replace('https://'+location.host+location.pathname+location.search+location.hash);
 </script>
-<meta name="app-version" content="2.55.1">
+<meta name="app-version" content="2.56.0">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Postimity Studio — Tu estudio de contenido con IA</title>
 <meta name="description" content="Crea posts, flyers, carruseles y videos profesionales con IA. Describe tu negocio una vez y genera contenido listo para publicar en 20 segundos.">
@@ -863,6 +863,36 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
 </style>
 <script defer data-domain="postimity.com" src="https://plausible.io/js/script.js"></script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script><!-- FB-151 (S55n): solo se usa al descargar el ZIP; sin defer bloqueaba el primer pintado -->
+<script>
+// S58 (ADM-4): de donde llego la persona, para medir que anuncio trae registros. Cuenta el ULTIMO anuncio (utm_*, fbclid,
+// gclid); sin anuncio, el sitio que la trajo, solo si no habia nada guardado. Vive 30 dias en este navegador y el alta lo
+// manda una vez. fbclid y gclid se guardan como si/no: su valor identifica a la persona. Misma funcion en landing y estudio.
+function capturarOrigen(loc, ref, store, ahora) {
+  try {
+    var t = typeof ahora === 'number' ? ahora : Date.now();
+    var q = new URLSearchParams((loc && loc.search) || ''), o = {}, anuncio = false;
+    ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'].forEach(function (k) { var v = q.get(k); if (v) { o[k] = String(v).slice(0, 80); anuncio = true; } });
+    if (q.get('fbclid')) { o.fbclid = true; anuncio = true; }
+    if (q.get('gclid')) { o.gclid = true; anuncio = true; }
+    var host = '';
+    try { host = ref ? new URL(ref).hostname : ''; } catch (e) { host = ''; }
+    if (host && !/(^|\.)postimity\.com$/.test(host)) o.ref = host;
+    if (!anuncio && (!o.ref || leerOrigen(store, t))) return;
+    o.landing = String((loc && loc.pathname) || '/').slice(0, 80);
+    o.t = new Date(t).toISOString();
+    store.setItem('pm_origen', JSON.stringify(o));
+  } catch (e) { /* sin almacenamiento del navegador: no se mide y nada se rompe */ }
+}
+function leerOrigen(store, ahora) {
+  try {
+    var o = JSON.parse(store.getItem('pm_origen') || 'null');
+    var t = typeof ahora === 'number' ? ahora : Date.now();
+    if (!o || !o.t || t - Date.parse(o.t) > 30 * 86400000) return null;
+    return o;
+  } catch (e) { return null; }
+}
+try { capturarOrigen(location, document.referrer, localStorage); } catch (e) { /* sin almacenamiento: no se mide */ }
+</script>
 <!-- Meta Pixel -->
 <script>
 !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
@@ -2489,7 +2519,7 @@ function persistSlides(imgs) {
 }
 
 // APP_VERSION (S34) — deploy verification. Must match worker /version and all HTML files.
-const APP_VERSION = '2.55.1'; // historial en ESTADO.md (§7a.1 y PARTE 10)
+const APP_VERSION = '2.56.0'; // historial en ESTADO.md (§7a.1 y PARTE 10)
 window.APP_VERSION = APP_VERSION;
 // El log de version vive unas lineas mas abajo (console.info). No agregar otro aqui:
 // S38 borro POSTIMITY_VERSION para tener un solo log y este lo volvio a duplicar.
@@ -3650,6 +3680,7 @@ async function syncBrandToCloud(brand, id) {
     // R14 (Session 20): fingerprint solo en el primer guardado real
     if (!brand.createdAt) {
       brandCopy.fingerprint = getBrowserFingerprint();
+      try { brandCopy.origen = leerOrigen(localStorage); } catch (e) { /* sin almacenamiento: sin origen */ }   // S58 (ADM-4): solo en el alta
     }
     const res = await apiFetch(WORKER, {
       method: 'POST',
