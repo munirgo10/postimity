@@ -7,7 +7,7 @@
    Etiquetas en lineas propias: el extractor de sintaxis del preflight (G2) lee los scripts por lineas. */
 if(location.protocol==='http:'&&/(^|\.)postimity\.com$/.test(location.hostname))location.replace('https://'+location.host+location.pathname+location.search+location.hash);
 </script>
-<meta name="app-version" content="2.54.6">
+<meta name="app-version" content="2.55.0">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Postimity Studio — Tu estudio de contenido con IA</title>
 <meta name="description" content="Crea posts, flyers, carruseles y videos profesionales con IA. Describe tu negocio una vez y genera contenido listo para publicar en 20 segundos.">
@@ -960,7 +960,7 @@ fbq('track', 'PageView');
         <div class="gen-bar-wrap">
           <div class="gen-bar" id="cuentaVideoBar" style="width:0%;background:#7C4DFF"></div>
         </div>
-        <div class="gen-renewal" id="cuentaRenewal">Se renuevan el 1 del próximo mes</div>
+        <div class="gen-renewal" id="cuentaRenewal">Se renuevan en tu fecha de pago</div>
       </div>
       <!-- Mi marca -->
       <div class="brand-card">
@@ -2489,7 +2489,7 @@ function persistSlides(imgs) {
 }
 
 // APP_VERSION (S34) — deploy verification. Must match worker /version and all HTML files.
-const APP_VERSION = '2.54.6'; // historial en ESTADO.md (§7a.1 y PARTE 10)
+const APP_VERSION = '2.55.0'; // historial en ESTADO.md (§7a.1 y PARTE 10)
 window.APP_VERSION = APP_VERSION;
 // El log de version vive unas lineas mas abajo (console.info). No agregar otro aqui:
 // S38 borro POSTIMITY_VERSION para tener un solo log y este lo volvio a duplicar.
@@ -3171,6 +3171,7 @@ function adoptarSaldo(data) {
   if (typeof data.genCount === 'number') saldo.gens = data.genCount;
   if (typeof data.videoCount === 'number') saldo.vgens = data.videoCount;
   if (data.limits && typeof data.limits === 'object') window._srvLimits = data.limits;
+  if (typeof data.periodoFin === 'string') window._srvPeriodoFin = data.periodoFin;   // FB-181: la renovación la dice el servidor
 }
 // Lo que queda de una bolsa, o null si el servidor todavia no lo ha dicho.
 function saldoRestante(bolsa) {
@@ -6864,12 +6865,13 @@ function getTrialDaysLeft() {
   return Math.max(0, Math.ceil((new Date(trialEndsAt).getTime() - Date.now()) / 86400000));
 }
 
+// FB-181 / D76: la cuota se renueva el día que se cobra; la fecha la dice el servidor (periodoFin). Sin dato, «—».
 function getNextRenewalDate() {
-  const now = new Date();
-  const next = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+  const fin = window._srvPeriodoFin ? new Date(window._srvPeriodoFin) : null;
+  if (!fin || isNaN(fin.getTime())) return '—';
   const lang = detectLanguage();
-  if(lang === 'en') return t('months')[next.getMonth()] + ' 1, ' + next.getFullYear();
-  return '1 de ' + t('monthsLower')[next.getMonth()] + ' de ' + next.getFullYear();
+  if(lang === 'en') return t('months')[fin.getMonth()] + ' ' + fin.getDate() + ', ' + fin.getFullYear();
+  return fin.getDate() + ' de ' + t('monthsLower')[fin.getMonth()] + ' de ' + fin.getFullYear();
 }
 
 async function showCuentaScreen() {
