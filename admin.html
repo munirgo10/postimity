@@ -8,7 +8,7 @@
 if(location.protocol==='http:'&&/(^|\.)postimity\.com$/.test(location.hostname))location.replace('https://'+location.host+location.pathname+location.search+location.hash);
 </script>
 <meta name="robots" content="noindex, nofollow"><!-- S55n: el panel no aparece en buscadores -->
-<meta name="app-version" content="2.56.1">
+<meta name="app-version" content="2.57.0">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Postimity · Administración</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232979FF'/%3E%3Ccircle cx='16' cy='16' r='5' fill='%23fff'/%3E%3C/svg%3E">
@@ -114,6 +114,23 @@ a{color:var(--b2)}
 .pm-opt{padding:10px;border:2px solid var(--bor);border-radius:10px;text-align:center;cursor:pointer}
 .pm-opt.active{border-color:var(--b);background:var(--b3)}
 .pm-opt.current{border-color:var(--g);background:var(--g3)}
+.pm-opt.current.active,.pm-opt.active{border-color:var(--b);background:var(--b3);box-shadow:0 0 0 2px var(--b3)}
+.pm-aviso{font-size:11px;color:var(--y);min-height:15px;margin:-6px 0 8px}
+.org{display:inline-block;font-size:8.5px;font-weight:800;padding:1px 5px;border-radius:4px;text-transform:uppercase;letter-spacing:.3px;vertical-align:middle;margin-left:4px}
+.org.real{background:var(--g3);color:var(--g2)}
+.org.est{background:var(--b3);color:var(--b2)}
+.org.cap{background:var(--y3);color:var(--y)}
+.sem{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:middle;background:var(--t4)}
+.sem.verde{background:var(--g)}.sem.amarillo{background:#F5B700}.sem.rojo{background:var(--r)}
+.fin-tab td.num,.fin-tab th.num{min-width:110px}
+.kpi-val{overflow-wrap:anywhere}
+#tab-finanzas .fin-row{flex-wrap:wrap;gap:6px}
+#tab-finanzas .grid2>div{min-width:0}
+.fin-tab tr.tot td{font-weight:800;border-top:1.5px solid var(--bor)}
+.fin-in{width:96px;padding:4px 6px;border:1px solid var(--bor);border-radius:6px;font-family:inherit;font-size:12px}
+.fin-in.l{width:180px}
+.tag.interna{background:#EDE7F6;color:#5E35B1}
+.fb-atendido{opacity:.55}
 .pm-opt-name{font-size:13px;font-weight:700}
 .pm-opt-price{font-size:10px;color:var(--t3)}
 .pm-motivo{width:100%;padding:9px;border:1.5px solid var(--bor);border-radius:8px;font-family:inherit;font-size:12px;resize:vertical;min-height:54px;margin-bottom:10px}
@@ -123,6 +140,7 @@ a{color:var(--b2)}
 .pm-confirm{background:var(--b);color:#fff}
 .pm-confirm:disabled{opacity:.5;cursor:not-allowed}
 .pm-status{font-size:11px;color:var(--t3);text-align:center;margin-top:8px;min-height:16px}
+@media(min-width:901px){.kpi-grid.c4{grid-template-columns:repeat(4,1fr)}}
 @media(max-width:900px){.kpi-grid{grid-template-columns:repeat(3,1fr)}.grid2{grid-template-columns:1fr}}
 @media(max-width:560px){.kpi-grid{grid-template-columns:repeat(2,1fr)}.nav{padding:8px 12px}}
 </style>
@@ -156,6 +174,7 @@ a{color:var(--b2)}
   <div class="tabs" id="tabs">
     <button class="tab-btn on" data-tab="hoy" onclick="verTab('hoy')">Hoy <span class="cnt" id="cntHoy" style="display:none"></span></button>
     <button class="tab-btn" data-tab="embudo" onclick="verTab('embudo')">Embudo y meses</button>
+    <button class="tab-btn" data-tab="finanzas" onclick="verTab('finanzas')">Finanzas <span class="cnt" id="cntFin" style="display:none"></span></button>
     <button class="tab-btn" data-tab="dinero" onclick="verTab('dinero')">Dinero</button>
     <button class="tab-btn" data-tab="cuentas" onclick="verTab('cuentas')">Cuentas</button>
     <button class="tab-btn" data-tab="bitacora" onclick="verTab('bitacora')">Bitácora</button>
@@ -195,6 +214,19 @@ a{color:var(--b2)}
     </div>
   </section>
 
+  <!-- ══ FINANZAS (S59): cada número dice su periodo y su origen ══ -->
+  <section class="tab" id="tab-finanzas">
+    <div class="section">
+      <div class="section-title">📊 Finanzas</div>
+      <div class="section-sub">Cada cifra dice su periodo (Este mes · Mes anterior · Histórico, en meses de México) y su origen: <span class="org real">Real</span> de Stripe, <span class="org est">Estimado</span> con el costo de referencia y lo que se generó, <span class="org cap">Captura</span> lo que escribes tú. Lo que no se sabe dice «sin dato», nunca $0. IVA incluido en el precio; el ISR no entra.</div>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+        <button class="btn pri" onclick="cargarFinanzas()">↻ Actualizar Finanzas</button>
+        <span id="finStatus" class="muted">Se carga al entrar.</span>
+      </div>
+    </div>
+    <div id="finOut"></div>
+  </section>
+
   <!-- ══ DINERO ══ -->
   <section class="tab" id="tab-dinero">
     <div class="section">
@@ -220,7 +252,7 @@ a{color:var(--b2)}
     </div>
     <div class="section">
       <div class="section-title">🔥 Costo estimado de proveedores</div>
-      <div class="section-sub">Estimado con el costo de referencia por modo y el historial guardado (hasta 200 generaciones por cuenta). El costo real por periodo llega en F4. Tipo de cambio USD→MXN: <input id="fxInput" type="number" min="1" step="0.01" style="width:80px;padding:3px 6px;border:1px solid var(--bor);border-radius:6px;font-family:inherit" onchange="guardarFx()"> (lo fijas tú; se guarda en este navegador).</div>
+      <div class="section-sub">Estimado con el costo de referencia calibrado y el historial guardado (hasta 200 por cuenta). El costo por mes y por tipo está en Finanzas. Tipo de cambio USD→MXN: <input id="fxInput" type="number" min="5" step="0.01" style="width:80px;padding:3px 6px;border:1px solid var(--bor);border-radius:6px;font-family:inherit" onchange="guardarFx()"> (ajuste de Finanzas: se guarda en la base y queda en la bitácora).</div>
       <div class="grid2"><div id="costoModo"></div><div id="costoCuenta"></div></div>
     </div>
     <div class="section">
@@ -239,6 +271,7 @@ a{color:var(--b2)}
       <div class="section-title">🔍 Cuentas</div>
       <div class="filters">
         <input type="text" class="search-input" id="brandSearch" placeholder="Nombre, correo, WhatsApp o id…" oninput="filterBrands()">
+        <select class="filter-sel" id="vistaFilter" onchange="filterBrands()"><option value="clientes">Clientes</option><option value="internas">Internas</option><option value="todas">Todas</option></select>
         <select class="filter-sel" id="estadoFilter" onchange="filterBrands()"><option value="">Todos los estados</option></select>
         <select class="filter-sel" id="planFilter" onchange="filterBrands()">
           <option value="">Todos los planes</option><option value="trial">Trial</option><option value="starter">Starter</option><option value="growth">Growth</option><option value="premium">Premium</option>
@@ -250,7 +283,7 @@ a{color:var(--b2)}
       </div>
       <div class="scroll" style="max-height:560px;overflow-y:auto">
         <table class="admin-table" id="brandTable">
-          <thead><tr><th>Marca</th><th>Estado</th><th>Alta</th><th>Prueba / periodo</th><th class="num">Uso</th><th>Fuente</th><th class="num">Costo</th><th>Acciones</th></tr></thead>
+          <thead><tr><th>Marca</th><th>Estado</th><th>Alta</th><th>Prueba / periodo</th><th class="num">Uso</th><th>Fuente</th><th class="num">Costo del mes</th><th class="num">Costo histórico</th><th>Acciones</th></tr></thead>
           <tbody></tbody>
         </table>
       </div>
@@ -264,7 +297,7 @@ a{color:var(--b2)}
     </div>
     <div class="section">
       <div class="section-title">🏆 Más activas en su periodo</div>
-      <div class="scroll"><table class="admin-table" id="topUsersTable"><thead><tr><th>#</th><th>Marca</th><th>Plan</th><th class="num">Gens</th><th class="num">🎬</th><th class="num">Costo</th></tr></thead><tbody></tbody></table></div>
+      <div class="scroll"><table class="admin-table" id="topUsersTable"><thead><tr><th>#</th><th>Marca</th><th>Plan</th><th class="num">Gens</th><th class="num">🎬</th><th class="num">Costo del mes</th><th class="num">Costo histórico</th></tr></thead><tbody></tbody></table></div>
     </div>
   </section>
 
@@ -313,6 +346,7 @@ a{color:var(--b2)}
     <div class="pm-warn" id="pmWarn">Esta cuenta paga en Stripe. Cambiar el plan aquí NO cambia lo que Stripe cobra: quedará como override y la conciliación lo señalará. Para cambiar lo que paga, hazlo en Stripe.</div>
     <div class="pm-options" id="pmOptions"></div>
     <textarea class="pm-motivo" id="pmMotivo" maxlength="200" placeholder="Motivo (obligatorio): p. ej. «prueba piloto con el cliente», «regresar mi cuenta de prueba»" oninput="validarPlan()"></textarea>
+    <div class="pm-aviso" id="pmAviso"></div>
     <div class="pm-btns">
       <button class="pm-cancel" onclick="closePlanModal()">Cancelar</button>
       <button class="pm-confirm" id="pmConfirm" onclick="confirmPlanChange()" disabled>Aplicar</button>
@@ -328,7 +362,7 @@ const GEN_LIMITS={trial:20,starter:40,growth:100,premium:250};
 const VIDEO_LIMITS={trial:2,starter:2,growth:8,premium:20};
 const DIA=86400000;
 const ESTADOS={'sin-cobro':'Sin cobro (Stripe)',prueba:'En prueba','prueba-vencida':'Prueba vencida','sin-prueba':'Sin prueba',pagando:'Pagando',riesgo:'Pago en riesgo',override:'Override',cancelada:'Canceló'};
-const ACCIONES={'dar-prueba':'Prueba devuelta',plan:'Cambio de plan',giro:'Giro fijado',borrar:'Cuenta borrada',pago:'Pago','pago-fallido':'Pago fallido','pago-recuperado':'Pago recuperado',cancelacion:'Cancelación','cambio-plan':'Cambio de plan (portal)','oxxo-vencido':'OXXO vencido'};
+const ACCIONES={interna:'Cuenta interna',ajuste:'Ajuste de finanzas','dar-prueba':'Prueba devuelta',plan:'Cambio de plan',giro:'Giro fijado',borrar:'Cuenta borrada',pago:'Pago','pago-fallido':'Pago fallido','pago-recuperado':'Pago recuperado',cancelacion:'Cancelación','cambio-plan':'Cambio de plan (portal)','oxxo-vencido':'OXXO vencido'};
 const DESCUADRES={
   'servicio-sin-cobro':['Servicio sin cobro','Tiene plan pagado y Stripe ya no cobra. Revisa en Stripe; si canceló, regresa la cuenta a trial con «Plan».'],
   'cobra-sin-servicio':['Cobra sin servicio','Stripe cobra y la cuenta está en prueba. Asigna el plan con «Plan» o reembolsa en Stripe.'],
@@ -343,6 +377,7 @@ const DESCUADRES={
   'cortesia-admin':['Cortesía de administración','Plan sin cobro fijado por administración. Revisa si sigue vigente.']
 };
 let adminData=null, concData=null, fbData=[], fbFilterType='all';
+let finData=null;   // S59: la respuesta de admin-finanzas (Finanzas y las alertas de proveedores en Hoy)
 
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
 function llave(){try{return sessionStorage.getItem('admin_key')||''}catch(e){return ''}}
@@ -362,16 +397,21 @@ function conLaConciliacion(lista,conc){
   const sin=new Set((conc.descuadres||[]).filter(x=>x.tipo==='servicio-sin-cobro'&&x.brandId).map(x=>x.brandId));
   return (lista||[]).map(b=>sin.has(b.brandId)?Object.assign({},b,{estado:'sin-cobro',estadoD1:b.estado}):b);
 }
+// S59 (INT-1): las cuentas internas (pruebas del operador y de amigos) no son parte del negocio: fuera de toda métrica.
+function clientes(lista){return (lista||[]).filter(b=>b&&!b.interna)}
 // FB-186: las cifras de dinero del panel. El MRR principal es el de Stripe; sin conciliar es null («sin dato»), nunca el de lista.
 function kpisDinero(d,conc){
-  const L=conLaConciliacion((d&&d.brandList)||[],conc), ok=!!(conc&&conc.success);
+  const L=clientes(conLaConciliacion((d&&d.brandList)||[],conc)), ok=!!(conc&&conc.success);
   return {pagando:L.filter(b=>b.estado==='pagando'||b.estado==='riesgo').length,sinCobro:L.filter(b=>b.estado==='sin-cobro').length,override:L.filter(b=>b.estado==='override').length,
     riesgo:L.filter(b=>b.estado==='riesgo').length,mrrReal:ok?(conc.mrr||{MXN:0,USD:0}):null,mrrLista:(d&&d.hoy&&d.hoy.mrrLista)||{MXN:0,USD:0},vivas:ok?(conc.suscripcionesVivas||0):null};
 }
 // Los proveedores cobran en USD: el costo se muestra en USD y en MXN con el tipo de cambio que fija el operador.
 function costo(usd,fx){const u=Number(usd)||0,t=Number(fx)>0?Number(fx):tipoCambio();return '$'+u.toFixed(2)+' USD · $'+(u*t).toFixed(1)+' MXN'}
-function tipoCambio(){try{const v=Number(localStorage.getItem('pm_fx'));return v>0?v:18.3}catch(e){return 18.3}}
-function guardarFx(){const v=Number(document.getElementById('fxInput').value);if(v>0){try{localStorage.setItem('pm_fx',String(v))}catch(e){}renderDinero();filterBrands();renderTop()}}
+// S59 (FIN-4): el tipo de cambio es un ajuste de D1 (Finanzas), el mismo para todos; ya no vive en el navegador.
+function tipoCambio(){const f=(finData&&finData.ajustes&&finData.ajustes.fx)||(adminData&&adminData.fx);return f&&Number(f.tc)>0?Number(f.tc):18.3}
+async function guardarFx(){const v=Number(document.getElementById('fxInput').value);if(!(v>0))return;
+  const dif=Number(((finData&&finData.ajustes&&finData.ajustes.fx)||(adminData&&adminData.fx)||{}).diferencial);
+  const r=await guardarAjuste('fx',{tc:v,diferencial:dif>=0?dif:0.03},'tipo de cambio desde Dinero');if(r&&r.success){if(adminData)adminData.fx=r.valor;renderDinero();filterBrands();renderTop()}}
 // Quien puso el plan de la cuenta (FB-186): sin esto no se sabe por que una cuenta cuenta como cliente.
 function origenPlan(b){const m={admin:'administración',stripe:'pago en Stripe','stripe-portal':'portal de Stripe','stripe-cancelled':'cancelación en Stripe','oxxo-expired':'OXXO vencido'};return b&&b.planChangedBy?(m[b.planChangedBy]||b.planChangedBy):'alta (sin cambios)'}
 function listaVista(){return conLaConciliacion((adminData&&adminData.brandList)||[],concData)}
@@ -397,7 +437,7 @@ function embudoPor(lista,clave){
 // telefono, ids de Stripe, brandId ni el texto libre de los motivos.
 function resumenAnonimo(d,conc,ahora){
   const t=typeof ahora==='number'?ahora:Date.now();
-  const lista=((d&&d.brandList)||[]).slice().sort((a,b)=>String(a.createdAt||'').localeCompare(String(b.createdAt||'')));
+  const lista=clientes((d&&d.brandList)||[]).slice().sort((a,b)=>String(a.createdAt||'').localeCompare(String(b.createdAt||'')));   // S59: sin internas
   const alias={};
   lista.forEach((b,i)=>{alias[b.brandId]='M'+String(i+1).padStart(2,'0')});
   const al=id=>(id&&alias[id])||'M??';
@@ -413,7 +453,7 @@ function resumenAnonimo(d,conc,ahora){
     cuentas:lista.map(cuenta),
     hoy:(d&&d.hoy)||null,
     fotos:((d&&d.fotos)||[]).slice(-120),
-    bitacora:((d&&d.bitacora)||[]).slice(0,150).map(x=>({dia:x.creado?diaMX(new Date(x.creado*1000).toISOString()):null,actor:x.actor,accion:x.accion,cuenta:x.brand_id?al(x.brand_id):null,antes:x.antes||null,despues:x.despues||null})),
+    bitacora:((d&&d.bitacora)||[]).slice(0,150).map(x=>({dia:x.creado?diaMX(new Date(x.creado*1000).toISOString()):null,actor:x.actor,accion:x.accion,cuenta:x.brand_id?al(x.brand_id):null,antes:x.accion==='ajuste'?null:(x.antes||null),despues:x.accion==='ajuste'?null:(x.despues||null)})),
     conciliacion:conc?{ok:!!conc.ok,mrrReal:conc.mrr||null,suscripcionesVivas:conc.suscripcionesVivas||0,cancelando:conc.cancelando||0,
       descuadres:(conc.descuadres||[]).map(x=>({tipo:x.tipo,severidad:x.severidad,cuenta:x.brandId?al(x.brandId):null}))}:null
   };
@@ -455,6 +495,7 @@ async function doAuth(){
     renderDashboard();
     loadFeedback();
     conciliar();   // FB-186: el dinero del panel lo dice Stripe; se concilia al entrar
+    cargarFinanzas();   // S59: Finanzas y las alertas de proveedores (Hoy)
   }catch(e){document.getElementById('loadingScreen').style.display='none';document.getElementById('authScreen').style.display='block';err.style.display='block';err.textContent='Error: '+e.message}
 }
 function recargar(){const k=llave();if(!k)return;document.getElementById('authKey').value=k;doAuth()}
@@ -490,7 +531,7 @@ function renderDashboard(){
 function kpi(label,val,sub,cls){return '<div class="kpi '+(cls||'')+'"><div class="kpi-label">'+label+'</div><div class="kpi-val">'+val+'</div><div class="kpi-sub">'+(sub||'')+'</div></div>'}
 function renderHoy(){
   const d=adminData, h=d.hoy||{porEstado:{},mrrLista:{}}, pe=h.porEstado||{};
-  const lista=listaVista(), ahora=Date.now(), k=kpisDinero(d,concData), ml=k.mrrLista;
+  const lista=clientes(listaVista()), ahora=Date.now(), k=kpisDinero(d,concData), ml=k.mrrLista;   // S59: sin internas
   const conc=concData&&concData.success, falla=concData&&!concData.success;
   document.getElementById('kpisHoy').innerHTML=
     kpi('Cuentas',h.marcas||lista.length,(h.registrosDia||0)+' registro(s) hoy','blue')+
@@ -502,7 +543,9 @@ function renderHoy(){
   const items=[];
   if(concData&&concData.success){
     for(const x of (concData.descuadres||[]).filter(x=>x.severidad==='P0'||x.severidad==='P1')){
-      const b=lista.find(z=>z.brandId===x.brandId)||{brandId:x.brandId,stripeCustomerId:x.customer};
+      const bi=(adminData.brandList||[]).find(z=>z.brandId===x.brandId);
+      if(bi&&bi.interna&&x.severidad!=='P0')continue;   // S59: una interna solo sale en Pendientes si hay dinero de Stripe en juego (P0)
+      const b=lista.find(z=>z.brandId===x.brandId)||bi||{brandId:x.brandId,stripeCustomerId:x.customer};
       const n=DESCUADRES[x.tipo]||[x.tipo,''];
       items.push({nivel:x.severidad,t:n[0]+(x.brandId?' · '+nombreDe(x.brandId):''),dd:esc(x.detalle)+' <span class="small">'+esc(n[1])+'</span>',a:x.brandId?contacto(b,'Tu cuenta de Postimity'):(x.customer?'<a class="btn sm" href="https://dashboard.stripe.com/customers/'+encodeURIComponent(x.customer)+'" target="_blank" rel="noopener">Stripe</a>':'')});
     }
@@ -519,6 +562,10 @@ function renderHoy(){
   for(const b of lista.filter(b=>b.estado==='prueba-vencida'&&b.trialFin&&ahora-Date.parse(b.trialFin)<=7*DIA)){
     items.push({nivel:'P2',t:'Prueba vencida sin pago · '+esc(b.name||b.brandId),dd:'Venció '+fecha(b.trialFin)+' · usó '+(b.monthlyGens||0)+'/'+(b.limiteGens||'?')+' · fuente: '+esc(fuenteDe(b)),a:contacto(b,'¿Seguimos con Postimity?')});
   }
+  // S59 (FIN-4): un proveedor sin saldo o en su límite apaga el producto: sale aquí, lo más grave primero
+  for(const p of ((finData&&finData.proveedores)||[]))for(const a of (p.alertas||[]).filter(a=>a.nivel==='P0'||a.nivel==='P1'))
+    items.push({nivel:a.nivel,t:'Proveedores · '+esc(p.nombre),dd:esc(a.texto),a:'<button class="btn sm" onclick="verTab(\'finanzas\')">Ver Finanzas</button>'});
+  if(finData&&!finData.success)items.push({nivel:'P1',t:'Finanzas no cargó',dd:esc(finData.error||'Error'),a:'<button class="btn sm" onclick="cargarFinanzas()">Reintentar</button>'});
   const giros=lista.filter(b=>b.giro&&b.giro.revisar).length;
   if(giros)items.push({nivel:'info',t:giros+' giro(s) por revisar',dd:'Marcas con giro de confianza baja.',a:'<button class="btn sm" onclick="verTab(\'cuentas\')">Revisar</button>'});
   const nuevos=fbData.filter(f=>f.status==='new').length;
@@ -536,7 +583,7 @@ function renderEmbudo(){
   const clave=document.getElementById('embAgrupar').value, dias=Number(document.getElementById('embPeriodo').value)||0;
   const gasto=Number(document.getElementById('embGasto').value)||0;
   const desde=dias?diaMX(new Date(Date.now()-dias*DIA).toISOString()):'';
-  const lista=(adminData.brandList||[]).filter(b=>!desde||diaMX(b.createdAt)>=desde);
+  const lista=clientes(adminData.brandList).filter(b=>!desde||diaMX(b.createdAt)>=desde);   // S59: sin internas
   const rows=embudoPor(lista,clave);
   const tot=rows.reduce((s,r)=>({registros:s.registros+r.registros,activadas:s.activadas+r.activadas,pagaron:s.pagaron+r.pagaron}),{registros:0,activadas:0,pagaron:0});
   const max=Math.max(1,...rows.map(r=>r.registros));
@@ -548,10 +595,11 @@ function renderEmbudo(){
     +(conGasto?'<div class="small" style="margin-top:6px">El costo se calcula solo para la fila «meta» con el gasto que escribiste. Compáralo con el costo por registro que reporta Meta: si Postimity cuenta menos registros, faltan parámetros utm en el anuncio.</div>':'');
 }
 function renderMeses(){
-  const d=adminData, lista=d.brandList||[], meses={};
+  const d=adminData, lista=clientes(d.brandList), meses={};   // S59: sin internas
   const m=k=>meses[k]||(meses[k]={mes:k,registros:0,activadas:0,pagos:0,cancelaciones:0,foto:null});
   for(const b of lista){const k=diaMX(b.createdAt).slice(0,7);if(k){m(k).registros++;if(b.activada)m(k).activadas++}if(b.primerPagoAt)m(diaMX(b.primerPagoAt).slice(0,7)).pagos++}
-  for(const x of d.bitacora||[])if(x.accion==='cancelacion'&&x.creado)m(diaMX(new Date(x.creado*1000).toISOString()).slice(0,7)).cancelaciones++;
+  const internas=new Set((d.brandList||[]).filter(b=>b.interna).map(b=>b.brandId));
+  for(const x of d.bitacora||[])if(x.accion==='cancelacion'&&x.creado&&!internas.has(x.brand_id))m(diaMX(new Date(x.creado*1000).toISOString()).slice(0,7)).cancelaciones++;
   for(const f of d.fotos||[])if(f.dia)m(f.dia.slice(0,7)).foto=f;
   const rows=Object.values(meses).filter(r=>r.mes).sort((a,b)=>b.mes.localeCompare(a.mes));
   document.getElementById('mesesTabla').innerHTML='<table class="admin-table"><thead><tr><th>Mes</th><th class="num">Registros</th><th class="num">Activadas</th><th class="num">Primeros pagos</th><th class="num">Cancelaciones</th><th class="num">Pagando al cierre</th><th class="num">En prueba al cierre</th><th class="num">MRR real al cierre</th><th class="num">MRR de lista al cierre</th></tr></thead><tbody>'
@@ -559,9 +607,159 @@ function renderMeses(){
       return '<tr><td>'+esc(r.mes)+(f?' <span class="small">(foto '+esc(f.dia)+')</span>':'')+'</td><td class="num">'+r.registros+'</td><td class="num">'+r.activadas+'</td><td class="num">'+r.pagos+'</td><td class="num">'+r.cancelaciones+'</td><td class="num">'+(f?(pe.pagando||0)+(pe.riesgo||0):'—')+'</td><td class="num">'+(f?pe.prueba||0:'—')+'</td><td class="num">'+(f&&f.mrrReal?dinero(f.mrrReal.MXN,'MXN')+(f.mrrReal.USD?' + '+dinero(f.mrrReal.USD,'USD'):''):'—')+'</td><td class="num">'+(f?dinero(ml.MXN,'MXN')+(ml.USD?' + '+dinero(ml.USD,'USD'):''):'—')+'</td></tr>'}).join(''):'<tr><td colspan="9" class="muted">Sin datos.</td></tr>')+'</tbody></table>';
 }
 
+// ── Finanzas (S59 · F4): cada número dice su periodo y su origen ──
+// Real = Stripe · Estimado = costo de referencia × lo que se generó · Captura = lo que escribes tú. null = «sin dato».
+const ORIGEN_CLASE={Real:'real',Estimado:'est',Captura:'cap'};
+function mxn(v){const n=Number(v),a=Math.abs(n),d=a<100?2:0;return (n<0?'−':'')+'$'+a.toLocaleString('es-MX',{minimumFractionDigits:d,maximumFractionDigits:d})}
+function org(o){return o?'<span class="org '+(ORIGEN_CLASE[o]||'est')+'">'+esc(o)+'</span>':''}
+function cifra(v,origen,mon){
+  if(v===null||v===undefined||!isFinite(Number(v)))return '<span class="muted">'+(origen==='Captura'?'sin captura':'sin dato')+'</span>'+org(origen);
+  return mxn(v)+' '+(mon||'MXN')+org(origen);
+}
+function pctTxt(v){return v===null||v===undefined||!isFinite(Number(v))?'<span class="muted">sin dato</span>':(Math.round(Number(v)*1000)/10)+'%'}
+function sem(s){return '<span class="sem '+esc(s||'')+'" title="'+esc(s||'sin dato')+'"></span>'}
+function mesLargo(ym){if(!ym)return '';const [y,m]=String(ym).split('-').map(Number);return ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'][m-1]+' '+y}
+function htmlFinanzas(fin){
+  if(!fin||!fin.success)return '<div class="section"><div class="ok-line" style="color:var(--r)">❌ '+esc((fin&&fin.error)||'Finanzas no respondió')+'</div></div>';
+  const P=fin.periodos||{}, st=fin.stripe||{}, aj=fin.ajustes||{}, fx=(aj.fx&&aj.fx.tc)||18.3, R=fin.resultados||{};
+  const col=[['este','Este mes',mesLargo(P.este)],['anterior','Mes anterior',mesLargo(P.anterior)],['historico','Histórico',P.desde?'desde '+mesLargo(P.desde):'']];
+  let h='';
+  // ── Bloque 1 · ¿Cuánto entra este mes? (Stripe, real)
+  const e=st.ok&&st.periodos?st.periodos.este:null, pc=st.ok?st.porCobrar:null, er=st.ok?st.enRiesgo:null;
+  const esperado=e&&pc?e.ventas+(pc.MXN||0)+(pc.USD||0)*fx:null;
+  const usd=o=>o&&o.USD?' + '+mxn(o.USD)+' USD':'';
+  h+='<div class="section"><div class="section-title">1 · ¿Cuánto entra este mes? <span class="small">'+esc(mesLargo(P.este))+' · Este mes</span></div>'
+    +'<div class="section-sub">'+(st.ok?'De Stripe: lo cobrado (con su comisión real), lo que renueva antes de fin de mes y lo que está en riesgo (pago vencido o se cancela al fin de su periodo).'+(st.incompleta?' ⚠️ Lectura incompleta.':''):'❌ '+esc(st.error||'Stripe no respondió')+': nada de este bloque se puede saber ahora.')+'</div>'
+    +'<div class="kpi-grid c4">'
+    +kpi('Cobrado a la fecha',e?mxn(e.bruto):'<span class="muted" style="font-size:16px">sin dato</span>',e?'IVA '+cifra(e.iva,'Real')+' · neto '+cifra(e.ingresoNeto,'Real')+' · comisión '+cifra(e.comision,'Real')+(e.reembolsos?' · reembolsos '+cifra(e.reembolsos,'Real'):''):org('Real'),'green')
+    +kpi('Por cobrar',pc?mxn(pc.MXN||0)+usd(pc):'<span class="muted" style="font-size:16px">sin dato</span>','renovaciones antes de fin de mes '+org('Real'),'blue')
+    +kpi('En riesgo',er?mxn(er.MXN||0)+usd(er):'<span class="muted" style="font-size:16px">sin dato</span>','pago vencido o se cancela '+org('Real'),er&&(er.MXN||er.USD)?'red':'')
+    +kpi('Esperado al cierre',esperado===null?'<span class="muted" style="font-size:16px">sin dato</span>':mxn(esperado),'cobrado neto de reembolsos + por cobrar (USD a '+fx+') '+org('Estimado'),'green')
+    +'</div>';
+  const cal=st.ok?(st.calendario||[]):null;
+  const EST_CAL={renueva:'Renueva','se-cancela':'Se cancela',riesgo:'En riesgo','oxxo-vence':'OXXO vence'};
+  h+='<div class="small" style="margin:4px 0">Calendario de cobros del mes</div>'+(cal===null?'<div class="muted">sin dato</div>':cal.length?'<div class="scroll"><table class="admin-table"><thead><tr><th>Fecha</th><th>Cuenta</th><th>Plan</th><th class="num">Monto</th><th>Estado</th></tr></thead><tbody>'
+    +cal.map(c=>'<tr><td>'+fecha(c.fecha)+'</td><td>'+esc(c.brandId?nombreDe(c.brandId):'(sin cuenta)')+'</td><td>'+esc(c.plan||'—')+'</td><td class="num">'+cifra(c.monto,'Real',c.moneda)+'</td><td>'+esc(EST_CAL[c.estado]||c.estado)+'</td></tr>').join('')+'</tbody></table></div>':'<div class="muted">Ningún cobro pendiente este mes.</div>')+'</div>';
+  // ── Bloque 2 · Estado de resultados
+  const filas=[['Ventas cobradas (con IVA)','ventas','Real'],['− IVA (incluido en el precio)','iva','Real'],['= Ingreso neto','ingresoNeto','Real',1],['− Comisión de Stripe','comision','Real'],
+    ['− IA de clientes que pagan','iaPago','Estimado'],['= Margen de contribución','margen','Estimado',1],['− IA de pruebas (adquisición)','iaPruebas','Estimado'],['− Meta','meta','Captura'],['− Costos fijos','fijos','Captura'],
+    ['= EBITDA','ebitda','Estimado',1],['IA de cuentas internas (gasto de producto, aparte)','iaInternas','Estimado'],['Resultado incluyendo producto','resultadoConProducto','Estimado',1]];
+  h+='<div class="section"><div class="section-title">2 · Estado de resultados <span class="small">MXN</span></div><div class="section-sub">Ingreso neto − comisión − IA de clientes que pagan = margen de contribución; − IA de pruebas − Meta − fijos = EBITDA. La IA de las cuentas internas va aparte. Los fijos del histórico son la tabla actual × '+(P.mesesHistorico||1)+' mes(es).</div>'
+    +'<div class="scroll"><table class="admin-table fin-tab"><thead><tr><th></th>'+col.map(c=>'<th class="num">'+c[1]+'<div class="small" style="text-transform:none">'+esc(c[2])+'</div></th>').join('')+'</tr></thead><tbody>'
+    +filas.map(f=>'<tr class="'+(f[3]?'tot':'')+'"><td>'+esc(f[0])+'</td>'+col.map(c=>'<td class="num">'+cifra(R[c[0]]?R[c[0]][f[1]]:null,f[2])+'</td>').join('')+'</tr>').join('')
+    +'<tr><td class="small">Faltan capturas</td>'+col.map(c=>{const x=(R[c[0]]&&R[c[0]].faltan)||[];return '<td class="num small">'+(x.length?'⚠️ incompleto: '+esc(x.join(', ')):'—')+'</td>'}).join('')+'</tr>'
+    +'</tbody></table></div></div>';
+  // ── Bloque 3 · Unidad económica
+  const u=fin.unidad||{}, s=u.semaforos||{}, M=fin.margenes||{}, U=u.umbrales||{conversion:{},recuperacion:{},ltvCac:{},margen:{}};
+  h+='<div class="section"><div class="section-title">3 · Unidad económica <span class="small">Histórico</span></div><div class="section-sub">Conversión de las pruebas que ya terminaron (sin internas ni pruebas vivas). CAC = (Meta + IA de pruebas) ÷ clientes nuevos. Semáforos: conversión 🟢 ≥'+Math.round((U.conversion.verde||0)*100)+'% · 🔴 &lt;'+Math.round((U.conversion.rojo||0)*100)+'%; recuperación 🟢 ≤'+(U.recuperacion.verde||'')+' · 🔴 &gt;'+(U.recuperacion.rojo||'')+' meses; lo que deja un cliente 🟢 ≥'+(U.ltvCac.verde||'')+'× su costo; margen 🔴 &lt;'+Math.round((U.margen.rojo||0)*100)+'%.</div>'
+    +'<div class="kpi-grid c4">'
+    +kpi(sem(s.conversion)+'Conversión',pctTxt(u.conversion),(u.pagaron||0)+' de '+(u.cohorte||0)+' pruebas terminadas pagaron '+org('Real'))
+    +kpi('CAC',u.cac===null||u.cac===undefined?'<span class="muted" style="font-size:16px">sin dato</span>':mxn(u.cac),(u.clientesNuevos||0)+' cliente(s) nuevo(s) · gasto de adquisición '+cifra(u.gastoAdquisicion,'Estimado'))
+    +kpi(sem(s.recuperacion)+'Meses para recuperar el CAC',u.mesesRecuperacion===null||u.mesesRecuperacion===undefined?'<span class="muted" style="font-size:16px">sin dato</span>':String(u.mesesRecuperacion),'contribución mensual por cliente '+cifra(u.contribucionMensual,'Estimado')+(u.supuestoContribucion?' · supuesto: '+esc(u.supuestoContribucion):''))
+    +kpi(sem(s.ltvCac)+'Lo que deja un cliente ÷ su costo',u.ltvCac===null||u.ltvCac===undefined?'<span class="muted" style="font-size:16px">sin dato</span>':u.ltvCac+'×','LTV '+cifra(u.ltv,'Estimado')+' con '+pctTxt(u.churn)+' de cancelación mensual '+org('Captura'))
+    +'</div><div class="scroll"><table class="admin-table"><thead><tr><th>Plan</th><th class="num">Precio</th><th class="num">Neto (sin IVA ni comisión)</th><th class="num">IA al tope</th><th class="num">Deja al tope</th><th class="num">Margen al tope</th></tr></thead><tbody>'
+    +['starter','growth','premium'].map(p=>{const m=M[p];return m?'<tr><td>'+sem(m.semaforo)+esc(p[0].toUpperCase()+p.slice(1))+'</td><td class="num">'+mxn(m.precio)+'</td><td class="num">'+cifra(m.neto,'Estimado')+'</td><td class="num">'+cifra(m.iaTope,'Estimado')+'</td><td class="num">'+cifra(m.contribucionTope,'Estimado')+'</td><td class="num">'+pctTxt(m.margenTope)+'</td></tr>':''}).join('')
+    +'</tbody></table></div></div>';
+  // ── Bloque 4 · Proveedores
+  const pv=fin.proveedores||[], C=fin.consumo||{}, ce=C.este||{}, estMes=['pago','prueba','interna'].reduce((t,k)=>t+((ce[k]&&ce[k].costo)||0),0);
+  const real=pv.filter(p=>p.capturado).reduce((t,p)=>t+(Number(p.gasto)||0),0);
+  h+='<div class="section"><div class="section-title">4 · Proveedores <span class="small">Este mes · captura semanal</span></div><div class="section-sub">Sin saldo o al llegar a su límite, el proveedor deja de responder y el producto deja de generar. Alerta: saldo para menos de 7 días sin recarga automática, gasto sobre 80% del límite o captura de más de 7 días.</div>'
+    +'<div class="small" style="margin-bottom:8px">Gasto capturado este mes '+cifra(pv.some(p=>p.capturado)?real:null,'Captura','USD')+' · estimado por el registro de consumo '+cifra(estMes,'Estimado','USD')+(estMes>0&&real>0?' · factor de calibración <b>'+(Math.round(real/estMes*100)/100)+'</b> (si se aleja de 1, ajusta el costo de referencia)':'')+'</div>'
+    +'<div class="scroll"><table class="admin-table"><thead><tr><th>Proveedor</th><th class="num">Gasto del mes (USD)</th><th class="num">Límite</th><th class="num">Saldo</th><th>Recarga</th><th class="num">Días que cubre</th><th>Alertas</th><th></th></tr></thead><tbody>'
+    +pv.map(p=>{const v=x=>x===null||x===undefined?'':x;return '<tr><td style="font-weight:700">'+esc(p.nombre)+'<div class="small">'+(p.fecha?'captura '+fecha(p.fecha):'sin captura')+'</div></td>'
+      +'<td class="num"><input class="fin-in" id="pv-g-'+esc(p.id)+'" type="number" min="0" step="0.01" value="'+v(p.gasto)+'"></td>'
+      +'<td class="num"><input class="fin-in" id="pv-l-'+esc(p.id)+'" type="number" min="0" step="1" placeholder="sin límite" value="'+v(p.limite)+'">'+(p.pctLimite!==null&&p.pctLimite!==undefined?'<div class="small">'+pctTxt(p.pctLimite)+'</div>':'')+'</td>'
+      +'<td class="num"><input class="fin-in" id="pv-s-'+esc(p.id)+'" type="number" step="0.01" placeholder="pospago" value="'+v(p.saldo)+'"></td>'
+      +'<td><label class="small"><input type="checkbox" id="pv-r-'+esc(p.id)+'"'+(p.recargaAuto?' checked':'')+'> automática</label></td>'
+      +'<td class="num">'+(p.diasCubre===null||p.diasCubre===undefined?'<span class="muted">—</span>':p.diasCubre)+'</td>'
+      +'<td>'+((p.alertas||[]).map(a=>'<div><span class="sev '+esc(a.nivel)+'">'+esc(a.nivel)+'</span> <span class="small">'+esc(a.texto)+'</span></div>').join('')||'<span class="ok-line">✅</span>')+'</td>'
+      +'<td><button class="btn sm" data-pid="'+esc(p.id)+'" onclick="guardarProveedor(this.dataset.pid)">Guardar</button></td></tr>'}).join('')
+    +'</tbody></table></div></div>';
+  // ── Consumo por tipo
+  const TIP=[['pago','Clientes que pagan'],['prueba','Pruebas (adquisición)'],['interna','Internas (producto)']];
+  h+='<div class="section"><div class="section-title">Consumo registrado <span class="small">generaciones · videos · costo estimado</span></div><div class="section-sub">Cada generación o video cobrado deja su costo con el costo de referencia vigente. '+(fin.reconstruido?'El histórico anterior al registro ya se reconstruyó desde el historial (aproximado).':'⚠️ El histórico anterior al registro aún no se reconstruye.')+' <button class="btn sm" onclick="reconstruirHistorico()">Reconstruir histórico desde el historial</button></div>'
+    +'<div class="scroll"><table class="admin-table"><thead><tr><th></th>'+col.map(c=>'<th class="num">'+c[1]+'</th>').join('')+'</tr></thead><tbody>'
+    +TIP.map(t=>'<tr><td>'+t[1]+'</td>'+col.map(c=>{const x=(C[c[0]]||{})[t[0]]||{gens:0,videos:0,costo:0};return '<td class="num">'+x.gens+' · 🎬 '+x.videos+'<div class="small">'+cifra(x.costo,'Estimado','USD')+'</div></td>'}).join('')+'</tr>').join('')
+    +'</tbody></table></div></div>';
+  // ── Captura
+  const meta=aj.meta||{}, fijos=aj.fijos||[], cr=aj.costoRef||{}, fxa=aj.fx||{};
+  const filaFijo=(x,i)=>'<tr><td><input class="fin-in l" id="fj-c-'+i+'" maxlength="60" value="'+esc(x.concepto||'')+'" placeholder="Concepto"></td><td><input class="fin-in" id="fj-m-'+i+'" type="number" min="0" step="0.01" value="'+(x.monto===undefined?'':x.monto)+'"></td>'
+    +'<td><select class="fin-in" id="fj-mon-'+i+'"><option'+(x.moneda==='MXN'?' selected':'')+'>MXN</option><option'+(x.moneda==='USD'?' selected':'')+'>USD</option></select></td>'
+    +'<td><select class="fin-in" id="fj-per-'+i+'"><option value="mes"'+(x.periodo!=='año'?' selected':'')+'>al mes</option><option value="año"'+(x.periodo==='año'?' selected':'')+'>al año</option></select></td>'
+    +'<td><label class="small"><input type="checkbox" id="fj-iva-'+i+'"'+(x.iva?' checked':'')+'> con IVA</label></td></tr>';
+  h+='<div class="section"><div class="section-title">Captura <span class="small">'+org('Captura')+' se guarda en la base y cada cambio queda en la bitácora</span></div>'
+    +'<div class="filters"><input class="search-input" id="finMotivo" maxlength="200" placeholder="Fuente o motivo del dato (p. ej. «factura de octubre»)" style="max-width:420px"></div>'
+    +'<div class="grid2"><div>'
+    +'<div class="small" style="font-weight:700;margin-bottom:4px">Gasto en Meta (MXN, como lo cobra Meta)</div>'
+    +[P.este,P.anterior].map(m=>'<div class="fin-row"><div class="fin-label">'+esc(mesLargo(m))+' '+(meta[m]?cifra(meta[m].monto,'Captura'):cifra(null,'Captura'))+'</div><div><input class="fin-in" id="mt-'+esc(m)+'" type="number" min="0" step="1" value="'+(meta[m]?meta[m].monto:'')+'"> <label class="small"><input type="checkbox" id="mti-'+esc(m)+'"'+(!meta[m]||meta[m].iva?' checked':'')+'> con IVA</label> <button class="btn sm" data-mes="'+esc(m)+'" onclick="guardarMeta(this.dataset.mes)">Guardar</button></div></div>').join('')
+    +'<div class="small" style="font-weight:700;margin:12px 0 4px">Supuestos y referencia</div>'
+    +'<div class="fin-row"><div class="fin-label">Tipo de cambio USD→MXN · diferencial</div><div><input class="fin-in" id="aj-tc" type="number" min="5" step="0.01" value="'+(fxa.tc||'')+'"> <input class="fin-in" id="aj-dif" type="number" min="0" max="0.2" step="0.005" value="'+(fxa.diferencial===undefined?'':fxa.diferencial)+'"> <button class="btn sm" onclick="guardarSupuesto(\'fx\')">Guardar</button></div></div>'
+    +'<div class="fin-row"><div class="fin-label">Costo de referencia (USD): generación · video de 5 s</div><div><input class="fin-in" id="aj-gen" type="number" min="0.001" step="0.001" value="'+(cr.gen||'')+'"> <input class="fin-in" id="aj-vid" type="number" min="0.01" step="0.01" value="'+(cr.video||'')+'"> <button class="btn sm" onclick="guardarSupuesto(\'costoRef\')">Guardar</button></div></div>'
+    +'<div class="fin-row"><div class="fin-label">Cancelación mensual supuesta (0.08 = 8%)</div><div><input class="fin-in" id="aj-churn" type="number" min="0.005" max="0.9" step="0.005" value="'+(aj.churn||'')+'"> <button class="btn sm" onclick="guardarSupuesto(\'churn\')">Guardar</button></div></div>'
+    +'</div><div>'
+    +'<div class="small" style="font-weight:700;margin-bottom:4px">Costos fijos</div>'
+    +'<div class="scroll"><table class="admin-table" id="fijosTabla"><tbody>'+fijos.map(filaFijo).join('')+filaFijo({moneda:'MXN',periodo:'mes'},fijos.length)+'</tbody></table></div>'
+    +'<div class="small" style="margin:4px 0">Para quitar un concepto, borra su nombre. La fila vacía de abajo agrega uno.</div><button class="btn sm pri" data-n="'+(fijos.length+1)+'" onclick="guardarFijos(Number(this.dataset.n))">Guardar costos fijos</button>'
+    +'</div></div></div>';
+  return h;
+}
+async function cargarFinanzas(){
+  const st=document.getElementById('finStatus'); if(st){st.textContent='⏳ Leyendo Stripe, consumo y ajustes…';st.style.color='var(--b2)';}
+  try{
+    const r=await fetch(WORKER,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mode:'admin-finanzas',adminKey:llave()})});
+    finData=await r.json();
+  }catch(e){finData={success:false,error:e.message}}
+  renderFinanzas();
+  if(adminData){renderHoy();renderDinero();}
+}
+function renderFinanzas(){
+  const st=document.getElementById('finStatus'), out=document.getElementById('finOut'); if(!out)return;
+  out.innerHTML=htmlFinanzas(finData);
+  if(st){st.textContent=finData&&finData.success?'Datos: '+fechaHora(finData.generadoEn)+(finData.stripe&&!finData.stripe.ok?' · ⚠️ Stripe no respondió':''):'❌ '+((finData&&finData.error)||'Sin datos');st.style.color=finData&&finData.success?'var(--t3)':'var(--r)';}
+  const graves=((finData&&finData.proveedores)||[]).reduce((n,p)=>n+(p.alertas||[]).filter(a=>a.nivel==='P0'||a.nivel==='P1').length,0), cnt=document.getElementById('cntFin');
+  if(cnt){cnt.style.display=graves?'inline-block':'none';cnt.textContent=graves;}
+}
+function motivoFin(def){const el=document.getElementById('finMotivo');const v=el&&el.value.trim();return v&&v.length>=4?v:def}
+async function guardarAjuste(clave,valor,motivo){
+  try{
+    const r=await fetch(WORKER,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mode:'admin-ajuste',adminKey:llave(),clave,valor,motivo})});
+    const d=await r.json();
+    if(!d.success){alert('❌ '+(d.error||'No se pudo guardar'));return d;}
+    if(d.bitacora===false)alert('Se guardó, pero NO quedó en la bitácora. Anótalo a mano.');
+    await cargarFinanzas();
+    return d;
+  }catch(e){alert('❌ Error: '+e.message);return null}
+}
+const numDe=id=>{const el=document.getElementById(id);const v=el?String(el.value).trim():'';return v===''?null:Number(v)};
+function guardarMeta(mes){const m=numDe('mt-'+mes);if(m===null){alert('Escribe el gasto de Meta de '+mesLargo(mes)+'.');return;}guardarAjuste('meta:'+mes,{monto:m,iva:!!document.getElementById('mti-'+mes).checked},motivoFin('captura de Meta'))}
+function guardarSupuesto(clave){
+  if(clave==='fx')return guardarAjuste('fx',{tc:numDe('aj-tc'),diferencial:numDe('aj-dif')||0},motivoFin('tipo de cambio'));
+  if(clave==='costoRef')return guardarAjuste('costoRef',{gen:numDe('aj-gen'),video:numDe('aj-vid')},motivoFin('recalibración con facturas'));
+  if(clave==='churn')return guardarAjuste('churn',numDe('aj-churn'),motivoFin('supuesto de cancelación'));
+}
+function guardarFijos(n){
+  const out=[];
+  for(let i=0;i<n;i++){const c=document.getElementById('fj-c-'+i);if(!c||!c.value.trim())continue;
+    out.push({concepto:c.value.trim(),monto:numDe('fj-m-'+i)||0,moneda:document.getElementById('fj-mon-'+i).value,periodo:document.getElementById('fj-per-'+i).value,iva:!!document.getElementById('fj-iva-'+i).checked});}
+  guardarAjuste('fijos',out,motivoFin('tabla de costos fijos'));
+}
+function guardarProveedor(id){
+  const g=numDe('pv-g-'+id);if(g===null){alert('Escribe el gasto del mes (USD) que dice el panel del proveedor.');return;}
+  guardarAjuste('proveedor:'+id,{gasto:g,limite:numDe('pv-l-'+id),saldo:numDe('pv-s-'+id),recargaAuto:!!document.getElementById('pv-r-'+id).checked},motivoFin('captura semanal'));
+}
+async function reconstruirHistorico(){
+  const st=document.getElementById('finStatus'); if(st){st.textContent='⏳ Reconstruyendo desde el historial…';st.style.color='var(--b2)';}
+  try{
+    const r=await fetch(WORKER,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mode:'admin-reconstruir-consumo',adminKey:llave()})});
+    const d=await r.json();
+    alert(d.success?'✅ '+d.insertadas+' generación(es) anteriores al registro agregadas (revisadas '+d.revisadas+'). Repetirlo no duplica nada.':'❌ '+(d.error||'No se pudo'));
+  }catch(e){alert('❌ Error: '+e.message)}
+  cargarFinanzas();
+}
+
 // ── Dinero ──
 function renderDinero(){
-  const d=adminData, lista=listaVista(), k=kpisDinero(d,concData), ml=k.mrrLista, real=k.mrrReal;
+  const d=adminData, lista=clientes(listaVista()), k=kpisDinero(d,concData), ml=k.mrrLista, real=k.mrrReal;
   const pagan=lista.filter(b=>b.estado==='pagando'||b.estado==='riesgo');
   document.getElementById('ingresos').innerHTML=
     '<div class="fin-row"><div class="fin-label"><b>MRR real (Stripe)</b></div><div class="fin-val" style="color:var(--g2)">'+(real?dinero(real.MXN,'MXN')+(real.USD?' + '+dinero(real.USD,'USD'):''):'<span class="muted">sin dato: concilia</span>')+'</div></div>'
@@ -576,8 +774,8 @@ function renderDinero(){
   const modos={post:'Post',enhance:'Estudio Pro',flyer:'Flyer',testimonial:'Testimonio',carousel:'Carrusel',video:'Video'}, ac=d.apiCosts||{};
   document.getElementById('costoModo').innerHTML=Object.entries(d.modeCounts||{}).map(([m,c])=>'<div class="fin-row"><div class="fin-label">'+(modos[m]||m)+' ('+c+' × $'+(ac[m]||0.05).toFixed(3)+' USD)</div><div class="fin-val">'+costo((ac[m]||0.05)*c)+'</div></div>').join('')
     +'<div class="fin-row" style="font-weight:800"><div class="fin-label">Total estimado</div><div class="fin-val">'+costo(d.totalApiCost||0)+'</div></div>';
-  const top=lista.filter(b=>b.cost>0).sort((a,b)=>b.cost-a.cost).slice(0,8);
-  document.getElementById('costoCuenta').innerHTML=top.length?top.map(b=>'<div class="fin-row"><div class="fin-label">'+esc(b.name)+' <span class="tag est '+esc(b.estado)+'">'+esc(ESTADOS[b.estado]||b.estado)+'</span></div><div class="fin-val">'+costo(b.cost)+'</div></div>').join(''):'<div class="muted">Sin generaciones.</div>';
+  const top=listaVista().filter(b=>b.costoHist>0).sort((a,b)=>b.costoHist-a.costoHist).slice(0,8);
+  document.getElementById('costoCuenta').innerHTML=top.length?'<div class="small" style="margin-bottom:4px">Costo histórico (mes en curso) · del registro de consumo</div>'+top.map(b=>'<div class="fin-row"><div class="fin-label">'+esc(b.name)+' <span class="tag est '+esc(b.estado)+'">'+esc(ESTADOS[b.estado]||b.estado)+'</span>'+(b.interna?' <span class="tag interna">interna</span>':'')+'</div><div class="fin-val">'+costo(b.costoHist)+' <span class="small">('+costo(b.costoMes||0)+')</span></div></div>').join(''):'<div class="muted">Sin consumo registrado.</div>';
 }
 async function conciliar(){
   const st=document.getElementById('concStatus'), out=document.getElementById('concOut');
@@ -615,8 +813,11 @@ function llenarFiltros(){
 function filterBrands(){
   if(!adminData)return;
   const q=(document.getElementById('brandSearch').value||'').toLowerCase().trim();
+  const vista=document.getElementById('vistaFilter').value||'clientes';   // S59 (INT-1): Clientes | Internas | Todas
   const f={estado:document.getElementById('estadoFilter').value,plan:document.getElementById('planFilter').value,pais:document.getElementById('paisFilter').value,giro:document.getElementById('giroFilter').value,fuente:document.getElementById('fuenteFilter').value,mes:document.getElementById('mesFilter').value};
   const filtered=listaVista().filter(b=>{
+    if(vista==='clientes'&&b.interna)return false;
+    if(vista==='internas'&&!b.interna)return false;
     if(f.estado&&b.estado!==f.estado)return false;
     if(f.plan&&(b.plan||'trial')!==f.plan)return false;
     if(f.pais&&b.country!==f.pais)return false;
@@ -632,14 +833,15 @@ function filterBrands(){
     const per=b.estado==='prueba'||b.estado==='prueba-vencida'?(b.trialFin?'Prueba hasta '+fecha(b.trialFin):'—'):(plan!=='trial'?'Renueva '+fecha(b.periodoFin):'—');
     const giro=b.giro&&b.giro.nombre?b.giro.nombre+(b.giro.scian?' · SCIAN '+b.giro.scian:'')+' · '+(b.giro.confianza||''):(b.nicho||'general');
     const o=b.origen||{};
-    return '<tr><td style="font-weight:600;min-width:180px">'+esc(b.name||'Sin nombre')+'<div class="small">'+esc(b.email||'')+(b.whatsapp?' · '+esc(b.whatsapp):'')+'</div><div class="small" title="Giro que escribió el dueño → giro que reconoce el servidor (FB-164)">'+esc(b.type||'—')+' → '+esc(giro)+'</div></td>'
+    return '<tr><td style="font-weight:600;min-width:180px">'+esc(b.name||'Sin nombre')+(b.interna?' <span class="tag interna">interna</span>':'')+'<div class="small">'+esc(b.email||'')+(b.whatsapp?' · '+esc(b.whatsapp):'')+'</div><div class="small" title="Giro que escribió el dueño → giro que reconoce el servidor (FB-164)">'+esc(b.type||'—')+' → '+esc(giro)+'</div></td>'
       +'<td><span class="tag est '+esc(b.estado)+'">'+esc(ESTADOS[b.estado]||b.estado||'—')+'</span><div style="margin-top:3px"><span class="tag plan-tag '+esc(plan)+'">'+esc(plan)+'</span></div>'+'<div class="small">puso el plan: '+esc(origenPlan(b))+(b.planChangedAt?' · '+fecha(b.planChangedAt):'')+'</div>'+(b.estadoD1?'<div class="small" style="color:var(--r)">D1 dice «'+esc(ESTADOS[b.estadoD1]||b.estadoD1)+'»</div>':'')+'</td>'
       +'<td style="white-space:nowrap">'+fecha(b.createdAt)+'<div class="small">'+esc(b.country||'')+'</div></td>'
       +'<td style="white-space:nowrap">'+per+(b.primerPagoAt?'<div class="small">1.er pago '+fecha(b.primerPagoAt)+'</div>':'')+'</td>'
       +'<td class="num" style="min-width:80px">'+uso+'</td>'
       +'<td>'+esc(fuenteDe(b))+(o.campaign?'<div class="small">'+esc(o.campaign)+'</div>':'')+'</td>'
-      +'<td class="num" style="white-space:nowrap">'+(b.cost>0?costo(b.cost):'—')+'</td>'
-      +'<td style="white-space:nowrap">'+(b.estado==='sin-prueba'?'<button class="btn sm pri" data-bid="'+esc(b.brandId)+'" onclick="darPrueba(this.dataset.bid)">Dar prueba</button> ':'')+'<button class="btn sm" data-bid="'+esc(b.brandId)+'" onclick="openPlanModal(this.dataset.bid)">Plan</button> <button class="btn sm del" data-bid="'+esc(b.brandId)+'" onclick="deleteBrand(this.dataset.bid)">🗑</button>'+(b.stripeCustomerId?' <a class="btn sm" href="https://dashboard.stripe.com/customers/'+encodeURIComponent(b.stripeCustomerId)+'" target="_blank" rel="noopener">Stripe</a>':'')+'</td></tr>';
+      +'<td class="num" style="white-space:nowrap">'+(b.costoMes>0?costo(b.costoMes):'—')+'</td>'
+      +'<td class="num" style="white-space:nowrap">'+(b.costoHist>0?costo(b.costoHist):'—')+'</td>'
+      +'<td style="white-space:nowrap">'+(b.estado==='sin-prueba'?'<button class="btn sm pri" data-bid="'+esc(b.brandId)+'" onclick="darPrueba(this.dataset.bid)">Dar prueba</button> ':'')+'<button class="btn sm" data-bid="'+esc(b.brandId)+'" onclick="openPlanModal(this.dataset.bid)">Plan</button> <button class="btn sm" data-bid="'+esc(b.brandId)+'" onclick="marcarInterna(this.dataset.bid)" title="Las internas no cuentan en ninguna métrica">'+(b.interna?'Es cliente':'Interna')+'</button> <button class="btn sm del" data-bid="'+esc(b.brandId)+'" onclick="deleteBrand(this.dataset.bid)">🗑</button>'+(b.stripeCustomerId?' <a class="btn sm" href="https://dashboard.stripe.com/customers/'+encodeURIComponent(b.stripeCustomerId)+'" target="_blank" rel="noopener">Stripe</a>':'')+'</td></tr>';
   }).join('');
   document.getElementById('brandCount').textContent='Mostrando '+Math.min(filtered.length,200)+' de '+filtered.length+' cuentas';
 }
@@ -669,33 +871,52 @@ async function fijarGiro(brandId){
   }catch(e){alert('Error de red: '+e.message);}
 }
 function renderTop(){
-  document.querySelector('#topUsersTable tbody').innerHTML=(adminData.topUsers||[]).map((u,i)=>{const gl=GEN_LIMITS[u.plan]||GEN_LIMITS.trial,vl=VIDEO_LIMITS[u.plan]||VIDEO_LIMITS.trial;
-    return '<tr><td style="font-weight:800;color:var(--b)">'+(i+1)+'</td><td style="font-weight:600">'+esc(u.name)+'</td><td><span class="tag plan-tag '+esc(u.plan)+'">'+esc(u.plan)+'</span></td><td class="num">'+(u.monthlyGens||0)+'<span class="small"> /'+gl+'</span></td><td class="num">'+(u.monthlyVideos||0)+'<span class="small"> /'+vl+'</span></td><td class="num" style="white-space:nowrap">'+costo(u.cost||0)+'</td></tr>'}).join('');
+  document.querySelector('#topUsersTable tbody').innerHTML=clientes(adminData.topUsers).map((u,i)=>{const gl=GEN_LIMITS[u.plan]||GEN_LIMITS.trial,vl=VIDEO_LIMITS[u.plan]||VIDEO_LIMITS.trial;
+    return '<tr><td style="font-weight:800;color:var(--b)">'+(i+1)+'</td><td style="font-weight:600">'+esc(u.name)+'</td><td><span class="tag plan-tag '+esc(u.plan)+'">'+esc(u.plan)+'</span></td><td class="num">'+(u.monthlyGens||0)+'<span class="small"> /'+gl+'</span></td><td class="num">'+(u.monthlyVideos||0)+'<span class="small"> /'+vl+'</span></td><td class="num" style="white-space:nowrap">'+costo(u.costoMes||0)+'</td><td class="num" style="white-space:nowrap">'+costo(u.costoHist||0)+'</td></tr>'}).join('');
 }
 
 // ── Cambiar plan (override) con motivo ──
-let pmBrandId=null, pmCurrentPlan=null, pmSelectedPlan=null, pmMarcable=false;
+let pmBrandId=null, pmCurrentPlan=null, pmSelectedPlan=null, pmMarcable=false, pmCuenta=null;
+// S59 (ADM-9): lo que el modal dice y permite, en una función. b = la cuenta CONCILIADA (listaVista): el encabezado dice el
+// estado que manda Stripe. El mismo plan de pago se marca como override; el aviso amarillo sale solo al CAMBIAR el plan de
+// quien paga; sin motivo no se aplica y se dice por qué.
+function modalPlan(b,seleccion,motivo){
+  const x=b||{}, actual=x.plan||'trial', marcable=actual!=='trial'&&x.planChangedBy!=='admin', paga=x.estado==='pagando'||x.estado==='riesgo';
+  const mismo=!!seleccion&&seleccion===actual, okMotivo=String(motivo||'').trim().length>=4;
+  return {
+    encabezado:(x.name||'Sin nombre')+' ('+String(x.brandId||'').slice(0,8)+'…) · '+(ESTADOS[x.estado]||x.estado||'—'),
+    marcable, warn:!!seleccion&&!mismo&&paga,
+    boton:mismo?'Marcar override':'Aplicar',
+    aviso:!seleccion?'Elige un plan'+(marcable?' (tocar el plan actual lo marca como override)':'')+'.':(!okMotivo?'Escribe el motivo (mínimo 4 letras): queda en la bitácora.':''),
+    habilitado:!!seleccion&&okMotivo&&(!mismo||marcable)
+  };
+}
+function pintarModalPlan(){
+  const m=modalPlan(pmCuenta,pmSelectedPlan,document.getElementById('pmMotivo').value);
+  document.getElementById('pmBrand').textContent=m.encabezado;
+  document.getElementById('pmWarn').style.display=m.warn?'block':'none';
+  document.getElementById('pmAviso').textContent=m.aviso;
+  const btn=document.getElementById('pmConfirm'); btn.disabled=!m.habilitado; btn.textContent=m.boton;
+}
 function openPlanModal(brandId){
-  const b=(adminData.brandList||[]).find(x=>x.brandId===brandId); if(!b)return;
-  pmBrandId=brandId; pmCurrentPlan=b.plan||'trial'; pmSelectedPlan=null;
-  pmMarcable=pmCurrentPlan!=='trial'&&b.planChangedBy!=='admin';   // FB-186: el mismo plan se puede marcar como override
-  document.getElementById('pmBrand').textContent=(b.name||'Sin nombre')+' ('+brandId.slice(0,8)+'…) · '+(ESTADOS[b.estado]||b.estado);
-  document.getElementById('pmWarn').style.display=(b.estado==='pagando'||b.estado==='riesgo')?'block':'none';
+  const b=listaVista().find(x=>x.brandId===brandId); if(!b)return;   // conciliada: el estado que dice Stripe
+  pmBrandId=brandId; pmCuenta=b; pmCurrentPlan=b.plan||'trial'; pmSelectedPlan=null;
+  pmMarcable=modalPlan(b,null,'').marcable;   // FB-186: el mismo plan se puede marcar como override
   document.getElementById('pmStatus').textContent='';
   document.getElementById('pmMotivo').value='';
-  document.getElementById('pmConfirm').disabled=true;document.getElementById('pmConfirm').textContent='Aplicar';
   const plans=[{key:'trial',name:'Trial',price:'Gratis'},{key:'starter',name:'Starter',price:'$199 MXN'},{key:'growth',name:'Growth',price:'$399 MXN'},{key:'premium',name:'Premium',price:'$899 MXN'}];
   document.getElementById('pmOptions').innerHTML=plans.map(p=>{const cur=p.key===pmCurrentPlan;
-    return '<div class="pm-opt'+(cur?' current':'')+'" onclick="selectPlan(\''+p.key+'\',this)" data-plan="'+p.key+'"><div class="pm-opt-name">'+p.name+(cur?' ✓':'')+'</div><div class="pm-opt-price">'+(cur&&pmMarcable?'tocar = marcar override':p.price)+'</div></div>'}).join('');
+    return '<div class="pm-opt'+(cur?' current':'')+'" onclick="selectPlan(\''+p.key+'\',this)" data-plan="'+p.key+'"><div class="pm-opt-name">'+p.name+(cur?' · actual':'')+'</div><div class="pm-opt-price">'+(cur&&pmMarcable?'tocar = marcar override':p.price)+'</div></div>'}).join('');
+  pintarModalPlan();
   document.getElementById('planModal').classList.add('show');
 }
-function closePlanModal(){document.getElementById('planModal').classList.remove('show');pmBrandId=null;pmSelectedPlan=null}
-function validarPlan(){document.getElementById('pmConfirm').disabled=!(pmSelectedPlan&&document.getElementById('pmMotivo').value.trim().length>=4)}
+function closePlanModal(){document.getElementById('planModal').classList.remove('show');pmBrandId=null;pmSelectedPlan=null;pmCuenta=null}
+function validarPlan(){pintarModalPlan()}
 function selectPlan(plan,el){
   if(plan===pmCurrentPlan&&!pmMarcable)return;
   pmSelectedPlan=plan;
   document.querySelectorAll('.pm-opt').forEach(o=>o.classList.toggle('active',o.dataset.plan===plan));
-  validarPlan();
+  pintarModalPlan();
 }
 async function confirmPlanChange(){
   const motivo=document.getElementById('pmMotivo').value.trim();
@@ -709,8 +930,8 @@ async function confirmPlanChange(){
       status.textContent='✅ '+data.message+(data.bitacora===false?' · ⚠️ no quedó en la bitácora: anótalo a mano':'');
       status.style.color='var(--g2)'; btn.textContent='Listo';
       setTimeout(()=>{closePlanModal();recargar();},1400);
-    }else{status.textContent='❌ '+(data.error||'No se pudo');status.style.color='var(--r)';btn.textContent='Aplicar';btn.disabled=false;}
-  }catch(e){status.textContent='❌ '+e.message;status.style.color='var(--r)';btn.textContent='Aplicar';btn.disabled=false;}
+    }else{status.textContent='❌ '+(data.error||'No se pudo');status.style.color='var(--r)';pintarModalPlan();}
+  }catch(e){status.textContent='❌ '+e.message;status.style.color='var(--r)';pintarModalPlan();}
 }
 
 // ── Dar prueba (FB-188): a una cuenta que entro «sin prueba», con motivo y bitacora ──
@@ -720,6 +941,19 @@ async function darPrueba(brandId){
   if(!motivo)return;
   try{
     const res=await fetch(WORKER,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mode:'admin-dar-prueba',adminKey:llave(),brandId,motivo})});
+    const data=await res.json();
+    alert((data.success?'✅ ':'❌ ')+(data.message||data.error||'No se pudo')+(data.bitacora===false?'\n⚠️ No quedó en la bitácora: anótalo a mano.':''));
+    if(data.success)recargar();
+  }catch(e){alert('❌ Error: '+e.message)}
+}
+// ── Cuenta interna (S59 · INT-1): fuera de KPIs, embudo, Pendientes, foto y resumen; con motivo y bitácora ──
+async function marcarInterna(brandId){
+  const b=(adminData.brandList||[]).find(x=>x.brandId===brandId)||{name:brandId};
+  const quiere=!b.interna;
+  const motivo=(prompt((quiere?'Marcar como INTERNA':'Regresar a CLIENTE')+' "'+b.name+'".\n'+(quiere?'Deja de contar en KPIs, embudo, Pendientes, foto diaria y resumen; su consumo pasa a gasto de producto.':'Vuelve a contar en todas las métricas.')+'\n\nMotivo (queda en la bitácora):',quiere?'cuenta de prueba del operador':'es un cliente real')||'').trim();
+  if(!motivo)return;
+  try{
+    const res=await fetch(WORKER,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mode:'admin-interna',adminKey:llave(),brandId,interna:quiere,motivo})});
     const data=await res.json();
     alert((data.success?'✅ ':'❌ ')+(data.message||data.error||'No se pudo')+(data.bitacora===false?'\n⚠️ No quedó en la bitácora: anótalo a mano.':''));
     if(data.success)recargar();
@@ -741,12 +975,18 @@ async function deleteBrand(brandId){
 }
 
 // ── Bitácora ──
+// S59 (ADM-9): antes/después se leen como frase: las fechas ISO salen como fecha y hora de aquí; un objeto anidado, resumido.
+function legibleBitacora(s){
+  if(!s)return '—';
+  let o; try{o=JSON.parse(s)}catch(e){return String(s)}
+  const v=x=>x===null||x===undefined?'—':(typeof x==='string'&&/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(x))?fechaHora(x):(typeof x==='object'?(Array.isArray(x)?x.length+' concepto(s)':Object.entries(x).map(([k,y])=>k+' '+(typeof y==='object'&&y!==null?'…':y)).join(', ')):String(x));
+  return o&&typeof o==='object'?Object.entries(o).map(([k,x])=>k+': '+v(x)).join(' · '):v(o);
+}
 function renderBitacora(){
   const actor=document.getElementById('bitActor').value;
   const rows=(adminData.bitacora||[]).filter(x=>!actor||x.actor===actor);
-  const corto=s=>{if(!s)return '—';try{const o=JSON.parse(s);return Object.entries(o).map(([k,v])=>k+': '+v).join(' · ')}catch(e){return String(s)}};
   document.getElementById('bitacoraTabla').innerHTML='<table class="admin-table"><thead><tr><th>Cuándo</th><th>Quién</th><th>Qué</th><th>Cuenta</th><th>Antes → después</th><th>Motivo</th></tr></thead><tbody>'
-    +(rows.length?rows.map(x=>'<tr><td style="white-space:nowrap">'+fechaHora(new Date((x.creado||0)*1000).toISOString())+'</td><td>'+esc(x.actor)+'</td><td style="font-weight:600">'+esc(ACCIONES[x.accion]||x.accion)+'</td><td>'+(x.brand_id?'<a href="#" data-bid="'+esc(x.brand_id)+'" onclick="verCuenta(this.dataset.bid);return false">'+esc(nombreDe(x.brand_id))+'</a>':'—')+'</td><td>'+esc(corto(x.antes))+' → '+esc(corto(x.despues))+'</td><td>'+esc(x.motivo||'')+'</td></tr>').join(''):'<tr><td colspan="6" class="muted">Sin movimientos todavía (la bitácora existe desde S58, oct 2026).</td></tr>')+'</tbody></table>';
+    +(rows.length?rows.map(x=>'<tr><td style="white-space:nowrap">'+fechaHora(new Date((x.creado||0)*1000).toISOString())+'</td><td>'+esc(x.actor)+'</td><td style="font-weight:600">'+esc(ACCIONES[x.accion]||x.accion)+'</td><td>'+(x.brand_id?'<a href="#" data-bid="'+esc(x.brand_id)+'" onclick="verCuenta(this.dataset.bid);return false">'+esc(nombreDe(x.brand_id))+'</a>':'—')+'</td><td>'+esc(legibleBitacora(x.antes))+' → '+esc(legibleBitacora(x.despues))+'</td><td>'+esc(x.motivo||'')+'</td></tr>').join(''):'<tr><td colspan="6" class="muted">Sin movimientos todavía (la bitácora existe desde S58, oct 2026).</td></tr>')+'</tbody></table>';
 }
 
 // ── Resumen anónimo (ADM-7) ──
@@ -780,7 +1020,17 @@ function renderFb(){
   // S38-11: el estado vacio se pinta como contenido de wrap, no como un elemento aparte que sobreviva al innerHTML.
   if(filtered.length===0){wrap.innerHTML='<div class="muted" style="text-align:center;padding:20px" id="fbEmpty">Sin comentarios</div>';return;}
   const typeIcon={suggestion:'💡',issue:'🛠️'};
-  wrap.innerHTML=filtered.map(f=>'<div style="border:1px solid var(--bor);border-radius:10px;padding:12px;margin-bottom:8px"><div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;flex-wrap:wrap"><span>'+(typeIcon[f.type]||'💬')+'</span><b>'+esc(f.brandName||'Anónimo')+'</b><span class="tag est cancelada">'+esc(f.category||'other')+'</span><span class="tag plan-tag '+esc(f.plan||'trial')+'">'+esc(f.plan||'trial')+'</span><span style="flex:1"></span><span class="small">'+fechaHora(f.createdAt)+'</span></div><div style="white-space:pre-wrap;line-height:1.6">'+esc(f.message)+'</div>'+(f.email?'<div class="small" style="margin-top:4px">📧 '+esc(f.email)+'</div>':'')+'</div>').join('');
+  // S59 (ADM-9): cada comentario se da por atendido (o se reabre); los atendidos se ven apagados y no cuentan en Hoy
+  wrap.innerHTML=filtered.map(f=>{const at=f.status==='atendido';return '<div class="'+(at?'fb-atendido':'')+'" style="border:1px solid var(--bor);border-radius:10px;padding:12px;margin-bottom:8px"><div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;flex-wrap:wrap"><span>'+(typeIcon[f.type]||'💬')+'</span><b>'+esc(f.brandName||'Anónimo')+'</b><span class="tag est cancelada">'+esc(f.category||'other')+'</span><span class="tag plan-tag '+esc(f.plan||'trial')+'">'+esc(f.plan||'trial')+'</span>'+(at?'<span class="tag est pagando">✓ Atendido</span>':'')+'<span style="flex:1"></span><span class="small">'+fechaHora(f.createdAt)+'</span> <button class="btn sm'+(at?'':' pri')+'" data-fid="'+esc(f.id)+'" data-est="'+(at?'new':'atendido')+'" onclick="atenderComentario(this.dataset.fid,this.dataset.est)">'+(at?'Reabrir':'✓ Atendido')+'</button></div><div style="white-space:pre-wrap;line-height:1.6">'+esc(f.message)+'</div>'+(f.email?'<div class="small" style="margin-top:4px">📧 '+esc(f.email)+'</div>':'')+'</div>'}).join('');
+}
+async function atenderComentario(id,estado){
+  try{
+    const r=await fetch(WORKER,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mode:'admin-feedback-estado',adminKey:llave(),id,estado:estado||'atendido'})});
+    const d=await r.json();
+    if(!d.success){alert('❌ '+(d.error||'No se pudo'));return;}
+    const f=fbData.find(x=>x.id===id); if(f)f.status=d.status;
+    renderFb(); renderHoy();
+  }catch(e){alert('❌ Error: '+e.message)}
 }
 function filterFb(type,btn){
   fbFilterType=type;
