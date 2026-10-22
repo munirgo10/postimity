@@ -7,7 +7,7 @@
    Etiquetas en lineas propias: el extractor de sintaxis del preflight (G2) lee los scripts por lineas. */
 if(location.protocol==='http:'&&/(^|\.)postimity\.com$/.test(location.hostname))location.replace('https://'+location.host+location.pathname+location.search+location.hash);
 </script>
-<meta name="app-version" content="2.57.0">
+<meta name="app-version" content="2.57.2">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Postimity Studio — Tu estudio de contenido con IA</title>
 <meta name="description" content="Crea posts, flyers, carruseles y videos profesionales con IA. Describe tu negocio una vez y genera contenido listo para publicar en 20 segundos.">
@@ -1624,12 +1624,12 @@ fbq('track', 'PageView');
     <div class="style-sel-wrap" id="styleSel">
       <div class="style-sel-label">Estilo de imagen generada</div>
       <div class="style-btns">
-        <button class="style-btn" id="sPhoto" onclick="setImageStyle('photo',this)">
+        <button class="style-btn active" id="sPhoto" onclick="setImageStyle('photo',this)">
           <span class="sb-icon">📸</span>
           <span class="sb-name">Fotorrealista</span>
           <span class="sb-desc">Persona o situación genérica</span>
         </button>
-        <button class="style-btn active" id="sIllus" onclick="setImageStyle('illustrated',this)">
+        <button class="style-btn" id="sIllus" onclick="setImageStyle('illustrated',this)">
           <span class="sb-icon">🎨</span>
           <span class="sb-name">Ilustrado</span>
           <span class="sb-desc">Gráfico colorido, sin personas</span>
@@ -2518,7 +2518,7 @@ function persistSlides(imgs) {
 }
 
 // APP_VERSION (S34) — deploy verification. Must match worker /version and all HTML files.
-const APP_VERSION = '2.57.0'; // historial en ESTADO.md (§7a.1 y PARTE 10)
+const APP_VERSION = '2.57.2'; // historial en ESTADO.md (§7a.1 y PARTE 10)
 window.APP_VERSION = APP_VERSION;
 // El log de version vive unas lineas mas abajo (console.info). No agregar otro aqui:
 // S38 borro POSTIMITY_VERSION para tener un solo log y este lo volvio a duplicar.
@@ -3179,7 +3179,7 @@ function t(key) { const lang = detectLanguage(); return (T[lang] || T.es)[key] |
 // ║  STATE VARIABLES                                 ║
 // ╚═══════════════════════════════════════════════════╝
 // ── STATE ───────────────────────────────────────────────────
-let mode = 'post', platform = 'instagram', pillar = 'General', flyerMode = 'ai', imageStyle = 'illustrated';
+let mode = 'post', platform = 'instagram', pillar = 'General', flyerMode = 'ai', imageStyle = 'photo';   // S59b (operador, 22 oct): abre en Fotorrealista (STY-1)
 let brandId = null; // Phase 2: unique brand identifier for KV sync
 // FB-143 (S55k): la pagina recuerda si ya tuvo una sesion. Cambiar de cuenta sobre una pagina usada dejaba a la
 // vista el ultimo resultado, los interruptores y el plan de la cuenta anterior. Lo marca applyBrand, un solo sitio.
@@ -4127,6 +4127,9 @@ async function cropGalleryPhoto(photo, id, fmtFijo) {
 // ║  INIT — DOMContentLoaded                        ║
 // ╚═══════════════════════════════════════════════════╝
 window.addEventListener('DOMContentLoaded', async () => {
+  // S59b (CAMPOS-3, operador 22 oct): iOS recarga una pestaña dormida y restaura lo escrito; lo «ya usado» (FB-131) vivía en
+  // memoria y se perdió. Lo primero, antes de esperar nada: el creador arranca vacío (el formulario de la marca no se toca).
+  vaciarControles(CAMPOS_DEL_CREADOR);
   setupUploads();
   showSeasonalAlert();
 
@@ -4998,7 +5001,7 @@ function updateStyleSelector() {
   // For testimonials: force abstract (hidden from user)
   if (mode === 'testimonial') { imageStyle = 'abstract'; }
   else if (mode === 'enhance') { /* no style selector for real photo */ }
-  else if (!visible && imageStyle === 'abstract') { imageStyle = 'illustrated'; } // reset if switching away
+  else if (!visible && imageStyle === 'abstract') { imageStyle = 'photo'; } // reset if switching away (STY-1)
 }
 // ─── COLOR POKAYOKE ──────────────────────────────────
 function applyPalette(p, s, a) {
@@ -8549,7 +8552,7 @@ function renderAgentPlan(plan) {
   const summary = document.getElementById('agentSummary');
   if(summary) summary.innerHTML = '📋 <strong>' + (plan.month||'') + '</strong> · ' + (plan.totalPosts||0) + ' posts · ' + (plan.summary||'') +
     // D57 · B: el plan dice su costo con el saldo que leyo el servidor al generarlo
-    (plan.cost ? '<div class="agent-cost-line" style="margin:8px 0 0">' + agentCostText(plan.cost, plan.cost.gensLeft, plan.cost.videosLeft, plan.cost.fits === false ? plan.cost.suggestedFreq : null) + '</div>' : '');
+    (plan.cost ? '<div class="agent-cost-line" style="margin:8px 0 0">' + agentCostText(plan.cost, null, null, plan.cost.fits === false ? plan.cost.suggestedFreq : null) + '</div>' : '');
 
   const container = document.getElementById('agentPlanContent');
   if(!container) return;
