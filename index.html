@@ -16,7 +16,7 @@ function reenviarAlEstudio(loc) {
 }
 try { reenviarAlEstudio(location); } catch (e) {}
 </script>
-<meta name="app-version" content="2.56.1">
+<meta name="app-version" content="2.57.0">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>¿No sabes qué publicar? Postimity sí.</title>
 <meta name="description" content="Postimity crea tu estrategia, planea tu mes y genera posts, flyers, carruseles y videos con la voz de tu marca. Sin diseñador. Sin agencia. Desde $199 MXN/mes.">
@@ -177,6 +177,7 @@ body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--bg);c
 
 /* ═══ PRICING ═══ */
 .pricing-section{background:linear-gradient(175deg,#F5F8FF 0%,var(--bg) 100%)}
+.launch-note{max-width:640px;margin:0 auto 22px;padding:10px 16px;border-radius:12px;background:#FFF4E0;color:#7A4A00;font-size:14px;text-align:center;line-height:1.5}
 .pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;max-width:940px;margin:0 auto}
 .price-card{background:var(--white);border:1.5px solid var(--bor);border-radius:20px;padding:36px 24px 28px;text-align:center;position:relative;transition:.25s}
 .price-card:hover{transform:translateY(-4px);box-shadow:0 12px 36px rgba(0,0,0,.08)}
@@ -467,6 +468,8 @@ function track(...args) {
   <div class="section-label" data-es="Precios" data-en="Pricing">Precios</div>
   <h2 class="section-title" data-es="Simple. Transparente. Sin sorpresas." data-en="Simple. Transparent. No surprises.">Simple. Transparente. Sin sorpresas.</h2>
   <p class="section-sub" data-es="1 generación = 1 contenido completo. Sin créditos confusos. Sabes exactamente lo que tienes." data-en="1 generation = 1 complete content. No confusing credits. You know exactly what you have.">1 generación = 1 contenido completo. Sin créditos confusos. Sabes exactamente lo que tienes.</p>
+  <!-- S59 (LANZ-1): «precio de lanzamiento» solo aqui; sin precio anterior inventado (LFPC art. 32); la promesa vive en el contrato §2.2 -->
+  <div class="launch-note" data-es="🚀 <strong>Precio de lanzamiento.</strong> Quien se suscribe ahora conserva este precio mientras mantenga su suscripción activa." data-en="🚀 <strong>Launch pricing.</strong> Subscribe now and keep this price for as long as your subscription stays active.">🚀 <strong>Precio de lanzamiento.</strong> Quien se suscribe ahora conserva este precio mientras mantenga su suscripción activa.</div>
   <div class="pricing-grid">
     <div class="price-card">
       <div class="price-name">Starter</div>
