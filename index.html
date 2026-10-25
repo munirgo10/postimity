@@ -16,7 +16,7 @@ function reenviarAlEstudio(loc) {
 }
 try { reenviarAlEstudio(location); } catch (e) {}
 </script>
-<meta name="app-version" content="2.57.2">
+<meta name="app-version" content="2.57.4">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>¿No sabes qué publicar? Postimity sí.</title>
 <meta name="description" content="Postimity crea tu estrategia, planea tu mes y genera posts, flyers, carruseles y videos con la voz de tu marca. Sin diseñador. Sin agencia. Desde $199 MXN/mes.">
@@ -178,6 +178,10 @@ body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--bg);c
 /* ═══ PRICING ═══ */
 .pricing-section{background:linear-gradient(175deg,#F5F8FF 0%,var(--bg) 100%)}
 .launch-note{max-width:640px;margin:0 auto 22px;padding:10px 16px;border-radius:12px;background:#FFF4E0;color:#7A4A00;font-size:14px;text-align:center;line-height:1.5}
+.foto-real{display:flex;gap:16px;align-items:flex-start;max-width:760px;margin:28px auto 0;padding:20px 22px;border-radius:16px;background:#E8F5E9;border:1px solid #C8E6C9;text-align:left}
+.foto-real-icon{font-size:34px;line-height:1}
+.foto-real h3{font-size:18px;font-weight:800;margin-bottom:6px}
+.foto-real p{font-size:14.5px;line-height:1.6;color:#374151}
 .pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;max-width:940px;margin:0 auto}
 .price-card{background:var(--white);border:1.5px solid var(--bor);border-radius:20px;padding:36px 24px 28px;text-align:center;position:relative;transition:.25s}
 .price-card:hover{transform:translateY(-4px);box-shadow:0 12px 36px rgba(0,0,0,.08)}
@@ -329,7 +333,7 @@ function track(...args) {
   <div class="hero-content">
     <div class="hero-badge">✦ <span data-es="Impulsado por IA" data-en="Powered by AI">Impulsado por IA</span></div>
     <h1 data-es="¿No sabes qué publicar? <span class='accent'>Postimity sí.</span>" data-en="Don't know what to post? <span class='accent'>Postimity does.</span>">¿No sabes qué publicar? <span class="accent">Postimity sí.</span></h1>
-    <p class="hero-sub" data-es="Postimity crea tu estrategia, planea tu mes completo y genera contenido profesional en 20 segundos. Tú solo publicas. Sin diseñador. Sin agencia. Sin Canva." data-en="Postimity creates your strategy, plans your entire month and generates professional content in 20 seconds. You just publish. No designer. No agency. No Canva.">Postimity crea tu estrategia, planea tu mes completo y genera contenido profesional en 20 segundos. Tú solo publicas. Sin diseñador. Sin agencia. Sin Canva.</p>
+    <p class="hero-sub" data-es="Postimity conoce tu negocio, arma tu estrategia y te entrega <strong>el plan de todo tu mes</strong>. Cada día abres tu plan, tocas <strong>«Crear»</strong> y en un minuto tienes tu post listo para publicar, con tu marca y hasta con <strong>tus propias fotos</strong>." data-en="Postimity learns your business, builds your strategy and hands you <strong>your whole month's plan</strong>. Each day you open your plan, tap <strong>«Create»</strong> and in a minute your post is ready to publish, with your brand and even <strong>your own photos</strong>.">Postimity conoce tu negocio, arma tu estrategia y te entrega <strong>el plan de todo tu mes</strong>. Cada día abres tu plan, tocas <strong>«Crear»</strong> y en un minuto tienes tu post listo para publicar, con tu marca y hasta con <strong>tus propias fotos</strong>.</p>
     <div class="hero-ctas">
       <a href="studio.html" class="btn-hero" data-es="Crear mi estrategia gratis →" data-en="Create my strategy free →">Crear mi estrategia gratis →</a>
       <a href="#como" class="btn-demo" data-es="Ver cómo funciona" data-en="See how it works">Ver cómo funciona</a>
@@ -337,7 +341,7 @@ function track(...args) {
     <div class="hero-trust">
       <span data-es="✓ Sin tarjeta de crédito" data-en="✓ No credit card">✓ Sin tarjeta de crédito</span>
       <span data-es="✓ 20 generaciones gratis" data-en="✓ 20 free generations">✓ 20 generaciones gratis</span>
-      <span data-es="✓ Listo en 2 min" data-en="✓ Ready in 2 min">✓ Listo en 2 min</span>
+      <span data-es="✓ Tu plan del mes en minutos" data-en="✓ Your month planned in minutes">✓ Tu plan del mes en minutos</span>
     </div>
   </div>
 
@@ -345,7 +349,7 @@ function track(...args) {
     <div class="product-showcase">
       <!-- Floating context cards -->
       <div class="float-card float-1"><span class="float-icon">📋</span> <span data-es="Plan mensual completo" data-en="Full monthly plan">Plan mensual completo</span></div>
-      <div class="float-card float-2"><span class="float-icon">⚡</span> <span data-es="20 seg por post" data-en="20 sec per post">20 seg por post</span></div>
+      <div class="float-card float-2"><span class="float-icon">⚡</span> <span data-es="Cada post en un toque" data-en="Every post in one tap">Cada post en un toque</span></div>
       <div class="float-card float-3"><span class="float-icon">🧠</span> <span data-es="Estrategia con IA" data-en="AI-powered strategy">Estrategia con IA</span></div>
 
       <!-- Phone mockup -->
@@ -405,7 +409,7 @@ function track(...args) {
     <div class="contrast-card with">
       <div class="contrast-label" data-es="✓ Con Postimity" data-en="✓ With Postimity">✓ Con Postimity</div>
       <ul class="contrast-items">
-        <li data-es="⚡ 20 segundos por post completo" data-en="⚡ 20 seconds per complete post">⚡ 20 segundos por post completo</li>
+        <li data-es="⚡ Tu plan del mes y cada post listo en un minuto" data-en="⚡ Your month planned and every post ready in a minute">⚡ Tu plan del mes y cada post listo en un minuto</li>
         <li data-es="💰 Desde $199 MXN/mes (~$11 USD)" data-en="💰 Starting at $11 USD/month">💰 Desde $199 MXN/mes (~$11 USD)</li>
         <li data-es="🎯 Siempre con tu voz y estilo" data-en="🎯 Always in your voice and style">🎯 Siempre con tu voz y estilo</li>
         <li data-es="📈 Contenido diario para 3 plataformas" data-en="📈 Daily content for 3 platforms">📈 Contenido diario para 3 plataformas</li>
@@ -417,8 +421,8 @@ function track(...args) {
 <!-- HOW IT WORKS -->
 <section class="section fade-up" id="como">
   <div class="section-label" data-es="Cómo funciona" data-en="How it works">Cómo funciona</div>
-  <h2 class="section-title" data-es="Tu estrategia lista en 2 minutos" data-en="Your strategy ready in 2 minutes">Tu estrategia lista en 2 minutos</h2>
-  <p class="section-sub" data-es="Sin tutoriales ni curvas de aprendizaje. Cuéntale a la IA sobre tu negocio y ella hace el resto." data-en="No tutorials or learning curves. Tell the AI about your business and it does the rest.">Sin tutoriales ni curvas de aprendizaje. Cuéntale a la IA sobre tu negocio y ella hace el resto.</p>
+  <h2 class="section-title" data-es="Así trabaja tu community manager con IA" data-en="How your AI community manager works">Así trabaja tu community manager con IA</h2>
+  <p class="section-sub" data-es="Tú pones lo que solo tú sabes de tu negocio. Postimity pone la estrategia, el plan y el diseño. Tú decides qué se publica." data-en="You bring what only you know about your business. Postimity brings the strategy, the plan and the design. You decide what gets published.">Tú pones lo que solo tú sabes de tu negocio. Postimity pone la estrategia, el plan y el diseño. Tú decides qué se publica.</p>
   <div class="steps">
     <div class="step">
       <div class="step-num">1</div>
@@ -437,9 +441,17 @@ function track(...args) {
     <div class="step">
       <div class="step-num">3</div>
       <div class="step-icon">🚀</div>
-      <h3 data-es="Genera y publica" data-en="Generate and publish">Genera y publica</h3>
-      <p data-es="Un toque genera imagen + captions para Instagram, Facebook y TikTok. Otro toque y estás publicando. Posts, flyers, carruseles y videos." data-en="One tap generates image + captions for Instagram, Facebook and TikTok. Another tap and you're publishing. Posts, flyers, carousels and videos.">Un toque genera imagen + captions para Instagram, Facebook y TikTok. Otro toque y estás publicando. Posts, flyers, carruseles y videos.</p>
-      <div class="step-time" data-es="20 seg" data-en="20 sec">20 seg</div>
+      <h3 data-es="Cada día, un toque" data-en="Every day, one tap">Cada día, un toque</h3>
+      <p data-es="Abres el post del día en tu plan y tocas «Crear»: imagen y textos para Instagram, Facebook y TikTok, listos para copiar y publicar. ¿Tienes una foto de tu negocio? Úsala." data-en="Open today's post in your plan and tap «Create»: image and captions for Instagram, Facebook and TikTok, ready to copy and publish. Got a photo of your business? Use it.">Abres el post del día en tu plan y tocas «Crear»: imagen y textos para Instagram, Facebook y TikTok, listos para copiar y publicar. ¿Tienes una foto de tu negocio? Úsala.</p>
+      <div class="step-time" data-es="~1 min por post" data-en="~1 min per post">~1 min por post</div>
+    </div>
+  </div>
+  <!-- S59b: empuje a Estudio Pro (fotos reales del negocio) -->
+  <div class="foto-real">
+    <div class="foto-real-icon">📸</div>
+    <div>
+      <h3 data-es="¿Ya tienes fotos de tu negocio? Úsalas." data-en="Already have photos of your business? Use them.">¿Ya tienes fotos de tu negocio? Úsalas.</h3>
+      <p data-es="Toma una foto con tu celular —tu platillo, tu local, tu producto o tu equipo— y <strong>Estudio Pro</strong> la deja con calidad de anuncio y escribe los textos a partir de lo que se ve en ella. Es tu negocio real, no un modelo de IA: eso es lo que genera confianza." data-en="Snap a photo with your phone —your dish, your shop, your product or your team— and <strong>Pro Studio</strong> gives it ad quality and writes the captions from what's in it. It's your real business, not an AI model: that's what builds trust.">Toma una foto con tu celular —tu platillo, tu local, tu producto o tu equipo— y <strong>Estudio Pro</strong> la deja con calidad de anuncio y escribe los textos a partir de lo que se ve en ella. Es tu negocio real, no un modelo de IA: eso es lo que genera confianza.</p>
     </div>
   </div>
 </section>
@@ -449,7 +461,7 @@ function track(...args) {
   <div class="features-inner">
     <div class="section-label" data-es="Tu equipo de marketing con IA" data-en="Your AI marketing team">Tu equipo de marketing con IA</div>
     <h2 class="section-title" data-es="Estrategia + ejecución. Todo resuelto." data-en="Strategy + execution. All handled.">Estrategia + ejecución. Todo resuelto.</h2>
-    <p class="section-sub" data-es="Primero la IA crea tu estrategia y planea tu mes. Después genera todo el contenido. Tú solo publicas." data-en="First AI creates your strategy and plans your month. Then generates all the content. You just publish.">Primero la IA crea tu estrategia y planea tu mes. Después genera todo el contenido. Tú solo publicas.</p>
+    <p class="section-sub" data-es="Primero la IA crea tu estrategia y planea tu mes. Después tú creas cada pieza en un toque, con IA o con tus propias fotos, y la publicas." data-en="First AI creates your strategy and plans your month. Then you create each piece in one tap, with AI or your own photos, and publish it.">Primero la IA crea tu estrategia y planea tu mes. Después tú creas cada pieza en un toque, con IA o con tus propias fotos, y la publicas.</p>
     <div class="features-grid">
       <div class="feat-card wide"><div class="feat-icon">🧠</div><h3 data-es="Brand Guide con IA — Tu estrategia de marketing" data-en="AI Brand Guide — Your marketing strategy">Brand Guide con IA — Tu estrategia de marketing</h3><p data-es="Cuéntale sobre tu negocio y la IA crea tu estrategia completa: voz de marca, 5 pilares de contenido, enfoque por plataforma y hashtags permanentes. Todo personalizado a tu giro." data-en="Tell it about your business and AI creates your complete strategy: brand voice, 5 content pillars, per-platform approach and permanent hashtags. All customized to your industry.">Cuéntale sobre tu negocio y la IA crea tu estrategia completa: voz de marca, 5 pilares de contenido, enfoque por plataforma y hashtags permanentes. Todo personalizado a tu giro.</p><span class="feat-badge live">✓ Live</span></div>
       <div class="feat-card wide"><div class="feat-icon">📋</div><h3 data-es="Marketing Agent — Tu plan mensual" data-en="Marketing Agent — Your monthly plan">Marketing Agent — Tu plan mensual</h3><p data-es="Cada mes recibes un plan completo: 20+ posts organizados por plataforma, pilar y festividades de tu país. Cada post listo para generar en un toque." data-en="Every month you get a complete plan: 20+ posts organized by platform, pillar and your country's holidays. Each post ready to generate in one tap.">Cada mes recibes un plan completo: 20+ posts organizados por plataforma, pilar y festividades de tu país. Cada post listo para generar en un toque.</p><span class="feat-badge live">✓ Live</span></div>
@@ -545,7 +557,7 @@ function track(...args) {
 <section style="padding:0 24px 40px">
   <div class="final-cta">
     <h2 data-es="Tu negocio merece marketing profesional" data-en="Your business deserves professional marketing">Tu negocio merece marketing profesional</h2>
-    <p data-es="Estrategia + plan mensual + contenido profesional. Todo listo en 2 minutos. Sin tarjeta de crédito." data-en="Strategy + monthly plan + professional content. All ready in 2 minutes. No credit card.">Estrategia + plan mensual + contenido profesional. Todo listo en 2 minutos. Sin tarjeta de crédito.</p>
+    <p data-es="Tu estrategia y el plan de tu mes, listos en minutos. Después, cada post en un toque, con tu marca y tus fotos. Sin tarjeta de crédito." data-en="Your strategy and your month's plan, ready in minutes. Then every post in one tap, with your brand and your photos. No credit card.">Tu estrategia y el plan de tu mes, listos en minutos. Después, cada post en un toque, con tu marca y tus fotos. Sin tarjeta de crédito.</p>
     <a href="studio.html" class="btn-white" data-es="Crear mi estrategia gratis →" data-en="Create my strategy free →">Crear mi estrategia gratis →</a>
     <div class="final-note" data-es="7 días gratis · 20 generaciones + 2 videos · Sin compromiso" data-en="7 free days · 20 generations + 2 videos · No commitment">7 días gratis · 20 generaciones + 2 videos · Sin compromiso</div>
   </div>
