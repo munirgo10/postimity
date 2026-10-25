@@ -8,7 +8,7 @@
 if(location.protocol==='http:'&&/(^|\.)postimity\.com$/.test(location.hostname))location.replace('https://'+location.host+location.pathname+location.search+location.hash);
 </script>
 <meta name="robots" content="noindex, nofollow"><!-- S55n: el panel no aparece en buscadores -->
-<meta name="app-version" content="2.57.2">
+<meta name="app-version" content="2.57.4">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Postimity · Administración</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232979FF'/%3E%3Ccircle cx='16' cy='16' r='5' fill='%23fff'/%3E%3C/svg%3E">
@@ -208,6 +208,21 @@ a{color:var(--b2)}
       <div class="scroll" id="embudoTabla"></div>
     </div>
     <div class="section">
+      <div class="section-title">🧭 Activación: alta → Guía de Marca → plan del mes → 1.ª generación → 3 o más → descargó o publicó</div>
+      <div class="section-sub"><span>Cuántas cuentas llegaron a cada paso (no tienen que ir en orden). «Descargó o publicó» = mandó una pieza a Instagram, Facebook o TikTok, o la descargó; copiar el texto y cancelar se cuentan aparte. Ese paso se mide solo en las cuentas con dato. Sin internas.</span> <span id="actDesde"></span></div>
+      <div class="filters">
+        <select class="filter-sel" id="actAgrupar" onchange="renderActivacion()">
+          <option value="total">Todas juntas</option><option value="fuente">Por fuente</option><option value="campana">Por campaña</option><option value="mes">Por mes de alta</option>
+        </select>
+        <select class="filter-sel" id="actPeriodo" onchange="renderActivacion()">
+          <option value="0">Todo el historial</option><option value="7">Últimos 7 días</option><option value="30" selected>Últimos 30 días</option><option value="90">Últimos 90 días</option>
+        </select>
+      </div>
+      <div class="scroll" id="activacionTabla"></div>
+      <div class="section-sub" style="margin-top:14px"><b>Cada cuenta</b> · ✓ sí · ✗ no · · sin dato. «Le falta» es el primer paso que no ha dado: ahí se le escribe.</div>
+      <div class="scroll" id="activacionCuentas"></div>
+    </div>
+    <div class="section">
       <div class="section-title">📅 Mes a mes</div>
       <div class="section-sub">Registros, activaciones y primeros pagos salen de cada cuenta; cancelaciones, de la bitácora; «al cierre», de la foto diaria (existe desde S58, oct 2026: los meses anteriores no la tienen).</div>
       <div class="scroll" id="mesesTabla"></div>
@@ -283,7 +298,7 @@ a{color:var(--b2)}
       </div>
       <div class="scroll" style="max-height:560px;overflow-y:auto">
         <table class="admin-table" id="brandTable">
-          <thead><tr><th>Marca</th><th>Estado</th><th>Alta</th><th>Prueba / periodo</th><th class="num">Uso</th><th>Fuente</th><th class="num">Costo del mes</th><th class="num">Costo histórico</th><th>Acciones</th></tr></thead>
+          <thead><tr><th>Marca</th><th>Estado</th><th>Alta</th><th>Prueba / periodo</th><th class="num">Uso</th><th>Activación</th><th>Fuente</th><th class="num">Costo del mes</th><th class="num">Costo histórico</th><th>Acciones</th></tr></thead>
           <tbody></tbody>
         </table>
       </div>
@@ -443,12 +458,14 @@ function resumenAnonimo(d,conc,ahora){
   const al=id=>(id&&alias[id])||'M??';
   const cuenta=b=>({alias:al(b.brandId),estado:b.estado||null,plan:b.plan||'trial',pais:b.country||null,giro:(b.giro&&b.giro.clase)||'general',fuente:fuenteDe(b),campana:(b.origen&&b.origen.campaign)||null,
     alta:diaMX(b.createdAt)||null,finPrueba:b.trialFin?diaMX(b.trialFin):null,primerPago:b.primerPagoAt?diaMX(b.primerPagoAt):null,riesgoDesde:b.paymentAtRiskSince?diaMX(b.paymentAtRiskSince):null,
-    usoPeriodo:Number(b.monthlyGens)||0,limite:b.limiteGens||null,videos:Number(b.monthlyVideos)||0,activada:!!b.activada,costoEstimadoUSD:Number(b.cost)||0});
+    usoPeriodo:Number(b.monthlyGens)||0,limite:b.limiteGens||null,videos:Number(b.monthlyVideos)||0,activada:!!b.activada,costoEstimadoUSD:Number(b.cost)||0,
+    guias:Number(b.guias)||0,planes:Number(b.planes)||0,planGuardado:(b.planesGuardados||[]).length>0,generaciones:Number(b.gens)||0,   // S60 (ACT-3)
+    salidas:b.salidas?{red:b.salidas.red,descarga:b.salidas.descarga,copiar:b.salidas.copiar,cancelado:b.salidas.cancelado}:null,activacion:b.activacion||null});
   const conteo=(arr,f)=>arr.reduce((o,x)=>{const k=f(x);o[k]=(o[k]||0)+1;return o},{});
   return {
     tipo:'postimity-resumen',version:1,generado:new Date(t).toISOString(),datosDel:(d&&d.generatedAt)||null,duracionPruebaDias:(d&&d.trialDias)||null,
     totales:{cuentas:lista.length,porEstado:conteo(lista,b=>b.estado||'?'),porPlan:conteo(lista,b=>b.plan||'trial'),porPais:conteo(lista,b=>b.country||'?'),porFuente:conteo(lista,fuenteDe)},
-    embudo:{porFuente:embudoPor(lista,'fuente'),porCampana:embudoPor(lista,'campana'),porDia:embudoPor(lista,'dia').slice(0,45),porMes:embudoPor(lista,'mes')},
+    embudo:{porFuente:embudoPor(lista,'fuente'),porCampana:embudoPor(lista,'campana'),porDia:embudoPor(lista,'dia').slice(0,45),porMes:embudoPor(lista,'mes'),activacion:embudoActivacion(lista,'fuente')},
     pruebasPorVencer:pruebasPorVencer(lista,t,3).map(cuenta),
     cuentas:lista.map(cuenta),
     hoy:(d&&d.hoy)||null,
@@ -520,6 +537,7 @@ function renderDashboard(){
   llenarFiltros();
   renderHoy();
   renderEmbudo();
+  renderActivacion();
   renderMeses();
   renderDinero();
   filterBrands();
@@ -593,6 +611,44 @@ function renderEmbudo(){
   document.getElementById('embudoTabla').innerHTML='<table class="admin-table"><thead><tr><th>'+({fuente:'Fuente',campana:'Campaña',dia:'Día',mes:'Mes'}[clave])+'</th><th class="num">Registros</th><th class="num">Activadas</th><th class="num">Pagaron</th>'+(conGasto?'<th class="num">Costo / registro</th><th class="num">Costo / pago</th>':'')+'</tr></thead><tbody>'
     +(rows.length?rows.map(r=>fila(r)).join('')+fila(Object.assign({grupo:'Total'},tot),true):'<tr><td colspan="6" class="muted">Sin registros en el periodo.</td></tr>')+'</tbody></table>'
     +(conGasto?'<div class="small" style="margin-top:6px">El costo se calcula solo para la fila «meta» con el gasto que escribiste. Compáralo con el costo por registro que reporta Meta: si Postimity cuenta menos registros, faltan parámetros utm en el anuncio.</div>':'');
+}
+// ── Activación (S60 · ACT-3): los pasos los decide el servidor (pasosDeActivacion); aquí solo se cuentan y se pintan ──
+const PASOS_ACTIVACION=[['guia','Guía de Marca'],['plan','Plan del mes'],['gen1','1.ª generación'],['gen3','3 o más'],['salida','Descargó o publicó']];
+// Por grupo (fuente, campaña, mes de alta o todas): cuántas cuentas llegaron a cada paso. La salida se mide sobre las que tienen dato.
+function embudoActivacion(lista,clave){
+  const g={};
+  for(const b of lista||[]){
+    const k=clave==='fuente'?fuenteDe(b):clave==='campana'?((b.origen&&b.origen.campaign)||'—'):clave==='mes'?(diaMX(b.createdAt).slice(0,7)||'—'):'Todas';
+    const r=g[k]||(g[k]={grupo:k,alta:0,guia:0,plan:0,gen1:0,gen3:0,salida:0,salidaBase:0});
+    const a=b.activacion||{};
+    r.alta++;
+    if(a.guia)r.guia++;
+    if(a.plan)r.plan++;
+    if(a.gen1)r.gen1++;
+    if(a.gen3)r.gen3++;
+    if(a.salida===true||a.salida===false){r.salidaBase++;if(a.salida)r.salida++}
+  }
+  const rows=Object.values(g);
+  return clave==='mes'?rows.sort((a,b)=>String(b.grupo).localeCompare(String(a.grupo))):rows.sort((a,b)=>b.alta-a.alta);
+}
+function marcaPaso(v){return v===true?'<b style="color:var(--g2)">✓</b>':v===false?'<span style="color:var(--r)">✗</span>':'<span class="muted" title="sin dato">·</span>'}
+function seQuedoEn(a){if(!a)return '—';for(const p of PASOS_ACTIVACION){if(a[p[0]]===null||a[p[0]]===undefined)return 'sin dato';if(!a[p[0]])return p[1]}return '✅ nada'}
+function renderActivacion(){
+  if(!adminData)return;
+  const clave=document.getElementById('actAgrupar').value, dias=Number(document.getElementById('actPeriodo').value)||0;
+  const desde=dias?diaMX(new Date(Date.now()-dias*DIA).toISOString()):'';
+  const lista=clientes(adminData.brandList).filter(b=>!desde||diaMX(b.createdAt)>=desde);   // sin internas (INT-1)
+  const rows=embudoActivacion(lista,clave), sd=adminData.salidaDesde;
+  document.getElementById('actDesde').textContent=sd?'Las salidas se registran desde el '+fechaHora(sd)+'; las cuentas anteriores sin salidas dicen «sin dato».':'Todavía no hay salidas registradas: «Descargó o publicó» dice «sin dato».';
+  const c=(n,base)=>'<td class="num">'+n+' <span class="small">'+pct(n,base)+'</span></td>';
+  document.getElementById('activacionTabla').innerHTML='<table class="admin-table"><thead><tr><th>'+({total:'Grupo',fuente:'Fuente',campana:'Campaña',mes:'Mes de alta'}[clave])+'</th><th class="num">Altas</th>'+PASOS_ACTIVACION.map(p=>'<th class="num">'+p[1]+'</th>').join('')+'</tr></thead><tbody>'
+    +(rows.length?rows.map(r=>'<tr><td>'+esc(r.grupo)+'</td><td class="num">'+r.alta+'</td>'+c(r.guia,r.alta)+c(r.plan,r.alta)+c(r.gen1,r.alta)+c(r.gen3,r.alta)
+      +(r.salidaBase?'<td class="num">'+r.salida+' de '+r.salidaBase+' <span class="small">'+pct(r.salida,r.salidaBase)+'</span></td>':'<td class="num muted">sin dato</td>')+'</tr>').join(''):'<tr><td colspan="7" class="muted">Sin altas en el periodo.</td></tr>')+'</tbody></table>';
+  const cuentas=lista.slice().sort((a,b)=>String(b.createdAt||'').localeCompare(String(a.createdAt||''))).slice(0,100);
+  document.getElementById('activacionCuentas').innerHTML='<table class="admin-table"><thead><tr><th>Marca</th><th>Fuente</th><th>Alta</th>'+PASOS_ACTIVACION.map(p=>'<th>'+p[1]+'</th>').join('')+'<th class="num">Generaciones</th><th>Salidas</th><th>Le falta</th></tr></thead><tbody>'
+    +(cuentas.length?cuentas.map(b=>{const a=b.activacion||{},s=b.salidas;
+      return '<tr><td style="font-weight:600">'+esc(b.name||'Sin nombre')+'</td><td>'+esc(fuenteDe(b))+'</td><td style="white-space:nowrap">'+fecha(b.createdAt)+'</td>'+PASOS_ACTIVACION.map(p=>'<td style="text-align:center">'+marcaPaso(a[p[0]])+'</td>').join('')
+        +'<td class="num">'+(Number(b.gens)||0)+'</td><td class="small" style="white-space:nowrap">'+(s?('red '+s.red+' · descarga '+s.descarga+' · copias '+s.copiar+(s.ultima?'<div>última '+fechaHora(s.ultima)+'</div>':'')):'sin dato')+'</td><td>'+esc(seQuedoEn(a))+'</td></tr>'}).join(''):'<tr><td colspan="11" class="muted">Sin altas en el periodo.</td></tr>')+'</tbody></table>';
 }
 function renderMeses(){
   const d=adminData, lista=clientes(d.brandList), meses={};   // S59: sin internas
@@ -838,6 +894,7 @@ function filterBrands(){
       +'<td style="white-space:nowrap">'+fecha(b.createdAt)+'<div class="small">'+esc(b.country||'')+'</div></td>'
       +'<td style="white-space:nowrap">'+per+(b.primerPagoAt?'<div class="small">1.er pago '+fecha(b.primerPagoAt)+'</div>':'')+'</td>'
       +'<td class="num" style="min-width:80px">'+uso+'</td>'
+      +'<td style="white-space:nowrap">'+PASOS_ACTIVACION.map(p=>'<span title="'+p[1]+'">'+marcaPaso((b.activacion||{})[p[0]])+'</span>').join(' ')+'<div class="small">Guías '+(Number(b.guias)||0)+' · planes '+(Number(b.planes)||0)+((b.planesGuardados||[]).length?' ('+esc(b.planesGuardados.join(', '))+')':'')+'</div><div class="small">'+(b.salidas?'Salidas '+(b.salidas.red+b.salidas.descarga)+(b.salidas.copiar?' · copias '+b.salidas.copiar:''):'Salidas: sin dato')+'</div></td>'
       +'<td>'+esc(fuenteDe(b))+(o.campaign?'<div class="small">'+esc(o.campaign)+'</div>':'')+'</td>'
       +'<td class="num" style="white-space:nowrap">'+(b.costoMes>0?costo(b.costoMes):'—')+'</td>'
       +'<td class="num" style="white-space:nowrap">'+(b.costoHist>0?costo(b.costoHist):'—')+'</td>'
