@@ -7,7 +7,7 @@
    Etiquetas en lineas propias: el extractor de sintaxis del preflight (G2) lee los scripts por lineas. */
 if(location.protocol==='http:'&&/(^|\.)postimity\.com$/.test(location.hostname))location.replace('https://'+location.host+location.pathname+location.search+location.hash);
 </script>
-<meta name="app-version" content="2.57.2">
+<meta name="app-version" content="2.57.4">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Postimity Studio — Tu estudio de contenido con IA</title>
 <meta name="description" content="Crea posts, flyers, carruseles y videos profesionales con IA. Describe tu negocio una vez y genera contenido listo para publicar en 20 segundos.">
@@ -773,7 +773,7 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
   .auth-wrap{margin-top:36px}
   /* Mode cards: 2x3 grid with more room */
   .mode-cards{grid-template-columns:repeat(3,1fr)!important;gap:8px}
-  .mc-desc{display:none}
+  .mc-desc{display:-webkit-box;font-size:10px;line-height:1.25;margin-top:2px}   /* S59b: en celular tambien se lee para que es cada modo */
   .mc-icon{font-size:22px}
   .mode-card{padding:14px 6px 10px;border-radius:10px}
   /* Form fields: single column, more breathing room */
@@ -1578,33 +1578,33 @@ fbq('track', 'PageView');
       <div class="mode-card active" id="mc1" onclick="handleModeClick('post')">
         <div class="mc-icon">✍️</div>
         <div class="mc-title">Post</div>
-        <div class="mc-desc">Texto → imagen con IA + captions</div>
+        <div class="mc-desc">Tu tema → post con imagen IA y textos</div>
       </div>
       <div class="mode-card" id="mc2" onclick="handleModeClick('enhance')">
         <div class="mc-icon">🖼️</div>
         <div class="mc-title">Estudio Pro</div>
-        <div class="mc-desc">Toma una foto → versión publicitaria</div>
+        <div class="mc-desc">Tu foto real → post publicitario</div>
       </div>
       <div class="mode-card" id="mc3" onclick="handleModeClick('flyer')">
         <div class="mc-icon">📄</div>
         <div class="mc-title">Flyer</div>
-        <div class="mc-desc">Gráfico promocional completo</div>
+        <div class="mc-desc">Promo o evento listo para compartir</div>
       </div>
       <div class="mode-card" id="mc4" onclick="handleModeClick('testimonial')">
         <div class="mc-icon">⭐</div>
         <div class="mc-title">Testimonio</div>
-        <div class="mc-desc">Reseña → post profesional</div>
+        <div class="mc-desc">Reseña de un cliente → post</div>
       </div>
       <div class="mode-card" id="mc5" onclick="handleModeClick('carousel')">
         <div class="mc-icon">🎠</div>
         <div class="mc-title">Carrusel</div>
-        <div class="mc-desc">Multi-slide educativo</div>
+        <div class="mc-desc">Varias láminas para enseñar o vender</div>
       </div>
       <div class="mode-card" id="mc6" onclick="handleModeClick('video')">
         <span class="mc-soon-badge" id="mcVideoBadge" style="display:none">PRONTO</span>
         <div class="mc-icon">🎬</div>
         <div class="mc-title">Video IA</div>
-        <div class="mc-desc">Reels, TikTok, Shorts</div>
+        <div class="mc-desc">Reels, TikTok y Shorts</div>
       </div>
     </div>
 
@@ -2518,7 +2518,7 @@ function persistSlides(imgs) {
 }
 
 // APP_VERSION (S34) — deploy verification. Must match worker /version and all HTML files.
-const APP_VERSION = '2.57.2'; // historial en ESTADO.md (§7a.1 y PARTE 10)
+const APP_VERSION = '2.57.4'; // historial en ESTADO.md (§7a.1 y PARTE 10)
 window.APP_VERSION = APP_VERSION;
 // El log de version vive unas lineas mas abajo (console.info). No agregar otro aqui:
 // S38 borro POSTIMITY_VERSION para tener un solo log y este lo volvio a duplicar.
@@ -2613,11 +2613,11 @@ const T = {
     // ── Creator screen ──
     brandBarEdit:'✏️ Editar marca',
     pillarLabel:'¿Para qué pilar es este contenido?',
-    mcPost:'Post', mcPostDesc:'Texto → imagen con IA + captions',
-    mcEnhance:'Estudio Pro', mcEnhanceDesc:'Toma una foto → versión publicitaria',
-    mcFlyer:'Flyer', mcFlyerDesc:'Gráfico promocional completo',
-    mcTestimonial:'Testimonio', mcTestimonialDesc:'Reseña → post profesional',
-    mcCarousel:'Carrusel', mcCarouselDesc:'Multi-slide educativo',
+    mcPost:'Post', mcPostDesc:'Tu tema → post con imagen IA y textos',
+    mcEnhance:'Estudio Pro', mcEnhanceDesc:'Tu foto real → post publicitario',
+    mcFlyer:'Flyer', mcFlyerDesc:'Promo o evento listo para compartir',
+    mcTestimonial:'Testimonio', mcTestimonialDesc:'Reseña de un cliente → post',
+    mcCarousel:'Carrusel', mcCarouselDesc:'Varias láminas para enseñar o vender',
     styleLabel:'Estilo de imagen generada',
     stylePhoto:'Fotorrealista', stylePhotoDesc:'Persona o situación genérica',
     styleIllus:'Ilustrado', styleIllusDesc:'Gráfico colorido, sin personas',
@@ -2811,7 +2811,7 @@ const T = {
     upsellVideoDesc:'Crea videos cortos para Reels, TikTok y Shorts con inteligencia artificial. Incluido desde el plan Growth.',
     upsellVideoCta:'Ver planes →',
     // ── Video mode card ──
-    mcVideoTitle:'Video IA', mcVideoDesc:'Reels, TikTok, Shorts',
+    mcVideoTitle:'Video IA', mcVideoDesc:'Reels, TikTok y Shorts',
     // ── Video generation ──
     videoTopicLabel:'🎬 Tema del video', videoDurLabel:'Duración', videoRatioLabel:'Formato',
     vdurNote:'5 seg = 1 video · 10 seg = 2 videos',
@@ -2918,11 +2918,11 @@ const T = {
     // ── Creator screen ──
     brandBarEdit:'✏️ Edit brand',
     pillarLabel:'Which pillar is this content for?',
-    mcPost:'Post', mcPostDesc:'Text → AI image + captions',
-    mcEnhance:'Studio Pro', mcEnhanceDesc:'Take a photo → ad-quality version',
-    mcFlyer:'Flyer', mcFlyerDesc:'Complete promotional graphic',
-    mcTestimonial:'Testimonial', mcTestimonialDesc:'Review → professional post',
-    mcCarousel:'Carousel', mcCarouselDesc:'Multi-slide educational',
+    mcPost:'Post', mcPostDesc:'Your topic → post with AI image and captions',
+    mcEnhance:'Studio Pro', mcEnhanceDesc:'Your real photo → ad-ready post',
+    mcFlyer:'Flyer', mcFlyerDesc:'Promo or event ready to share',
+    mcTestimonial:'Testimonial', mcTestimonialDesc:'Customer review → post',
+    mcCarousel:'Carousel', mcCarouselDesc:'Several slides to teach or sell',
     styleLabel:'Generated image style',
     stylePhoto:'Photorealistic', stylePhotoDesc:'Generic person or situation',
     styleIllus:'Illustrated', styleIllusDesc:'Colorful graphic, no people',
@@ -3115,7 +3115,7 @@ const T = {
     upsellVideoDesc:'Create short videos for Reels, TikTok and Shorts with AI. Included from the Growth plan.',
     upsellVideoCta:'View plans →',
     // ── Video mode card ──
-    mcVideoTitle:'Video AI', mcVideoDesc:'Reels, TikTok, Shorts',
+    mcVideoTitle:'Video AI', mcVideoDesc:'Reels, TikTok and Shorts',
     // ── Video generation ──
     videoTopicLabel:'🎬 Video topic', videoDurLabel:'Duration', videoRatioLabel:'Format',
     vdurNote:'5 sec = 1 video · 10 sec = 2 videos',
@@ -5929,7 +5929,8 @@ async function downloadCarouselSlide(idx) {
   const slug = (brand?.name || 'postimity').toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 20);
   const blob = dataUrlToBlob(carouselResults[idx]);
   const filename = slug + '-slide-' + (idx+1) + '-' + Date.now() + '.jpg';
-  await universalSave(blob, filename);
+  const r = await universalSave(blob, filename);
+  registrarSalida('descarga', null, r, 'carousel', 'creador');   // S60 (ACT-2): después de guardar, sin esperar
 }
 
 // ─── ADJUST RESULT ─────────────────────────────────────────────────────
@@ -6075,6 +6076,7 @@ async function downloadAllSlides() {
   const names = blobs.map((_, i) => slug + '-slide-' + (i + 1) + '-' + ts + '.jpg');
   const zipName = slug + '-carousel-' + ts + '.zip';
   const result = await universalSaveMultiple(blobs, names, zipName);
+  registrarSalida('descarga', null, result, 'carousel', 'creador');   // S60 (ACT-2)
 
   if (result === 'shared') {
     showToast(isES ? '✅ ' + total + ' slides guardados en carrete' : '✅ ' + total + ' slides saved to camera roll');
@@ -6693,6 +6695,7 @@ function showVideoResult(videoUrl, topic, captionsData) {
         const resp = await fetch(vSrc);
         const blob = await resp.blob();
         const result = await universalSave(blob, vSlug + '-video-' + Date.now() + '.mp4');
+        registrarSalida('descarga', null, result, 'video', 'creador');   // S60 (ACT-2)
         if (result === 'shared') showToast(isESv ? '✅ Video guardado en carrete' : '✅ Video saved to camera roll');
         else if (result === 'opened') showToast(isESv ? '📷 Mantén presionado para guardar el video' : '📷 Long-press to save the video', 5000);
         else if (result === 'downloaded') showToast(isESv ? '✅ Video descargado' : '✅ Video downloaded');
@@ -6796,6 +6799,7 @@ async function shareVideoToSocial(platform) {
       console.warn('Video fetch for save failed:', e);
     }
   }
+  registrarSalida('red', platform, result, 'video', 'creador');   // S60 (ACT-2): después del texto y del video
 
   // 3. Show instructions based on result
   if (result) {
@@ -8008,6 +8012,7 @@ async function downloadHistPiece() {
   // CERO await antes de universalSave: iOS anula la activacion del toque con cualquier espera de red.
   if (!histPieceBlob || !histCurrentPost) { showToast(t('histSlidePrep')); return; }
   const r = await universalSave(histPieceBlob, histPieceName(histCurrentPost));
+  registrarSalida('descarga', null, r, histCurrentPost && histCurrentPost.mode, 'historial');   // S60 (ACT-2)
   if (r === 'shared' || r === 'downloaded') showToast(t('histPieceSaved'));
   else if (r === 'opened') showToast(t('histPieceOpened'), 5000);
   else if (r !== false) showToast(t('histPieceErr'), 5000);
@@ -8158,7 +8163,8 @@ async function downloadHistSlide(idx) {
   try {
     const blob = cached || await fetchImageBlobNoCache(histCurrentPost?.carouselImages?.[idx]);
     if (!blob) throw new Error('sin blob');
-    await universalSave(blob, histSlideName(idx));
+    const r = await universalSave(blob, histSlideName(idx));
+    registrarSalida('descarga', null, r, 'carousel', 'historial');   // S60 (ACT-2)
   } catch(e) {
     // RD-10: un fallo de descarga se dice, no se traga.
     console.warn('downloadHistSlide failed:', e.message);
@@ -8181,6 +8187,7 @@ async function downloadHistAllSlides() {
   if (!blobs.length) { showToast(t('histSlideErr')); return; }
 
   const result = await universalSaveMultiple(blobs, names, slug + '-carousel-' + ts + '.zip');
+  registrarSalida('descarga', null, result, 'carousel', 'historial');   // S60 (ACT-2)
 
   // El silencio era el otro defecto: la version anterior ignoraba el retorno, asi
   // que un fallo de compartir en iOS no producia ni exito ni error. Se refleja
@@ -9946,7 +9953,7 @@ function copyCaption(plat, btn) {
   const [capId,hashId]=ids[plat];
   const text=document.getElementById(capId).textContent+'\n\n'+document.getElementById(hashId).textContent;
   const platNames={ig:'Instagram',fb:'Facebook',tt:'TikTok'};
-  navigator.clipboard.writeText(text).then(()=>{ btn.textContent=t('toastCopied'); btn.classList.add('ok'); setTimeout(()=>{ btn.textContent=t('copyForPlatform').replace('{plat}',platNames[plat]); btn.classList.remove('ok'); },2500); });
+  navigator.clipboard.writeText(text).then(()=>{ registrarSalida('copiar', platNames[plat].toLowerCase(), 'copiado', mode, 'creador'); btn.textContent=t('toastCopied'); btn.classList.add('ok'); setTimeout(()=>{ btn.textContent=t('copyForPlatform').replace('{plat}',platNames[plat]); btn.classList.remove('ok'); },2500); });
 }
 function copyAll() {
   const ig=(document.getElementById('igCap')?.textContent||'')+'\n'+(document.getElementById('igHash')?.textContent||'');
@@ -9954,6 +9961,7 @@ function copyAll() {
   const tt=(document.getElementById('ttCap')?.textContent||'')+'\n'+(document.getElementById('ttHash')?.textContent||'');
   const text = '📸 INSTAGRAM:\n'+ig+'\n\n👥 FACEBOOK:\n'+fb+'\n\n🎵 TIKTOK:\n'+tt;
   navigator.clipboard.writeText(text).then(()=>{
+    registrarSalida('copiar', null, 'copiado', mode, 'creador');   // S60 (ACT-2): las tres redes a la vez, sin red
     const btn=document.querySelector('.result-actions .btn-primary');
     if(btn){ btn.textContent=t('toastAllCopied'); setTimeout(()=>btn.textContent=t('resultCopyAll'),2500); }
     showToast(t('toastCaptionCopied'));
@@ -10137,6 +10145,23 @@ async function ensureDataUrl() {
 }
 
 
+// ─── S60 (ACT-2): REGISTRO DE LO QUE SALE DEL ESTUDIO ────────────────────────
+// Cada toque que se lleva una pieza (a una red, descargada) o su texto copiado se anota en el servidor: acción, red, modo,
+// origen y resultado. La cuenta la pone el servidor con la sesión. Ni nombre de archivo, ni texto, ni datos personales, y
+// nada al píxel ni a otra analítica. REGLAS: se llama DESPUÉS de guardar o copiar (iOS anula el toque con cualquier espera
+// antes de universalSave; el portapapeles va primero, RD-4), nunca se espera (sin await) y se traga todo fallo: si la red
+// falla, la descarga ya ocurrió y su aviso sale igual. keepalive: el aviso llega aunque la persona cambie de app al instante.
+const SALIDA_RESULTADO = { shared: 'compartido', downloaded: 'descargado', opened: 'abierto' };
+function registrarSalida(accion, red, resultado, modoPieza, origen) {
+  try {
+    const r = resultado === 'copiado' ? 'copiado' : (SALIDA_RESULTADO[resultado] || 'cancelado');
+    // text/plain: petición simple, sin preflight de CORS (Safari no siempre manda keepalive con preflight); el worker lee el texto
+    const p = apiFetch(WORKER, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=UTF-8' }, keepalive: true,
+      body: JSON.stringify({ mode: 'registrar-salida', accion: accion, red: red || null, resultado: r, modo: modoPieza || null, origen: origen || 'creador' }) });
+    if (p && typeof p.catch === 'function') p.catch(function () { /* el registro nunca frena una descarga */ });
+  } catch (e) { /* el registro nunca frena ni rompe una descarga */ }
+}
+
 // ─── S33: Universal save — single download/save path for ALL modes ────────
 // Handles: Desktop (Downloads folder via <a download>), Android (Downloads via <a download>),
 // iOS (Web Share API → camera roll, or window.open blob for long-press save)
@@ -10295,6 +10320,7 @@ async function openInSocial(platform) {
       result = await universalSave(blob, filename);
     }
   }
+  registrarSalida('red', platform, result, mode, 'creador');   // S60 (ACT-2): después del texto y de guardar, sin esperar
 
   // 3. Show clear instructions based on what happened
   if (result) {
@@ -10333,6 +10359,7 @@ async function downloadImg(format) {
   const brd = loadBrand();
   const sl = (brd?.name || 'postimity').toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 20);
   const result = await universalSave(dlBlob, sl + '-' + format + '-' + Date.now() + '.jpg');
+  registrarSalida('descarga', null, result, mode, 'creador');   // S60 (ACT-2)
   const isES = detectLanguage() === 'es';
   if (result === 'shared') showToast(isES ? '✅ Imagen guardada en carrete' : '✅ Image saved to camera roll');
   else if (result === 'opened') showToast(isES ? '📷 Mantén presionado para guardar la imagen' : '📷 Long-press to save the image', 5000);
