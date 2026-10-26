@@ -7,7 +7,7 @@
    Etiquetas en lineas propias: el extractor de sintaxis del preflight (G2) lee los scripts por lineas. */
 if(location.protocol==='http:'&&/(^|\.)postimity\.com$/.test(location.hostname))location.replace('https://'+location.host+location.pathname+location.search+location.hash);
 </script>
-<meta name="app-version" content="2.57.4">
+<meta name="app-version" content="2.57.5">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Postimity Studio — Tu estudio de contenido con IA</title>
 <meta name="description" content="Crea posts, flyers, carruseles y videos profesionales con IA. Describe tu negocio una vez y genera contenido listo para publicar en 20 segundos.">
@@ -1578,33 +1578,33 @@ fbq('track', 'PageView');
       <div class="mode-card active" id="mc1" onclick="handleModeClick('post')">
         <div class="mc-icon">✍️</div>
         <div class="mc-title">Post</div>
-        <div class="mc-desc">Tu tema → post con imagen IA y textos</div>
+        <div class="mc-desc">Tu tema → imagen y texto con IA</div>
       </div>
       <div class="mode-card" id="mc2" onclick="handleModeClick('enhance')">
         <div class="mc-icon">🖼️</div>
         <div class="mc-title">Estudio Pro</div>
-        <div class="mc-desc">Tu foto real → post publicitario</div>
+        <div class="mc-desc">Tu foto real con calidad de anuncio</div>
       </div>
       <div class="mode-card" id="mc3" onclick="handleModeClick('flyer')">
         <div class="mc-icon">📄</div>
         <div class="mc-title">Flyer</div>
-        <div class="mc-desc">Promo o evento listo para compartir</div>
+        <div class="mc-desc">Anuncia tu promo o evento</div>
       </div>
       <div class="mode-card" id="mc4" onclick="handleModeClick('testimonial')">
         <div class="mc-icon">⭐</div>
         <div class="mc-title">Testimonio</div>
-        <div class="mc-desc">Reseña de un cliente → post</div>
+        <div class="mc-desc">Presume una reseña real</div>
       </div>
       <div class="mode-card" id="mc5" onclick="handleModeClick('carousel')">
         <div class="mc-icon">🎠</div>
         <div class="mc-title">Carrusel</div>
-        <div class="mc-desc">Varias láminas para enseñar o vender</div>
+        <div class="mc-desc">Tips o pasos en varias imágenes</div>
       </div>
       <div class="mode-card" id="mc6" onclick="handleModeClick('video')">
         <span class="mc-soon-badge" id="mcVideoBadge" style="display:none">PRONTO</span>
         <div class="mc-icon">🎬</div>
         <div class="mc-title">Video IA</div>
-        <div class="mc-desc">Reels, TikTok y Shorts</div>
+        <div class="mc-desc">Video corto para Reels y TikTok</div>
       </div>
     </div>
 
@@ -2518,7 +2518,7 @@ function persistSlides(imgs) {
 }
 
 // APP_VERSION (S34) — deploy verification. Must match worker /version and all HTML files.
-const APP_VERSION = '2.57.4'; // historial en ESTADO.md (§7a.1 y PARTE 10)
+const APP_VERSION = '2.57.5'; // historial en ESTADO.md (§7a.1 y PARTE 10)
 window.APP_VERSION = APP_VERSION;
 // El log de version vive unas lineas mas abajo (console.info). No agregar otro aqui:
 // S38 borro POSTIMITY_VERSION para tener un solo log y este lo volvio a duplicar.
@@ -2613,11 +2613,11 @@ const T = {
     // ── Creator screen ──
     brandBarEdit:'✏️ Editar marca',
     pillarLabel:'¿Para qué pilar es este contenido?',
-    mcPost:'Post', mcPostDesc:'Tu tema → post con imagen IA y textos',
-    mcEnhance:'Estudio Pro', mcEnhanceDesc:'Tu foto real → post publicitario',
-    mcFlyer:'Flyer', mcFlyerDesc:'Promo o evento listo para compartir',
-    mcTestimonial:'Testimonio', mcTestimonialDesc:'Reseña de un cliente → post',
-    mcCarousel:'Carrusel', mcCarouselDesc:'Varias láminas para enseñar o vender',
+    mcPost:'Post', mcPostDesc:'Tu tema → imagen y texto con IA',
+    mcEnhance:'Estudio Pro', mcEnhanceDesc:'Tu foto real con calidad de anuncio',
+    mcFlyer:'Flyer', mcFlyerDesc:'Anuncia tu promo o evento',
+    mcTestimonial:'Testimonio', mcTestimonialDesc:'Presume una reseña real',
+    mcCarousel:'Carrusel', mcCarouselDesc:'Tips o pasos en varias imágenes',
     styleLabel:'Estilo de imagen generada',
     stylePhoto:'Fotorrealista', stylePhotoDesc:'Persona o situación genérica',
     styleIllus:'Ilustrado', styleIllusDesc:'Gráfico colorido, sin personas',
@@ -2811,7 +2811,7 @@ const T = {
     upsellVideoDesc:'Crea videos cortos para Reels, TikTok y Shorts con inteligencia artificial. Incluido desde el plan Growth.',
     upsellVideoCta:'Ver planes →',
     // ── Video mode card ──
-    mcVideoTitle:'Video IA', mcVideoDesc:'Reels, TikTok y Shorts',
+    mcVideoTitle:'Video IA', mcVideoDesc:'Video corto para Reels y TikTok',
     // ── Video generation ──
     videoTopicLabel:'🎬 Tema del video', videoDurLabel:'Duración', videoRatioLabel:'Formato',
     vdurNote:'5 seg = 1 video · 10 seg = 2 videos',
@@ -2918,11 +2918,11 @@ const T = {
     // ── Creator screen ──
     brandBarEdit:'✏️ Edit brand',
     pillarLabel:'Which pillar is this content for?',
-    mcPost:'Post', mcPostDesc:'Your topic → post with AI image and captions',
-    mcEnhance:'Studio Pro', mcEnhanceDesc:'Your real photo → ad-ready post',
-    mcFlyer:'Flyer', mcFlyerDesc:'Promo or event ready to share',
-    mcTestimonial:'Testimonial', mcTestimonialDesc:'Customer review → post',
-    mcCarousel:'Carousel', mcCarouselDesc:'Several slides to teach or sell',
+    mcPost:'Post', mcPostDesc:'Your topic → AI image and caption',
+    mcEnhance:'Studio Pro', mcEnhanceDesc:'Your real photo, ad quality',
+    mcFlyer:'Flyer', mcFlyerDesc:'Announce your promo or event',
+    mcTestimonial:'Testimonial', mcTestimonialDesc:'Show off a real review',
+    mcCarousel:'Carousel', mcCarouselDesc:'Tips or steps in several images',
     styleLabel:'Generated image style',
     stylePhoto:'Photorealistic', stylePhotoDesc:'Generic person or situation',
     styleIllus:'Illustrated', styleIllusDesc:'Colorful graphic, no people',
@@ -3115,7 +3115,7 @@ const T = {
     upsellVideoDesc:'Create short videos for Reels, TikTok and Shorts with AI. Included from the Growth plan.',
     upsellVideoCta:'View plans →',
     // ── Video mode card ──
-    mcVideoTitle:'Video AI', mcVideoDesc:'Reels, TikTok and Shorts',
+    mcVideoTitle:'Video AI', mcVideoDesc:'Short video for Reels and TikTok',
     // ── Video generation ──
     videoTopicLabel:'🎬 Video topic', videoDurLabel:'Duration', videoRatioLabel:'Format',
     vdurNote:'5 sec = 1 video · 10 sec = 2 videos',
@@ -8490,7 +8490,7 @@ async function generateAgentPlan() {
       }).catch(() => {});
     }
 
-    renderAgentPlan(data);
+    renderAgentPlan(data, { recien: true });   // S60b: la primera vez se lee desde el inicio
 
     // Update agent bar
     const sub = document.getElementById('agentBarSub');
@@ -8552,7 +8552,7 @@ function agentFestWhen(post, monthNames) {
   return ' · ' + Number(m[3]) + ' ' + String((monthNames || [])[Number(m[2]) - 1] || '').slice(0, 3).toLowerCase();
 }
 
-function renderAgentPlan(plan) {
+function renderAgentPlan(plan, opts) {
   document.getElementById('agentConfigWrap').style.display = 'none';
   document.getElementById('agentPlanWrap').style.display = 'block';
 
@@ -8664,7 +8664,10 @@ function renderAgentPlan(plan) {
     });
     container.appendChild(weekDiv);
   });
-  if (anclaHoy && typeof anclaHoy.scrollIntoView === 'function') setTimeout(() => { try { anclaHoy.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (e) {} }, 60);
+  // S60b (operador, 25 oct): recién generado, el plan abre desde el INICIO para que lo lean completo la primera vez (resumen,
+  // semanas, temas). Al volver a entrar (plan guardado, showAgentScreen) abre en la publicación de hoy (FB-112).
+  const destino = (opts && opts.recien) ? document.getElementById('agentPlanWrap') : anclaHoy;
+  if (destino && typeof destino.scrollIntoView === 'function') setTimeout(() => { try { destino.scrollIntoView({ block: (opts && opts.recien) ? 'start' : 'center', behavior: 'smooth' }); } catch (e) {} }, 60);
 }
 
 function goCreatePost(idx) {
