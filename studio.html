@@ -7,7 +7,7 @@
    Etiquetas en lineas propias: el extractor de sintaxis del preflight (G2) lee los scripts por lineas. */
 if(location.protocol==='http:'&&/(^|\.)postimity\.com$/.test(location.hostname))location.replace('https://'+location.host+location.pathname+location.search+location.hash);
 </script>
-<meta name="app-version" content="2.57.5">
+<meta name="app-version" content="2.57.6">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Postimity Studio — Tu estudio de contenido con IA</title>
 <meta name="description" content="Crea posts, flyers, carruseles y videos profesionales con IA. Describe tu negocio una vez y genera contenido listo para publicar en 20 segundos.">
@@ -2516,7 +2516,7 @@ function persistSlides(imgs) {
 }
 
 // APP_VERSION (S34) — deploy verification. Must match worker /version and all HTML files.
-const APP_VERSION = '2.57.5'; // historial en ESTADO.md (§7a.1 y PARTE 10)
+const APP_VERSION = '2.57.6'; // historial en ESTADO.md (§7a.1 y PARTE 10)
 window.APP_VERSION = APP_VERSION;
 // El log de version vive unas lineas mas abajo (console.info). No agregar otro aqui:
 // S38 borro POSTIMITY_VERSION para tener un solo log y este lo volvio a duplicar.
@@ -2542,8 +2542,8 @@ console.info('Postimity Studio v' + APP_VERSION);
 // INV-063 (S37): trial sube de 20 a 25. Con PU-2 vigente, 20 acciones equivalen a
 // ~13 posts terminados; el trial compite contra el abandono, no contra Growth.
 const PALETA_BASE = { primary:'#1B3A5C', secondary:'#5C8DB8', accent:'#F2A33A' };   // D64 (S55k): la marca que no elige color; NO es la paleta de Postimity
-const GEN_LIMITS = { trial: 20, starter: 40, growth: 100, premium: 250 };
-const VIDEO_LIMITS = { trial: 2, starter: 2, growth: 8, premium: 20 };
+const GEN_LIMITS = { trial: 20, starter: 40, growth: 90, premium: 200 };
+const VIDEO_LIMITS = { trial: 2, starter: 2, growth: 6, premium: 15 };
 const VIDEO_COST = { '5': 1, '10': 2 }; // espejo del worker — la unidad es el clip de 5 seg
 
 // ── FEATURE ACCESS MAP ──────────────────────────────────────
@@ -2803,7 +2803,7 @@ const T = {
     lockBadge:'GROWTH', lockSoonBadge:'PRONTO',
     upsellTitle:'Disponible en Starter',
     upsellDesc:'El Marketing Agent está incluido desde el plan Starter. Genera un plan de contenido mensual completo con un clic.',
-    upsellFeat1:'Plan mensual de 20+ posts', upsellFeat2:'Deep links directos a crear', upsellFeat3:'Recordatorios de publicación', upsellFeat4:'Estrategia por pilares de contenido', upsellFeat5:'100 generaciones/mes',
+    upsellFeat1:'Plan mensual de 20+ posts', upsellFeat2:'Deep links directos a crear', upsellFeat3:'Recordatorios de publicación', upsellFeat4:'Estrategia por pilares de contenido', upsellFeat5:'90 generaciones/mes',
     upsellCta:'Ver planes →', upsellClose:'Ahora no',
     upsellVideoTitle:'Video IA — Disponible en Growth',
     upsellVideoDesc:'Crea videos cortos para Reels, TikTok y Shorts con inteligencia artificial. Incluido desde el plan Growth.',
@@ -3107,7 +3107,7 @@ const T = {
     lockBadge:'GROWTH', lockSoonBadge:'SOON',
     upsellTitle:'Available on Starter',
     upsellDesc:'Marketing Agent is included from the Starter plan. Generate a complete monthly content plan with one click.',
-    upsellFeat1:'Monthly plan with 20+ posts', upsellFeat2:'Deep links to create directly', upsellFeat3:'Publishing reminders', upsellFeat4:'Content pillar strategy', upsellFeat5:'100 generations/month',
+    upsellFeat1:'Monthly plan with 20+ posts', upsellFeat2:'Deep links to create directly', upsellFeat3:'Publishing reminders', upsellFeat4:'Content pillar strategy', upsellFeat5:'90 generations/month',
     upsellCta:'View plans →', upsellClose:'Not now',
     upsellVideoTitle:'Video AI — Available on Growth',
     upsellVideoDesc:'Create short videos for Reels, TikTok and Shorts with AI. Included from the Growth plan.',
@@ -7182,9 +7182,9 @@ function renderCuenta() {
     const mxn = detectLanguage() === 'es';
     const isES = detectLanguage() === 'es';
     const tiers = [
-      { key:'starter', name:'Starter', price: mxn?'$199':'$11', period: mxn?'MXN/mes':'USD/mo', gens:'40 '+t('genPerMonth'), videos:'2 videos de 5 seg', features: isES ? 'Todas las herramientas · Diseños firmados con Postimity' : 'All tools · Designs signed with Postimity' },
-      { key:'growth',  name:'Growth',  price: mxn?'$399':'$22', period: mxn?'MXN/mes':'USD/mo', gens:'100 '+t('genPerMonth'), videos:'8 videos de 5 seg', features: isES ? 'Todo + tus diseños sin firma' : 'All + your designs unsigned', popular: true },
-      { key:'premium', name:'Premium', price: mxn?'$899':'$50', period: mxn?'MXN/mes':'USD/mo', gens:'250 '+t('genPerMonth'), videos:'20 videos de 5 seg', features: isES ? 'Todo lo de Growth, con más del doble de volumen' : 'Everything in Growth, with more than twice the volume', multi: true },
+      { key:'starter', name:'Starter', price: mxn?'$199':'$11', period: mxn?'MXN/mes':'USD/mo', gens:GEN_LIMITS.starter+' '+t('genPerMonth'), videos:VIDEO_LIMITS.starter+(isES?' videos de 5 seg':' videos of 5 sec'), features: isES ? 'Todas las herramientas · Diseños firmados con Postimity' : 'All tools · Designs signed with Postimity' },
+      { key:'growth',  name:'Growth',  price: mxn?'$399':'$22', period: mxn?'MXN/mes':'USD/mo', gens:GEN_LIMITS.growth+' '+t('genPerMonth'), videos:VIDEO_LIMITS.growth+(isES?' videos de 5 seg':' videos of 5 sec'), features: isES ? 'Todo + tus diseños sin firma' : 'All + your designs unsigned', popular: true },
+      { key:'premium', name:'Premium', price: mxn?'$899':'$50', period: mxn?'MXN/mes':'USD/mo', gens:GEN_LIMITS.premium+' '+t('genPerMonth'), videos:VIDEO_LIMITS.premium+(isES?' videos de 5 seg':' videos of 5 sec'), features: isES ? 'Todo lo de Growth, con más del doble de volumen' : 'Everything in Growth, with more than twice the volume', multi: true },
     ];
     const activateLabel = isES ? 'Activar' : 'Activate';
     const currentLabel = isES ? '✅ Plan actual' : '✅ Current plan';
