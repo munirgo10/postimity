@@ -16,7 +16,7 @@ function reenviarAlEstudio(loc) {
 }
 try { reenviarAlEstudio(location); } catch (e) {}
 </script>
-<meta name="app-version" content="2.57.4">
+<meta name="app-version" content="2.57.5">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>¿No sabes qué publicar? Postimity sí.</title>
 <meta name="description" content="Postimity crea tu estrategia, planea tu mes y genera posts, flyers, carruseles y videos con la voz de tu marca. Sin diseñador. Sin agencia. Desde $199 MXN/mes.">
@@ -81,7 +81,7 @@ body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--bg);c
 .hero-content{animation:fadeUp .8s ease-out}
 .hero-badge{display:inline-flex;align-items:center;gap:6px;background:var(--white);border:1px solid var(--bor);color:var(--blue);font-size:12px;font-weight:700;padding:6px 14px;border-radius:20px;margin-bottom:20px;box-shadow:0 2px 8px rgba(0,0,0,.04)}
 .hero h1{font-size:clamp(32px,4.5vw,52px);font-weight:800;line-height:1.08;letter-spacing:-1.5px;color:var(--t1);margin-bottom:16px}
-.hero h1 .accent{background:linear-gradient(135deg,var(--blue),#7C4DFF);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero h1 .accent{white-space:nowrap;display:inline-block;padding:.04em .06em .1em 0;margin-bottom:-.1em;background:linear-gradient(135deg,var(--blue),#7C4DFF);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 .hero-sub{font-size:17px;color:var(--t2);line-height:1.65;margin-bottom:28px}
 .hero-ctas{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px}
 .btn-hero{display:inline-block;background:var(--blue);color:#fff;padding:13px 28px;border-radius:10px;font-size:15px;font-weight:700;text-decoration:none;transition:.2s;border:none;cursor:pointer;font-family:inherit;box-shadow:0 4px 20px rgba(41,121,255,.3);position:relative;overflow:hidden}
@@ -114,8 +114,8 @@ body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--bg);c
 /* Floating elements around mockup */
 .float-card{position:absolute;background:var(--white);border:1px solid var(--bor);border-radius:10px;padding:10px 14px;box-shadow:0 8px 24px rgba(0,0,0,.08);font-size:11px;animation:float 3s ease-in-out infinite;white-space:nowrap}
 .float-1{top:20px;right:-20px;animation-delay:0s}
-.float-2{bottom:80px;left:-30px;animation-delay:1s}
-.float-3{bottom:20px;right:-10px;animation-delay:2s}
+.float-2{top:150px;left:-28px;animation-delay:1s}   /* S60b: flota sobre la imagen del ejemplo, no sobre su texto ni el del hero */
+.float-3{bottom:64px;right:-40px;animation-delay:2s}   /* S60b: ya no se monta sobre el botón de TikTok */
 .float-icon{margin-right:4px}
 
 /* ═══ METRICS STRIP ═══ */
@@ -135,7 +135,7 @@ body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--bg);c
 .contrast-card.without .contrast-label{color:#C53030}
 .contrast-card.with .contrast-label{color:#276749}
 .contrast-items{list-style:none}
-.contrast-items li{font-size:13px;padding:5px 0;display:flex;align-items:flex-start;gap:6px;line-height:1.5}
+.contrast-items li{font-size:13px;padding:5px 0 5px 1.6em;text-indent:-1.6em;line-height:1.5}   /* S60b: la segunda línea se alinea con el texto, no con el emoji */
 .contrast-card.without .contrast-items li{color:#9B2C2C}
 .contrast-card.with .contrast-items li{color:#276749}
 
@@ -164,10 +164,11 @@ body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--bg);c
 .features-section .section-title{color:#fff}
 .features-section .section-sub{color:rgba(255,255,255,.6)}
 .features-inner{max-width:1100px;margin:0 auto}
-.features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.features-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:14px}
 .feat-card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:var(--r2);padding:28px 22px;transition:.25s;position:relative;overflow:hidden}
 .feat-card:hover{background:rgba(255,255,255,.08);border-color:rgba(41,121,255,.3);transform:translateY(-3px)}
-.feat-card.wide{grid-column:span 3}
+.feat-card{grid-column:span 2}
+.feat-card.wide{grid-column:span 3}   /* S60b: las dos principales lado a lado, no a todo el ancho con media tarjeta vacía */
 .feat-icon{font-size:28px;margin-bottom:14px}
 .feat-card h3{font-size:15px;font-weight:700;margin-bottom:6px;color:#fff}
 .feat-card p{font-size:13px;color:rgba(255,255,255,.55);line-height:1.6}
@@ -176,17 +177,18 @@ body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--bg);c
 .feat-badge.soon{background:rgba(124,77,255,.15);color:#B39DFF}
 
 /* ═══ PRICING ═══ */
-.pricing-section{background:linear-gradient(175deg,#F5F8FF 0%,var(--bg) 100%)}
+.pricing-section{background:none}   /* S60b: el degradado pintaba un rectángulo de 1100 px con bordes visibles */
 .launch-note{max-width:640px;margin:0 auto 22px;padding:10px 16px;border-radius:12px;background:#FFF4E0;color:#7A4A00;font-size:14px;text-align:center;line-height:1.5}
 .foto-real{display:flex;gap:16px;align-items:flex-start;max-width:760px;margin:28px auto 0;padding:20px 22px;border-radius:16px;background:#E8F5E9;border:1px solid #C8E6C9;text-align:left}
 .foto-real-icon{font-size:34px;line-height:1}
 .foto-real h3{font-size:18px;font-weight:800;margin-bottom:6px}
 .foto-real p{font-size:14.5px;line-height:1.6;color:#374151}
 .pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;max-width:940px;margin:0 auto}
-.price-card{background:var(--white);border:1.5px solid var(--bor);border-radius:20px;padding:36px 24px 28px;text-align:center;position:relative;transition:.25s}
+.price-card{background:var(--white);border:1.5px solid var(--bor);border-radius:20px;padding:36px 24px 28px;text-align:center;position:relative;transition:.25s;display:flex;flex-direction:column}
+.price-card .price-cta{margin-top:auto}   /* S60b: los tres botones a la misma altura */
 .price-card:hover{transform:translateY(-4px);box-shadow:0 12px 36px rgba(0,0,0,.08)}
-.price-card.featured{border:2px solid var(--blue);box-shadow:0 12px 40px rgba(41,121,255,.12);transform:scale(1.03)}
-.price-card.featured:hover{transform:scale(1.03) translateY(-4px)}
+.price-card.featured{border:2px solid var(--blue);box-shadow:0 12px 40px rgba(41,121,255,.16);padding:35px 23px 27px}   /* S60b: sin escalar: nombre, precio y botón alineados con las otras dos */
+.price-card.featured:hover{transform:translateY(-4px)}
 .price-popular{position:absolute;top:-13px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--blue),#7C4DFF);color:#fff;font-size:11px;font-weight:700;padding:5px 16px;border-radius:20px;white-space:nowrap;box-shadow:0 4px 12px rgba(41,121,255,.25)}
 .price-name{font-size:20px;font-weight:800;margin-bottom:4px}
 .price-amount{font-size:40px;font-weight:800;margin:8px 0 2px;letter-spacing:-1px}
@@ -235,6 +237,7 @@ body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--bg);c
 .footer-links a:hover{color:#fff}
 
 /* ═══ RESPONSIVE ═══ */
+@media(max-width:1199px){.float-3{display:none}}   /* S60b: sin espacio a la derecha del celular, no se monta ni se corta */
 @media(max-width:900px){
   .hero{grid-template-columns:1fr;text-align:center;padding:48px 20px 0}
   .hero-ctas{justify-content:center}
@@ -245,7 +248,8 @@ body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--bg);c
   .steps{grid-template-columns:1fr;gap:12px}
   .contrast-grid{grid-template-columns:1fr}
   .features-grid{grid-template-columns:1fr}
-  .feat-card.wide{grid-column:span 1}
+  .feat-card,.feat-card.wide{grid-column:auto}
+  .foto-real{flex-direction:column;gap:8px}
   .pricing-grid{grid-template-columns:1fr;max-width:380px}
   .price-card.featured{transform:none}
   .price-card.featured:hover{transform:translateY(-4px)}
@@ -366,8 +370,8 @@ function track(...args) {
             </div>
             <div class="phone-caption">
               <strong data-es="📱 Caption listo para publicar:" data-en="📱 Caption ready to publish:">📱 Caption listo para publicar:</strong>
-              <span data-es="«Cada detalle cuenta. Nuestro equipo cuida tu experiencia de principio a fin porque sabemos que mereces lo mejor...»" data-en="«Every detail counts. Our team cares for your experience from start to finish because we know you deserve the best...»">«Cada detalle cuenta. Nuestro equipo cuida tu experiencia de principio a fin porque sabemos que mereces lo mejor...»</span>
-              <div class="phone-hashtags">#TuMarca #IA #ContentCreation</div>
+              <span data-es="«🌮 Martes de 2×1 en tacos al pastor. Te esperamos de 6 a 11 pm. ¿Con o sin piña?»" data-en="«🌮 2-for-1 Taco Tuesday. See you from 6 to 11 pm. Pineapple or no pineapple?»">«🌮 Martes de 2×1 en tacos al pastor. Te esperamos de 6 a 11 pm. ¿Con o sin piña?»</span>
+              <div class="phone-hashtags">#TacosAgs #MartesDeTacos #2x1</div>
             </div>
           </div>
           <div class="phone-actions">
@@ -386,7 +390,7 @@ function track(...args) {
 <div class="metrics">
   <div class="metrics-inner">
     <div><div class="metric-num"><span class="metric-accent">6</span></div><div class="metric-label" data-es="Modos de creación" data-en="Creation modes">Modos de creación</div></div>
-    <div><div class="metric-num"><span class="metric-accent">20</span>s</div><div class="metric-label" data-es="Por generación" data-en="Per generation">Por generación</div></div>
+    <div><div class="metric-num"><span class="metric-accent">45</span>s</div><div class="metric-label" data-es="Por generación" data-en="Per generation">Por generación</div></div>
     <div><div class="metric-num"><span class="metric-accent">3</span></div><div class="metric-label" data-es="Plataformas a la vez" data-en="Platforms at once">Plataformas a la vez</div></div>
     <div><div class="metric-num"><span class="metric-accent">0</span></div><div class="metric-label" data-es="Diseñadores necesarios" data-en="Designers needed">Diseñadores necesarios</div></div>
   </div>
@@ -422,28 +426,28 @@ function track(...args) {
 <section class="section fade-up" id="como">
   <div class="section-label" data-es="Cómo funciona" data-en="How it works">Cómo funciona</div>
   <h2 class="section-title" data-es="Así trabaja tu community manager con IA" data-en="How your AI community manager works">Así trabaja tu community manager con IA</h2>
-  <p class="section-sub" data-es="Tú pones lo que solo tú sabes de tu negocio. Postimity pone la estrategia, el plan y el diseño. Tú decides qué se publica." data-en="You bring what only you know about your business. Postimity brings the strategy, the plan and the design. You decide what gets published.">Tú pones lo que solo tú sabes de tu negocio. Postimity pone la estrategia, el plan y el diseño. Tú decides qué se publica.</p>
+  <p class="section-sub" data-es="Tú le cuentas de tu negocio. Postimity pone la estrategia, el plan y el diseño. Tú decides qué se publica." data-en="You tell it about your business. Postimity brings the strategy, the plan and the design. You decide what gets published.">Tú le cuentas de tu negocio. Postimity pone la estrategia, el plan y el diseño. Tú decides qué se publica.</p>
   <div class="steps">
     <div class="step">
       <div class="step-num">1</div>
       <div class="step-icon">🧠</div>
-      <h3 data-es="La IA analiza tu negocio" data-en="AI analyzes your business">La IA analiza tu negocio</h3>
-      <p data-es="Cuéntale qué haces y qué te hace especial. La IA crea tu estrategia de marketing completa: voz de marca, pilares de contenido y enfoque por plataforma." data-en="Tell it what you do and what makes you special. AI creates your complete marketing strategy: brand voice, content pillars and per-platform approach.">Cuéntale qué haces y qué te hace especial. La IA crea tu estrategia de marketing completa: voz de marca, pilares de contenido y enfoque por plataforma.</p>
-      <div class="step-time">~60 seg</div>
+      <h3 data-es="Cuéntanos de tu negocio" data-en="Tell us about your business">Cuéntanos de tu negocio</h3>
+      <p data-es="Qué vendes, a quién y qué te hace diferente. Con eso Postimity arma tu estrategia: cómo hablarle a tus clientes y de qué temas publicar." data-en="What you sell, to whom and what makes you different. Postimity turns that into your strategy: how to talk to your customers and what to post about.">Qué vendes, a quién y qué te hace diferente. Con eso Postimity arma tu estrategia: cómo hablarle a tus clientes y de qué temas publicar.</p>
+      <div class="step-time" data-es="~1 min" data-en="~1 min">~1 min</div>
     </div>
     <div class="step">
       <div class="step-num">2</div>
       <div class="step-icon">📋</div>
       <h3 data-es="Recibe tu plan del mes" data-en="Get your monthly plan">Recibe tu plan del mes</h3>
-      <p data-es="El Marketing Agent planea todo tu mes: qué publicar, cuándo, en qué plataforma y por qué. Cada post listo para generar en un toque." data-en="The Marketing Agent plans your entire month: what to post, when, on which platform and why. Each post ready to generate in one tap.">El Marketing Agent planea todo tu mes: qué publicar, cuándo, en qué plataforma y por qué. Cada post listo para generar en un toque.</p>
+      <p data-es="Un calendario con qué publicar cada día y en qué red, con las fechas especiales de tu país ya incluidas." data-en="A calendar of what to post each day and on which network, with your country's special dates already included.">Un calendario con qué publicar cada día y en qué red, con las fechas especiales de tu país ya incluidas.</p>
       <div class="step-time" data-es="~30 seg" data-en="~30 sec">~30 seg</div>
     </div>
     <div class="step">
       <div class="step-num">3</div>
       <div class="step-icon">🚀</div>
       <h3 data-es="Cada día, un toque" data-en="Every day, one tap">Cada día, un toque</h3>
-      <p data-es="Abres el post del día en tu plan y tocas «Crear»: imagen y textos para Instagram, Facebook y TikTok, listos para copiar y publicar. ¿Tienes una foto de tu negocio? Úsala." data-en="Open today's post in your plan and tap «Create»: image and captions for Instagram, Facebook and TikTok, ready to copy and publish. Got a photo of your business? Use it.">Abres el post del día en tu plan y tocas «Crear»: imagen y textos para Instagram, Facebook y TikTok, listos para copiar y publicar. ¿Tienes una foto de tu negocio? Úsala.</p>
-      <div class="step-time" data-es="~1 min por post" data-en="~1 min per post">~1 min por post</div>
+      <p data-es="Abre tu plan, elige el post de hoy y toca «Crear». La imagen y el texto quedan listos para subir a Instagram, Facebook o TikTok." data-en="Open your plan, pick today's post and tap «Create». The image and caption are ready to upload to Instagram, Facebook or TikTok.">Abre tu plan, elige el post de hoy y toca «Crear». La imagen y el texto quedan listos para subir a Instagram, Facebook o TikTok.</p>
+      <div class="step-time" data-es="~45 seg por post" data-en="~45 sec per post">~45 seg por post</div>
     </div>
   </div>
   <!-- S59b: empuje a Estudio Pro (fotos reales del negocio) -->
