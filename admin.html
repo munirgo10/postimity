@@ -8,7 +8,7 @@
 if(location.protocol==='http:'&&/(^|\.)postimity\.com$/.test(location.hostname))location.replace('https://'+location.host+location.pathname+location.search+location.hash);
 </script>
 <meta name="robots" content="noindex, nofollow"><!-- S55n: el panel no aparece en buscadores -->
-<meta name="app-version" content="2.57.5">
+<meta name="app-version" content="2.57.6">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Postimity · Administración</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232979FF'/%3E%3Ccircle cx='16' cy='16' r='5' fill='%23fff'/%3E%3C/svg%3E">
@@ -373,8 +373,8 @@ a{color:var(--b2)}
 const WORKER='https://api.postimity.com/';
 // S22-2: tablas de limites para mostrar contexto (deben coincidir con el worker: MD-30). S58: cada cuenta ya trae su limite
 // (limiteGens / limiteVideos) desde el servidor; estas quedan solo como respaldo de la tabla de las mas activas.
-const GEN_LIMITS={trial:20,starter:40,growth:100,premium:250};
-const VIDEO_LIMITS={trial:2,starter:2,growth:8,premium:20};
+const GEN_LIMITS={trial:20,starter:40,growth:90,premium:200};
+const VIDEO_LIMITS={trial:2,starter:2,growth:6,premium:15};
 const DIA=86400000;
 const ESTADOS={'sin-cobro':'Sin cobro (Stripe)',prueba:'En prueba','prueba-vencida':'Prueba vencida','sin-prueba':'Sin prueba',pagando:'Pagando',riesgo:'Pago en riesgo',override:'Override',cancelada:'Canceló'};
 const ACCIONES={interna:'Cuenta interna',ajuste:'Ajuste de finanzas','dar-prueba':'Prueba devuelta',plan:'Cambio de plan',giro:'Giro fijado',borrar:'Cuenta borrada',pago:'Pago','pago-fallido':'Pago fallido','pago-recuperado':'Pago recuperado',cancelacion:'Cancelación','cambio-plan':'Cambio de plan (portal)','oxxo-vencido':'OXXO vencido'};
@@ -665,7 +665,7 @@ function renderMeses(){
 
 // ── Finanzas (S59 · F4): cada número dice su periodo y su origen ──
 // Real = Stripe · Estimado = costo de referencia × lo que se generó · Captura = lo que escribes tú. null = «sin dato».
-const ORIGEN_CLASE={Real:'real',Estimado:'est',Captura:'cap'};
+const ORIGEN_CLASE={Real:'real',Estimado:'est',Captura:'cap',Medido:'real'};   // S61 (USO-1): Medido = tokens que reporta el proveedor × tarifa de lista
 function mxn(v){const n=Number(v),a=Math.abs(n),d=a<100?2:0;return (n<0?'−':'')+'$'+a.toLocaleString('es-MX',{minimumFractionDigits:d,maximumFractionDigits:d})}
 function org(o){return o?'<span class="org '+(ORIGEN_CLASE[o]||'est')+'">'+esc(o)+'</span>':''}
 function cifra(v,origen,mon){
@@ -713,9 +713,18 @@ function htmlFinanzas(fin){
     +kpi('CAC',u.cac===null||u.cac===undefined?'<span class="muted" style="font-size:16px">sin dato</span>':mxn(u.cac),(u.clientesNuevos||0)+' cliente(s) nuevo(s) · gasto de adquisición '+cifra(u.gastoAdquisicion,'Estimado'))
     +kpi(sem(s.recuperacion)+'Meses para recuperar el CAC',u.mesesRecuperacion===null||u.mesesRecuperacion===undefined?'<span class="muted" style="font-size:16px">sin dato</span>':String(u.mesesRecuperacion),'contribución mensual por cliente '+cifra(u.contribucionMensual,'Estimado')+(u.supuestoContribucion?' · supuesto: '+esc(u.supuestoContribucion):''))
     +kpi(sem(s.ltvCac)+'Lo que deja un cliente ÷ su costo',u.ltvCac===null||u.ltvCac===undefined?'<span class="muted" style="font-size:16px">sin dato</span>':u.ltvCac+'×','LTV '+cifra(u.ltv,'Estimado')+' con '+pctTxt(u.churn)+' de cancelación mensual '+org('Captura'))
-    +'</div><div class="scroll"><table class="admin-table"><thead><tr><th>Plan</th><th class="num">Precio</th><th class="num">Neto (sin IVA ni comisión)</th><th class="num">IA al tope</th><th class="num">Deja al tope</th><th class="num">Margen al tope</th></tr></thead><tbody>'
+    +'</div><div class="small" style="margin:8px 0 4px">Al tope = el cliente usa sus cuatro bolsas completas (generaciones, video, planes del Agente y cambios de guía), cada una con su costo de referencia.</div><div class="scroll"><table class="admin-table"><thead><tr><th>Plan</th><th class="num">Precio</th><th class="num">Neto (sin IVA ni comisión)</th><th class="num">IA al tope</th><th class="num">Deja al tope</th><th class="num">Margen al tope</th></tr></thead><tbody>'
     +['starter','growth','premium'].map(p=>{const m=M[p];return m?'<tr><td>'+sem(m.semaforo)+esc(p[0].toUpperCase()+p.slice(1))+'</td><td class="num">'+mxn(m.precio)+'</td><td class="num">'+cifra(m.neto,'Estimado')+'</td><td class="num">'+cifra(m.iaTope,'Estimado')+'</td><td class="num">'+cifra(m.contribucionTope,'Estimado')+'</td><td class="num">'+pctTxt(m.margenTope)+'</td></tr>':''}).join('')
     +'</tbody></table></div></div>';
+  // ── S61 (USO-1 · PR-243): costo medido por acción, este mes, junto a la referencia
+  const MED=fin.medido, usd3=v=>v===null||v===undefined||!isFinite(Number(v))?'<span class="muted">sin dato</span>':'$'+Number(v).toFixed(3)+' USD';
+  const NOMBRE_MODO={'marketing-agent':'Plan del Agente','brand-guide':'Guía de Marca','brand-guide-update':'Ajuste de guía','video-submit':'Video','video-prompt':'Guion de video','captions':'Post (texto)','image':'Post (imagen)','image-regen':'Nueva imagen','enhance':'Estudio Pro','flyer':'Flyer','flyer-captions':'Flyer (texto)','testimonial':'Testimonio','carousel':'Carrusel','adjust':'Ajustar texto','adjust-image':'Ajustar imagen','video-captions':'Video (texto)'};
+  h+='<div class="section"><div class="section-title">Costo medido por acción <span class="small">Este mes '+org('Medido')+'</span></div><div class="section-sub">Lo que cada proveedor reporta (tokens) × tarifa de lista, por acción, se haya entregado o no (un fallo también se paga). Compáralo con el costo de referencia; si se aleja, recalibra arriba. No reemplaza a la factura.</div>'
+    +(!MED||!MED.length?'<div class="small"><span class="muted">sin dato</span> — todavía no hay acciones medidas este mes.</div>'
+    :'<div class="scroll"><table class="admin-table"><thead><tr><th>Acción</th><th class="num">Acciones</th><th class="num">Entregadas</th><th class="num">Costo medido promedio</th><th class="num">Referencia</th><th class="num">Total del mes</th></tr></thead><tbody>'
+      +MED.map(x=>'<tr><td>'+esc(NOMBRE_MODO[x.modo]||x.modo)+'</td><td class="num">'+x.acciones+'</td><td class="num">'+x.entregadas+'</td><td class="num">'+usd3(x.promedio)+'</td><td class="num">'+usd3(x.referencia)+'</td><td class="num">'+usd3(x.usd)+'</td></tr>').join('')
+      +'</tbody></table></div>')
+    +'</div>';
   // ── Bloque 4 · Proveedores
   const pv=fin.proveedores||[], C=fin.consumo||{}, ce=C.este||{}, estMes=['pago','prueba','interna'].reduce((t,k)=>t+((ce[k]&&ce[k].costo)||0),0);
   const real=pv.filter(p=>p.capturado).reduce((t,p)=>t+(Number(p.gasto)||0),0);
@@ -750,7 +759,7 @@ function htmlFinanzas(fin){
     +[P.este,P.anterior].map(m=>'<div class="fin-row"><div class="fin-label">'+esc(mesLargo(m))+' '+(meta[m]?cifra(meta[m].monto,'Captura'):cifra(null,'Captura'))+'</div><div><input class="fin-in" id="mt-'+esc(m)+'" type="number" min="0" step="1" value="'+(meta[m]?meta[m].monto:'')+'"> <label class="small"><input type="checkbox" id="mti-'+esc(m)+'"'+(!meta[m]||meta[m].iva?' checked':'')+'> con IVA</label> <button class="btn sm" data-mes="'+esc(m)+'" onclick="guardarMeta(this.dataset.mes)">Guardar</button></div></div>').join('')
     +'<div class="small" style="font-weight:700;margin:12px 0 4px">Supuestos y referencia</div>'
     +'<div class="fin-row"><div class="fin-label">Tipo de cambio USD→MXN · diferencial</div><div><input class="fin-in" id="aj-tc" type="number" min="5" step="0.01" value="'+(fxa.tc||'')+'"> <input class="fin-in" id="aj-dif" type="number" min="0" max="0.2" step="0.005" value="'+(fxa.diferencial===undefined?'':fxa.diferencial)+'"> <button class="btn sm" onclick="guardarSupuesto(\'fx\')">Guardar</button></div></div>'
-    +'<div class="fin-row"><div class="fin-label">Costo de referencia (USD): generación · video de 5 s</div><div><input class="fin-in" id="aj-gen" type="number" min="0.001" step="0.001" value="'+(cr.gen||'')+'"> <input class="fin-in" id="aj-vid" type="number" min="0.01" step="0.01" value="'+(cr.video||'')+'"> <button class="btn sm" onclick="guardarSupuesto(\'costoRef\')">Guardar</button></div></div>'
+    +'<div class="fin-row"><div class="fin-label">Costo de referencia (USD): generación · video de 5 s · plan del Agente · guía</div><div><input class="fin-in" id="aj-gen" type="number" min="0.001" step="0.001" value="'+(cr.gen||'')+'"> <input class="fin-in" id="aj-vid" type="number" min="0.01" step="0.01" value="'+(cr.video||'')+'"> <input class="fin-in" id="aj-agente" type="number" min="0.01" step="0.01" value="'+(cr.agente||'')+'"> <input class="fin-in" id="aj-guia" type="number" min="0.001" step="0.001" value="'+(cr.guia||'')+'"> <button class="btn sm" onclick="guardarSupuesto(\'costoRef\')">Guardar</button></div></div>'
     +'<div class="fin-row"><div class="fin-label">Cancelación mensual supuesta (0.08 = 8%)</div><div><input class="fin-in" id="aj-churn" type="number" min="0.005" max="0.9" step="0.005" value="'+(aj.churn||'')+'"> <button class="btn sm" onclick="guardarSupuesto(\'churn\')">Guardar</button></div></div>'
     +'</div><div>'
     +'<div class="small" style="font-weight:700;margin-bottom:4px">Costos fijos</div>'
@@ -790,7 +799,7 @@ const numDe=id=>{const el=document.getElementById(id);const v=el?String(el.value
 function guardarMeta(mes){const m=numDe('mt-'+mes);if(m===null){alert('Escribe el gasto de Meta de '+mesLargo(mes)+'.');return;}guardarAjuste('meta:'+mes,{monto:m,iva:!!document.getElementById('mti-'+mes).checked},motivoFin('captura de Meta'))}
 function guardarSupuesto(clave){
   if(clave==='fx')return guardarAjuste('fx',{tc:numDe('aj-tc'),diferencial:numDe('aj-dif')||0},motivoFin('tipo de cambio'));
-  if(clave==='costoRef')return guardarAjuste('costoRef',{gen:numDe('aj-gen'),video:numDe('aj-vid')},motivoFin('recalibración con facturas'));
+  if(clave==='costoRef')return guardarAjuste('costoRef',{gen:numDe('aj-gen'),video:numDe('aj-vid'),agente:numDe('aj-agente'),guia:numDe('aj-guia')},motivoFin('recalibración con facturas'));   // S61 (FIN-5)
   if(clave==='churn')return guardarAjuste('churn',numDe('aj-churn'),motivoFin('supuesto de cancelación'));
 }
 function guardarFijos(n){
