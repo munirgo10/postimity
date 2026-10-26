@@ -243,10 +243,8 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
 /* Testimonial */
 .test-ta{width:100%;padding:11px 13px;border:1.5px solid var(--bor);border-radius:10px;font-size:13px;font-family:inherit;color:var(--t1);resize:vertical;min-height:100px;outline:none;transition:border .15s;line-height:1.5}
 .test-ta:focus{border-color:var(--b)}
-.test-divider{text-align:center;font-size:12px;color:var(--t3);margin:10px 0;position:relative}
-.test-divider::before,.test-divider::after{content:'';position:absolute;top:50%;width:42%;height:1px;background:var(--bor)}
-.test-divider::before{left:0}
-.test-divider::after{right:0}
+.test-divider{display:flex;align-items:center;gap:10px;text-align:center;font-size:12px;color:var(--t3);margin:10px 0}
+.test-divider::before,.test-divider::after{content:'';flex:1;min-width:16px;height:1px;background:var(--bor)}   /* S60b: las líneas se ajustan al texto; antes medían 42% fijo y cruzaban el texto en celular */
 /* Generate btn */
 .btn-gen{width:100%;padding:13px;background:var(--b);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:.15s;font-family:inherit;margin-top:14px;box-shadow:0 3px 14px rgba(41,121,255,.3)}
 .btn-gen:hover:not(:disabled){background:var(--b2);transform:translateY(-1px)}
@@ -8589,7 +8587,7 @@ function renderAgentPlan(plan, opts) {
   const brandForReminder = loadBrand();
   const remActive = localStorage.getItem('postimity_reminders_' + agentMonthShown()) === 'on';
   // FB-140 (S55j): una sola nota, estatica, debajo de los recordatorios — no una por tarjeta
-  container.innerHTML = renderReminderCard(remActive, brandForReminder) + '<div class="agent-style-note" style="font-size:12px;color:var(--t3);line-height:1.5;margin:8px 2px 14px">💡 ' + t('agentStyleNote') + '</div>';
+  container.innerHTML = renderReminderCard(remActive, brandForReminder) + '<div class="agent-style-note" style="font-size:12px;font-weight:700;color:var(--t2);line-height:1.5;margin:8px 2px 14px">💡 ' + t('agentStyleNote') + '</div>';
   // S42 / INV-129 — localStorage pinta rapido, pero NO es la fuente de verdad: quien
   // envia es el worker leyendo KV. Los dos se separan al borrar datos del sitio (la
   // instruccion post-deploy de S41-A), al cambiar de dispositivo o de navegador, y la
