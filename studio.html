@@ -7,7 +7,7 @@
    Etiquetas en lineas propias: el extractor de sintaxis del preflight (G2) lee los scripts por lineas. */
 if(location.protocol==='http:'&&/(^|\.)postimity\.com$/.test(location.hostname))location.replace('https://'+location.host+location.pathname+location.search+location.hash);
 </script>
-<meta name="app-version" content="2.58.0">
+<meta name="app-version" content="2.58.1">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Postimity Studio — Tu estudio de contenido con IA</title>
 <meta name="description" content="Crea posts, flyers, carruseles y videos profesionales con IA. Describe tu negocio una vez y genera contenido listo para publicar en 20 segundos.">
@@ -1201,7 +1201,6 @@ fbq('track', 'PageView');
       <!-- Plan display (shown after generating) -->
       <div id="agentPlanWrap" style="display:none">
         <div class="agent-summary" id="agentSummary"></div>
-        <div class="agent-hoy" id="agentHoyArriba" style="display:none"></div>
         <div id="agentPlanContent"></div>
         <div class="agent-hoy" id="agentHoyAbajo" style="display:none;margin-top:4px"></div>
         <div class="agent-sig" id="agentSiguiente" style="display:none"></div>
@@ -2382,6 +2381,8 @@ function syncCounters(data) {
   }
   adoptarSaldo(data);   // FB-59: lo que dice el servidor, tal cual
   updateGenCounter();
+  // S62b (PR-248): la primera generación cobrada completa «Crea tu primer post»; se vuelve a preguntar al servidor
+  if (data.success && Number(data.genCount) >= 1 && typeof activacionState !== 'undefined' && activacionState && activacionState.gen1 !== true) refrescarPrimerosPasos();
 }
 
 // Un tope invisible es indistinguible de una falla cuando te choca con el. Estas
@@ -2544,7 +2545,7 @@ function persistSlides(imgs) {
 }
 
 // APP_VERSION (S34) — deploy verification. Must match worker /version and all HTML files.
-const APP_VERSION = '2.58.0'; // historial en ESTADO.md (§7a.1 y PARTE 10)
+const APP_VERSION = '2.58.1'; // historial en ESTADO.md (§7a.1 y PARTE 10)
 window.APP_VERSION = APP_VERSION;
 // El log de version vive unas lineas mas abajo (console.info). No agregar otro aqui:
 // S38 borro POSTIMITY_VERSION para tener un solo log y este lo volvio a duplicar.
@@ -2637,7 +2638,7 @@ const T = {
     commsLabel:'Acepto recibir recordatorios y tips por email. Puedes desuscribirte en cualquier momento.',
     btnSave:'Guardar y crear mi estrategia →', btnSaveEstrategia:'Guardar y crear mi estrategia →', btnSaveSolo:'Guardar',
     saveNeedsGuide:'🔒 Genera tu Brand Guide para continuar: con él armamos tu estrategia del mes.',
-    ppTitle:'Tus primeros pasos', ppCuenta:'{n} de 3', ppMarca:'Tu marca', ppEstrategia:'Tu estrategia del mes', ppDescarga:'Descarga tu primer post',
+    ppTitle:'Tus primeros pasos', ppCuenta:'{n} de 3', ppMarca:'Tu marca', ppEstrategia:'Tu estrategia del mes', ppPrimerPost:'Crea tu primer post',
     ppMarcaAviso:'Antes de tu siguiente post, arma tu marca: con ella tus posts salen con tu voz y tus pilares.',
     // ── Creator screen ──
     brandBarEdit:'✏️ Editar marca',
@@ -2769,10 +2770,10 @@ const T = {
     agentStartsNote:'Este plan arranca el {date}. Mientras tanto puedes crear publicaciones sueltas desde el estudio.',
     agentStylePhoto:'📷 Fotorrealista', agentStyleIllus:'🖼️ Ilustrado', agentStyleAbstract:'🎨 Abstracto',
     // ── Reminders ──
-    remTitle:'Recordatorios automáticos', remSub:'Aviso cálido cada mañana antes de tu post del día',
-    remActiveTitle:'Recordatorios activos — {month}', remActiveSub:'Recibirás un aviso cada mañana antes de tu post del día',
+    remTitle:'Recordatorios automáticos', remSub:'Un aviso cálido en la mañana de cada día que tu plan tiene post, para crearlo en un toque',
+    remActiveTitle:'Recordatorios activos — {month}', remActiveSub:'Te avisaremos en la mañana de cada día que tu plan tiene post',
     remActiveBtn:'✓ Activo', remEmailLabel:'📧 Email para recordatorios', remWALabel:'📱 WhatsApp personal (opcional)',
-    remChannelLabel:'Canal de notificación', remBoth:'Ambos', remActivate:'🔔 Avísame cada mañana',
+    remChannelLabel:'Canal de notificación', remBoth:'Ambos', remActivate:'🔔 Avísame los días de mi plan',
     remSoon:'Próximamente', remWASoon:'Recordatorios por WhatsApp: en camino. Por ahora llegan a tu correo.',
     toastRemFail:'No pudimos activar los recordatorios. Revisa tu conexión e intenta de nuevo.',
     // ── PLT_INFO ──
@@ -2949,7 +2950,7 @@ const T = {
     commsLabel:'I agree to receive reminders and tips by email. You can unsubscribe at any time.',
     btnSave:'Save and create my strategy →', btnSaveEstrategia:'Save and create my strategy →', btnSaveSolo:'Save',
     saveNeedsGuide:'🔒 Generate your Brand Guide to continue: we build your monthly strategy from it.',
-    ppTitle:'Your first steps', ppCuenta:'{n} of 3', ppMarca:'Your brand', ppEstrategia:'Your monthly strategy', ppDescarga:'Download your first post',
+    ppTitle:'Your first steps', ppCuenta:'{n} of 3', ppMarca:'Your brand', ppEstrategia:'Your monthly strategy', ppPrimerPost:'Create your first post',
     ppMarcaAviso:'Before your next post, set up your brand: your posts will come out in your voice and with your pillars.',
     // ── Creator screen ──
     brandBarEdit:'✏️ Edit brand',
@@ -3081,10 +3082,10 @@ const T = {
     agentStartsNote:'This plan starts on {date}. Meanwhile you can create individual posts from the studio.',
     agentStylePhoto:'📷 Photorealistic', agentStyleIllus:'🖼️ Illustrated', agentStyleAbstract:'🎨 Abstract',
     // ── Reminders ──
-    remTitle:'Auto reminders', remSub:'A warm nudge every morning before your daily post',
-    remActiveTitle:'Reminders active — {month}', remActiveSub:"You'll receive a reminder every morning before your daily post",
+    remTitle:'Auto reminders', remSub:'A warm nudge on the morning of each day your plan has a post, to create it in one tap',
+    remActiveTitle:'Reminders active — {month}', remActiveSub:"We'll remind you on the morning of each day your plan has a post",
     remActiveBtn:'✓ Active', remEmailLabel:'📧 Reminder email', remWALabel:'📱 Personal WhatsApp (optional)',
-    remChannelLabel:'Notification channel', remBoth:'Both', remActivate:'🔔 Remind me every morning',
+    remChannelLabel:'Notification channel', remBoth:'Both', remActivate:'🔔 Remind me on my plan days',
     remSoon:'Coming soon', remWASoon:'WhatsApp reminders are on the way. For now they arrive by email.',
     toastRemFail:"We couldn't turn on reminders. Check your connection and try again.",
     // ── PLT_INFO ──
@@ -4705,7 +4706,8 @@ async function ensureBrandThenGuide() {
     // Tambien valida los campos obligatorios y avisa por su cuenta si faltan.
     const btn = document.getElementById('btnGenBG');
     const prev = btn ? btn.textContent : '';
-    if (btn) { btn.disabled = true; btn.textContent = isES ? '⏳ Guardando tu marca...' : '⏳ Saving your brand...'; }
+    // S62b (operador, 27 oct): el primer guardado tarda unos segundos; se ve que trabaja (el mismo reloj que la guía)
+    if (btn) { btn.disabled = true; btn.innerHTML = '<div class="spin-sm"></div> ' + (isES ? 'Guardando tu marca…' : 'Saving your brand…'); }
     window._savingForGuide = true;
     try { saveBrand(); } finally { window._savingForGuide = false; }
 
@@ -4933,7 +4935,7 @@ function saveBrand() {
   // una guia, no guardar. Un toast de "marca guardada" ahi le informa de algo que
   // no pidio y le hace dudar de si funciono lo que si pidio.
   //
-  // S62 (2.58.0 · PR-244): la guía ya es obligatoria para guardar, así que el «primer guardado que no navega» de S46 solo
+  // S62 (PR-244): la guía ya es obligatoria para guardar, así que el «primer guardado que no navega» de S46 solo
   // queda para el guardado INTERNO que hace la guía (ensureBrandThenGuide): ni navega ni avisa. El del botón navega: sin
   // estrategia todavía, al Marketing Agent («Guardar y crear mi estrategia →»); con ella, al estudio («Guardar»).
   if (window._savingForGuide) { syncGateButtons(); return; }
@@ -8443,7 +8445,7 @@ function applyAgentFreqGate() {
   try { paintAgentQuote(); } catch(e) {}
 }
 
-// ═══ S62 · 2.58.0 · ENTRADA GUIADA (PR-244 a PR-248) ═══════════════════════════════════════════════════════════════
+// ═══ S62 · ENTRADA GUIADA (PR-244 a PR-248) ═══════════════════════════════════════════════════════════════
 // Marca → estrategia → post de hoy. Los pasos de la cuenta los dice el SERVIDOR (check-auth → activacion, la misma regla
 // que el panel, RD-35) y el estudio solo los pinta: nada se guarda en el navegador. Quien cierra la pestaña a medias retoma
 // desde la lista «Tus primeros pasos», arriba del estudio, hasta completarla.
@@ -8455,6 +8457,11 @@ function adoptarActivacion(a) {
   try { pintarBotonGuardar(); } catch (e) {}
 }
 function tieneEstrategia() { return !!(activacionState && activacionState.plan); }
+// «Crea tu primer post»: con el plan ya cargado, el estudio abre con el post de hoy (o el próximo) lleno; si no, el plan
+function irAPrimerPost() {
+  const prox = (typeof agentPostsCache !== 'undefined' && agentPostsCache.length) ? agentProximoPost(agentPostsCache, agentHoy()) : null;
+  if (prox) goCreatePost(prox.idx); else showAgentScreen();
+}
 async function refrescarPrimerosPasos() {
   try { const auth = await checkAuth(); if (auth && 'activacion' in auth) adoptarActivacion(auth.activacion); } catch (e) { /* sin dato: se queda lo pintado */ }
 }
@@ -8466,12 +8473,13 @@ function pintarPrimerosPasos() {
   const el = document.getElementById('primerosPasos');
   if (!el) return;
   const a = activacionState;
-  if (!a || (a.guia && a.plan && a.salida)) { el.style.display = 'none'; el.innerHTML = ''; return; }   // sin dato o completa: nada
+  if (!a || (a.guia && a.plan && a.gen1)) { el.style.display = 'none'; el.innerHTML = ''; return; }   // sin dato o completa: nada
   const pasos = [
     { ok: a.guia, txt: t('ppMarca'), ir: 'goToEdit()' },
     { ok: a.plan, txt: t('ppEstrategia'), ir: 'showAgentScreen()' },
-    // ya generó: su pieza está en el historial; si no, el post de hoy está en su plan
-    { ok: a.salida, txt: t('ppDescarga'), ir: a.gen1 ? 'showHistorialScreen()' : 'showAgentScreen()' }];
+    // S62b (operador, 27 oct): el tercer paso es CREAR, no descargar (el historial confundía). Lleva directo al post de hoy
+    // de su plan; descargar se sigue midiendo en el panel (Activación)
+    { ok: a.gen1, txt: t('ppPrimerPost'), ir: 'irAPrimerPost()' }];
   const hechos = pasos.filter(p => p.ok).length;
   el.innerHTML = '<div class="pp-title">' + esc(t('ppTitle')) + '<span>' + esc(t('ppCuenta').replace('{n}', hechos)) + '</span></div>' +
     '<div class="pp-pasos">' + pasos.map((p, i) => p.ok
@@ -8740,7 +8748,9 @@ function renderAgentPlan(plan, opts) {
   const brandForReminder = loadBrand();
   const remActive = localStorage.getItem('postimity_reminders_' + agentMonthShown()) === 'on';
   // FB-140 (S55j): una sola nota, estatica, debajo de los recordatorios — no una por tarjeta
-  container.innerHTML = renderReminderCard(remActive, brandForReminder) + '<div class="agent-style-note" style="font-size:12px;font-weight:700;color:var(--t2);line-height:1.5;margin:8px 2px 14px">💡 ' + t('agentStyleNote') + '</div>';
+  // S62b (operador, 27 oct): «Crea tu post de hoy» va después de la nota de estilo (recordatorios → nota → botón → semanas)
+  container.innerHTML = renderReminderCard(remActive, brandForReminder) + '<div class="agent-style-note" style="font-size:12px;font-weight:700;color:var(--t2);line-height:1.5;margin:8px 2px 14px">💡 ' + t('agentStyleNote') + '</div>' +
+    '<div class="agent-hoy" id="agentHoyArriba" style="display:none"></div>';
   // S42 / INV-129 — localStorage pinta rapido, pero NO es la fuente de verdad: quien
   // envia es el worker leyendo KV. Los dos se separan al borrar datos del sitio (la
   // instruccion post-deploy de S41-A), al cambiar de dispositivo o de navegador, y la
@@ -10316,12 +10326,8 @@ function registrarSalida(accion, red, resultado, modoPieza, origen) {
   try {
     const r = resultado === 'copiado' ? 'copiado' : (SALIDA_RESULTADO[resultado] || 'cancelado');
     // text/plain: petición simple, sin preflight de CORS (Safari no siempre manda keepalive con preflight); el worker lee el texto
-    let p = apiFetch(WORKER, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=UTF-8' }, keepalive: true,
+    const p = apiFetch(WORKER, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=UTF-8' }, keepalive: true,
       body: JSON.stringify({ mode: 'registrar-salida', accion: accion, red: red || null, resultado: r, modo: modoPieza || null, origen: origen || 'creador' }) });
-    // S62 (PR-248): si la lista de primeros pasos espera la primera descarga, se vuelve a preguntar al servidor cuando ESTE
-    // confirma el registro (nunca se marca en el navegador)
-    const espera = r !== 'copiado' && r !== 'cancelado' && accion !== 'copiar' && activacionState && activacionState.salida !== true;
-    if (p && typeof p.then === 'function' && espera) p = p.then(function (res) { return res && res.json ? res.json() : null; }).then(function (d) { if (d && d.registrado) refrescarPrimerosPasos(); });
     if (p && typeof p.catch === 'function') p.catch(function () { /* el registro nunca frena una descarga */ });
   } catch (e) { /* el registro nunca frena ni rompe una descarga */ }
 }
