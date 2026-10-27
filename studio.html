@@ -7,7 +7,7 @@
    Etiquetas en lineas propias: el extractor de sintaxis del preflight (G2) lee los scripts por lineas. */
 if(location.protocol==='http:'&&/(^|\.)postimity\.com$/.test(location.hostname))location.replace('https://'+location.host+location.pathname+location.search+location.hash);
 </script>
-<meta name="app-version" content="2.57.6">
+<meta name="app-version" content="2.58.0">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Postimity Studio — Tu estudio de contenido con IA</title>
 <meta name="description" content="Crea posts, flyers, carruseles y videos profesionales con IA. Describe tu negocio una vez y genera contenido listo para publicar en 20 segundos.">
@@ -552,6 +552,25 @@ input[type=color]{width:28px;height:28px;border:none;border-radius:6px;cursor:po
 .apc-mode.flyer{background:#FCE4EC;color:#AD1457}
 .apc-style.real{background:#E8F5E9;color:#2E7D32}
 .agent-cost-line{font-size:12px;color:var(--t2);line-height:1.5;margin:-6px 0 14px}
+/* S62 · entrada guiada: la etiqueta de la frecuencia, el botón del post de hoy, el mes siguiente y la lista de primeros pasos */
+.afb-tag{display:block;font-size:9.5px;font-weight:800;letter-spacing:.02em;margin-top:3px;opacity:.85}
+.agent-hoy{margin:0 0 16px}
+.agent-hoy-btn{width:100%;padding:13px 14px;border:none;border-radius:12px;background:var(--b);color:#fff;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;line-height:1.35}
+.agent-hoy-btn:hover{filter:brightness(1.06)}
+.agent-sig{background:var(--bg);border:1px dashed var(--b);border-radius:12px;padding:12px 14px;margin:0 0 14px;font-size:13px;color:var(--t2);line-height:1.5}
+.agent-sig button{margin-top:8px;width:100%;padding:10px;border-radius:10px;border:1.5px solid var(--b);background:var(--w);color:var(--b);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit}
+.agent-upsell-btn{display:inline-block;margin-top:6px;padding:8px 12px;border-radius:9px;border:none;background:var(--b);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit}
+.reminder-card.destacada{border-color:var(--b);box-shadow:0 0 0 3px var(--b3)}
+.pp-wrap{background:var(--w);border:1.5px solid var(--b);border-radius:var(--r2);padding:12px 14px;margin-bottom:16px;display:none}
+.pp-title{font-size:13px;font-weight:800;color:var(--t1);margin-bottom:8px;display:flex;justify-content:space-between;gap:8px}
+.pp-title span{font-weight:700;color:var(--t3);font-size:12px;white-space:nowrap}
+.pp-pasos{display:flex;gap:8px;flex-wrap:wrap}
+.pp-paso{flex:1 1 140px;display:flex;align-items:center;gap:8px;padding:9px 11px;border-radius:10px;font-size:12.5px;font-weight:700;line-height:1.3;text-align:left;font-family:inherit;border:1.5px solid var(--bor);background:var(--bg);color:var(--t2)}
+button.pp-paso{cursor:pointer;border-color:var(--b);background:var(--b3);color:var(--b2)}
+.pp-paso.hecho{opacity:.75;color:var(--t3)}
+.pp-paso.hecho .pp-num{background:var(--g);border-color:var(--g);color:#fff}
+.pp-num{flex-shrink:0;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;background:var(--w);border:1.5px solid currentColor}
+.pp-aviso{font-size:12px;color:var(--t2);line-height:1.5;margin-top:8px}
 .agent-cost-line:empty{display:none}
 .agent-cost-line .warn{display:block;color:#B5750B;font-weight:700;margin-top:2px}
 .apc-btn.copy:hover{background:var(--bor)}
@@ -1157,9 +1176,9 @@ fbq('track', 'PageView');
           <div class="agent-config-title">⚙️ Configura tu plan mensual</div>
           <div class="ic-label" id="agentFreqLabel">Posts por semana</div>
           <div class="agent-freq-btns">
-            <button class="agent-freq-btn" data-freq="3" onclick="setAgentFreq(this)">3/semana<br><span style="font-size:10px;opacity:.7">~12 posts</span></button>
-            <button class="agent-freq-btn active" data-freq="5" onclick="setAgentFreq(this)">5/semana<br><span style="font-size:10px;opacity:.7">~20 posts</span></button>
-            <button class="agent-freq-btn" data-freq="7" onclick="setAgentFreq(this)" id="agentFreq7">7/semana<br><span style="font-size:10px;opacity:.7" id="agentFreq7Sub">~28 posts</span></button>
+            <button class="agent-freq-btn active" data-freq="3" onclick="setAgentFreq(this)"><b class="afb-n">3/semana</b><br><span style="font-size:10px;opacity:.7">~12 posts</span><b class="afb-tag" id="agentFreq3Tag">Recomendado</b></button>
+            <button class="agent-freq-btn" data-freq="5" onclick="setAgentFreq(this)"><b class="afb-n">5/semana</b><br><span style="font-size:10px;opacity:.7">~20 posts</span></button>
+            <button class="agent-freq-btn" data-freq="7" onclick="setAgentFreq(this)" id="agentFreq7"><b class="afb-n">7/semana</b><br><span style="font-size:10px;opacity:.7" id="agentFreq7Sub">~28 posts</span><b class="afb-tag" id="agentFreq7Tag">Intensivo</b></button>
           </div>
           <div id="agentCostLine" class="agent-cost-line"></div>
           <div class="ic-label" id="agentPlatsLabel">Plataformas</div>
@@ -1182,7 +1201,10 @@ fbq('track', 'PageView');
       <!-- Plan display (shown after generating) -->
       <div id="agentPlanWrap" style="display:none">
         <div class="agent-summary" id="agentSummary"></div>
+        <div class="agent-hoy" id="agentHoyArriba" style="display:none"></div>
         <div id="agentPlanContent"></div>
+        <div class="agent-hoy" id="agentHoyAbajo" style="display:none;margin-top:4px"></div>
+        <div class="agent-sig" id="agentSiguiente" style="display:none"></div>
         <button class="btn btn-full" onclick="showAgentConfig()" style="margin-top:8px;background:var(--bg);color:var(--t2);border:.5px solid var(--bor);border-radius:10px;padding:10px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">
           ↺ Regenerar plan
         </button>
@@ -1481,7 +1503,7 @@ fbq('track', 'PageView');
       <div id="bguideCapNote" style="font-size:12px;color:var(--t3);margin-top:8px;line-height:1.5;text-align:center"></div>
       <div class="bg-section" id="bgSection">
         <div class="bg-label" style="margin-top:14px">📋 Brand Guide generado — puedes editarlo</div>
-        <textarea class="bg-area" id="bgText" rows="12"></textarea>
+        <textarea class="bg-area" id="bgText" rows="12" oninput="syncGateButtons()"></textarea>
         <div id="bgAIDisclaimer" style="font-size:12px;line-height:1.55;margin-top:8px;padding:10px 12px;background:var(--bg2);border:1px solid var(--bor);border-left:3px solid var(--pk);border-radius:8px;color:var(--t2)">
           ⚠️ <strong>Revisa esta guía antes de guardarla.</strong> La IA la redacta a partir de lo que escribiste y <strong>puede afirmar cosas que no son ciertas de tu negocio</strong>.
           Presta atención a frases como «somos los únicos» o «los mejores»: ese tipo de afirmación está regulada en publicidad y respondes tú por ella.
@@ -1511,8 +1533,9 @@ fbq('track', 'PageView');
 
 
     <button class="btn btn-primary btn-full" id="btnSave" onclick="saveBrand()" disabled style="padding:14px;font-size:14px">
-      Guardar y empezar a crear →
+      Guardar y crear mi estrategia →
     </button>
+    <div id="saveNeedsGuide" style="display:none;font-size:12px;color:var(--t3);margin-top:8px;text-align:center;line-height:1.5">🔒 Genera tu Brand Guide para continuar: con él armamos tu estrategia del mes.</div>
   </div>
 </div>
 
@@ -1536,6 +1559,9 @@ fbq('track', 'PageView');
       </div>
       <button class="btn-edit" onclick="goToEdit()">✏️ Editar marca</button>
     </div>
+
+    <!-- S62 (PR-248): «Tus primeros pasos». La pinta pintarPrimerosPasos con lo que dice el servidor (check-auth → activacion) -->
+    <div class="pp-wrap" id="primerosPasos" aria-live="polite"></div>
 
     <!-- Seasonal alert -->
     <div class="seasonal-alert" id="seasonalAlert">
@@ -2389,8 +2415,10 @@ function updateCapLabels() {
   if (maEl) {
     if (ma === null) { maEl.textContent = ''; }
     else if (ma === 0) {
-      maEl.textContent = es ? '⛔ Sin planes disponibles este mes. No consume tus generaciones.'
-                            : '⛔ No plans left this month. This does not use your generations.';
+      // S62 (PR-247): sin planes, la salida es un plan de pago (la cuenta sin prueba llega aquí desde el alta), nunca un error
+      maEl.innerHTML = esc(es ? '⛔ Sin planes disponibles este mes. No consume tus generaciones.'
+                              : '⛔ No plans left this month. This does not use your generations.') +
+        '<br><button type="button" class="agent-upsell-btn" onclick="showUpgradeInfo()">' + esc(t('agentSinPlanes')) + '</button>';
     } else {
       const lim = capsState.magen.limit;
       maEl.textContent = es ? `📋 Te quedan ${ma} de ${lim} planes este mes. No consume tus generaciones.`
@@ -2516,7 +2544,7 @@ function persistSlides(imgs) {
 }
 
 // APP_VERSION (S34) — deploy verification. Must match worker /version and all HTML files.
-const APP_VERSION = '2.57.6'; // historial en ESTADO.md (§7a.1 y PARTE 10)
+const APP_VERSION = '2.58.0'; // historial en ESTADO.md (§7a.1 y PARTE 10)
 window.APP_VERSION = APP_VERSION;
 // El log de version vive unas lineas mas abajo (console.info). No agregar otro aqui:
 // S38 borro POSTIMITY_VERSION para tener un solo log y este lo volvio a duplicar.
@@ -2607,7 +2635,10 @@ const T = {
     bgLoaded:'✅ Brand Guide cargado — puedes regenerar',
     termsLabel:'He leído y acepto los <a href="terms.html" target="_blank" style="color:var(--b);font-weight:600">Términos y Condiciones</a> y el <a href="privacy.html" target="_blank" style="color:var(--b);font-weight:600">Aviso de Privacidad</a> de Postimity.',
     commsLabel:'Acepto recibir recordatorios y tips por email. Puedes desuscribirte en cualquier momento.',
-    btnSave:'Guardar y empezar a crear →',
+    btnSave:'Guardar y crear mi estrategia →', btnSaveEstrategia:'Guardar y crear mi estrategia →', btnSaveSolo:'Guardar',
+    saveNeedsGuide:'🔒 Genera tu Brand Guide para continuar: con él armamos tu estrategia del mes.',
+    ppTitle:'Tus primeros pasos', ppCuenta:'{n} de 3', ppMarca:'Tu marca', ppEstrategia:'Tu estrategia del mes', ppDescarga:'Descarga tu primer post',
+    ppMarcaAviso:'Antes de tu siguiente post, arma tu marca: con ella tus posts salen con tu voz y tus pilares.',
     // ── Creator screen ──
     brandBarEdit:'✏️ Editar marca',
     pillarLabel:'¿Para qué pilar es este contenido?',
@@ -2724,6 +2755,10 @@ const T = {
     agentPlatNote:'Las plataformas se distribuyen inteligentemente según tu audiencia del Brand Guide.',
     agentGenBtn:'✨ Generar plan de {month}', agentGenLoading:'☕ Generando tu plan mensual... puede tomar hasta 3 minutos. No cierres esta pestaña.',
     agentRegenPlan:'↺ Regenerar plan',
+    agentPerWeek:'/semana', agentFreqRec:'Recomendado', agentFreqInt:'Intensivo',
+    agentHoyBtn:'✨ Crea tu post de hoy →', agentProxBtn:'✨ Crea tu próximo post ({when}) →',
+    agentSigTxt:'📅 Este plan termina el {date}. Tu plan de {month} ya se puede generar.', agentSigGen:'Generar plan de {month} →', agentSigVer:'Ver plan de {month} →',
+    agentSinPlanes:'Ver planes →',
     agentGenerating:'⏳ Generando plan...',
     agentPlannedSub:'{n} posts planificados para {month}',
     agentWeekLabel:'Semana {n} · {range}',
@@ -2737,7 +2772,7 @@ const T = {
     remTitle:'Recordatorios automáticos', remSub:'Aviso cálido cada mañana antes de tu post del día',
     remActiveTitle:'Recordatorios activos — {month}', remActiveSub:'Recibirás un aviso cada mañana antes de tu post del día',
     remActiveBtn:'✓ Activo', remEmailLabel:'📧 Email para recordatorios', remWALabel:'📱 WhatsApp personal (opcional)',
-    remChannelLabel:'Canal de notificación', remBoth:'Ambos', remActivate:'🔔 Activar recordatorios',
+    remChannelLabel:'Canal de notificación', remBoth:'Ambos', remActivate:'🔔 Avísame cada mañana',
     remSoon:'Próximamente', remWASoon:'Recordatorios por WhatsApp: en camino. Por ahora llegan a tu correo.',
     toastRemFail:'No pudimos activar los recordatorios. Revisa tu conexión e intenta de nuevo.',
     // ── PLT_INFO ──
@@ -2912,7 +2947,10 @@ const T = {
     bgLoaded:'✅ Brand Guide loaded — you can regenerate',
     termsLabel:'I have read and accept the <a href="terms.html" target="_blank" style="color:var(--b);font-weight:600">Terms & Conditions</a> and <a href="privacy.html" target="_blank" style="color:var(--b);font-weight:600">Privacy Policy</a> of Postimity.',
     commsLabel:'I agree to receive reminders and tips by email. You can unsubscribe at any time.',
-    btnSave:'Save and start creating →',
+    btnSave:'Save and create my strategy →', btnSaveEstrategia:'Save and create my strategy →', btnSaveSolo:'Save',
+    saveNeedsGuide:'🔒 Generate your Brand Guide to continue: we build your monthly strategy from it.',
+    ppTitle:'Your first steps', ppCuenta:'{n} of 3', ppMarca:'Your brand', ppEstrategia:'Your monthly strategy', ppDescarga:'Download your first post',
+    ppMarcaAviso:'Before your next post, set up your brand: your posts will come out in your voice and with your pillars.',
     // ── Creator screen ──
     brandBarEdit:'✏️ Edit brand',
     pillarLabel:'Which pillar is this content for?',
@@ -3029,6 +3067,10 @@ const T = {
     agentPlatNote:'Platforms are intelligently distributed based on your Brand Guide audience.',
     agentGenBtn:'✨ Generate plan for {month}', agentGenLoading:'☕ Generating your monthly plan... may take up to 3 minutes. Do not close this tab.',
     agentRegenPlan:'↺ Regenerate plan',
+    agentPerWeek:'/week', agentFreqRec:'Recommended', agentFreqInt:'Intensive',
+    agentHoyBtn:'✨ Create today\'s post →', agentProxBtn:'✨ Create your next post ({when}) →',
+    agentSigTxt:'📅 This plan ends on {date}. Your {month} plan can be generated now.', agentSigGen:'Generate {month} plan →', agentSigVer:'See {month} plan →',
+    agentSinPlanes:'See plans →',
     agentGenerating:'⏳ Generating plan...',
     agentPlannedSub:'{n} posts planned for {month}',
     agentWeekLabel:'Week {n} · {range}',
@@ -3042,7 +3084,7 @@ const T = {
     remTitle:'Auto reminders', remSub:'A warm nudge every morning before your daily post',
     remActiveTitle:'Reminders active — {month}', remActiveSub:"You'll receive a reminder every morning before your daily post",
     remActiveBtn:'✓ Active', remEmailLabel:'📧 Reminder email', remWALabel:'📱 Personal WhatsApp (optional)',
-    remChannelLabel:'Notification channel', remBoth:'Both', remActivate:'🔔 Activate reminders',
+    remChannelLabel:'Notification channel', remBoth:'Both', remActivate:'🔔 Remind me every morning',
     remSoon:'Coming soon', remWASoon:'WhatsApp reminders are on the way. For now they arrive by email.',
     toastRemFail:"We couldn't turn on reminders. Check your connection and try again.",
     // ── PLT_INFO ──
@@ -3410,6 +3452,7 @@ async function refreshServerState({ esperarCambioDePlan = false, planPrevio = nu
     adoptarRegulado(auth.regulado);   // D62
     adoptarGiro(auth.giro);   // S57c
     adoptarSaldo(auth);   // FB-59: saldo y topes tras volver de pagar
+    if ('activacion' in auth) adoptarActivacion(auth.activacion);   // S62 (PR-248): los primeros pasos los dice el servidor
     try { updateCapLabels(); applyAgentFreqGate(); updateGenCounter(); } catch(e) {}
     if (!esperarCambioDePlan) break;
     if (auth.plan && auth.plan !== planPrevio) break;   // el webhook ya aplico el plan
@@ -4175,6 +4218,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   adoptarNicho(auth.nicho);   // D66 (S55m): la voz del lienzo
   adoptarRegulado(auth.regulado);   // D62
   adoptarGiro(auth.giro, true);   // S57c: al entrar, aviso discreto si nadie ha confirmado el giro
+  if ('activacion' in auth) adoptarActivacion(auth.activacion);   // S62 (PR-248): los primeros pasos los dice el servidor
   try { updateCapLabels(); applyAgentFreqGate(); } catch(e) {}
 
   // Authenticated — load brand if exists
@@ -4287,6 +4331,7 @@ function showScreen(id) {
   // pantalla esta visible (ver S39-1 arriba) y ya sincroniza updateCapLabels por esta
   // misma razon.
   if (id === 'creatorScreen') {
+    try { pintarPrimerosPasos(); } catch(e) { console.warn('showScreen: pintarPrimerosPasos falló', e && e.message); }   // S62 (PR-248)
     try { updateStyleSelector(); } catch(e) { console.warn('showScreen: updateStyleSelector falló', e && e.message); }
     try { updateGalleryToggle(); } catch(e) { console.warn('showScreen: updateGalleryToggle falló', e && e.message); }
   }
@@ -4631,9 +4676,19 @@ function syncGateButtons() {
   //
   // El consentimiento si es fricción legítima: sin el no se puede almacenar nada
   // (Contrato 11.2). Esa es la unica puerta que el usuario debe ver.
-  if (save) save.disabled = !acepto;
+  // S62 (PR-244): sin guía no se habilita «Guardar». Solo una bolsa de guía en cero (cuenta sin prueba) deja guardar sin
+  // ella: no puede generarla, y el Agente le muestra la salida a un plan de pago (nunca un callejón).
+  const guia = guiaLista();
+  if (save) save.disabled = !acepto || !guia;
   if (gen)  gen.disabled  = !acepto;
   if (note) note.style.display = acepto ? 'none' : '';
+  const falta = document.getElementById('saveNeedsGuide');
+  if (falta) falta.style.display = (acepto && !guia) ? '' : 'none';
+  try { pintarBotonGuardar(); } catch (e) {}
+}
+function guiaLista() {
+  const v = (document.getElementById('bgText') || {}).value;
+  return !!(v && String(v).trim()) || capLeft('bguide') === 0;
 }
 
 async function ensureBrandThenGuide() {
@@ -4745,7 +4800,8 @@ async function generateBrandGuide() {
     }
     document.getElementById('bgText').value=data.brandGuide;
     document.getElementById('bgSection').classList.add('show');
-    document.getElementById('btnSave').disabled=false;
+    syncGateButtons();   // S62 (PR-244): con la guía lista se habilita «Guardar y crear mi estrategia →»
+    refrescarPrimerosPasos();   // la lista de primeros pasos la dice el servidor
     btn.innerHTML=t('bgGenerated'); btn.style.background='var(--g)';
     const tn=document.getElementById('bgTimeNote'); if(tn) tn.remove();
     document.getElementById('bgEditGuide').style.display='block';
@@ -4876,22 +4932,19 @@ function saveBrand() {
   // Y el aviso se calla si el guardado viene de generar la guia: el usuario pidio
   // una guia, no guardar. Un toast de "marca guardada" ahi le informa de algo que
   // no pidio y le hace dudar de si funciono lo que si pidio.
-  const btnS = document.getElementById('btnSave');
-  if (btnS && !btnS.dataset.saved) {
-    btnS.dataset.saved = '1';
-    btnS.textContent = detectLanguage()==='en' ? 'Start creating →' : 'Empezar a crear →';
-    syncGateButtons();
-    if (!window._savingForGuide) {
-      showToast(detectLanguage()==='en' ? '✅ Brand saved' : '✅ Marca guardada');
-    }
-    return;
-  }
-  showScreen('creatorScreen');
+  //
+  // S62 (2.58.0 · PR-244): la guía ya es obligatoria para guardar, así que el «primer guardado que no navega» de S46 solo
+  // queda para el guardado INTERNO que hace la guía (ensureBrandThenGuide): ni navega ni avisa. El del botón navega: sin
+  // estrategia todavía, al Marketing Agent («Guardar y crear mi estrategia →»); con ella, al estudio («Guardar»).
+  if (window._savingForGuide) { syncGateButtons(); return; }
+  const aEstrategia = !tieneEstrategia();
+  if (aEstrategia) showAgentScreen();
+  else showScreen('creatorScreen');
   // First-time celebration
   const firstBrandKey = 'postimity_first_brand_' + brandId;
   if(!localStorage.getItem(firstBrandKey)) {
     localStorage.setItem(firstBrandKey, '1');
-    setTimeout(() => showToast(t('toastBGReady')), 600);
+    if (!aEstrategia) setTimeout(() => showToast(t('toastBGReady')), 600);   // «genera tu primer post 👇» solo en el estudio
     // Meta Pixel: Lead event on first brand creation
     track('track', 'Lead', { content_name: 'brand_created', content_category: brand.type });   // FB-175: sin el nombre del negocio
   }
@@ -8238,7 +8291,9 @@ function copyHistCaption() {
 // ╔═══════════════════════════════════════════════════╗
 // ║  MARKETING AGENT                                 ║
 // ╚═══════════════════════════════════════════════════╝
-let agentFreq = 5;
+// S62 (D49 · PR-245): 3 por semana «Recomendado» por defecto en todos los planes; 7 «Intensivo» solo donde el plan lo permite
+const AGENT_FREQ_RECOMENDADA = 3;
+let agentFreq = 3;   // = AGENT_FREQ_RECOMENDADA (literal: varios arneses cargan esta línea sin la constante)
 let agentPlats = ['instagram', 'facebook'];
 let agentPlan = null;
 let agentPostsCache = []; // Stores posts indexed for onclick access
@@ -8271,6 +8326,7 @@ function getMonthLabel(monthStr) {
 
 function showAgentScreen() {
   try { applyAgentFreqGate(); updateCapLabels(); } catch(e) {}
+  try { agentMesObjetivo = null; } catch (e) {}   // S62: «el mes siguiente» se elige desde el plan, no se hereda
   const month = getCurrentMonth();
   const label = getMonthLabel(month);
   const el = document.getElementById('agentMonthLabel');
@@ -8374,15 +8430,108 @@ function applyAgentFreqGate() {
     b.style.cursor = blocked ? 'not-allowed' : '';
     if(blocked && b.classList.contains('active')) {
       b.classList.remove('active');
-      const fallback = document.querySelector('.agent-freq-btn[data-freq="5"]');
-      if(fallback) { fallback.classList.add('active'); agentFreq = 5; }
+      const fallback = document.querySelector('.agent-freq-btn[data-freq="' + AGENT_FREQ_RECOMENDADA + '"]');
+      if(fallback) { fallback.classList.add('active'); agentFreq = AGENT_FREQ_RECOMENDADA; }
     }
   });
   const sub = document.getElementById('agentFreq7Sub');
   if(sub) sub.textContent = (7 > maxF)
     ? (es ? '~28 posts · Growth' : '~28 posts · Growth')
     : '~28 posts';
+  const tag7 = document.getElementById('agentFreq7Tag');   // S62: «Intensivo» solo donde se puede elegir
+  if (tag7) tag7.style.display = (7 > maxF) ? 'none' : '';
   try { paintAgentQuote(); } catch(e) {}
+}
+
+// ═══ S62 · 2.58.0 · ENTRADA GUIADA (PR-244 a PR-248) ═══════════════════════════════════════════════════════════════
+// Marca → estrategia → post de hoy. Los pasos de la cuenta los dice el SERVIDOR (check-auth → activacion, la misma regla
+// que el panel, RD-35) y el estudio solo los pinta: nada se guarda en el navegador. Quien cierra la pestaña a medias retoma
+// desde la lista «Tus primeros pasos», arriba del estudio, hasta completarla.
+let activacionState = null;
+let agentMesObjetivo = null;   // el mes que «Generar» pedirá; null = el actual
+function adoptarActivacion(a) {
+  activacionState = (a && typeof a === 'object') ? { guia: a.guia === true, plan: a.plan === true, gen1: a.gen1 === true, salida: a.salida === true } : null;
+  try { pintarPrimerosPasos(); } catch (e) {}
+  try { pintarBotonGuardar(); } catch (e) {}
+}
+function tieneEstrategia() { return !!(activacionState && activacionState.plan); }
+async function refrescarPrimerosPasos() {
+  try { const auth = await checkAuth(); if (auth && 'activacion' in auth) adoptarActivacion(auth.activacion); } catch (e) { /* sin dato: se queda lo pintado */ }
+}
+function pintarBotonGuardar() {
+  const b = document.getElementById('btnSave');
+  if (b) b.textContent = t(tieneEstrategia() ? 'btnSaveSolo' : 'btnSaveEstrategia');
+}
+function pintarPrimerosPasos() {
+  const el = document.getElementById('primerosPasos');
+  if (!el) return;
+  const a = activacionState;
+  if (!a || (a.guia && a.plan && a.salida)) { el.style.display = 'none'; el.innerHTML = ''; return; }   // sin dato o completa: nada
+  const pasos = [
+    { ok: a.guia, txt: t('ppMarca'), ir: 'goToEdit()' },
+    { ok: a.plan, txt: t('ppEstrategia'), ir: 'showAgentScreen()' },
+    // ya generó: su pieza está en el historial; si no, el post de hoy está en su plan
+    { ok: a.salida, txt: t('ppDescarga'), ir: a.gen1 ? 'showHistorialScreen()' : 'showAgentScreen()' }];
+  const hechos = pasos.filter(p => p.ok).length;
+  el.innerHTML = '<div class="pp-title">' + esc(t('ppTitle')) + '<span>' + esc(t('ppCuenta').replace('{n}', hechos)) + '</span></div>' +
+    '<div class="pp-pasos">' + pasos.map((p, i) => p.ok
+      ? '<div class="pp-paso hecho"><span class="pp-num">✓</span>' + esc(p.txt) + '</div>'
+      : '<button type="button" class="pp-paso" onclick="' + p.ir + '"><span class="pp-num">' + (i + 1) + '</span>' + esc(p.txt) + ' →</button>').join('') + '</div>' +
+    (a.guia ? '' : '<div class="pp-aviso">' + esc(t('ppMarcaAviso')) + '</div>');   // la cuenta sin guía: un aviso, no un bloqueo
+  el.style.display = 'block';
+}
+// La publicación de hoy o, si hoy no toca, la siguiente (por fecha). null si el plan ya pasó.
+function agentProximoPost(posts, hoy) {
+  let mejor = -1;
+  (posts || []).forEach((p, i) => { if (p && typeof p.date === 'string' && p.date >= hoy && (mejor < 0 || p.date < posts[mejor].date)) mejor = i; });
+  return mejor < 0 ? null : { idx: mejor, post: posts[mejor], hoy: posts[mejor].date === hoy };
+}
+function agentCuandoCorto(post) {
+  const d = new Date(post.date + 'T12:00:00'), meses = t('months') || [];
+  const dia = String(post.dayName || '').trim(), mes = String(meses[d.getMonth()] || '').slice(0, 3);
+  return detectLanguage() === 'en' ? ((dia ? dia + ' ' : '') + mes + ' ' + d.getDate()) : ((dia ? dia.toLowerCase() + ' ' : '') + d.getDate() + ' ' + mes.toLowerCase());
+}
+function pintarPostDeHoy(posts) {
+  const prox = agentProximoPost(posts, agentHoy());
+  const html = prox ? '<button type="button" class="agent-hoy-btn" onclick="goCreatePost(' + prox.idx + ')">' +
+    esc(prox.hoy ? t('agentHoyBtn') : t('agentProxBtn').replace('{when}', agentCuandoCorto(prox.post))) + '</button>' : '';
+  ['agentHoyArriba', 'agentHoyAbajo'].forEach(id => { const el = document.getElementById(id); if (el) { el.innerHTML = html; el.style.display = html ? 'block' : 'none'; } });
+}
+// Alta a fin de mes: el plan en pantalla termina en 7 días o menos → se ofrece el del mes siguiente (o se abre si ya existe).
+function agentMesSiguiente(m) { const [y, mm] = String(m).split('-').map(Number); return mm === 12 ? (y + 1) + '-01' : y + '-' + String(mm + 1).padStart(2, '0'); }
+function pintarMesSiguiente(posts) {
+  const el = document.getElementById('agentSiguiente');
+  if (!el) return;
+  el.style.display = 'none'; el.innerHTML = '';
+  const fechas = (posts || []).map(p => p && p.date).filter(d => typeof d === 'string').sort();
+  const hoy = agentHoy(), fin = fechas[fechas.length - 1];
+  if (!hoy || !fin) return;
+  const dias = Math.round((Date.parse(fin + 'T12:00:00Z') - Date.parse(hoy + 'T12:00:00Z')) / 86400000);
+  if (dias > 7) return;
+  const sig = agentMesSiguiente(agentMonthShown()), etiqueta = getMonthLabel(sig);
+  const pinta = (existe) => {
+    const d = new Date(fin + 'T12:00:00'), meses = t('months') || [];
+    const cuando = detectLanguage() === 'en' ? (meses[d.getMonth()] + ' ' + d.getDate()) : (d.getDate() + ' de ' + String(meses[d.getMonth()] || '').toLowerCase());
+    el.innerHTML = esc(t('agentSigTxt').replace('{date}', cuando).replace('{month}', etiqueta)) +
+      '<button type="button" onclick="' + (existe ? 'verPlanDeMes(\'' + sig + '\')' : 'prepararMesSiguiente(\'' + sig + '\')') + '">' + esc(t(existe ? 'agentSigVer' : 'agentSigGen').replace('{month}', etiqueta)) + '</button>';
+    el.style.display = 'block';
+  };
+  // ¿Ya existe? Entonces se abre, nunca se vuelve a generar (sería otro plan cobrado)
+  if (!brandId) return pinta(false);
+  apiFetch(WORKER, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mode: 'get-agent-plan', brandId, month: sig }) })
+    .then(r => r.json()).then(d => pinta(!!(d && d.success && d.plan))).catch(() => {});
+}
+function prepararMesSiguiente(mes) {
+  agentMesObjetivo = mes;
+  showAgentConfig();
+  const lbl = document.getElementById('agentMonthLabel'); if (lbl) lbl.textContent = getMonthLabel(mes);
+  const badge = document.getElementById('agentMonthBadge'); if (badge) badge.textContent = getMonthLabel(mes);
+  window.scrollTo(0, 0);
+}
+function verPlanDeMes(mes) {
+  apiFetch(WORKER, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mode: 'get-agent-plan', brandId, month: mes }) })
+    .then(r => r.json()).then(d => { if (d && d.success && d.plan) { agentShownMonth = mes; agentPlan = d.plan; renderAgentPlan(d.plan);
+      const badge = document.getElementById('agentMonthBadge'); if (badge) badge.textContent = getMonthLabel(mes); } }).catch(() => {});
 }
 
 function toggleAgentPlat(btn) {
@@ -8439,8 +8588,10 @@ async function generateAgentPlan() {
   if(note) note.style.display = 'block';
 
   const noteText = note ? note.textContent : '';
+  // S62: el mes que se genera es el actual, salvo que la persona haya pedido el siguiente desde su plan (prepararMesSiguiente)
+  const mesPedido = (typeof agentMesObjetivo === 'string' && agentMesObjetivo) || getCurrentMonth();
   try {
-    const month = getCurrentMonth();
+    const month = mesPedido;
     const lang = detectLanguage();
     // Check if gallery has photos and toggle is meaningful
     const galleryActive = galleryData.length > 0;
@@ -8488,7 +8639,9 @@ async function generateAgentPlan() {
       }).catch(() => {});
     }
 
+    try { agentMesObjetivo = null; } catch (e) {}
     renderAgentPlan(data, { recien: true });   // S60b: la primera vez se lee desde el inicio
+    refrescarPrimerosPasos();   // S62 (PR-248): «Tu estrategia del mes» ✓, con el dato del servidor
 
     // Update agent bar
     const sub = document.getElementById('agentBarSub');
@@ -8502,7 +8655,7 @@ async function generateAgentPlan() {
   } finally {
     if (note) note.textContent = noteText;
     btn.disabled = false;
-    btn.innerHTML = t('agentGenBtn').replace('{month}', '<span id="agentMonthLabel">' + getMonthLabel(getCurrentMonth()) + '</span>');
+    btn.innerHTML = t('agentGenBtn').replace('{month}', '<span id="agentMonthLabel">' + getMonthLabel((typeof agentMesObjetivo === 'string' && agentMesObjetivo) || getCurrentMonth()) + '</span>');
     if(note) note.style.display = 'none';
   }
 }
@@ -8664,6 +8817,8 @@ function renderAgentPlan(plan, opts) {
   });
   // S60b (operador, 25 oct): recién generado, el plan abre desde el INICIO para que lo lean completo la primera vez (resumen,
   // semanas, temas). Al volver a entrar (plan guardado, showAgentScreen) abre en la publicación de hoy (FB-112).
+  // S62 (PR-246): «Crea tu post de hoy» (o el próximo) arriba y abajo del plan; y el mes siguiente cuando este termina
+  try { pintarPostDeHoy(posts); pintarMesSiguiente(posts); } catch (e) { console.warn('renderAgentPlan: post de hoy', e && e.message); }
   const destino = (opts && opts.recien) ? document.getElementById('agentPlanWrap') : anclaHoy;
   if (destino && typeof destino.scrollIntoView === 'function') setTimeout(() => { try { destino.scrollIntoView({ block: (opts && opts.recien) ? 'start' : 'center', behavior: 'smooth' }); } catch (e) {} }, 60);
 }
@@ -8818,7 +8973,8 @@ function renderReminderCard(active, brand) {
     '</div>';
   }
 
-  return '<div class="reminder-card" id="reminderCard" style="flex-direction:column;align-items:flex-start">' +
+  // S62: destacada y con un toque («🔔 Avísame cada mañana»). Nunca se activa sola: solo con ese toque (FC-19a)
+  return '<div class="reminder-card destacada" id="reminderCard" style="flex-direction:column;align-items:flex-start">' +
     '<div style="display:flex;align-items:center;gap:14px;width:100%">' +
       '<span class="reminder-icon">🔔</span>' +
       '<div class="reminder-info"><div class="reminder-title">' + t('remTitle') + '</div>' +
@@ -9043,7 +9199,10 @@ function applyBilingualUI() {
   const chkCommsSpan = document.querySelector('#chkComms')?.parentElement?.querySelector('span');
   if(chkCommsSpan) chkCommsSpan.textContent = t('commsLabel');
   // Save button
-  st('btnSave','btnSave');
+  try { pintarBotonGuardar(); } catch (e) {}   // S62: «Guardar y crear mi estrategia →» o «Guardar», según la cuenta
+  st('saveNeedsGuide','saveNeedsGuide');
+  document.querySelectorAll('.agent-freq-btn').forEach(b => { const n = b.querySelector('.afb-n'); if (n) n.textContent = b.dataset.freq + t('agentPerWeek'); });
+  { const r = document.getElementById('agentFreq3Tag'); if (r) r.textContent = t('agentFreqRec'); const i = document.getElementById('agentFreq7Tag'); if (i) i.textContent = t('agentFreqInt'); }
 
   // ── Creator screen ──
   // Edit brand button
@@ -10157,8 +10316,12 @@ function registrarSalida(accion, red, resultado, modoPieza, origen) {
   try {
     const r = resultado === 'copiado' ? 'copiado' : (SALIDA_RESULTADO[resultado] || 'cancelado');
     // text/plain: petición simple, sin preflight de CORS (Safari no siempre manda keepalive con preflight); el worker lee el texto
-    const p = apiFetch(WORKER, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=UTF-8' }, keepalive: true,
+    let p = apiFetch(WORKER, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=UTF-8' }, keepalive: true,
       body: JSON.stringify({ mode: 'registrar-salida', accion: accion, red: red || null, resultado: r, modo: modoPieza || null, origen: origen || 'creador' }) });
+    // S62 (PR-248): si la lista de primeros pasos espera la primera descarga, se vuelve a preguntar al servidor cuando ESTE
+    // confirma el registro (nunca se marca en el navegador)
+    const espera = r !== 'copiado' && r !== 'cancelado' && accion !== 'copiar' && activacionState && activacionState.salida !== true;
+    if (p && typeof p.then === 'function' && espera) p = p.then(function (res) { return res && res.json ? res.json() : null; }).then(function (d) { if (d && d.registrado) refrescarPrimerosPasos(); });
     if (p && typeof p.catch === 'function') p.catch(function () { /* el registro nunca frena una descarga */ });
   } catch (e) { /* el registro nunca frena ni rompe una descarga */ }
 }
